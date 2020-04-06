@@ -1,0 +1,11 @@
+tensorflow>=1.9
+tf_metrics
+more_itertools
+bs4
+pandas
+matplotlib
+regex
+seaborn
+tinycss
+lxml
+tensorflow-addons
