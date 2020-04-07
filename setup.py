@@ -6,6 +6,5 @@ setup(
     packages=['layouteagle',],
     license='GPLv3',
     long_description=open('README.md').read(),
-    package_dir={'': '.'},
 
 )
