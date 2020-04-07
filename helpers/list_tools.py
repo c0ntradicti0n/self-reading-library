@@ -54,8 +54,8 @@ class Lookup:
     def __init__(self, tokens: List):
         if all(isinstance(t, List) for t in tokens):
           tokens = flatten(tokens)
-        self.id_to_token = OrderedDict((i, t) for i, t in enumerate(set(tokens)))
-        self.token_to_id = OrderedDict({k:v for v,k in self.id_to_token.items()})
+        self.id_to_token = OrderedDict(sorted((i, t) for i, t in enumerate(set(tokens))))
+        self.token_to_id = OrderedDict(sorted((k,v) for v,k in self.id_to_token.items()))
 
     def __call__(self, id_s=None, token_s=None):
         assert bool(id_s) ^ bool(token_s)
@@ -63,6 +63,9 @@ class Lookup:
             return list(recursive_map(id_s, lambda x: self.id_to_token[x]))
         if token_s:
             return list(recursive_map(token_s, lambda x: self.token_to_id[x]))
+
+    def ids_to_tokens(self, ids):
+        return [self.id_to_token[id] for id in ids]
 
 
 
