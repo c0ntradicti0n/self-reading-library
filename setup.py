@@ -4,6 +4,8 @@ setup(
     name='LayoutEagle',
     version='0.1',
     packages=['layouteagle',],
-    license='GNU GPL v3',
+    license='GPLv3',
     long_description=open('README.md').read(),
+    package_dir={'': '.'},
+
 )
