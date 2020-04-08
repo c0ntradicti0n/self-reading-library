@@ -14,6 +14,7 @@ import numpy
 
 from regex import regex
 
+from layouteagle import config
 from layouteagle.LayoutReader.pdf import Pdf
 
 
