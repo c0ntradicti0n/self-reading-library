@@ -11,15 +11,13 @@ import itertools
 import more_itertools
 
 import numpy
-from pipey import Pipeable
 
 from regex import regex
 
-import layouteagle.config
 from layouteagle.LayoutReader.pdf import Pdf
 
 
-class TrueFormatUpmarker(Pipeable):
+class TrueFormatUpmarker:
     def __init__(self, min_bottom=None, max_bottom=None, debug=False, parameterize=False):
         self.collect_data_for_file = Pdf()
 
