@@ -9,7 +9,7 @@ import requests
 import time
 from bs4 import BeautifulSoup
 
-import layouteagle.config
+from layouteagle import config
 from layouteagle.helpers.cache_tools import persist_to_file
 
 
