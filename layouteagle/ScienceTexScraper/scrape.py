@@ -1,6 +1,5 @@
 import glob
 import hashlib
-import logging
 import os
 from itertools import count
 import random
@@ -12,6 +11,8 @@ from bs4 import BeautifulSoup
 from layouteagle import config
 from layouteagle.helpers.cache_tools import persist_to_file
 
+import logging
+logging.basicConfig(level = logging.INFO)
 
 class ScienceTexScraper:
     def __init__(self, url, n, add_extension= ".gz.tar"):
@@ -28,10 +29,10 @@ class ScienceTexScraper:
         self.yet = []
         return list(self.surf_random(self.url))
 
-    headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'}
+    headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36'}
 
     def surf_random(self, url):
-        logging.error(f"trying {url}")
+        logging.info(f"trying {url}")
 
         response = requests.get(url, headers=self.headers)
         soup = BeautifulSoup(response.text, "lxml")

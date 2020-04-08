@@ -1,4 +1,4 @@
-import logging
+
 
 from layouteagle import config
 from layouteagle.LatexReplacer.latex_replacer import LatexReplacer
@@ -6,6 +6,8 @@ from layouteagle.LayoutReader.feature_maker import FeatureMaker
 from layouteagle.ScienceTexScraper.scrape import ScienceTexScraper
 from layouteagle.bi_lstm_crf_layout.bilstm_crf import Bi_LSTM_CRF
 
+import logging
+logging.basicConfig(level = logging.INFO)
 loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
 for logger in loggers:
     logger.setLevel(logging.INFO)
