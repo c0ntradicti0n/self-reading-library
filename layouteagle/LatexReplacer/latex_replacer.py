@@ -9,7 +9,7 @@ from threading import Timer
 
 from TexSoup import TexSoup, TexNode, TokenWithPosition, TexText, TexEnv, OArg, RArg
 
-import layouteagle.config
+from layouteagle import config
 from layouteagle.LatexReplacer import twocolumn_defs, multicol_defs
 from layouteagle.LatexReplacer.replacer import SoupReplacer
 from layouteagle.helpers.cache_tools import persist_to_file
