@@ -1,6 +1,6 @@
 import pandas
 
-import layouteagle.config
+from layouteagle import config
 from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPdf2HTMLEX
 from layouteagle.helpers.cache_tools import persist_to_file
 
