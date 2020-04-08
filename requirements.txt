@@ -1,6 +1,5 @@
 tensorflow>=2.1.0
 tensorflow-addons>=0.8.3
-tf_metrics
 more_itertools
 bs4
 pandas
