@@ -17,8 +17,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import regex
 
-import layouteagle.config
-from layouteagle.helpers.color_logger import *
+from layouteagle import config
 from layouteagle.helpers.list_tools import threewise
 
 from layouteagle.LayoutReader.trueformatupmarker import TrueFormatUpmarker
