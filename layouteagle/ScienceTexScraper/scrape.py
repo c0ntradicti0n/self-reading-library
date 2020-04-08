@@ -34,10 +34,14 @@ class ScienceTexScraper:
     def surf_random(self, url):
         logging.info(f"trying {url}")
 
-        response = requests.get(url, headers=self.headers)
-        soup = BeautifulSoup(response.text, "lxml")
-        links = soup.findAll('a')
-        random.shuffle(links)
+        try:
+            response = requests.get(url, headers=self.headers)
+            soup = BeautifulSoup(response.text, "lxml")
+            links = soup.findAll('a')
+            random.shuffle(links)
+        except:
+            logging.error("Connection error, maybe timeout, maybe headers, maybe bad connection, continuing elsewhere")
+            links = []
 
         # First look on the page for downloads, that should be done
         for link in links:
@@ -73,7 +77,7 @@ class ScienceTexScraper:
                 self.yet.append(new_url)
                 new_url = self.url +  new_url
                 yield from self.surf_random(new_url)
-                time.sleep(1)
+                time.sleep(random.uniform(0.9, 1.9))
 
 
 
