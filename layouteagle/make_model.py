@@ -1,7 +1,4 @@
 import logging
-from collections import Callable
-
-from more_itertools import pairwise
 
 from layouteagle import config
 from layouteagle.LatexReplacer.latex_replacer import LatexReplacer
