@@ -26,10 +26,12 @@ class ScienceTexScraper:
         self.yet = []
         return list(self.surf_random(self.url))
 
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0'}
+
     def surf_random(self, url):
         logging.error(f"trying {url}")
 
-        response = requests.get(url)
+        response = requests.get(url, headers=self.headers)
         soup = BeautifulSoup(response.text, "lxml")
         links = soup.findAll('a')
         random.shuffle(links)

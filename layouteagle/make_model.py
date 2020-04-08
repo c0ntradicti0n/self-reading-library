@@ -10,7 +10,7 @@ loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
 for logger in loggers:
     logger.setLevel(logging.INFO)
 
-science_tex_scraper = ScienceTexScraper(url = config.tex_source, n=120)
+science_tex_scraper = ScienceTexScraper(url = config.tex_source, n=5)
 latex_replacer = LatexReplacer(".labeled.tex")
 true_format_upmarker = FeatureMaker(pandas_pickle_path="tex_data/features.pckl", debug=True, parameterize=False)
 bi_lstm_crf =  Bi_LSTM_CRF()
