@@ -7,7 +7,7 @@ from functools import partial
 from itertools import cycle
 from threading import Timer
 
-from TexSoup import TexSoup, TexNode, TokenWithPosition, TexText, TexEnv
+from TexSoup import TexSoup, TexNode, TokenWithPosition, TexText, TexEnv, OArg, RArg
 
 import config
 from LatexReplacer import twocolumn_defs, multicol_defs
@@ -15,6 +15,7 @@ from LatexReplacer.replacer import SoupReplacer
 from helpers.cache_tools import persist_to_file
 from helpers.os_tools import get_path_filename_extension
 from helpers.str_tools import find_all, insert
+from regex import regex
 
 
 class LatexReplacer(SoupReplacer):
@@ -24,17 +25,22 @@ class LatexReplacer(SoupReplacer):
         self.timeout_sec = timout_sec
 
         identity =  lambda x: x
-        self.allowed_recursion_tags = ["textit"]
+        self.allowed_recursion_tags = ["textit", "LARGE", "title", "author", "footnote", "thanks", 'texttt', "emph", "item", "bf"]
+        self.forbidden_envs = ["$", "tikzpicture",  "eqnarray", "equation", "tabular"]
+        self.forbidden_envs = self.forbidden_envs + [env + "*" for env in self.forbidden_envs]
 
         self.what = {
             lambda soup: soup.title: (identity, self.make_replacement("title")),
             lambda soup: soup.find_all("author"): (identity, self.make_replacement("author")),
+            lambda soup: soup.find_all("email"): (identity, self.make_replacement("author")),
+            lambda soup: soup.find_all("adress"): (identity, self.make_replacement("author")),
             lambda soup: soup.abstract: (identity, self.make_replacement("abstract")),
             lambda soup: soup.find_all("caption"): (identity, self.make_replacement("caption")),
             lambda soup: soup.find_all("footnote"): (identity, self.make_replacement("footnote")),
             lambda soup: soup.find_all("thanks"): (identity, self.make_replacement("footnote")),
             lambda soup: soup.find_all("section"): (identity, self.make_replacement("section")),
-            lambda soup: soup.find_all("subsection"): (identity, self.make_replacement("subsection")),
+            lambda soup: soup.find_all("subsection"): (identity, self.make_replacement("section")),
+            lambda soup: soup.find_all("subsubsection"): (identity, self.make_replacement("section")),
 
             lambda soup: soup.document: (
                 identity,
@@ -112,10 +118,6 @@ class LatexReplacer(SoupReplacer):
             super().__call__(soup)
 
             result = str(soup.__repr__())
-            number_of_column_strings = result.count('column')
-            if number_of_column_strings < len(f_content)/10 * 0.1:
-                logging.error("too few text recognized, ignoring")
-                continue
 
             out_path = self.add_extension(path_to_read_from)
             with open(out_path, 'w') as f:
@@ -133,7 +135,7 @@ class LatexReplacer(SoupReplacer):
     def append_expression(possible_part_string, replaced_contents):
         replaced_contents.append(possible_part_string.expr)
 
-    def replace_this_text(content_generator, possible_part_string, replaced_contents, replacement_string):
+    def replace_this_text(self, content_generator, possible_part_string, replaced_contents, replacement_string):
         new_lines = list(find_all(possible_part_string.expr._text, '\n'))
         try:
             how_often = int(len(possible_part_string.expr._text) / int(len(replacement_string)) + 0.99)
@@ -164,27 +166,39 @@ class LatexReplacer(SoupReplacer):
             contents_to_visit = list(where.all)
 
             for possible_part_string in contents_to_visit:
-                if isinstance(possible_part_string.expr, TexText) and not possible_part_string.expr._text.strip():
+                if isinstance(possible_part_string.expr, OArg):
+                    LatexReplacer.append_expression(possible_part_string, replaced_contents)
+                elif isinstance(possible_part_string.expr, RArg):
                     LatexReplacer.append_expression(possible_part_string, replaced_contents)
 
-                elif isinstance(possible_part_string.expr, TexEnv) and possible_part_string.expr.name in ['$']:
+                elif isinstance(possible_part_string.expr, TexText) and not possible_part_string.expr._text.strip():
                     LatexReplacer.append_expression(possible_part_string, replaced_contents)
+
+                elif isinstance(possible_part_string.expr, TexEnv):
+                    if not possible_part_string.expr.name in self.forbidden_envs:
+                        possible_part_string = replace_it_with(possible_part_string)
+                        #LatexReplacer.append_expression(possible_part_string, replaced_contents)
+                    else:
+                        logging.warning(f"environment {possible_part_string.expr.name} is not to be replaced")
 
                 elif isinstance(possible_part_string.expr, TexText):
-                    LatexReplacer.replace_this_text(content_generator, possible_part_string, replaced_contents,
+                    self.replace_this_text(content_generator, possible_part_string, replaced_contents,
                                             replacement_string)
-
-                else:
+                else: # LaTex Commands are left
                     try:
-                        if not possible_part_string.expr in [content for arg in where.args.all for content in
-                                                         arg.contents]:
-                            if where.expr.name in self.allowed_recursion_tags:
-                                possible_part_string = replace_it_with(possible_part_string).expr
-                                where.replace_this_text(content_generator, possible_part_string, replaced_contents,
-                                                        replacement_string)
-                    
-                    except:
-                        logging.error("not replaced tags inside")
+                        expression_is_in_args_of_command = \
+                            possible_part_string.expr in [content for arg in where.args.all
+                                                          for content in arg.contents]
+                    except AttributeError:
+                        logging.warning(f"strange args of latex commands: some arg {list(where.args.all)} was a str and has no '.contents'")
+                        expression_is_in_args_of_command = True
+
+                    if expression_is_in_args_of_command:
+                        if hasattr(possible_part_string, "name"):
+                            if possible_part_string.name in self.allowed_recursion_tags:
+                                possible_part_string = replace_it_with(possible_part_string)
+                            else:
+                                logging.warning(f"command {possible_part_string.name} is not to be replaced")
 
                     LatexReplacer.append_expression(possible_part_string, replaced_contents)
 
@@ -193,7 +207,6 @@ class LatexReplacer(SoupReplacer):
             except:
                 where.expr._contents = replaced_contents
             new_node = TexNode(where.expr, [])
-            print(list(where.contents))
             return new_node
 
         return replace_it_with
@@ -206,6 +219,9 @@ class LatexReplacer(SoupReplacer):
         except:
             raise
         if clean:
+            subprocess.run(['rm', '*.labeled.*'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(['rm', '*.pdf.html'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(['rm', '*.pdf'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             subprocess.run(['rm', '*.aux'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             subprocess.run(['rm', '*.log'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
@@ -224,10 +240,22 @@ class LatexReplacer(SoupReplacer):
             finally:
                 timer.cancel()
             output = stdout.decode('latin1')
+            errors = stderr.decode('latin1')
 
-            if ("error" in output.lower()):
+            if (any(error  in output.lower() for error in ["latex error", "fatal error"])):
                 where = output.lower().index('error')
-                logging.error(f'compilation failed on {output[where-100:where+100]}')
+                error_msg_at = output[where-150:where+150]
+                logging.error(f'compilation failed on \n""" {error_msg_at}"""')
+                line_number_match = regex.search(r":(\d+):", error_msg_at)
+                if line_number_match:
+                    line_number = int(line_number_match.groups(1)[0])
+                    with open(filename) as f:
+                        lines = f.readlines()
+                    faulty_code = "\n".join(lines[max(0, line_number - 1):
+                                                  min(len(lines), line_number + 1)])
+                    logging.error(f'  --->  see file {tex_file_path}: """\n{faulty_code}"""')
+                break
+
 
         os.chdir(cwd)
 
