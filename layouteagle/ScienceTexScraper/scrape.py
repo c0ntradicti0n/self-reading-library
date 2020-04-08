@@ -18,6 +18,8 @@ class ScienceTexScraper:
         self.url = url
         self.n = n
         self.add_extension = add_extension
+        if not os.path.isdir(config.tex_data):
+            os.system(f"mkdir {config.tex_data}")
 
     @persist_to_file(config.scrape_cache + 'scraped_tex_paths.json')
     def __call__(self):
@@ -26,7 +28,7 @@ class ScienceTexScraper:
         self.yet = []
         return list(self.surf_random(self.url))
 
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0'}
+    headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'}
 
     def surf_random(self, url):
         logging.error(f"trying {url}")
