@@ -1,0 +1,92 @@
+[-INFO-] 2020-04-01 00:02:24,309 32752  train.<module> line:21  vocab file exits!!
+[-INFO-] 2020-04-01 00:03:10,333 321  train.<module> line:21  vocab file exits!!
+[-INFO-] 2020-04-01 00:03:10,912 321  train.<module> line:39  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 00:03:26,388 386  train.<module> line:21  vocab file exits!!
+[-INFO-] 2020-04-01 00:03:57,431 386  train.<module> line:39  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 00:08:11,636 1045  train.<module> line:21  vocab file exits!!
+[-INFO-] 2020-04-01 00:08:47,443 1070  train.<module> line:21  vocab file exits!!
+[-INFO-] 2020-04-01 00:08:48,028 1070  train.<module> line:39  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 00:09:37,754 1158  train.<module> line:21  vocab file exits!!
+[-INFO-] 2020-04-01 00:10:29,564 1236  train.<module> line:21  vocab file exits!!
+[-INFO-] 2020-04-01 00:11:34,953 1397  train.<module> line:21  vocab file exits!!
+[-INFO-] 2020-04-01 00:11:35,525 1397  train.<module> line:39  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 00:12:00,975 1478  train.<module> line:21  vocab file exits!!
+[-INFO-] 2020-04-01 00:12:01,512 1478  train.<module> line:39  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 00:14:30,847 1590  train.<module> line:18  building vocab file
+[-INFO-] 2020-04-01 00:14:54,528 1604  train.<module> line:34  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 00:15:35,064 1639  train.<module> line:34  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 00:30:15,420 2490  train.<module> line:34  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 00:33:18,925 2592  train.<module> line:34  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 00:35:01,498 2671  train.<module> line:34  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 00:42:41,593 2961  train.<module> line:34  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 00:43:13,437 3049  train.<module> line:34  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 00:43:29,128 3083  train.<module> line:34  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 00:43:40,328 3114  train.<module> line:34  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 14:09:49,467 12212  train.<module> line:36  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 14:12:01,282 12277  train.<module> line:36  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 14:17:10,608 12471  train.<module> line:36  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 14:18:59,866 12558  train.<module> line:36  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 14:19:52,216 12558  train.<module> line:87  epoch 0, step 20, loss 89.1169 , accuracy 0.6773
+[-INFO-] 2020-04-01 14:19:52,251 12558  train.<module> line:91  model saved
+[-INFO-] 2020-04-01 14:20:45,604 12558  train.<module> line:87  epoch 1, step 40, loss 63.5027 , accuracy 0.8405
+[-INFO-] 2020-04-01 14:20:45,635 12558  train.<module> line:91  model saved
+[-INFO-] 2020-04-01 14:21:39,289 12558  train.<module> line:87  epoch 2, step 60, loss 45.2529 , accuracy 0.8660
+[-INFO-] 2020-04-01 14:21:39,327 12558  train.<module> line:91  model saved
+[-INFO-] 2020-04-01 14:22:35,693 12558  train.<module> line:87  epoch 3, step 80, loss 39.0420 , accuracy 0.8787
+[-INFO-] 2020-04-01 14:22:35,725 12558  train.<module> line:91  model saved
+[-INFO-] 2020-04-01 14:23:29,349 12558  train.<module> line:87  epoch 4, step 100, loss 30.6593 , accuracy 0.9216
+[-INFO-] 2020-04-01 14:23:29,382 12558  train.<module> line:91  model saved
+[-INFO-] 2020-04-01 14:24:19,619 12558  train.<module> line:87  epoch 5, step 120, loss 29.8254 , accuracy 0.9162
+[-INFO-] 2020-04-01 14:25:15,152 12558  train.<module> line:87  epoch 6, step 140, loss 24.7822 , accuracy 0.8939
+[-INFO-] 2020-04-01 14:26:06,239 12558  train.<module> line:87  epoch 7, step 160, loss 18.1148 , accuracy 0.9196
+[-INFO-] 2020-04-01 14:26:58,284 12558  train.<module> line:87  epoch 8, step 180, loss 22.8771 , accuracy 0.9200
+[-INFO-] 2020-04-01 14:27:56,304 12558  train.<module> line:87  epoch 9, step 200, loss 22.2965 , accuracy 0.9304
+[-INFO-] 2020-04-01 14:27:56,337 12558  train.<module> line:91  model saved
+[-INFO-] 2020-04-01 14:28:48,281 12558  train.<module> line:87  epoch 10, step 220, loss 14.2313 , accuracy 0.9427
+[-INFO-] 2020-04-01 14:28:48,316 12558  train.<module> line:91  model saved
+[-INFO-] 2020-04-01 14:29:42,852 12558  train.<module> line:87  epoch 11, step 240, loss 14.8338 , accuracy 0.9478
+[-INFO-] 2020-04-01 14:29:42,887 12558  train.<module> line:91  model saved
+[-INFO-] 2020-04-01 14:30:38,000 12558  train.<module> line:87  epoch 12, step 260, loss 14.3789 , accuracy 0.9442
+[-INFO-] 2020-04-01 14:31:27,865 12558  train.<module> line:87  epoch 13, step 280, loss 15.6065 , accuracy 0.9331
+[-INFO-] 2020-04-01 14:32:22,714 12558  train.<module> line:87  epoch 14, step 300, loss 13.8369 , accuracy 0.9385
+[-INFO-] 2020-04-01 14:33:16,253 12558  train.<module> line:87  epoch 15, step 320, loss 12.7032 , accuracy 0.9567
+[-INFO-] 2020-04-01 14:33:16,290 12558  train.<module> line:91  model saved
+[-INFO-] 2020-04-01 14:34:10,866 12558  train.<module> line:87  epoch 16, step 340, loss 14.7080 , accuracy 0.9353
+[-INFO-] 2020-04-01 14:35:04,623 12558  train.<module> line:87  epoch 17, step 360, loss 12.6845 , accuracy 0.9492
+[-INFO-] 2020-04-01 14:35:49,363 12558  train.<module> line:87  epoch 18, step 380, loss 17.0568 , accuracy 0.9312
+[-INFO-] 2020-04-01 14:36:34,166 12558  train.<module> line:87  epoch 19, step 400, loss 12.9661 , accuracy 0.9491
+[-INFO-] 2020-04-01 14:36:34,166 12558  train.<module> line:94  finished
+[-INFO-] 2020-04-01 14:41:03,634 13596  train.<module> line:36  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 14:42:10,679 13596  train.<module> line:87  epoch 0, step 20, loss 103.5423 , accuracy 0.6125
+[-INFO-] 2020-04-01 14:42:10,715 13596  train.<module> line:91  model saved
+[-INFO-] 2020-04-01 14:43:14,015 13596  train.<module> line:87  epoch 1, step 40, loss 37.6730 , accuracy 0.8944
+[-INFO-] 2020-04-01 14:43:14,059 13596  train.<module> line:91  model saved
+[-INFO-] 2020-04-01 14:44:06,861 13596  train.<module> line:87  epoch 2, step 60, loss 30.5423 , accuracy 0.8695
+[-INFO-] 2020-04-01 14:45:01,250 13596  train.<module> line:87  epoch 3, step 80, loss 42.4720 , accuracy 0.8842
+[-INFO-] 2020-04-01 14:45:53,974 13596  train.<module> line:87  epoch 4, step 100, loss 30.3326 , accuracy 0.8693
+[-INFO-] 2020-04-01 14:46:47,287 13596  train.<module> line:87  epoch 5, step 120, loss 21.7963 , accuracy 0.9480
+[-INFO-] 2020-04-01 14:46:47,324 13596  train.<module> line:91  model saved
+[-INFO-] 2020-04-01 14:47:36,138 13596  train.<module> line:87  epoch 6, step 140, loss 32.3482 , accuracy 0.8878
+[-INFO-] 2020-04-01 14:48:25,112 13596  train.<module> line:87  epoch 7, step 160, loss 21.2773 , accuracy 0.9228
+[-INFO-] 2020-04-01 14:49:14,614 13596  train.<module> line:87  epoch 8, step 180, loss 20.5669 , accuracy 0.9229
+[-INFO-] 2020-04-01 14:50:05,272 13596  train.<module> line:87  epoch 9, step 200, loss 21.7271 , accuracy 0.9354
+[-INFO-] 2020-04-01 14:50:57,323 13596  train.<module> line:87  epoch 10, step 220, loss 17.9078 , accuracy 0.9271
+[-INFO-] 2020-04-01 14:51:49,589 13596  train.<module> line:87  epoch 11, step 240, loss 22.7763 , accuracy 0.9213
+[-INFO-] 2020-04-01 14:52:42,136 13596  train.<module> line:87  epoch 12, step 260, loss 24.4816 , accuracy 0.9340
+[-INFO-] 2020-04-01 14:53:37,788 13596  train.<module> line:87  epoch 13, step 280, loss 16.3402 , accuracy 0.9441
+[-INFO-] 2020-04-01 14:54:24,703 13596  train.<module> line:87  epoch 14, step 300, loss 15.5323 , accuracy 0.9140
+[-INFO-] 2020-04-01 14:55:12,809 13596  train.<module> line:87  epoch 15, step 320, loss 11.4324 , accuracy 0.9681
+[-INFO-] 2020-04-01 14:55:12,843 13596  train.<module> line:91  model saved
+[-INFO-] 2020-04-01 14:56:11,815 13596  train.<module> line:87  epoch 16, step 340, loss 12.3675 , accuracy 0.9420
+[-INFO-] 2020-04-01 14:56:59,345 13596  train.<module> line:87  epoch 17, step 360, loss 13.0581 , accuracy 0.9203
+[-INFO-] 2020-04-01 14:57:52,535 13596  train.<module> line:87  epoch 18, step 380, loss 16.8240 , accuracy 0.9198
+[-INFO-] 2020-04-01 14:58:46,037 13596  train.<module> line:87  epoch 19, step 400, loss 12.3781 , accuracy 0.9464
+[-INFO-] 2020-04-01 14:58:46,039 13596  train.<module> line:94  finished
+[-INFO-] 2020-04-01 17:28:23,404 17554  train.<module> line:36  hidden_num:512, vocab_size:58541, label_size:5
+[-INFO-] 2020-04-01 17:29:18,934 17554  train.<module> line:87  epoch 0, step 20, loss 73.6034 , accuracy 0.7877
+[-INFO-] 2020-04-01 17:29:18,970 17554  train.<module> line:91  model saved
+[-INFO-] 2020-04-01 17:30:08,934 17554  train.<module> line:87  epoch 1, step 40, loss 66.3450 , accuracy 0.8103
+[-INFO-] 2020-04-01 17:30:08,965 17554  train.<module> line:91  model saved
+[-INFO-] 2020-04-01 17:31:07,084 17554  train.<module> line:87  epoch 2, step 60, loss 72.2983 , accuracy 0.7904
+[-INFO-] 2020-04-01 17:32:06,334 17554  train.<module> line:87  epoch 3, step 80, loss 38.8609 , accuracy 0.9130
+[-INFO-] 2020-04-01 17:32:06,366 17554  train.<module> line:91  model saved
