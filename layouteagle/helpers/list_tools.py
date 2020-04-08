@@ -4,7 +4,7 @@ from typing import List
 
 import numpy
 
-from helpers.nested_dict_tools import recursive_map, flatten
+from layouteagle.helpers.nested_dict_tools import recursive_map, flatten
 
 
 def find_repeating(lst, count=2):
