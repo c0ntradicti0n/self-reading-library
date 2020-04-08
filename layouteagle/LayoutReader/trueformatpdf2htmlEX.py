@@ -17,11 +17,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import regex
 
-import config
-from helpers.color_logger import *
-from helpers.list_tools import threewise
+import layouteagle.config
+from layouteagle.helpers.color_logger import *
+from layouteagle.helpers.list_tools import threewise
 
-from LayoutReader.trueformatupmarker import TrueFormatUpmarker
+from layouteagle.LayoutReader.trueformatupmarker import TrueFormatUpmarker
 
 logging.getLogger().setLevel(logging.WARNING)
 

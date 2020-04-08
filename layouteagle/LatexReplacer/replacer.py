@@ -3,10 +3,9 @@ from collections import Callable
 from types import GeneratorType
 from typing import Dict, Tuple
 
-from pipey import Pipeable
 
 
-class SoupReplacer (Pipeable):
+class SoupReplacer:
     def __init__(self, what:Dict[Callable, Tuple[Callable, Callable]]):
         self.what = what
 

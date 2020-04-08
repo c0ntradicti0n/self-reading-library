@@ -9,12 +9,12 @@ from threading import Timer
 
 from TexSoup import TexSoup, TexNode, TokenWithPosition, TexText, TexEnv, OArg, RArg
 
-import config
-from LatexReplacer import twocolumn_defs, multicol_defs
-from LatexReplacer.replacer import SoupReplacer
-from helpers.cache_tools import persist_to_file
-from helpers.os_tools import get_path_filename_extension
-from helpers.str_tools import find_all, insert
+import layouteagle.config
+from layouteagle.LatexReplacer import twocolumn_defs, multicol_defs
+from layouteagle.LatexReplacer.replacer import SoupReplacer
+from layouteagle.helpers.cache_tools import persist_to_file
+from layouteagle.helpers.os_tools import get_path_filename_extension
+from layouteagle.helpers.str_tools import find_all, insert
 from regex import regex
 
 

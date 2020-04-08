@@ -15,8 +15,8 @@ from pipey import Pipeable
 
 from regex import regex
 
-import config
-from LayoutReader.pdf import Pdf
+import layouteagle.config
+from layouteagle.LayoutReader.pdf import Pdf
 
 
 class TrueFormatUpmarker(Pipeable):

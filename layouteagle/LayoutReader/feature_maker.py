@@ -1,8 +1,8 @@
 import pandas
 
-import config
-from LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPdf2HTMLEX
-from helpers.cache_tools import persist_to_file
+import layouteagle.config
+from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPdf2HTMLEX
+from layouteagle.helpers.cache_tools import persist_to_file
 
 
 class FeatureMaker(TrueFormatUpmarkerPdf2HTMLEX):

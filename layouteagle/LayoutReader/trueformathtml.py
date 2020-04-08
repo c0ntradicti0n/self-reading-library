@@ -1,6 +1,6 @@
 import os
-from TFU.trueformatupmarker import TrueFormatUpmarker
-from helpers.color_logger import *
+from layouteagle.LayoutReader.trueformatupmarker import TrueFormatUpmarker
+from layouteagle.helpers.color_logger import *
 import bs4
 from bs4 import NavigableString, Tag
 

@@ -9,8 +9,8 @@ import requests
 import time
 from bs4 import BeautifulSoup
 
-import config
-from helpers.cache_tools import persist_to_file
+import layouteagle.config
+from layouteagle.helpers.cache_tools import persist_to_file
 
 
 class ScienceTexScraper:
