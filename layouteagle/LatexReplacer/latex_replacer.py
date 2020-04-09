@@ -7,7 +7,7 @@ from functools import partial
 from itertools import cycle
 from threading import Timer
 
-from TexSoup import TexSoup, TexNode, TokenWithPosition, TexText, TexEnv, OArg, RArg
+from TexSoup import TexSoup, TexNode, TokenWithPosition, TexText, TexEnv, OArg, RArg, TexCmd
 
 from layouteagle import config
 from layouteagle.LatexReplacer import twocolumn_defs, multicol_defs
@@ -98,7 +98,7 @@ class LatexReplacer(SoupReplacer):
                 new_content = '\n' + new_content
             else:
                 new_content = new_content + ' '
-        new_positional_string = TokenWithPosition(new_content)
+        new_positional_string = TexText(new_content)
         replaced_contents.append(new_positional_string)
 
     def make_replacement(self, string, recursive=True):
@@ -147,18 +147,28 @@ class LatexReplacer(SoupReplacer):
                     if expression_is_in_args_of_command:
                         if hasattr(possible_part_string, "name"):
                             if possible_part_string.name in self.allowed_recursion_tags:
-                                possible_part_string = replace_it_with(possible_part_string)
+                                replace_it_with(possible_part_string)
+                                continue
                             else:
                                 logging.warning(f"command {possible_part_string.name} is not to be replaced")
 
                     LatexReplacer.append_expression(possible_part_string, replaced_contents)
 
+            if not all(isinstance(rc, (TexCmd, TexEnv, TexText))
+                       for rc in replaced_contents):
+                untyped_contents = [(i, content) for i, content in
+                                    enumerate(replaced_contents) if isinstance(content, TokenWithPosition)]
+                for i, content in untyped_contents:
+                    replaced_contents[i] = TexText(content)
+
             try:
                 where.expr.args[0].contents = replaced_contents
             except:
                 where.expr._contents = replaced_contents
-            new_node = TexNode(where.expr, [])
-            return new_node
+
+
+
+            return where
 
         return replace_it_with
 
@@ -216,16 +226,23 @@ class LatexReplacer(SoupReplacer):
 
     def work(self, path_to_read_from, compile=True):
         path_to_read_from = path_to_read_from.replace(" ", "")
-        if not self.compiles(path_to_read_from) and compile:
-            logging.error(f"Latex file {path_to_read_from} could not be compiled")
+        try:
+            if not self.compiles(path_to_read_from) and compile:
+                logging.error(f"Latex file {path_to_read_from} could not be compiled")
+                return
+        except FileNotFoundError:
+            logging.error ("Input file not found! ")
             return
 
-        with open(path_to_read_from, 'r') as f:
-            try:
-                f_content = f.read()
-            except UnicodeDecodeError:
-                logging.error(f"decode error on {[path_to_read_from]}")
-                return
+        try:
+            with open(path_to_read_from, 'r') as f:
+                try:
+                    f_content = f.read()
+                except UnicodeDecodeError:
+                    logging.error(f"decode error on {[path_to_read_from]}")
+                    return
+        except FileNotFoundError:
+            raise
 
         try:
             soup = TexSoup(f_content)
@@ -244,7 +261,8 @@ class LatexReplacer(SoupReplacer):
 
         logging.info(f"working on {path_to_read_from}")
         try:
-            self.column_placeholder = self.insert_functionality(soup, f_content)
+            if compile:
+                self.column_placeholder = self.insert_functionality(soup, f_content)
         except Exception:
             logging.error("column functionality could not be inserted")
             return
