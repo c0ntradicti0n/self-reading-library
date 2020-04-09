@@ -12,11 +12,10 @@ science_port    = 5183
 
 hidden_folder = ".layouteagle/"
 cache = hidden_folder + "cache/"
-texdata = hidden_folder + "tex_data/"
+tex_data = hidden_folder + "tex_data/"
 models = hidden_folder + "models/"
 
 tex_source = "http://arxiv.org"
-tex_data = "./tex_data/"
 
 INDEX_WRAP_TAG_NAME = 'z'
 

@@ -60,8 +60,13 @@ class ScienceTexScraper:
                 name = hashlib.md5(new_url.encode('utf-8')).hexdigest()
                 tar_gz_path = config.tex_data + name + self.add_extension
                 path  =  config.tex_data + name
-                os.system(f'wget --user-agent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36" {new_url} -O {tar_gz_path}')
-                os.system(f"mkdir -p ./tex_data/{name} & tar -zxvf {tar_gz_path} -C ./tex_data/{name}/")
+                os.system(f'wget '
+                          f'--user-agent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36" '
+                          f'{new_url}'
+                          f' -O {tar_gz_path}')
+                unpack_path = config.tex_data + name
+                os.system(f"mkdir -p {unpack_path} & "
+                          f"tar -zxvf {tar_gz_path} -C {unpack_path}/")
                 tex_files = glob.glob(path + "/*.tex")
                 yield from tex_files
 

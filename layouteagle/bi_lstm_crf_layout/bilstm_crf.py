@@ -48,7 +48,7 @@ class Bi_LSTM_CRF:
 
         in_page = feature_df[1:].groupby(["doc_id", "page_number"]).groups
 
-        cols_to_use = ["x", "y", "len", "height",  "page_number", "font-size", "coarse_grained_pdf", "line-height"]
+        cols_to_use = ["x", "y", "len", "height",  "page_number", "font-size", "fine_grained_pdf", "coarse_grained_pdf", "line-height"]
 
         # normalise
         for col in cols_to_use:

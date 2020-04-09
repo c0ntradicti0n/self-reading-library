@@ -114,7 +114,7 @@ class LatexReplacer(SoupReplacer):
 
             replaced_contents = []
 
-            contents_to_visit = list(where.all)
+            contents_to_visit = list(TexNode(child) for child in where.expr.all)
 
             for possible_part_string in contents_to_visit:
                 if isinstance(possible_part_string.expr, OArg):
@@ -238,11 +238,9 @@ class LatexReplacer(SoupReplacer):
         if "\input{" in f_content:
             input_files = list(soup.find_all("input"))
             for input_file in input_files:
-
                 ipath, ifilename, iextension, ifilename_without_extension = get_path_filename_extension(path_to_read_from)
-                self.work(ipath + input_file.expr.args[-1].value, compile=False)
+                self.work(ipath + input_file.expr.args[-1].value + iextension, compile=False)
             logging.info(f"replacing included input from {path_to_read_from}: {input_files}")
-            return
 
         logging.info(f"working on {path_to_read_from}")
         try:
