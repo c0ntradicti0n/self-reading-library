@@ -17,10 +17,10 @@ class LayoutEagle:
     def __init__(self,
                  model_path="best_model/",):
         try:
-            os.mkdir(".layouteagle")
-            os.mkdir(".layouteagle/cache")
-            os.mkdir(".layouteagle/texdata")
-            os.mkdir(".layouteagle/models/")
+            os.mkdir(config.hidden_folder)
+            os.mkdir(config.cache)
+            os.mkdir(config.tex_data)
+            os.mkdir(config.models)
         except:
             logging.info("dirs exist")
         finally:
@@ -32,9 +32,12 @@ class LayoutEagle:
             debug=True, parameterize=False)
         self.trueFormatPDF2HTMLEX = TrueFormatUpmarkerPDF2HTMLEX()
 
-    def __call__(self, pdf_path=None, html1_path=None, html2_path=None, css_path=None):
+    def make_document(self, pdf_path=None, html1_path=None, html2_path=None, css_path=None):
         div_features = self.feature_maker.work(pdf_path, html1_path=None)
         labeled_div_features = self.bi_lstm_crf.predict(features=div_features)
+        if pdf_path and not html1_path:
+            return labeled_div_features
+
         self.trueFormatPDF2HTMLEX(labeled_div_features, html2_path=html2_path)
 
     def make_model(self, n):

@@ -11,7 +11,7 @@ class FeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
         self.pandas_pickle_path =  pandas_pickle_path
         self.add_html_extension = add_html_extension
 
-    @persist_to_file(config.scrape_cache + 'collected_features.json')
+    @persist_to_file(config.cache + 'collected_features.json')
     def __call__(self, labeled_paths):
         all_feature_dfs = []
 

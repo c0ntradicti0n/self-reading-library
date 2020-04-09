@@ -10,7 +10,11 @@ app_port        = 5181
 annotation_port = 5182
 science_port    = 5183
 
-scrape_cache = "./cache/"
+hidden_folder = ".layouteagle/"
+cache = hidden_folder + "cache/"
+texdata = hidden_folder + "tex_data/"
+models = hidden_folder + "models/"
+
 tex_source = "http://arxiv.org"
 tex_data = "./tex_data/"
 

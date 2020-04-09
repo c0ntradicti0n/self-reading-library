@@ -22,7 +22,7 @@ class ScienceTexScraper:
         if not os.path.isdir(config.tex_data):
             os.system(f"mkdir {config.tex_data}")
 
-    @persist_to_file(config.scrape_cache + 'scraped_tex_paths.json')
+    @persist_to_file(config.cache + 'scraped_tex_paths.json')
     def __call__(self):
         self.scrape_count = count()
         self.i = 0

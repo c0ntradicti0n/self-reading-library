@@ -73,7 +73,7 @@ class LatexReplacer(SoupReplacer):
             logging.info("no multi column instruction found, so its single col")
             return b"column 1".decode('unicode_escape')
 
-    @persist_to_file(config.scrape_cache + 'labeled_tex_paths.json')
+    @persist_to_file(config.cache + 'labeled_tex_paths.json')
     def __call__(self, paths, compile=True):
         """
         :param path_to_read_from:
