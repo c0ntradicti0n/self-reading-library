@@ -1,3 +1,5 @@
+import logging
+
 import pandas
 
 from layouteagle import config
@@ -18,7 +20,10 @@ class FeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
         for doc_id, labeled_pdf_path in enumerate(labeled_paths):
             labeled_html_path = labeled_pdf_path + self.add_html_extension
             self.pdf2htmlEX(labeled_pdf_path, labeled_html_path)
-            self.generate_data_for_file(labeled_html_path)
+            try:
+                self.generate_data_for_file(labeled_html_path)
+            except FileNotFoundError:
+                logging.error("output of pdf2html looks damaged")
             pdf_doc = self.collect_data_for_file
             pdf_doc.features["doc_id"] = doc_id
             all_feature_dfs.append(pdf_doc.features)
