@@ -23,13 +23,14 @@ def persist_to_file(file_name):
                 for kv in param))
 
             if hash not in cache:
-                logging.info(f"Saving {hash} to cache file {file_name}" )
                 #try:
                 cache[hash] = original_func(*param)
                 #except Exception:
                 #    os.system(f"rm {file_name}")
                 #    raise
                 json.dump(cache, open(file_name, 'w'))
+                logging.info(f"Saving {hash} to cache file {file_name}" )
+
 
             return cache[hash]
 

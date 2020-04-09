@@ -24,7 +24,7 @@ from layouteagle.LayoutReader.trueformatupmarker import TrueFormatUpmarker
 
 logging.getLogger().setLevel(logging.WARNING)
 
-class TrueFormatUpmarkerPdf2HTMLEX (TrueFormatUpmarker):
+class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -332,7 +332,7 @@ class TrueFormatUpmarkerPdf2HTMLEX (TrueFormatUpmarker):
 import unittest
 
 class TestPaperReader(unittest.TestCase):
-    tfu_pdf = TrueFormatUpmarkerPdf2HTMLEX(debug=True, parameterize=False)
+    tfu_pdf = TrueFormatUpmarkerPDF2HTMLEX(debug=True, parameterize=False)
 
     def test_dump_features(self):
         files = list(pathlib.Path('testdata').glob('*.html'))
@@ -433,7 +433,7 @@ class TestPaperReader(unittest.TestCase):
 
 if __name__ == '__main__':
 
-    tfu_pdf = TrueFormatUpmarkerPdf2HTMLEX(debug=True, parameterize=False)
+    tfu_pdf = TrueFormatUpmarkerPDF2HTMLEX(debug=True, parameterize=False)
 
     files = list(pathlib.Path('testdata').glob('*.html'))
     dfs = []

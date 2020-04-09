@@ -1,11 +1,11 @@
 import pandas
 
 from layouteagle import config
-from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPdf2HTMLEX
+from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
 from layouteagle.helpers.cache_tools import persist_to_file
 
 
-class FeatureMaker(TrueFormatUpmarkerPdf2HTMLEX):
+class FeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
     def __init__(self, pandas_pickle_path, add_html_extension=".html", *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.pandas_pickle_path =  pandas_pickle_path

@@ -76,61 +76,12 @@ class LatexReplacer(SoupReplacer):
     @persist_to_file(config.scrape_cache + 'labeled_tex_paths.json')
     def __call__(self, paths, compile=True):
         """
-
         :param path_to_read_from:
         """
-
         labeled_paths = []
         for path_to_read_from in paths:
-            path_to_read_from = path_to_read_from.replace(" ", "")
-            if not self.compiles(path_to_read_from) and compile:
-                logging.error(f"Latex file {path_to_read_from} could not be compiled")
-                continue
-
-            with open(path_to_read_from, 'r') as f:
-                try:
-                    f_content = f.read()
-                except UnicodeDecodeError:
-                    logging.error(f"decode error on {[path_to_read_from]}")
-                    continue
-
-            if "\input{" in f_content:
-                input_files = soup.find_all("input")
-                for input_file in input_files:
-                    logging.info(f"replacing included input from {path_to_read_from}: {input_file}")
-                    self(input_file, compile=False)
-                continue
-
-            try:
-                soup = TexSoup(f_content)
-                if not soup:
-                    raise ValueError("parse of texfile was None")
-            except Exception as e:
-                logging.error(f"error in Tex-file {path_to_read_from}:\n {e}")
-                continue
-
-            logging.info(f"working on {path_to_read_from}")
-            try:
-                self.column_placeholder = self.insert_functionality(soup, f_content)
-            except Exception:
-                logging.error("column functionality could not be inserted")
-                continue
-            super().__call__(soup)
-
-            result = str(soup.__repr__())
-
-            out_path = self.add_extension(path_to_read_from)
-            with open(out_path, 'w') as f:
-                f.write(result)
-
-            if compile:
-                pdf_path = self.compiles(out_path, n=4)
-                if pdf_path:
-                    labeled_paths.append(pdf_path)
-                else:
-                    logging.error(f"replaced result could not be parsed by pdflatex {out_path}")
-                    continue
-        return labeled_paths
+            labeled_paths.append(self.work(path_to_read_from))
+        return [lp for lp in labeled_paths if lp]
 
     def append_expression(possible_part_string, replaced_contents):
         replaced_contents.append(possible_part_string.expr)
@@ -255,8 +206,6 @@ class LatexReplacer(SoupReplacer):
                                                   min(len(lines), line_number + 1)])
                     logging.error(f'  --->  see file {tex_file_path}: """\n{faulty_code}"""')
                 break
-
-
         os.chdir(cwd)
 
         if process.returncode != 0:
@@ -264,6 +213,58 @@ class LatexReplacer(SoupReplacer):
         logging.warning(f"{tex_file_path} compiled")
         pdf_path = path + "/"  + filename_without_extension + ".pdf"
         return pdf_path
+
+    def work(self, path_to_read_from, compile=True):
+        path_to_read_from = path_to_read_from.replace(" ", "")
+        if not self.compiles(path_to_read_from) and compile:
+            logging.error(f"Latex file {path_to_read_from} could not be compiled")
+            return
+
+        with open(path_to_read_from, 'r') as f:
+            try:
+                f_content = f.read()
+            except UnicodeDecodeError:
+                logging.error(f"decode error on {[path_to_read_from]}")
+                return
+
+        try:
+            soup = TexSoup(f_content)
+            if not soup:
+                raise ValueError("parse of texfile was None")
+        except Exception as e:
+            logging.error(f"error in Tex-file {path_to_read_from}:\n {e}")
+            return
+
+        if "\input{" in f_content:
+            input_files = list(soup.find_all("input"))
+            for input_file in input_files:
+
+                ipath, ifilename, iextension, ifilename_without_extension = get_path_filename_extension(path_to_read_from)
+                self.work(ipath + input_file.expr.args[-1].value, compile=False)
+            logging.info(f"replacing included input from {path_to_read_from}: {input_files}")
+            return
+
+        logging.info(f"working on {path_to_read_from}")
+        try:
+            self.column_placeholder = self.insert_functionality(soup, f_content)
+        except Exception:
+            logging.error("column functionality could not be inserted")
+            return
+        super().__call__(soup)
+
+        result = str(soup.__repr__())
+
+        out_path = self.add_extension(path_to_read_from)
+        with open(out_path, 'w') as f:
+            f.write(result)
+
+        if compile:
+            pdf_path = self.compiles(out_path, n=4)
+            if pdf_path:
+                return pdf_path
+            else:
+                logging.error(f"replaced result could not be parsed by pdflatex {out_path}")
+                return
 
 
 import unittest
