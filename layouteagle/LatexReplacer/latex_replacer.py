@@ -166,8 +166,6 @@ class LatexReplacer(SoupReplacer):
             except:
                 where.expr._contents = replaced_contents
 
-
-
             return where
 
         return replace_it_with
@@ -242,7 +240,8 @@ class LatexReplacer(SoupReplacer):
                     logging.error(f"decode error on {[path_to_read_from]}")
                     return
         except FileNotFoundError:
-            raise
+            logging.error("included file in latex could not be found")
+            return
 
         try:
             soup = TexSoup(f_content)
