@@ -1,5 +1,6 @@
 import logging
 import os
+from types import GeneratorType
 
 import numpy
 import pandas
@@ -11,7 +12,9 @@ from layouteagle.helpers.list_tools import Lookup
 
 
 class Bi_LSTM_CRF:
-    def __init__(self, batch_size=84, hidden_num=150, lr=1e-3, embedding_size=8, epoch=160, output_dir="models/"):
+    def __init__(self, batch_size=84, hidden_num=150, lr=1e-3,
+                 embedding_size=9, epoch=160, max_divs_per_page=150,
+                 output_dir="models/"):
         self.batch_size = batch_size
         self.hidden_num = hidden_num
         self.lr = lr
@@ -19,9 +22,12 @@ class Bi_LSTM_CRF:
         self.epoch = epoch
         self.output_dir = output_dir
         self.optimizer = tf.keras.optimizers.Adam(self.lr)
+        self.max_divs_per_page = max_divs_per_page
 
     def __call__(self, feature_path):
         os.system(f"rm -r {self.output_dir} & mkdir {self.output_dir}")
+        if isinstance(feature_path, GeneratorType):
+            feature_path = next(feature_path)
         self.prepare_from_pickle(feature_path)
         self.train()
         logging.info("finished")
@@ -47,7 +53,7 @@ class Bi_LSTM_CRF:
         feature_df['index'] = feature_df.index
 
         in_page = feature_df[1:].groupby(["doc_id", "page_number"]).groups
-
+        in_page = {grouper_tuple: group.tolist() for grouper_tuple, group in in_page.items() if len(group) < self.max_divs_per_page}
         cols_to_use = ["x", "y", "len", "height",  "page_number", "font-size", "fine_grained_pdf", "coarse_grained_pdf", "line-height"]
 
         # normalise
@@ -147,11 +153,10 @@ class Bi_LSTM_CRF:
                 loss, logits, text_lens = self.train_one_step(text_batch, labels_batch)
 
                 accuracy = self.get_acc_one_step(logits, text_lens, labels_batch)
-                logging.warning(f'epoch {epoch}, step {step}/{len(dataset)}, '
+                logging.info(f'epoch {epoch}, step {step}/{len(dataset)}, '
                                 f'loss {loss} , accuracy {accuracy}')
 
-
-                if accuracy > best_acc and accuracy > 0.5:
+                if loss < best_loss and step>4:
                     best_loss = loss
                     best_acc = accuracy
 

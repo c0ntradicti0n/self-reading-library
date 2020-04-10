@@ -10,26 +10,17 @@ class SoupReplacer:
         self.what = what
 
     def replace_node(self, node, _with):
-        try:
-            node.replace_with(_with(node))
-        except AttributeError:
-            raise
-        except TypeError:
-            logging.info("{node} not replaced")
-        except ValueError:
-            logging.info("'{node} not in list'")
-
-
+        _with(node)
 
     def __call__(self, soup):
         for _what, (_where, _with) in self.what.items():
             element_s = _what(soup)
             if not element_s:
                 continue
-            if not isinstance(element_s, GeneratorType):
+            if not isinstance(element_s, GeneratorType): # single
                 self.replace_node(element_s, _with)
             else:
-                for i, element in enumerate(element_s):
+                for i, element in enumerate(element_s): # plural
                     self.replace_node(element, _with)
 
 

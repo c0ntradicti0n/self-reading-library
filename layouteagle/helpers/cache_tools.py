@@ -2,6 +2,7 @@ import inspect
 import json
 import logging
 import os
+from types import GeneratorType
 
 
 def persist_to_file(file_name):
@@ -23,14 +24,17 @@ def persist_to_file(file_name):
                 for kv in param))
 
             if hash not in cache:
-                #try:
-                cache[hash] = original_func(*param)
-                #except Exception:
-                #    os.system(f"rm {file_name}")
-                #    raise
-                json.dump(cache, open(file_name, 'w'))
-                logging.info(f"Saving {hash} to cache file {file_name}" )
+                return_val = original_func(*param)
+                if isinstance(return_val, GeneratorType):
+                    cache[hash] = []
+                    for rv in return_val:
+                        cache[hash].append(rv)
+                        yield rv
+                else:
+                    cache[hash] = return_val
 
+                json.dump(cache, open(file_name, 'w'))
+                logging.info(f"Dumping {hash} to cache file {file_name}" )
 
             return cache[hash]
 

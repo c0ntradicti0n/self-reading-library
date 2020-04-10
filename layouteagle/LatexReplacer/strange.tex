@@ -1,0 +1,154 @@
+\documentclass{IEEEtran}
+\renewcommand\IEEEkeywordsname{Keywords}
+\usepackage{lipsum}
+\usepackage{graphicx}
+\newcommand{\name}[1] {#1}
+\newcommand{\address}[1] {#1}
+\providecommand{\keywords}[1]{\textbf{\textit{Index terms---}} #1}
+
+\author{Christoph F. Strnadl\footnote{contact: Software AG, CTO Office, \texttt{christoph.strnadl@softwareag.com}; Twitter: \texttt{@archimate}}\;, IEEE \emph{Senior Member}}
+
+
+
+   \begin{document}
+
+
+\begin{abstract}
+  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1   column 1  column 1  column 1  column 1  column 1  column 1   column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1   column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1  column 1 \end{abstract}
+
+       \begin{itemize}
+	\item DF-TDMA: the mobile device transmits to the relays in different time slots.
+	In this case, a convex problem is formulated with respect to offloaded data amount, allocated time slot for different relays and transmit power of the mobile device and relays.
+	To get more insight of the problem structure and reduce computation complexity, a bilevel optimization method is utilized. In the upper level, the optimal data amount for offloading is acquired, while in the lower level, other variables are optimized. The lower level problem is convex, and transformed into a linear programming with KKT conditions. The upper level problem is as well proved to be a single variable convex problem.
+
+	With the above methods, global optimal is obtained with lower complexity, compared with directly using traditional numerical methods.
+
+	\item DF-FDMA: the mobile device transmits to the relays simultaneously in different subbands.
+	In this case, a nonconvex problem is formulated with respect to offloaded data amount, overall transmit duration, allocated bandwidth for different relays and transmit power of the mobile device and relays.
+	Utilizing bilevel method, in the upper level, the optimal data amount for offloading is acquired, while in the lower level, other variables are optimized.
+	The lower level problem is convex, and transformed into a linear programming with KKT conditions. In the upper level, we form the problem into a monotonic programming, and apply Polybolck Algorithm to solve it.
+
+	With the above methods, global optimal is obtained.
+\end{itemize}
+
+\author{
+     \IEEEcompsocitemizethanks{
+	\IEEEcompsocthanksitem Date of current version \today.
+	\IEEEcompsocthanksitem A. Span and S. ten Brink are with
+	Institute of Telecommunications, University of Stuttgart, Stuttgart, Germany (E-mail:\{alexander.span,tenbrink\}@inue.uni-stuttgart.de).
+	\IEEEcompsocthanksitem V. Aref and H. B\"ulow are with with Nokia Bell Labs, Stuttgart 70435, Germany (E-mail: \{vahid.aref,henning.buelow\}@nokia-bell-labs.com).
+	}
+}
+
+
+% paper title
+\title{\textbf{Semi-supervised acoustic and language model training for English-isiZulu code-switched speech recognition}\thanks{This work was supported in part by NSERC of Canada.}}
+
+\author{\IEEEauthorblockN{Jian-Jia Weng, Fady Alajaji, and Tam\'as Linder}\\
+\IEEEauthorblockA{Department of Mathematics and Statistics \\
+Queen's University\\
+Kingston, ON K7L 3N6, Canada \\
+jian-jia.weng@queensu.ca, \{fady, linder\}@mast.queensu.ca}
+}
+
+% svg
+\begin{figure}[h]
+\begin{center}
+\def\svgwidth{300pt}
+\input{snaildivides.eps_tex}
+\caption{The snail divides with one, two, three and four double points, from left to right.}
+\label{snaildivides}
+\end{center}
+\end{figure}
+
+\input{include}
+
+\input{sub/include}
+
+
+\maketitle
+\begin{abstract}
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm   wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+\end{abstract}
+
+\begin{IEEEkeywords}
+  Network information theory, two-way channels, lossy transmission, joint source-channel coding, adaptive coding.
+\end{IEEEkeywords}
+
+
+\address{Department of Electrical and Electronic Engineering, Stellenbosch University, South Africa \\
+         \{abiswas, fdw, ewaldvdw, trn\}@sun.ac.za}
+
+\name{A. Biswas, F. de Wet, E. van der Westhuizen, T.R. Niesler}
+
+\lipsum[3-10]
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+
+
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+  wer wie was wieso weshalb warum wer nicht fragt bleibt dumm
+
+
+
+
+
+
+
+
+\maketitle
+
+
+\subsubsection{{\texttt{ASR$_2$}}}
+  dings bums   dings bums
+   dings bums
+   dings bums
+   dings bums
+   dings bums
+   dings bums
+
+
+\bibliography{reference}
+
+
+
+\bibliographystyle{plain}
+
+\begin{thebibliography}{30}
+
+
+
+
+
+\bibitem{AR}
+A.Andler and S.Ramanan,
+Moduli of abelian varieties, Lect. Notes. Math. 1644, 1996.
+
+
+
+\bibitem{BaLa}
+J. Barge and J. Lannes, Suites de Sturm, indice de Maslov et p\'eriodicit\'e
+de Bott, [Sturm sequences, Maslov index and Bott periodicity],
+{\em Progress in Mathematics}, 267. Birkh\"auser Verlag, Basel, 2008.
+viii+199 pp.
+
+    \end{thebibliography}
+
+
+\end{document}

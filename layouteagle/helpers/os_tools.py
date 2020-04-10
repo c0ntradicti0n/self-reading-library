@@ -23,6 +23,8 @@ def get_filename_from_path(path):
 def get_path_filename_extension(adress):
     extension = os.path.splitext(adress)[1]
     path = os.path.dirname(adress) + "/"
+    if path == r"/":
+        path = "./"
     filename = os.path.basename(adress)
     filename_without_extension = filename[:-len(extension)]
     return path, filename, extension, filename_without_extension

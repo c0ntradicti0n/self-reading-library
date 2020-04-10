@@ -16,21 +16,27 @@ class FeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
     @persist_to_file(config.cache + 'collected_features.json')
     def __call__(self, labeled_paths):
         all_feature_dfs = []
-
-        for doc_id, labeled_pdf_path in enumerate(labeled_paths):
+        doc_id = 0
+        while doc_id < self.n:
+            labeled_pdf_path = next(labeled_paths)
             labeled_html_path = labeled_pdf_path + self.add_html_extension
             self.pdf2htmlEX(labeled_pdf_path, labeled_html_path)
             try:
                 self.generate_data_for_file(labeled_html_path)
             except FileNotFoundError:
                 logging.error("output of pdf2html looks damaged")
+                continue
             pdf_doc = self.collect_data_for_file
             pdf_doc.features["doc_id"] = doc_id
             all_feature_dfs.append(pdf_doc.features)
+            doc_id += 1
 
         df = pandas.concat(all_feature_dfs)
         df.divs = df.divs.astype(str)
         df.to_pickle(self.pandas_pickle_path)
 
         return self.pandas_pickle_path
+
+    def set_n(self, n):
+        self.n = n
 

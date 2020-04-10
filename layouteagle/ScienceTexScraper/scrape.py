@@ -15,9 +15,8 @@ import logging
 logging.basicConfig(level = logging.INFO)
 
 class ScienceTexScraper:
-    def __init__(self, url, n, add_extension= ".gz.tar"):
+    def __init__(self, url, add_extension= ".gz.tar"):
         self.url = url
-        self.n = n
         self.add_extension = add_extension
         if not os.path.isdir(config.tex_data):
             os.system(f"mkdir {config.tex_data}")
@@ -27,7 +26,7 @@ class ScienceTexScraper:
         self.scrape_count = count()
         self.i = 0
         self.yet = []
-        return list(self.surf_random(self.url))
+        return self.surf_random(self.url)
 
     headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36'}
 
@@ -50,20 +49,18 @@ class ScienceTexScraper:
             except KeyError:
                 continue
             if "e-print" in link.attrs['href']:
-                self.i = next(self.scrape_count)
-                if self.i >= self.n:
-                    break
-                else:
-                    logging.warning(f"got {self.i + 1} of {self.n}")
+
                 new_url = self.url +  new_url
                 logging.warning(f"getting {new_url}")
                 name = hashlib.md5(new_url.encode('utf-8')).hexdigest()
                 tar_gz_path = config.tex_data + name + self.add_extension
                 path  =  config.tex_data + name
-                os.system(f'wget '
-                          f'--user-agent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36" '
-                          f'{new_url}'
-                          f' -O {tar_gz_path}')
+                os.system(
+                    f'wget '
+                    f'--user-agent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36" '
+                    f'{new_url} '
+                    f'-O {tar_gz_path}')
+
                 unpack_path = config.tex_data + name
                 os.system(f"mkdir -p {unpack_path} & "
                           f"tar -zxvf {tar_gz_path} -C {unpack_path}/")
@@ -72,8 +69,7 @@ class ScienceTexScraper:
 
         # if not enough, random surf further
         for link in links:
-            if self.i >= self.n:
-                break
+
             try:
                 new_url = link['href']
             except KeyError:

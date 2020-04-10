@@ -15,7 +15,8 @@ for logger in loggers:
 
 class LayoutEagle:
     def __init__(self,
-                 model_path="best_model/",):
+                 model_path="best_model/",
+                 pandas_path=".layouteagle/features.pckl"):
         try:
             os.mkdir(config.hidden_folder)
             os.mkdir(config.cache)
@@ -26,6 +27,8 @@ class LayoutEagle:
         finally:
             logging.info("tried to create directories")
 
+        self.pandas_path = pandas_path
+
         self.bi_lstm_crf = Bi_LSTM_CRF(output_dir=model_path)
         self.feature_maker = FeatureMaker(
             pandas_pickle_path=".layouteagle/features.pckl",
@@ -34,6 +37,10 @@ class LayoutEagle:
 
     def make_document(self, pdf_path=None, html1_path=None, html2_path=None, css_path=None):
         div_features = self.feature_maker.work(pdf_path, html1_path=None)
+        self.feature_maker = FeatureMaker(
+            pandas_pickle_path=self.pandas_path,
+            debug=True,
+            parameterize=False)
         labeled_div_features = self.bi_lstm_crf.predict(features=div_features)
         if pdf_path and not html1_path:
             return labeled_div_features
@@ -41,8 +48,9 @@ class LayoutEagle:
         self.trueFormatPDF2HTMLEX(labeled_div_features, html2_path=html2_path)
 
     def make_model(self, n):
-        science_tex_scraper = ScienceTexScraper(url = config.tex_source, n=n)
+        science_tex_scraper = ScienceTexScraper(url = config.tex_source)
         latex_replacer = LatexReplacer(".labeled.tex")
+        self.feature_maker.set_n(n)
 
         pipeline = [science_tex_scraper, latex_replacer, self.feature_maker, self.bi_lstm_crf, lambda x: print (x)]
 
@@ -56,7 +64,7 @@ class LayoutEagle:
 
 if __name__ == '__main__':
     lea = LayoutEagle()
-    lea.make_model(n=60)
+    lea.make_model(n=4)
 
 
 
