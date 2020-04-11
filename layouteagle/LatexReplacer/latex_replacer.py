@@ -12,14 +12,14 @@ from TexSoup import TexSoup, TexNode, TokenWithPosition, TexText, TexEnv, OArg, 
 from layouteagle import config
 from layouteagle.LatexReplacer import twocolumn_defs, multicol_defs
 from layouteagle.LatexReplacer.replacer import SoupReplacer
-from layouteagle.helpers.cache_tools import persist_to_file
+from layouteagle.helpers.cache_tools import persist_to_file, file_persistent_cached_generator
 from layouteagle.helpers.os_tools import get_path_filename_extension
 from layouteagle.helpers.str_tools import find_all, insert
 from regex import regex
 
 
 class LatexReplacer(SoupReplacer):
-    def __init__(self, add_extension, timout_sec=2):
+    def __init__(self, add_extension, timout_sec=10):
         self.replacement_target = TexNode
         self.add_extension = lambda path: path + add_extension
         self.timeout_sec = timout_sec
@@ -95,17 +95,16 @@ class LatexReplacer(SoupReplacer):
             logging.info("no multi column instruction found, so its single col")
             return b"column 1".decode('unicode_escape')
 
-    @persist_to_file(config.cache + 'labeled_tex_paths.json')
+    @file_persistent_cached_generator(config.cache + 'labeled_tex_paths.json')
     def __call__(self, paths, compile=True):
         """
         :param path_to_read_from:
         """
-        labeled_paths = []
         for path_to_read_from in paths:
-            result = self.work(path_to_read_from)
-            if result:
-                labeled_paths.append(result)
-        return [lp for lp in labeled_paths if lp]
+            new_pdf_path = self.work(path_to_read_from)
+            if new_pdf_path:
+                yield  new_pdf_path
+
 
     def append_expression(possible_part_string, replaced_contents):
         replaced_contents.append(possible_part_string.expr)
@@ -303,11 +302,16 @@ class LatexReplacer(SoupReplacer):
             for input_file in input_files:
                 ipath, ifilename, iextension, ifilename_without_extension = get_path_filename_extension(path_to_read_from)
                 try:
+                    logging.info("trial 1 with file inclusion:")
                     new_path = self.work(ipath + input_file.expr.args[-1].value + iextension, compile=False)
                 except FileNotFoundError:
+                    logging.info("trial 2 with file inclusion (less extension):")
                     new_path = self.work(ipath + input_file.expr.args[-1].value, compile=False)
 
-                input_file.args.all[0] = RArg(new_path[:-(len(iextension))])
+                try:
+                    input_file.args.all[-1] = RArg(new_path[:-(len(iextension))])
+                except TypError:
+                    logging.error(f"failed to replace input tag {str(input_file)}")
             logging.info(f"replacing included input from {path_to_read_from}: {input_files}")
 
 

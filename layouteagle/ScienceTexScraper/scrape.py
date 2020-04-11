@@ -9,7 +9,7 @@ import time
 from bs4 import BeautifulSoup
 
 from layouteagle import config
-from layouteagle.helpers.cache_tools import persist_to_file
+from layouteagle.helpers.cache_tools import persist_to_file, file_persistent_cached_generator
 
 import logging
 logging.basicConfig(level = logging.INFO)
@@ -21,7 +21,7 @@ class ScienceTexScraper:
         if not os.path.isdir(config.tex_data):
             os.system(f"mkdir {config.tex_data}")
 
-    @persist_to_file(config.cache + 'scraped_tex_paths.json')
+    @file_persistent_cached_generator(config.cache + 'scraped_tex_paths.json')
     def __call__(self):
         self.scrape_count = count()
         self.i = 0

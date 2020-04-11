@@ -1,5 +1,6 @@
 import os
 import shutil
+from collections import namedtuple
 from glob import iglob
 from pathlib import Path
 
@@ -20,6 +21,7 @@ def make_fresh_dir(dir):
 def get_filename_from_path(path):
     return os.path.basename(path)
 
+PathInfo = namedtuple("PathInfo", ["path", "filename", "extension", "filename_without_extension"])
 def get_path_filename_extension(adress):
     extension = os.path.splitext(adress)[1]
     path = os.path.dirname(adress) + "/"
@@ -27,4 +29,4 @@ def get_path_filename_extension(adress):
         path = "./"
     filename = os.path.basename(adress)
     filename_without_extension = filename[:-len(extension)]
-    return path, filename, extension, filename_without_extension
+    return PathInfo(path, filename, extension, filename_without_extension)

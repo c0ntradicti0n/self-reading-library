@@ -1,5 +1,0 @@
-[-INFO-] 2020-04-04 01:44:41,743 5337  train.<module> line:31  hidden_num:512, vocab_size:58541, label_size:5
-[-INFO-] 2020-04-04 01:45:34,171 5337  train.<module> line:82  epoch 0, step 20, loss 125.8848 , accuracy 0.6163
-[-INFO-] 2020-04-04 01:45:34,210 5337  train.<module> line:86  model saved
-[-INFO-] 2020-04-04 01:46:28,547 5337  train.<module> line:82  epoch 1, step 40, loss 82.3998 , accuracy 0.7124
-[-INFO-] 2020-04-04 01:46:28,577 5337  train.<module> line:86  model saved

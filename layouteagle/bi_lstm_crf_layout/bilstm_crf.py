@@ -27,6 +27,7 @@ class Bi_LSTM_CRF:
     def __call__(self, feature_path):
         os.system(f"rm -r {self.output_dir} & mkdir {self.output_dir}")
         if isinstance(feature_path, GeneratorType):
+
             feature_path = next(feature_path)
         self.prepare_from_pickle(feature_path)
         self.train()

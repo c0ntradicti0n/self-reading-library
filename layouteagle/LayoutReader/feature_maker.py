@@ -4,7 +4,7 @@ import pandas
 
 from layouteagle import config
 from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
-from layouteagle.helpers.cache_tools import persist_to_file
+from layouteagle.helpers.cache_tools import persist_to_file, file_persistent_cached_generator
 
 
 class FeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
@@ -13,11 +13,12 @@ class FeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
         self.pandas_pickle_path =  pandas_pickle_path
         self.add_html_extension = add_html_extension
 
-    @persist_to_file(config.cache + 'collected_features.json')
+    @file_persistent_cached_generator(config.cache + 'collected_features.json')
     def __call__(self, labeled_paths):
         all_feature_dfs = []
         doc_id = 0
         while doc_id < self.n:
+            logging.info(f"Got {doc_id}/{self.n}")
             labeled_pdf_path = next(labeled_paths)
             labeled_html_path = labeled_pdf_path + self.add_html_extension
             self.pdf2htmlEX(labeled_pdf_path, labeled_html_path)
@@ -35,7 +36,7 @@ class FeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
         df.divs = df.divs.astype(str)
         df.to_pickle(self.pandas_pickle_path)
 
-        return self.pandas_pickle_path
+        yield self.pandas_pickle_path
 
     def set_n(self, n):
         self.n = n
