@@ -7,21 +7,20 @@ from typing import Dict, Tuple
 
 class SoupReplacer:
     def __init__(self, what:Dict[Callable, Tuple[Callable, Callable]]):
+        super().__init__()
         self.what = what
 
-    def replace_node(self, node, _with):
-        _with(node)
+    def replace_node(self, node, how):
+        self.make_replacement(node, how)
 
     def __call__(self, soup):
-        for _what, (_where, _with) in self.what.items():
-            element_s = _what(soup)
-            if not element_s:
-                continue
-            if not isinstance(element_s, GeneratorType): # single
-                self.replace_node(element_s, _with)
-            else:
-                for i, element in enumerate(element_s): # plural
-                    self.replace_node(element, _with)
+        for tag, tex_strings in self.replacements.items():
+            for tex_string in tex_strings:
+                nodes = list(self.find_all(soup, tex_string))
+                if not nodes:
+                    continue
+                for i, node in enumerate(nodes): # plural
+                    self.replace_node(node, tag)
 
 
 import unittest

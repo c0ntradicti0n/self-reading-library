@@ -154,14 +154,14 @@ class TrueFormatUpmarker:
         "no_label":"NONE"
     }
     def check_for_label_in_string(self, text):
-        contained_labels = [s for s in self.label_strings.values() if s in text]
+        contained_labels = [s for s in self.label_strings.values() if s in text.lower()]
         if contained_labels:
             if len(contained_labels) > 1:
                 logging.warning("More labels in div text found than wanted")
             return contained_labels[0]
         else: return self.label_strings["no_label"]
 
-    shifts = 30
+    shifts = 0
     def override_by_labeled_document(self, features):
         features["text"] = features.divs.apply(lambda div: div.text)
         features["pcl"] = features["text"].apply(lambda text: self.check_for_label_in_string(text))
@@ -177,9 +177,7 @@ class TrueFormatUpmarker:
             (features["pcl"] != features["shift_down"]) &
             (features["shift_down"].str.contains("column")))
 
-            features["pcl"][
-                where
-                 ] = features["shift_down"]
+            features["pcl"][where] = features["shift_down"]
         features["column_labels"] = features["pcl"]
 
     def index_labels(string):
@@ -205,21 +203,23 @@ class TrueFormatUpmarker:
             change_list = list(self.tags_to_change(feature_line.debug_color, soup, div))
             indexing_css_update = {}
             for indexed_div_content in change_list[::-1]:
-                div.contents.pop(indexed_div_content.div_content_index)
+                indexed_div_content.parent.contents.pop(indexed_div_content.div_content_index)
 
                 for indexed_word_tag in indexed_div_content.indexed_word_tags[::-1]:
-                    div.contents.insert(
+                    indexed_div_content.parent.contents.insert(
                         indexed_div_content.div_content_index,
                         indexed_word_tag.tag)
                     indexing_css_update[indexed_word_tag.index] = indexed_word_tag.word
 
             self.indexed_words.update(dict(indexing_css_update))
 
-    IndexedDivContent = namedtuple("IndexedDivContent", ["div_content_index", "indexed_word_tags"])
+    IndexedDivContent = namedtuple("IndexedDivContent", ["div_content_index", "parent", "indexed_word_tags"])
 
     def tags_to_change(self, debug_percent, soup, text_div) -> IndexedDivContent :
         for div_tag_index, content in enumerate(text_div.contents):
-            if isinstance(content, bs4.NavigableString):
+            if isinstance(content, bs4.Tag) and content.contents != [' ']:
+                yield from self.tags_to_change( debug_percent, soup, content)
+            elif isinstance(content, bs4.NavigableString):
                 words = TrueFormatUpmarker.tokenize_differential_signs(content)
                 new_tags = [
                     self.make_new_tag(
@@ -228,7 +228,7 @@ class TrueFormatUpmarker:
                         debug_percent=debug_percent)
                     for word in words
                 ]
-                yield TrueFormatUpmarker.IndexedDivContent(div_tag_index, new_tags)
+                yield TrueFormatUpmarker.IndexedDivContent(div_tag_index, text_div, new_tags)
 
     def collect_all_divs(self, soup):
         raise NotImplementedError

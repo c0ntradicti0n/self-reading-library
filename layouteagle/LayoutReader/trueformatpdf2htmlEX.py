@@ -29,7 +29,7 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def generate_css_tagging_document(self, html_read_from="", html_write_to="", parameterizing=False):
+    def generate_css_tagging_document(self, html_read_from="", html_write_to="", parameterizing=False, premade_features=None, premade_soup=None):
         """
         This manipulates an html-file from the result of pdf2htmlEX, that inserts word for word tags with css ids
         to apply markup to these words only with a css-file, without changing this document again.
@@ -37,8 +37,11 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
         This has to restore the semantics of the layout, as the reading sequence of left right, top to bottom,
         column for column, page for page. Other layout things should disappear from the text sequence.
         """
-
-        features, soup = self.generate_data_for_file(html_read_from)
+        if isinstance(premade_features, pandas.DataFrame) and isinstance(premade_soup, bs4.BeautifulSoup):
+            features = premade_features
+            soup = premade_soup
+        else:
+            features, soup = self.generate_data_for_file(html_read_from)
 
         self.manipulate_document(soup=soup,
                                  features=features)
@@ -139,7 +142,7 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
         cluster_member_colors = [sns.desaturate(x, p) for x, p in
                                  zip(cluster_colors, clusterer.probabilities_)]
         plt.scatter(*list(coords), c=cluster_member_colors, linewidth=0)
-        # plt.scatter(*list(coords[:,outliers].T), linewidth=0, c='red')
+
         plt.savefig(debug_pic_name + ".png", bbox_inches='tight')
 
     def get_declaration_value(self, declaration, key):
@@ -335,12 +338,15 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
             else:
                 dd_overwrite = dyy[tindex]
 
-    def pdf2htmlEX(self, pdf, html):
-        assert (pdf.endswith(".pdf"))
+    def pdf2htmlEX(self, pdf_path, html):
+        assert (pdf_path.endswith(".pdf"))
+        logging.info(f"converting pdf {pdf_path} to html ")
         os.system(f"pdf2htmlEX  "
+                  f"--space-as-offset 1 "
+                  f"--decompose-ligature 1 "
                   f"--optimize-text 1 "
                   f"--fit-width {config.reader_width}  "
-                  f"\"{pdf}\" \"{html}\"")
+                  f"\"{pdf_path}\" \"{html}\"")
 
 
 import unittest

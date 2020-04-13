@@ -65,7 +65,10 @@ class Lookup:
             return list(recursive_map(token_s, lambda x: self.token_to_id[x]))
 
     def ids_to_tokens(self, ids):
-        return [self.id_to_token[id] for id in ids]
+        try:
+            return [self.id_to_token[id] for id in ids]
+        except:
+            logging.error(f"{[id for id in ids if id not in self.id_to_token]} not in labels dict {self.id_to_token}")
 
 
 

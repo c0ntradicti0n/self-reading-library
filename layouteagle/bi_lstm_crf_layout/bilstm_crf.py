@@ -6,6 +6,8 @@ import numpy
 import pandas
 import tensorflow as tf
 import tensorflow_addons as tf_ad
+import tensorflow.keras.backend as K
+
 
 from layouteagle.bi_lstm_crf_layout.model import LayoutModel
 from layouteagle.helpers.list_tools import Lookup
@@ -17,7 +19,7 @@ def sorted_by_zipped(x):
 
 
 class Bi_LSTM_CRF:
-    def __init__(self, batch_size=500, hidden_num=950, lr=1e-4,
+    def __init__(self, batch_size=50, hidden_num=950, lr=0.01,
                  embedding_size=9, epoch=160, max_divs_per_page=150,
                  output_dir="models/"):
         self.batch_size = batch_size
@@ -26,8 +28,8 @@ class Bi_LSTM_CRF:
         self.embedding_size = embedding_size
         self.epoch = epoch
         self.output_dir = output_dir
-        self.optimizer = tf.keras.optimizers.Adam(self.lr)
         self.max_divs_per_page = max_divs_per_page
+
 
     def __call__(self, feature_path):
         os.system(f"rm -r {self.output_dir} & mkdir {self.output_dir}")
@@ -66,7 +68,7 @@ class Bi_LSTM_CRF:
         max_distance = max([max(x) for x in feature_df[1:]['distance_vector']])
         max_distance = max([max(x) for x in feature_df[1:]['distance_vector']])
         feature_df.distance_vector = feature_df[1:].distance_vector.apply(lambda x:x/max_distance)
-        feature_df.distance_vector = feature_df[1:].distance_vector.apply(lambda x: list(sorted(x)))
+        feature_df.distance_vector = feature_df[1:].distance_vector.apply(lambda x: list(sorted(x)[:6]))
         feature_df = feature_df.assign(**feature_df.distance_vector.apply(pandas.Series).add_prefix(distance_col_prefix))
         feature_df = feature_df.fillna(1)
 
@@ -74,14 +76,13 @@ class Bi_LSTM_CRF:
         max_angle = max([max(x) for x in feature_df[1:]['angle']])
         min_angle = min([min(x) for x in feature_df[1:]['angle']])
 
-        feature_df.angle = feature_df[1:].angle.apply(lambda x:(x+abs(min_angle))/(max_angle+abs(min_angle)))
+        #feature_df.angle = feature_df[1:].angle.apply(lambda x:(x+abs(min_angle))/(max_angle+abs(min_angle)))
         feature_df.angle = feature_df[1:].angle.apply(lambda x: list(x))
         feature_df['da'] = list(zip(feature_df["angle"] , feature_df["distance_vector"]))
-        feature_df.angle = feature_df[1:]["da"].apply(lambda x: (sorted_by_zipped(x)))
+        feature_df.angle = feature_df[1:]["da"].apply(lambda x: (sorted_by_zipped(x))[:6])
         feature_df = feature_df.assign(**feature_df.angle.apply(pandas.Series).add_prefix(angle_col_prefix))
         feature_df = feature_df.fillna(1)
 
-        # normalise
         for col in cols_to_use:
             feature_df[col] = feature_df[col] / max(feature_df[col])
 
@@ -114,7 +115,10 @@ class Bi_LSTM_CRF:
             feature_df[col] = feature_df[col] / feature_df[col].max()
 
 
-        logging.info(f"hidden_num:{self.hidden_num}, vocab_size:{len(feature_df['index'])}, label_size:{len(feature_df['column_labels'].unique())}, features: {len(cols_to_use)}")
+        logging.info(f"hidden_num:{self.hidden_num}, vocab_size:{len(feature_df['index'])}, label_size:{len(feature_df['column_labels'].unique())}, features: {len(cols_to_use)},"
+                     f"{self.lr}")
+        self.optimizer = tf.keras.optimizers.Adam(self.lr)
+
         self.model = LayoutModel(hidden_num=self.hidden_num,
                               data=feature_df,
                               cols_to_use=cols_to_use,
@@ -131,25 +135,20 @@ class Bi_LSTM_CRF:
     # @tf.function
     def train_one_step(self, text_batch, labels_batch):
         with tf.GradientTape() as tape:
-            logits, text_lens, log_likelihood = self.model(text_batch, labels_batch, training=True)
-            loss = - tf.reduce_mean(log_likelihood)
-        gradients = tape.gradient(loss, self.model.trainable_variables)
+            logits, text_lens = self.model(text_batch, labels_batch, training=True)
+            loss = self.model.crf.loss(labels_batch, logits)
+        gradients = tape.gradient(loss, self.model.trainable_variables, unconnected_gradients='zero')
+        self.optimizer = tf.keras.optimizers.Adam(self.lr)
         self.optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
         return loss, logits, text_lens
 
     def get_acc_one_step(self, logits, text_lens, labels_batch):
         paths = []
-        accuracy = 0
         accuracies = []
         for logit, text_len, labels in zip(logits, text_lens, labels_batch):
-            viterbi_path, _ = tf_ad.text.viterbi_decode(logit, self.model.transition_params)
-            paths.append(viterbi_path)
-
-            # wee don't need to adapt correct padding values here, because they are equal anyway
-            correct_prediction = correct_prediction = tf.equal(viterbi_path[:text_len], labels[:text_len])
-
+            paths.append(logit)
+            correct_prediction = correct_prediction = tf.equal(logit, labels)
             accuracies.append(tf.reduce_mean(tf.cast(correct_prediction, tf.float32)))
-            # print(tf.reduce            # print(tf.reduce_mean(tf.cast(correct_prediction, tf.float32)))
         accuracy = sum(numpy.array(accuracies) / len(paths))
         return accuracy
 
@@ -167,27 +166,21 @@ class Bi_LSTM_CRF:
                 step = step + 1
                 loss, logits, text_lens = self.train_one_step(text_batch, labels_batch)
 
-                accuracy = self.get_acc_one_step(logits, text_lens, labels_batch)
+                accuracy = self.model.crf.accuracy(labels_batch, logits)
                 logging.info(f'epoch {epoch}, step {step}/{len(dataset)}, '
-                                f'loss {loss} , accuracy {accuracy}')
+                                f'loss {loss}, accuracy {accuracy}, lr {self.lr}')
 
-                if accuracy > best_acc and step>10:
+                if True and  accuracy > best_acc and step>10:
                     best_loss = loss
                     best_acc = accuracy
 
-                    viterbi_path, _ = tf_ad.text.viterbi_decode(logits[0], self.model.transition_params)
-                    prediction = viterbi_path
-
+                    logits = K.argmax(logits, axis=-1)
+                    unique_labels = set(logits[0].numpy().tolist())
                     logging.info(
-                        f"\n{self.label_lookup.ids_to_tokens(prediction)[:text_lens[0]]} | \n{self.label_lookup.ids_to_tokens(labels_batch[0].numpy())[:text_lens[0]]}")
-
-                    #self.ckpt_manager.save()
-
-                    # save model
-                    # for this, we have to do a dummy prediction, to set the real input shapes
-
-                    #self.model.predict(text_batch[1:3])
-                    tf.saved_model.save(self.model, self.output_dir + self.best_name)
+                        f"\n{logits[0].numpy().tolist()} | \n"
+                        f"{labels_batch[0]} \n"
+                        f"{dict(zip(unique_labels, self.label_lookup.ids_to_tokens(unique_labels)))}")
+                    #tf.saved_model.save(self.model, self.output_dir + self.best_name)
                     logging.warning("Saved best model up to now")
 
     def predict(self, features):
