@@ -1,4 +1,5 @@
 import logging
+import string
 
 import pandas
 
@@ -32,7 +33,12 @@ class FeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
             all_feature_dfs.append(pdf_doc.features)
             doc_id += 1
 
+
+        CHARS = ''
         df = pandas.concat(all_feature_dfs)
+        df['chars'] = df.divs.apply(lambda div: sum(div.text.count(c) for c in string.ascii_letters))
+        df['nums'] = df.divs.apply(lambda div: sum(div.text.count(c) for c in string.digits))
+        df['signs'] = df.divs.apply(lambda div: sum(div.text.count(c) for c in string.punctuation))
         df.divs = df.divs.astype(str)
         df.to_pickle(self.pandas_pickle_path)
 

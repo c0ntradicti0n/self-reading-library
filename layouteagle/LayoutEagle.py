@@ -64,7 +64,7 @@ class LayoutEagle:
 
 if __name__ == '__main__':
     lea = LayoutEagle()
-    lea.make_model(n=8)
+    lea.make_model(n=30)
 
 
 

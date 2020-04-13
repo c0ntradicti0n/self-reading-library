@@ -11,12 +11,17 @@ from layouteagle.bi_lstm_crf_layout.model import LayoutModel
 from layouteagle.helpers.list_tools import Lookup
 
 
+def sorted_by_zipped(x):
+    return list(_x[0] for _x in sorted(zip(*x), key=lambda __x:__x[1]))
+
+
+
 class Bi_LSTM_CRF:
-    def __init__(self, batch_size=84, hidden_num=150, lr=1e-3,
+    def __init__(self, batch_size=500, hidden_num=950, lr=1e-4,
                  embedding_size=9, epoch=160, max_divs_per_page=150,
                  output_dir="models/"):
         self.batch_size = batch_size
-        self.hidden_num = hidden_num
+        self.hidden_num = embedding_size
         self.lr = lr
         self.embedding_size = embedding_size
         self.epoch = epoch
@@ -55,11 +60,32 @@ class Bi_LSTM_CRF:
 
         in_page = feature_df[1:].groupby(["doc_id", "page_number"]).groups
         in_page = {grouper_tuple: group.tolist() for grouper_tuple, group in in_page.items() if len(group) < self.max_divs_per_page}
-        cols_to_use = ["x", "y", "len", "height",  "page_number", "font-size", "fine_grained_pdf", "coarse_grained_pdf", "line-height"]
+        cols_to_use = ["x", "y", "len", "height",  "page_number", "font-size", "fine_grained_pdf", "coarse_grained_pdf", "line-height", "chars", "nums", "signs"]
+
+        distance_col_prefix = 'd_'
+        max_distance = max([max(x) for x in feature_df[1:]['distance_vector']])
+        max_distance = max([max(x) for x in feature_df[1:]['distance_vector']])
+        feature_df.distance_vector = feature_df[1:].distance_vector.apply(lambda x:x/max_distance)
+        feature_df.distance_vector = feature_df[1:].distance_vector.apply(lambda x: list(sorted(x)))
+        feature_df = feature_df.assign(**feature_df.distance_vector.apply(pandas.Series).add_prefix(distance_col_prefix))
+        feature_df = feature_df.fillna(1)
+
+        angle_col_prefix = 'a_'
+        max_angle = max([max(x) for x in feature_df[1:]['angle']])
+        min_angle = min([min(x) for x in feature_df[1:]['angle']])
+
+        feature_df.angle = feature_df[1:].angle.apply(lambda x:(x+abs(min_angle))/(max_angle+abs(min_angle)))
+        feature_df.angle = feature_df[1:].angle.apply(lambda x: list(x))
+        feature_df['da'] = list(zip(feature_df["angle"] , feature_df["distance_vector"]))
+        feature_df.angle = feature_df[1:]["da"].apply(lambda x: (sorted_by_zipped(x)))
+        feature_df = feature_df.assign(**feature_df.angle.apply(pandas.Series).add_prefix(angle_col_prefix))
+        feature_df = feature_df.fillna(1)
 
         # normalise
         for col in cols_to_use:
             feature_df[col] = feature_df[col] / max(feature_df[col])
+
+        cols_to_use += [col for col in feature_df.columns if col.startswith(distance_col_prefix) or col.startswith(angle_col_prefix)]
 
         # zip token ids and labels
         content_ids, labels = list(zip(*[(
@@ -80,11 +106,6 @@ class Bi_LSTM_CRF:
         self.train_dataset = self.train_dataset.shuffle(
             len(feature_df['index']) - len(ml_data), reshuffle_each_iteration=True).batch(self.batch_size, drop_remainder=True,
                                                            )
-        logging.info("hidden_num:{}, vocab_size:{}, label_size:{}".format(self.hidden_num,
-                                                                          len(feature_df['index']),
-                                                                          len(feature_df['column_labels'].unique())))
-
-
 
         self.embedding_matrix = [feature_df.iloc[[sample for sample in samples]][cols_to_use] for samples in content_ids]
 
@@ -93,10 +114,11 @@ class Bi_LSTM_CRF:
             feature_df[col] = feature_df[col] / feature_df[col].max()
 
 
+        logging.info(f"hidden_num:{self.hidden_num}, vocab_size:{len(feature_df['index'])}, label_size:{len(feature_df['column_labels'].unique())}, features: {len(cols_to_use)}")
         self.model = LayoutModel(hidden_num=self.hidden_num,
                               data=feature_df,
                               cols_to_use=cols_to_use,
-                              embedding_size=self.embedding_size,
+                              embedding_size=len(cols_to_use),
                               pad_label=self.PAD_FEATURE_INDEX)
 
         ckpt = tf.train.Checkpoint(optimizer=self.optimizer, model=self.model)
@@ -124,16 +146,8 @@ class Bi_LSTM_CRF:
             paths.append(viterbi_path)
 
             # wee don't need to adapt correct padding values here, because they are equal anyway
-            correct_prediction = tf.equal(
-                tf.convert_to_tensor(tf.keras.preprocessing.sequence.pad_sequences([viterbi_path],
-                                                                                   padding='post',
-                                                                                   value=self.label_lookup.token_to_id[self.PAD_LABEL]),
-                                     dtype=tf.int32),
-                tf.convert_to_tensor(tf.keras.preprocessing.sequence.pad_sequences([labels],
-                                                                                   padding='post',
-                                                                                   value=self.label_lookup.token_to_id[self.PAD_LABEL]),
-                                     dtype=tf.int32)
-            )
+            correct_prediction = correct_prediction = tf.equal(viterbi_path[:text_len], labels[:text_len])
+
             accuracies.append(tf.reduce_mean(tf.cast(correct_prediction, tf.float32)))
             # print(tf.reduce            # print(tf.reduce_mean(tf.cast(correct_prediction, tf.float32)))
         accuracy = sum(numpy.array(accuracies) / len(paths))
@@ -157,15 +171,15 @@ class Bi_LSTM_CRF:
                 logging.info(f'epoch {epoch}, step {step}/{len(dataset)}, '
                                 f'loss {loss} , accuracy {accuracy}')
 
-                if loss < best_loss and step>4:
+                if accuracy > best_acc and step>10:
                     best_loss = loss
                     best_acc = accuracy
 
                     viterbi_path, _ = tf_ad.text.viterbi_decode(logits[0], self.model.transition_params)
                     prediction = viterbi_path
 
-                    logging.warning(
-                        f"\n{self.label_lookup.ids_to_tokens(prediction)} | \n{self.label_lookup.ids_to_tokens(labels_batch[0].numpy())}")
+                    logging.info(
+                        f"\n{self.label_lookup.ids_to_tokens(prediction)[:text_lens[0]]} | \n{self.label_lookup.ids_to_tokens(labels_batch[0].numpy())[:text_lens[0]]}")
 
                     #self.ckpt_manager.save()
 

@@ -33,9 +33,6 @@ class LayoutModel(tf.keras.Model):
 
         self.biLSTM1 = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(hidden_num, return_sequences=True))
         self.biLSTM2 = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(hidden_num, return_sequences=True))
-        self.biLSTM3 = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(hidden_num, return_sequences=True))
-        self.biLSTM4 = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(hidden_num, return_sequences=True))
-        self.biLSTM5 = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(hidden_num, return_sequences=True))
 
         self.dense1 = tf.keras.layers.Dense(hidden_num)
         self.dense2 = tf.keras.layers.Dense(hidden_num)
@@ -50,11 +47,11 @@ class LayoutModel(tf.keras.Model):
 
     # @tf.function
     def call(self, text,labels=None,training=None, precomputed=False):
-        #text_lens = tf.math.reduce_sum(tf.cast(tf.math.not_equal(text, self.PAD_LABEL), dtype=tf.int32), axis=-1)
-        try:
-            text_lens = tf.constant(text.shape[0] *[text.shape[1]], dtype=tf.int32)
-        except:
-            raise
+        text_lens = tf.math.reduce_sum(tf.cast(tf.math.not_equal(text, self.PAD_LABEL), dtype=tf.int32), axis=-1)
+        #try:
+        #    text_lens = tf.constant(text.shape[0] *[text.shape[1]], dtype=tf.int32)
+        #except:
+        #    raise
         # -1 change 0
 
         if not precomputed:

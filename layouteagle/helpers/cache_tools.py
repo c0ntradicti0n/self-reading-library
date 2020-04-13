@@ -20,9 +20,11 @@ def file_persistent_cached_generator(filename):
             generator = original_func(*param)
 
             for result in generator:
-                with open(filename, 'a') as f:
-                    f.write( json.dumps(result) + "\n")
-                yield result
+                result_string =  json.dumps(result) + "\n"
+                if result_string not in cache:
+                    with open(filename, 'a') as f:
+                        f.write(result_string)
+                    yield result
 
         return new_func
 
@@ -42,11 +44,11 @@ if __name__ == "__main__":
     [n for n in gen]
 
     # new run, returning old results also
-    gen = test(range(20, 10, -1))
+    gen = test(range(30, 20, -1))
 
     result = [next(gen)  for i in range(20)]
     print (result)
-    assert result == [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12]
+    assert result == [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22]
 
 
 def persist_to_file(file_name):

@@ -16,6 +16,7 @@ from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
 import seaborn as sns
 import regex
+from scipy.spatial import distance_matrix
 
 from layouteagle import config
 from layouteagle.helpers.list_tools import threewise
@@ -198,6 +199,8 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
 
         features["coarse_grained_pdf"] = numpy.hstack(other_feature_kinds_stacked.coarse_grained_pdfs)
         features["fine_grained_pdf"] = numpy.hstack(other_feature_kinds_stacked.fine_grained_pdfs)
+        features["distance_vector"] =  [dv for distance_matrix in other_feature_kinds_stacked.distances for dv in distance_matrix]
+        features["angle"] =  [dv for distance_matrix in other_feature_kinds_stacked.angles for dv in distance_matrix]
 
         self.override_by_labeled_document(features)
 
@@ -210,7 +213,7 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
     def normalized(self, a):
         return a/[a_line.max()-a_line.min() for a_line in a.T]
 
-    FeatureKinds = namedtuple("FeatureKinds", ["coarse_grained_pdfs", "fine_grained_pdfs", "coarse_grained_field", "number_of_columns"])
+    FeatureKinds = namedtuple("FeatureKinds", ["coarse_grained_pdfs", "fine_grained_pdfs", "coarse_grained_field", "number_of_columns", "distances", "angles"])
 
     def analyse_point_density_frequence(self, page_features, debug=True, axe_len_X=100, axe_len_Y=100) -> FeatureKinds:
         points2d = numpy.column_stack((page_features.x, page_features.y))
@@ -230,12 +233,15 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
         coarse_grained_field =  gaussian_filter(dotted, sigma=3)
         coarse_grained_pdfs = coarse_grained_field [indices[:,0], indices[:,1]]
 
-        fine_grained_field =  gaussian_filter(dotted, sigma=0.5)
+        fine_grained_field =  gaussian_filter(dotted, sigma=2)
         fine_grained_pdfs = fine_grained_field [indices[:,0], indices[:,1]]
+
+        distances = distance_matrix(points2d, points2d)
+        angles = angles = numpy.array([[numpy.arctan2(p2[1]-p1[1], p2[0]-p1[0]) for p1 in points2d] for p2 in points2d] )
 
         number_of_columns = self.number_of_columns(density2D=fine_grained_field.T)
 
-        return self.FeatureKinds(coarse_grained_pdfs, fine_grained_pdfs, coarse_grained_field, number_of_columns)
+        return self.FeatureKinds(coarse_grained_pdfs, fine_grained_pdfs, coarse_grained_field, number_of_columns, distances, angles)
 
     def most_common_value(self, values, constraint=None):
         if constraint:

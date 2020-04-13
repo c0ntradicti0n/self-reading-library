@@ -25,8 +25,10 @@ class LatexReplacer(SoupReplacer):
         self.timeout_sec = timout_sec
 
         identity =  lambda x: x
-        self.allowed_recursion_tags = ["textbf", "uppercase", "textit", "LARGE", "thanks",
-                                       'texttt', "emph", "item", "bf", "IEEEauthorblockN", "IEEEauthorblockA"]
+        self.allowed_recursion_tags = ["textbf", "uppercase", "textit", "LARGE", "thanks", "Large", "large", "footnotesize",
+                                       'texttt', "emph", "item", "bf", "IEEEauthorblockN", "IEEEauthorblockA", "textsc", "textsl"]
+        self.allowed_oargs = ['title', 'author', 'section', 'item']
+        self.forbidden_nargs = ["baselineskip"]
         self.forbidden_envs = ["$", "tikzpicture",  "eqnarray", "equation", "tabular"]
         self.forbidden_envs = self.forbidden_envs + [env + "*" for env in self.forbidden_envs]
 
@@ -39,6 +41,12 @@ class LatexReplacer(SoupReplacer):
             lambda soup: soup.find_all("email"): (identity, self.make_replacement("author")),
             lambda soup: soup.find_all("corres"): (identity, self.make_replacement("author")),
         lambda soup: soup.find_all("affiliation"): (identity, self.make_replacement("author")),
+        lambda soup: soup.find_all("affil"): (identity, self.make_replacement("author")),
+
+       #Include path in include tex commands
+       #also make scond version with three, two and one column layout
+       # newline before ending environments
+
 
         lambda soup: soup.find_all("corresp"): (identity, self.make_replacement("author")),
             lambda soup: soup.find_all("author"): (identity, self.make_replacement("author")),
@@ -47,9 +55,8 @@ class LatexReplacer(SoupReplacer):
             lambda soup: soup.find_all("address"): (identity, self.make_replacement("author")),
             lambda soup: soup.find_all("adress"): (identity, self.make_replacement("author")),
             lambda soup: soup.find_all("emailAdd"): (identity, self.make_replacement("author")),
-
-            lambda soup: soup.abstract: (identity, self.make_replacement("abstract")),
-            lambda soup: soup.keywords: (identity, self.make_replacement("abstract")),
+            lambda soup: soup.find_all("authorrunning"): (identity, self.make_replacement("author")),
+            lambda soup: soup.find_all("institute"): (identity, self.make_replacement("author")),
 
             lambda soup: soup.find_all("caption"): (identity, self.make_replacement("caption")),
 
@@ -67,7 +74,13 @@ class LatexReplacer(SoupReplacer):
             lambda soup: soup.document if soup.document else soup: (
                 identity,
                 self.make_replacement(lambda: self.column_placeholder )
-            )
+            ),
+
+            lambda soup: soup.abstract:   (
+                identity,self.make_replacement(lambda: self.column_placeholder )),
+            lambda soup: soup.keywords:   (
+                identity,self.make_replacement(lambda: self.column_placeholder )),
+
         }
 
     def insert_functionality(self, soup, file_content):
@@ -79,8 +92,7 @@ class LatexReplacer(SoupReplacer):
 
         if any(arg in file_content for arg in ["lrec", "ieeeconf", "IEEEtran", "acmart", "twocolumn"]):
             soup.insert(insert_index, twocolumn_defs.defs)
-            # put multicol begin after first section(!) of doc and the rest to the end
-            insert_index = soup.expr._contents.index(document_class_element.expr) + 1
+            # TODO put multicol begin after first section(!) of doc and the rest to the end
 
             document_environment = soup.document.expr._contents
             document_environment.insert(0, twocolumn_defs.multicol_begin)
@@ -111,9 +123,13 @@ class LatexReplacer(SoupReplacer):
 
     def replace_this_text(self, content_generator, possible_part_string, replaced_contents, replacement_string):
         try:
-            expr_text = next(possible_part_string.text)
-        except StopIteration:
-            expr_text = possible_part_string.expr._text
+            try:
+                expr_text = next(possible_part_string.text)
+            except StopIteration:
+                expr_text = possible_part_string.expr._text
+        except AttributeError:
+            expr_text = possible_part_string.expr
+
         new_lines = list(find_all(expr_text, '\n'))
         try:
             how_often = int(len(expr_text) / int(len(replacement_string)) + 0.99)
@@ -140,12 +156,19 @@ class LatexReplacer(SoupReplacer):
             content_generator = cycle([replacement_string])
 
             replaced_contents = []
-
+            normal_write_back = True
             if isinstance(where.expr, TexCmd):
                 contents_to_visit = list(TexNode(child) for child in where.args)
+                if not contents_to_visit:
+                    if where.expr._contents:
+                        contents_to_visit = list(TexNode(child) for child in where.expr._contents)
+                        normal_write_back = "_contents"
+
             elif isinstance(where.expr, TexEnv):
                 contents_to_visit = list(TexNode(child) for child in where.expr._contents)
-            elif isinstance(where.expr, RArg):
+            elif isinstance(where.expr, TexNode):
+                contents_to_visit = list(TexNode(child) for child in where.expr._contents)
+            elif isinstance(where.expr, (RArg, OArg)):
                 contents_to_visit = list(TexNode(child) for child in where.expr.contents)
             else:
                 logging.error("visited node not to visit")
@@ -153,10 +176,14 @@ class LatexReplacer(SoupReplacer):
 
             for node_to_replace in contents_to_visit:
                 if isinstance(node_to_replace.expr, OArg):
-                    LatexReplacer.append_expression(node_to_replace, replaced_contents)
+                    if where.name in self.allowed_oargs:
+                        node_to_replace = replace_it_with(node_to_replace)
+                        LatexReplacer.append_expression(node_to_replace, replaced_contents)
+                    else:
+                        LatexReplacer.append_expression(node_to_replace, replaced_contents)
                 elif isinstance(node_to_replace.expr, RArg):
                     try:
-                        if where.args and node_to_replace.expr == where.args[-1]:
+                        if where.args and node_to_replace.expr == where.args[-1] and where.name not in self.forbidden_nargs:
                             node_to_replace = replace_it_with( node_to_replace )
                             LatexReplacer.append_expression(node_to_replace, replaced_contents)
                         else:
@@ -167,7 +194,11 @@ class LatexReplacer(SoupReplacer):
 
 
                 elif isinstance(node_to_replace.expr, (TokenWithPosition, str)):
-                    LatexReplacer.append_expression(node_to_replace, replaced_contents)
+                    if where.name == "item":
+                        self.replace_this_text(content_generator, node_to_replace, replaced_contents,
+                                               replacement_string)
+                    else:
+                        LatexReplacer.append_expression(node_to_replace, replaced_contents)
                 elif isinstance(node_to_replace.expr, TexText) and not node_to_replace.expr._text.strip():
                     LatexReplacer.append_expression(node_to_replace, replaced_contents)
 
@@ -177,9 +208,20 @@ class LatexReplacer(SoupReplacer):
                         LatexReplacer.append_expression(node_to_replace, replaced_contents)
                     else:
                         self.log_not_replace("environment", node_to_replace.name)
+                        LatexReplacer.append_expression(node_to_replace, replaced_contents)
+
                 elif isinstance(node_to_replace.expr, TexText):
                     self.replace_this_text(content_generator, node_to_replace, replaced_contents,
                                             replacement_string)
+
+                elif isinstance(node_to_replace.expr, TexCmd):
+                    if node_to_replace.expr.name in self.allowed_recursion_tags:
+                        node_to_replace = replace_it_with(node_to_replace)
+                        LatexReplacer.append_expression(node_to_replace, replaced_contents)
+                    else:
+                        self.log_not_replace("command", node_to_replace.name)
+                        LatexReplacer.append_expression(node_to_replace, replaced_contents)
+
                 else:
                     LatexReplacer.append_expression(node_to_replace, replaced_contents)
 
@@ -191,11 +233,11 @@ class LatexReplacer(SoupReplacer):
 
 
 
-            if isinstance(where.expr, TexEnv):
+            if isinstance(where.expr, TexEnv) or normal_write_back=='_contents':
                 where.expr._contents = replaced_contents
             elif isinstance(where.expr, TexCmd):
                 where.expr.args.all = replaced_contents
-            elif isinstance(where.expr, RArg):
+            elif isinstance(where.expr, (RArg, OArg)):
                 where.expr.contents = replaced_contents
             else:
                 logging.error("replacing something else")
@@ -306,12 +348,18 @@ class LatexReplacer(SoupReplacer):
                     new_path = self.work(ipath + input_file.expr.args[-1].value + iextension, compile=False)
                 except FileNotFoundError:
                     logging.info("trial 2 with file inclusion (less extension):")
-                    new_path = self.work(ipath + input_file.expr.args[-1].value, compile=False)
+                    try:
+                        new_path = self.work(ipath + input_file.expr.args[-1].value, compile=False)
+                    except FileNotFoundError:
+                        logging.error("included file not found at all")
+                        return
 
                 try:
                     input_file.args.all[-1] = RArg(new_path[:-(len(iextension))])
-                except TypError:
+                except TypeError:
                     logging.error(f"failed to replace input tag {str(input_file)}")
+                    return
+
             logging.info(f"replacing included input from {path_to_read_from}: {input_files}")
 
 
