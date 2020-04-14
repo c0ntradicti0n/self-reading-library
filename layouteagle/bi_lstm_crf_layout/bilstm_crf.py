@@ -8,6 +8,7 @@ import tensorflow as tf
 import tensorflow_addons as tf_ad
 import tensorflow.keras.backend as K
 from more_itertools import flatten
+from tensorflow_core.python import OneHot
 
 from layouteagle.bi_lstm_crf_layout.model import LayoutModel
 from layouteagle.helpers.list_tools import Lookup
@@ -19,8 +20,8 @@ def sorted_by_zipped(x):
 
 
 class Bi_LSTM_CRF:
-    def __init__(self, batch_size=100, hidden_num=950, lr=0.01,
-                 embedding_size=9, epoch=160, max_divs_per_page=150,
+    def __init__(self, batch_size=100, hidden_num=950, lr=0.003,
+                 embedding_size=9, epoch=560, max_divs_per_page=150,
                  output_dir="models/"):
         self.batch_size = batch_size
         self.hidden_num = embedding_size
@@ -86,7 +87,7 @@ class Bi_LSTM_CRF:
         for col in cols_to_use:
             feature_df[col] = feature_df[col] / max(feature_df[col])
 
-        cols_to_use += [col for col in feature_df.columns if col.startswith(distance_col_prefix) or col.startswith(angle_col_prefix)]
+        #cols_to_use += [col for col in feature_df.columns if col.startswith(distance_col_prefix) or col.startswith(angle_col_prefix)]
 
         # zip token ids and labels
         content_ids, labels = list(zip(*[(
@@ -132,24 +133,30 @@ class Bi_LSTM_CRF:
                                                        checkpoint_name='model.ckpt',
                                                        max_to_keep=3)
 
-    # @tf.function
+
     def train_one_step(self, text_batch, labels_batch):
         with tf.GradientTape() as tape:
-            logits, text_lens = self.model(text_batch, labels_batch, training=True)
-            loss = self.model.crf.loss(labels_batch, logits)
-        gradients = tape.gradient(loss, self.model.trainable_variables, unconnected_gradients='zero')
-        self.optimizer = tf.keras.optimizers.Adam(self.lr)
+            logits, text_lens, log_likelihood = self.model(text_batch, labels_batch, training=True)
+            loss = - tf.reduce_mean(log_likelihood)
+        gradients = tape.gradient(loss, self.model.trainable_variables)
         self.optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
         return loss, logits, text_lens
 
     def get_acc_one_step(self, logits, text_lens, labels_batch):
         paths = []
-        accuracies = []
+        accuracy = 0
         for logit, text_len, labels in zip(logits, text_lens, labels_batch):
-            paths.append(logit)
-            correct_prediction = correct_prediction = tf.equal(logit, labels)
-            accuracies.append(tf.reduce_mean(tf.cast(correct_prediction, tf.float32)))
-        accuracy = sum(numpy.array(accuracies) / len(paths))
+            viterbi_path, _ = tf_ad.text.viterbi_decode(logit[:text_len], self.model.transition_params)
+            paths.append(viterbi_path)
+            correct_prediction = tf.equal(
+                tf.convert_to_tensor(tf.keras.preprocessing.sequence.pad_sequences([viterbi_path], padding='post'),
+                                     dtype=tf.int32),
+                tf.convert_to_tensor(tf.keras.preprocessing.sequence.pad_sequences([labels[:text_len]], padding='post'),
+                                     dtype=tf.int32)
+            )
+            accuracy = accuracy + tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+            # print(tf.reduce_mean(tf.cast(correct_prediction, tf.float32)))
+        accuracy = accuracy / len(paths)
         return accuracy
 
     best_name = "bestmodel"
@@ -166,7 +173,7 @@ class Bi_LSTM_CRF:
                 step = step + 1
                 loss, logits, text_lens = self.train_one_step(text_batch, labels_batch)
 
-                accuracy = self.model.crf.accuracy(labels_batch, logits)
+                accuracy = self.get_acc_one_step(logits, text_lens, labels_batch)
                 logging.info(f'epoch {epoch}, step {step}/{len(dataset)}, '
                                 f'loss {loss}, accuracy {accuracy}, lr {self.lr}')
 
@@ -174,11 +181,17 @@ class Bi_LSTM_CRF:
                     best_loss = loss
                     best_acc = accuracy
 
-                    logits = K.argmax(logits, axis=-1)
-                    unique_labels = set(logits[0].numpy().tolist())
+                    logits, text_lens = self.model.predict(text_batch[0:2])
+                    paths = []
+                    for logit, text_len in zip(logits, text_lens):
+                        viterbi_path, _ = tf_ad.text.viterbi_decode(logit[:text_len], self.model.transition_params)
+                        paths.append(viterbi_path)
+                    print(paths[0])
+
+                    unique_labels = set(flatten(paths))
                     logging.info(
-                        f"\n{logits[0].numpy().tolist()} | \n"
-                        f"{labels_batch[0]} \n"
+                        f"\n{numpy.array(paths)} | \n"
+                        f"{labels_batch[0:2]} \n"
                         f"{dict(zip(unique_labels, self.label_lookup.ids_to_tokens(unique_labels)))}")
                     #tf.saved_model.save(self.model, self.output_dir + self.best_name)
                     logging.warning("Saved best model up to now")

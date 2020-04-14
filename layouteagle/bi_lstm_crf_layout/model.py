@@ -8,7 +8,7 @@ import tensorflow as tf
 import tensorflow_addons as tf_ad
 
 import numpy as np
-from tensorflow_core.python.keras.layers import TimeDistributed, Dense, Bidirectional, LSTM
+from tensorflow_core.python.keras.layers import TimeDistributed, Dense, Bidirectional, LSTM, Dropout, GRU
 from tf2crf import CRF
 
 
@@ -39,7 +39,9 @@ class LayoutModel(tf.keras.Model):
         self.biLSTM2 = Bidirectional(LSTM(hidden_num, return_sequences=True, trainable=True),   trainable=True)
         self.biLSTM3 = Bidirectional(LSTM(hidden_num, return_sequences=True, trainable=True),   trainable=True)
 
-        self.dropout = self.Dropout(0.3)
+        self.gru = Bidirectional(GRU(64, return_sequences=True))
+
+        self.dropout = Dropout(0.3)
 
         #self.cnn_layer = tf.keras.layers.Conv1D(
         #    filters=100,
@@ -47,13 +49,21 @@ class LayoutModel(tf.keras.Model):
         #    # Use 'same' padding so outputs have the same shape as inputs.
         #    padding='same')
 
-        self.timedistributed = TimeDistributed(Dense(self.label_size, activation="relu"))
+        self.timedistributed = TimeDistributed(Dense(1700, activation="sigmoid"))
 
-        self.dense2 = tf.keras.layers.Dense(17, trainable=True,  activation = 'softmax')
+        self.dense2 = tf.keras.layers.Dense(1700, trainable=True,  activation = 'sigmoid')
 
-        self.crf = CRF(trainable=True)
+        self.crf = CRF(self.label_size,trainable=True)
 
-        self.dense5 = tf.keras.layers.Dense(self.label_size, trainable=True)
+
+        self.dense51 = tf.keras.layers.Dense(self.label_size, trainable=True, activation="selu")
+        self.dense52 = tf.keras.layers.Dense(self.label_size, trainable=True, activation="selu")
+        self.dense53 = tf.keras.layers.Dense(self.label_size, trainable=True, activation="selu")
+        self.dense54 = tf.keras.layers.Dense(self.label_size, trainable=True, activation="selu")
+        self.dense55 = tf.keras.layers.Dense(self.label_size, trainable=True, activation="selu")
+        self.dense56 = tf.keras.layers.Dense(self.label_size, trainable=True, activation="selu")
+        self.dense57 = tf.keras.layers.Dense(self.label_size, trainable=True, activation="selu")
+
 
 
 
@@ -62,10 +72,10 @@ class LayoutModel(tf.keras.Model):
 
         self.dropout = tf.keras.layers.Dropout(0)
 
-    # @tf.function
+    @tf.function
     def call(self, text,labels=None,training=None, precomputed=False):
-        #text_lens = tf.math.reduce_sum(tf.cast(tf.math.not_equal(text, self.PAD_LABEL), dtype=tf.int32), axis=-1)
-        #try:
+        text_lens = tf.math.reduce_sum(tf.cast(tf.math.not_equal(text, 0), dtype=tf.int32), axis=-1)
+        # -1 change 0        #try:
         text_lens = tf.constant(text.shape[0] *[text.shape[1]], dtype=tf.int32)
         #except:
         #    raise
@@ -76,7 +86,6 @@ class LayoutModel(tf.keras.Model):
         else:
             raise NotImplementedError
 
-        inputs = self.dropout(inputs, training)
         #inputs = self.cnn_layer(inputs)
         #inputs = tf.keras.layers.Attention(ac)(
         #    [inputs, inputs])
@@ -86,8 +95,16 @@ class LayoutModel(tf.keras.Model):
         #inputs = self.biLSTM2(inputs) # self.crf3(self.crf4(self.crf1(self.crf2(inputs))))
         #inputs = self.biLSTM3(inputs) # self.crf3(self.crf4(self.crf1(self.crf2(inputs))))
         #inputs = self.timedistributed(inputs) # self.crf3(self.crf4(self.crf1(self.crf2(inputs))))
+        #inputs = self.timedistributed(inputs)
+        logits = self.crf(self.dense51(
+            self.dense52(
+                self.dense53(
+                    self.dense54(
+                        self.dense55(
+                            self.dense56(
+                                self.dense57(inputs,training=training),training=training),training=training),training=training),training=training),training=training)))
 
-        logits = self.crf(self.dense5(inputs))
+        #logits = inputs #self.crf(self.dense57(self.gru(inputs)))
 
         if labels is not None:
 
