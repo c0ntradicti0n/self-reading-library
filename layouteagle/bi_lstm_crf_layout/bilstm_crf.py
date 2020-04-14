@@ -7,7 +7,7 @@ import pandas
 import tensorflow as tf
 import tensorflow_addons as tf_ad
 import tensorflow.keras.backend as K
-
+from more_itertools import flatten
 
 from layouteagle.bi_lstm_crf_layout.model import LayoutModel
 from layouteagle.helpers.list_tools import Lookup
@@ -19,7 +19,7 @@ def sorted_by_zipped(x):
 
 
 class Bi_LSTM_CRF:
-    def __init__(self, batch_size=50, hidden_num=950, lr=0.01,
+    def __init__(self, batch_size=100, hidden_num=950, lr=0.01,
                  embedding_size=9, epoch=160, max_divs_per_page=150,
                  output_dir="models/"):
         self.batch_size = batch_size
@@ -96,7 +96,7 @@ class Bi_LSTM_CRF:
         # PAD Tokens
         content_ids = tf.keras.preprocessing.sequence.pad_sequences(content_ids, padding='post', value=self.PAD_FEATURE_INDEX)
 
-        self.label_lookup = Lookup([ml_data['column_labels'].tolist()] + list(labels))
+        self.label_lookup = Lookup(ml_data['column_labels'].tolist() + list(set(flatten(labels))))
         labels = self.label_lookup(token_s=labels)
         labels = tf.keras.preprocessing.sequence.pad_sequences(
             labels,

@@ -8,6 +8,7 @@ import tensorflow as tf
 import tensorflow_addons as tf_ad
 
 import numpy as np
+from tensorflow_core.python.keras.layers import TimeDistributed, Dense, Bidirectional, LSTM
 from tf2crf import CRF
 
 
@@ -34,25 +35,26 @@ class LayoutModel(tf.keras.Model):
                   input_length=self.vocab_size,
                   trainable=False)
 
-        self.biLSTM1 = tf.keras.layers.LSTM(hidden_num, return_sequences=True, trainable=True)
+        self.biLSTM1 = Bidirectional(LSTM(hidden_num, return_sequences=True, trainable=True),   trainable=True)
+        self.biLSTM2 = Bidirectional(LSTM(hidden_num, return_sequences=True, trainable=True),   trainable=True)
+        self.biLSTM3 = Bidirectional(LSTM(hidden_num, return_sequences=True, trainable=True),   trainable=True)
+
+        self.dropout = self.Dropout(0.3)
+
         #self.cnn_layer = tf.keras.layers.Conv1D(
         #    filters=100,
         #    kernel_size=4,
         #    # Use 'same' padding so outputs have the same shape as inputs.
         #    padding='same')
 
-        self.dense1 = tf.keras.layers.Dense(hidden_num, trainable=True, activation = 'relu')
-        self.dense12 = tf.keras.layers.Dense(hidden_num, trainable=True, activation = 'relu')
+        self.timedistributed = TimeDistributed(Dense(self.label_size, activation="relu"))
 
-        self.dense2 = tf.keras.layers.Dense(hidden_num, trainable=True,  activation = 'softmax')
-
-        self.crf1 = CRF(trainable=True)
-        self.crf2= CRF(trainable=True)
-        self.crf3= CRF(trainable=True)
-        self.crf4= CRF(trainable=True)
-        self.dense5 = tf.keras.layers.Dense(self.label_size)
+        self.dense2 = tf.keras.layers.Dense(17, trainable=True,  activation = 'softmax')
 
         self.crf = CRF(trainable=True)
+
+        self.dense5 = tf.keras.layers.Dense(self.label_size, trainable=True)
+
 
 
         #self.transition_params = tf.Variable(tf.random.uniform(shape=(self.label_size, self.label_size)),
@@ -80,7 +82,10 @@ class LayoutModel(tf.keras.Model):
         #    [inputs, inputs])
         #inputs = tf.keras.layers.Attention(32, 3, activation='relu')(inputs)
         #inputs = tf.keras.layers.MaxPooling1D(3)(inputs)
-        inputs = self.biLSTM1(inputs) # self.crf3(self.crf4(self.crf1(self.crf2(inputs))))
+        #inputs = self.biLSTM1(inputs) # self.crf3(self.crf4(self.crf1(self.crf2(inputs))))
+        #inputs = self.biLSTM2(inputs) # self.crf3(self.crf4(self.crf1(self.crf2(inputs))))
+        #inputs = self.biLSTM3(inputs) # self.crf3(self.crf4(self.crf1(self.crf2(inputs))))
+        #inputs = self.timedistributed(inputs) # self.crf3(self.crf4(self.crf1(self.crf2(inputs))))
 
         logits = self.crf(self.dense5(inputs))
 

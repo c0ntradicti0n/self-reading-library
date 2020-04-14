@@ -34,7 +34,7 @@ class FeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
             pdf_doc.features["doc_id"] = doc_id
             all_feature_dfs.append(pdf_doc.features)
 
-            if self.debug:
+            if False and self.debug:
                 debug_html_path = labeled_html_path+".debug.html"
                 self.tfu = TrueFormatUpmarkerPDF2HTMLEX(debug=True)
                 self.tfu.generate_css_tagging_document(premade_soup=soup, html_write_to=debug_html_path, premade_features=features)
@@ -42,10 +42,14 @@ class FeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
             doc_id += 1
 
         df = pandas.concat(all_feature_dfs)
-        df['chars'] = df.divs.apply(lambda div: sum(div.text.count(c) for c in string.ascii_letters))
-        df['nums'] = df.divs.apply(lambda div: sum(div.text.count(c) for c in string.digits))
-        df['signs'] = df.divs.apply(lambda div: sum(div.text.count(c) for c in string.punctuation))
-        df.divs = df.divs.astype(str)
+        try:
+            df['chars'] = df.divs.apply(lambda div: sum(div.text.count(c) for c in string.ascii_letters))
+            df['nums'] = df.divs.apply(lambda div: sum(div.text.count(c) for c in string.digits))
+            df['signs'] = df.divs.apply(lambda div: sum(div.text.count(c) for c in string.punctuation))
+            df.divs = df.divs.astype(str)
+        except e:
+            logging.error("bad content")
+            raise
         df.to_pickle(self.pandas_pickle_path)
 
         yield self.pandas_pickle_path
