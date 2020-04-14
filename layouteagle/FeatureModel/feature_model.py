@@ -30,7 +30,7 @@ distance_col_prefix = 'd_'
 max_distance = max([max(x) for x in feature_df[1:]['distance_vector']])
 max_distance = max([max(x) for x in feature_df[1:]['distance_vector']])
 feature_df.distance_vector = feature_df[1:].distance_vector.apply(lambda x: x / max_distance)
-feature_df.distance_vector = feature_df[1:].distance_vector.apply(lambda x: list(sorted(x)[:6]))
+feature_df.distance_vector = feature_df[1:].distance_vector.apply(lambda x: list(sorted(x)))
 feature_df = feature_df.assign(**feature_df.distance_vector.apply(pandas.Series).add_prefix(distance_col_prefix))
 feature_df = feature_df.fillna(1)
 
@@ -41,7 +41,7 @@ min_angle = min([min(x) for x in feature_df[1:]['angle']])
 # feature_df.angle = feature_df[1:].angle.apply(lambda x:(x+abs(min_angle))/(max_angle+abs(min_angle)))
 feature_df.angle = feature_df[1:].angle.apply(lambda x: list(x))
 feature_df['da'] = list(zip(feature_df["angle"], feature_df["distance_vector"]))
-feature_df.angle = feature_df[1:]["da"].apply(lambda x: (sorted_by_zipped(x))[:6])
+feature_df.angle = feature_df[1:]["da"].apply(lambda x: (sorted_by_zipped(x)))
 feature_df = feature_df.assign(**feature_df.angle.apply(pandas.Series).add_prefix(angle_col_prefix))
 feature_df = feature_df.fillna(1)
 
@@ -115,14 +115,14 @@ model = tf.keras.Sequential([
 
 ])
 
-optimizer = tf.optimizers.Adam(lr=0.00001)
+optimizer = tf.optimizers.Adam(lr=0.0001)
 model.compile(optimizer=optimizer,
               loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False, ),
               metrics=['accuracy'])
 
 history = model.fit(train_ds,
           validation_data=val_ds,
-          epochs=40, callbacks=[es, mc])
+          epochs=300, callbacks=[es, mc])
 
 from matplotlib import pyplot
 # evaluate the model
