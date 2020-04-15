@@ -13,7 +13,7 @@ import pprint
 
 
 class LayoutModeler:
-    kwargs = {
+    train_kwargs = {
         'dropout': {'rate': 0.2,
                     'dtype': 'float64'},
         'dense1': {'units': 200,
@@ -40,7 +40,7 @@ class LayoutModeler:
                  debug: bool = False):
         self.feature_path = feature_path
         self.model_path = model_path
-        self.kwargs.update(override_train_kwargs)
+        self.train_kwargs.update(override_train_kwargs)
         self.debug = debug
 
         try:
@@ -56,7 +56,7 @@ class LayoutModeler:
         self.label_lookup = Lookup([self.label_set])
         feature_df.column_labels = self.label_lookup(token_s=feature_df.column_labels.tolist())
 
-        self.cols_to_use = self.kwargs['cols_to_use'] + [self.kwargs['labels']]
+        self.cols_to_use = self.train_kwargs['cols_to_use'] + [self.train_kwargs['labels']]
         feature_df = feature_df.reset_index(drop=True)
 
         distance_col_prefix = 'd_'
@@ -89,12 +89,12 @@ class LayoutModeler:
         logging.info(f'{len(test)} test samples')
 
         # A utility method to create a tf.data dataset from a Pandas Dataframe
-        def df_to_dataset(dataframe, shuffle=True, batch_size=self.kwargs['batch_size']):
+        def df_to_dataset(dataframe, shuffle=True, batch_size=self.train_kwargs['batch_size']):
             dataframe = dataframe.copy()
             dataframe = dataframe.reset_index(drop=True)
             try:
-                labels = dataframe[self.kwargs['labels']].tolist()
-                dataframe.pop(self.kwargs['labels'])
+                labels = dataframe[self.train_kwargs['labels']].tolist()
+                dataframe.pop(self.train_kwargs['labels'])
                 categorical_labels = to_categorical(labels)
             except:
                 raise
@@ -116,7 +116,7 @@ class LayoutModeler:
         feature_columns = []
 
         # remove the labels, that were put in the df temporarily
-        self.cols_to_use = [col for col in self.cols_to_use if col != self.kwargs['labels']]
+        self.cols_to_use = [col for col in self.cols_to_use if col != self.train_kwargs['labels']]
 
         # all are numeric cols
         for header in self.cols_to_use:
@@ -132,26 +132,26 @@ class LayoutModeler:
 
         self.model = tf.keras.Sequential([
             feature_layer,
-            tf.keras.layers.Dropout(**self.kwargs['dropout']),
-            tf.keras.layers.Dense(**self.kwargs['dense1']),
-            tf.keras.layers.Dense(units=len(self.label_set), **self.kwargs['denseE'])
+            tf.keras.layers.Dropout(**self.train_kwargs['dropout']),
+            tf.keras.layers.Dense(**self.train_kwargs['dense1']),
+            tf.keras.layers.Dense(units=len(self.label_set), **self.train_kwargs['denseE'])
         ])
 
-        optimizer = tf.optimizers.Adam(**self.kwargs['adam'])
+        optimizer = tf.optimizers.Adam(**self.train_kwargs['adam'])
         self.model.compile(optimizer=optimizer,
                       loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
                       metrics=['accuracy'])
 
         history = self.model.fit(self.train_ds,
                             validation_data=self.val_ds,
-                            epochs=self.kwargs['epochs'], callbacks=[es, mc])
+                            epochs=self.train_kwargs['epochs'], callbacks=[es, mc])
         return history
 
     def plot(self, history):
         from matplotlib import pyplot
         # plot training history
         pyplot.plot(history.history['accuracy'], label='train')
-        pyplot.plot(history.history['val_accuracy'], label='test')
+        pyplot.plot(history.history['val_accuracy'], label='validation')
         pyplot.legend()
         pyplot.show()
         pyplot.savefig("accuracy_epochs2.png")
@@ -162,7 +162,6 @@ class LayoutModeler:
         _, test_acc = self.model.evaluate(self.test_ds, verbose=0)
         logging.info('Train: %.3f, Test: %.3f' % (train_acc, test_acc))
 
-        self.val_ds
         y_new = self.model.predict_classes(self.val_ds, batch_size=None)
         logging.info('Validation')
         for x, y in zip(self.val_ds.unbatch(), y_new):
@@ -180,7 +179,7 @@ class LayoutModeler:
             self.feature_path = feature_path
         feature_df = self.load_pandas_file(self.feature_path)
         feature_columns = self.prepare_features(feature_df)
-        history = self.train(feature_columns, **train_kwargs)
+        history = self.train(feature_columns, **self.train_kwargs)
         if self.debug:
             self.plot(history)
         self.validate()
@@ -190,4 +189,4 @@ class LayoutModeler:
 
 if __name__ == '__main__':
     modeler = LayoutModeler(debug=True)
-    modeler()
+    modeler(modeler.feature_path)
