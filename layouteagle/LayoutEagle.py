@@ -5,7 +5,7 @@ from layouteagle.LatexReplacer.latex_replacer import LatexReplacer
 from layouteagle.LayoutReader.feature_maker import FeatureMaker
 from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
 from layouteagle.ScienceTexScraper.scrape import ScienceTexScraper
-from layouteagle.bi_lstm_crf_layout.bilstm_crf import Bi_LSTM_CRF
+from layouteagle.LayoutModel.layoutmodel import LayoutModel
 
 import logging
 logging.basicConfig(level = logging.INFO)
@@ -29,7 +29,7 @@ class LayoutEagle:
 
         self.pandas_path = pandas_path
 
-        self.bi_lstm_crf = Bi_LSTM_CRF(output_dir=model_path)
+        self.model = LayoutModel(output_dir=model_path)
         self.feature_maker = FeatureMaker(
             pandas_pickle_path=".layouteagle/features.pckl",
             debug=True, parameterize=False)
@@ -41,7 +41,7 @@ class LayoutEagle:
             pandas_pickle_path=self.pandas_path,
             debug=True,
             parameterize=False)
-        labeled_div_features = self.bi_lstm_crf.predict(features=div_features)
+        labeled_div_features = self.model.predict(features=div_features)
         if pdf_path and not html1_path:
             return labeled_div_features
 
@@ -52,7 +52,7 @@ class LayoutEagle:
         latex_replacer = LatexReplacer(".labeled.tex")
         self.feature_maker.set_n(n)
 
-        pipeline = [science_tex_scraper, latex_replacer, self.feature_maker, self.bi_lstm_crf, lambda x: print (x)]
+        pipeline = [science_tex_scraper, latex_replacer, self.feature_maker, self.model, lambda x: print (x)]
 
         intermediate_result = []
         for functional_object in pipeline:

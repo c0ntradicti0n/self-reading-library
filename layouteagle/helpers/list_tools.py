@@ -7,6 +7,11 @@ import numpy
 from layouteagle.helpers.nested_dict_tools import recursive_map, flatten
 
 
+
+def sorted_by_zipped(x):
+    return list(_x[0] for _x in sorted(zip(*x), key=lambda __x:__x[1]))
+
+
 def find_repeating(lst, count=2):
     ret = []
     counts = [None] * len(lst)

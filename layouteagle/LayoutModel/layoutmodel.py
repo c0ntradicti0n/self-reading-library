@@ -6,30 +6,16 @@ import numpy
 import pandas
 import tensorflow as tf
 import tensorflow_addons as tf_ad
-import tensorflow.keras.backend as K
 from more_itertools import flatten
-from tensorflow_core.python import OneHot
 
-from layouteagle.bi_lstm_crf_layout.model import LayoutModel
+from layouteagle.LayoutModel.makemodel import Make
 from layouteagle.helpers.list_tools import Lookup
 
 
-def sorted_by_zipped(x):
-    return list(_x[0] for _x in sorted(zip(*x), key=lambda __x:__x[1]))
 
-
-
-class Bi_LSTM_CRF:
-    def __init__(self, batch_size=100, hidden_num=950, lr=0.003,
-                 embedding_size=9, epoch=560, max_divs_per_page=150,
-                 output_dir="models/"):
-        self.batch_size = batch_size
-        self.hidden_num = embedding_size
-        self.lr = lr
-        self.embedding_size = embedding_size
-        self.epoch = epoch
-        self.output_dir = output_dir
-        self.max_divs_per_page = max_divs_per_page
+class LayoutModel:
+    def __init__(self, model_path=".layouteagle/layoutmodel.keras"):
+        self.model = self.load_model(model_path)
 
 
     def __call__(self, feature_path):
@@ -208,7 +194,10 @@ class Bi_LSTM_CRF:
             print(paths[0])
             print([self.label_lookup[id] for id in paths[0]])
 
-    def load(self):
-        self.model = tf.saved_model.load(
-            self.output_dir + self.best_name, tags=None
-        )
+    def make_model(self, model_path):
+        modeler = Make(model_path)
+        self.modeler  modeler()
+
+
+    def load_model(self, model_path):
+        self.model = tf.saved_model.load(model_path)
