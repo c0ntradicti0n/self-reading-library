@@ -124,7 +124,7 @@ class LayoutModeler:
         return feature_columns
 
     def train(self, feature_columns, override_kwargs={}):
-        self.kwargs.update(override_kwargs)
+        self.train_kwargs.update(override_kwargs)
         feature_layer = tf.keras.layers.DenseFeatures(feature_columns=feature_columns, dtype='float64')
 
         es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=3)
@@ -179,7 +179,7 @@ class LayoutModeler:
             self.feature_path = feature_path
         feature_df = self.load_pandas_file(self.feature_path)
         feature_columns = self.prepare_features(feature_df)
-        history = self.train(feature_columns, **self.train_kwargs)
+        history = self.train(feature_columns, self.train_kwargs)
         if self.debug:
             self.plot(history)
         self.validate()
