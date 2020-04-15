@@ -1,203 +1,183 @@
-import logging
-import os
-from types import GeneratorType
-
-import numpy
 import pandas
 import tensorflow as tf
-import tensorflow_addons as tf_ad
-from more_itertools import flatten
+from sklearn.model_selection import train_test_split
+from tensorflow_core.python.keras.callbacks import EarlyStopping, ModelCheckpoint
+from tensorflow_core.python.keras.utils import to_categorical
 
-from layouteagle.LayoutModel.makemodel import Make
-from layouteagle.helpers.list_tools import Lookup
+from layouteagle.helpers.list_tools import Lookup, sorted_by_zipped
 
-
-
-class LayoutModel:
-    def __init__(self, model_path=".layouteagle/layoutmodel.keras"):
-        self.model = self.load_model(model_path)
+import logging
+import pprint
 
 
-    def __call__(self, feature_path):
-        os.system(f"rm -r {self.output_dir} & mkdir {self.output_dir}")
-        if isinstance(feature_path, GeneratorType):
+class LayoutModeler:
+    kwargs = {
+        'dropout': {'rate': 0.2,
+                    'dtype': 'float64'},
+        'dense1': {'units': 200,
+                   'trainable': True,
+                   'activation': 'tanh',
+                   'dtype': 'float64'},
+        'denseE': { # 'units' are set by us self to necessary
+                   'trainable': True,
+                   'activation': 'softmax',
+                   'dtype': 'float64'},
+        'adam': {'lr': 0.00003},
+        'epochs': 100,
+        'batch_size': 32,
+        'labels': 'column_labels',
+        'cols_to_use': ['x', 'y', 'len', 'height', 'page_number', 'font-size',
+                        'fine_grained_pdf', 'coarse_grained_pdf','line-height',
+                        'chars', 'nums', 'signs']
+    }
 
-            feature_path = next(feature_path)
-        self.prepare_from_pickle(feature_path)
-        self.train()
-        logging.info("finished")
-        model_file_path = self.output_dir + 'model.ckpt'
-        return model_file_path
+    def __init__(self, feature_path='.layouteagle/features.pckl', model_path='.layouteagle/layoutmodel.keras'):
+        self.feature_path = feature_path
+        self.model_path = model_path
 
-    def prepare_from_pickle(self, feature_path):
-        feature_df = pandas.read_pickle(feature_path)
-        self.prepare(feature_df)
+        try:
+            self.model = self.load()
+        except OSError:
+            self.model = self()
 
-    def prepare(self, feature_df):
+    def load_pandas_file(self, feature_path):
+        return pandas.read_pickle(feature_path)
 
-        # append padding features
-        ml_data = pandas.DataFrame([[0] * len (feature_df.columns)], columns=feature_df.columns)
-        self.PAD_FEATURE_INDEX = 0
-        self.PAD_LABEL = "PAD"
-        ml_data['column_labels'] = self.PAD_LABEL
-        ml_data['page_number'] = -1
-        ml_data['doc_id'] = 0
-        feature_df = pandas.concat([ml_data, feature_df])
+    def prepare_features(self, feature_df):
+        self.label_set = list(set(feature_df['column_labels'].tolist()))
+        self.label_lookup = Lookup([self.label_set])
+        feature_df.column_labels = self.label_lookup(token_s=feature_df.column_labels.tolist())
 
-        feature_df.reset_index(drop=True, inplace=True)
-        feature_df['index'] = feature_df.index
-
-        in_page = feature_df[1:].groupby(["doc_id", "page_number"]).groups
-        in_page = {grouper_tuple: group.tolist() for grouper_tuple, group in in_page.items() if len(group) < self.max_divs_per_page}
-        cols_to_use = ["x", "y", "len", "height",  "page_number", "font-size", "fine_grained_pdf", "coarse_grained_pdf", "line-height", "chars", "nums", "signs"]
+        self.cols_to_use = self.kwargs['cols_to_use'] + [self.kwargs['labels']]
+        feature_df = feature_df.reset_index(drop=True)
 
         distance_col_prefix = 'd_'
         max_distance = max([max(x) for x in feature_df[1:]['distance_vector']])
-        max_distance = max([max(x) for x in feature_df[1:]['distance_vector']])
-        feature_df.distance_vector = feature_df[1:].distance_vector.apply(lambda x:x/max_distance)
-        feature_df.distance_vector = feature_df[1:].distance_vector.apply(lambda x: list(sorted(x)[:6]))
-        feature_df = feature_df.assign(**feature_df.distance_vector.apply(pandas.Series).add_prefix(distance_col_prefix))
+        feature_df.distance_vector = feature_df[1:].distance_vector.apply(lambda x: x / max_distance)
+        feature_df.distance_vector = feature_df[1:].distance_vector.apply(lambda x: list(sorted(x)))
+        feature_df = feature_df.assign(
+            **feature_df.distance_vector.apply(pandas.Series).add_prefix(distance_col_prefix))
         feature_df = feature_df.fillna(1)
 
         angle_col_prefix = 'a_'
-        max_angle = max([max(x) for x in feature_df[1:]['angle']])
-        min_angle = min([min(x) for x in feature_df[1:]['angle']])
-
-        #feature_df.angle = feature_df[1:].angle.apply(lambda x:(x+abs(min_angle))/(max_angle+abs(min_angle)))
         feature_df.angle = feature_df[1:].angle.apply(lambda x: list(x))
-        feature_df['da'] = list(zip(feature_df["angle"] , feature_df["distance_vector"]))
-        feature_df.angle = feature_df[1:]["da"].apply(lambda x: (sorted_by_zipped(x))[:6])
+        feature_df['da'] = list(zip(feature_df['angle'], feature_df['distance_vector']))
+        feature_df.angle = feature_df[1:]['da'].apply(lambda x: list(sorted_by_zipped(x))[:50])
         feature_df = feature_df.assign(**feature_df.angle.apply(pandas.Series).add_prefix(angle_col_prefix))
         feature_df = feature_df.fillna(1)
 
-        for col in cols_to_use:
-            feature_df[col] = feature_df[col] / max(feature_df[col])
+        with pandas.option_context('display.max_rows', None, 'display.max_columns', None):
+            logging.info(str(feature_df.head()))
 
-        #cols_to_use += [col for col in feature_df.columns if col.startswith(distance_col_prefix) or col.startswith(angle_col_prefix)]
+        self.cols_to_use += [col for col in feature_df.columns if
+                             col.startswith(distance_col_prefix) or col.startswith(angle_col_prefix)]
+        feature_df = feature_df.sample(frac=1).reset_index(drop=True)
+        feature_df = feature_df[self.cols_to_use]
 
-        # zip token ids and labels
-        content_ids, labels = list(zip(*[(
-            pp,
-            feature_df.iloc[list(pp)]['column_labels'].tolist()) for pp in in_page.values()]))
+        train, test = train_test_split(feature_df, test_size=0.2)
+        train, val = train_test_split(train, test_size=0.2)
+        logging.info(f'{len(train)} train samples')
+        logging.info(f'{len(val)} validation samples')
+        logging.info(f'{len(test)} test samples')
 
-        # PAD Tokens
-        content_ids = tf.keras.preprocessing.sequence.pad_sequences(content_ids, padding='post', value=self.PAD_FEATURE_INDEX)
+        # A utility method to create a tf.data dataset from a Pandas Dataframe
+        def df_to_dataset(dataframe, shuffle=True, batch_size=self.kwargs['batch_size']):
+            dataframe = dataframe.copy()
+            dataframe = dataframe.reset_index(drop=True)
+            try:
+                labels = dataframe[self.kwargs['labels']].tolist()
+                dataframe.pop(self.kwargs['labels'])
+                categorical_labels = to_categorical(labels)
+            except:
+                raise
+            ds = tf.data.Dataset.from_tensor_slices((dict(dataframe), categorical_labels))
+            if shuffle:
+                ds = ds.shuffle(buffer_size=len(dataframe))
+            ds = ds.batch(batch_size)
+            return ds
 
-        self.label_lookup = Lookup(ml_data['column_labels'].tolist() + list(set(flatten(labels))))
-        labels = self.label_lookup(token_s=labels)
-        labels = tf.keras.preprocessing.sequence.pad_sequences(
-            labels,
-            padding='post',
-            value=self.label_lookup.token_to_id[self.PAD_LABEL])
+        self.train_ds = df_to_dataset(train)
+        self.val_ds = df_to_dataset(val, shuffle=False)
+        self.test_ds = df_to_dataset(test, shuffle=False)
 
-        self.train_dataset = tf.data.Dataset.from_tensor_slices((content_ids, labels))
-        self.train_dataset = self.train_dataset.shuffle(
-            len(feature_df['index']) - len(ml_data), reshuffle_each_iteration=True).batch(self.batch_size, drop_remainder=True,
-                                                           )
+        for feature_batch, label_batch in self.train_ds.take(1):
+            logging.debug(f'Every feature: {list(feature_batch.keys())}')
+            logging.debug(f'A batch of ages: {feature_batch["chars"]}')
+            logging.debug(f'A batch of targets: {str(label_batch)}')
 
-        self.embedding_matrix = [feature_df.iloc[[sample for sample in samples]][cols_to_use] for samples in content_ids]
+        feature_columns = []
 
-        int_to_one_hot  = ["reading_sequence", "page_number"]
-        for col in cols_to_use:
-            feature_df[col] = feature_df[col] / feature_df[col].max()
+        # remove the labels, that were put in the df temporarily
+        self.cols_to_use = [col for col in self.cols_to_use if col != self.kwargs['labels']]
 
+        # all are numeric cols
+        for header in self.cols_to_use:
+            feature_columns.append(tf.feature_column.numeric_column(header))
+        return feature_columns
 
-        logging.info(f"hidden_num:{self.hidden_num}, vocab_size:{len(feature_df['index'])}, label_size:{len(feature_df['column_labels'].unique())}, features: {len(cols_to_use)},"
-                     f"{self.lr}")
-        self.optimizer = tf.keras.optimizers.Adam(self.lr)
+    def train(self, feature_columns, override_kwargs={}):
+        self.kwargs.update(override_kwargs)
+        feature_layer = tf.keras.layers.DenseFeatures(feature_columns=feature_columns, dtype='float64')
 
-        self.model = LayoutModel(hidden_num=self.hidden_num,
-                              data=feature_df,
-                              cols_to_use=cols_to_use,
-                              embedding_size=len(cols_to_use),
-                              pad_label=self.PAD_FEATURE_INDEX)
+        es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=3)
+        mc = ModelCheckpoint(self.model_path + ".h5", monitor='val_accuracy', mode='max', verbose=1, save_best_only=True)
 
-        ckpt = tf.train.Checkpoint(optimizer=self.optimizer, model=self.model)
-        ckpt.restore(tf.train.latest_checkpoint(self.output_dir))
-        self.ckpt_manager = tf.train.CheckpointManager(ckpt,
-                                                       self.output_dir,
-                                                       checkpoint_name='model.ckpt',
-                                                       max_to_keep=3)
+        self.model = tf.keras.Sequential([
+            feature_layer,
+            tf.keras.layers.Dropout(**self.kwargs['dropout']),
+            tf.keras.layers.Dense(**self.kwargs['dense1']),
+            tf.keras.layers.Dense(units=len(self.label_set), **self.kwargs['denseE'])
+        ])
 
+        optimizer = tf.optimizers.Adam(**self.kwargs['adam'])
+        self.model.compile(optimizer=optimizer,
+                      loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
+                      metrics=['accuracy'])
 
-    def train_one_step(self, text_batch, labels_batch):
-        with tf.GradientTape() as tape:
-            logits, text_lens, log_likelihood = self.model(text_batch, labels_batch, training=True)
-            loss = - tf.reduce_mean(log_likelihood)
-        gradients = tape.gradient(loss, self.model.trainable_variables)
-        self.optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
-        return loss, logits, text_lens
+        history = self.model.fit(self.train_ds,
+                            validation_data=self.val_ds,
+                            epochs=self.kwargs['epochs'], callbacks=[es, mc])
+        return history
 
-    def get_acc_one_step(self, logits, text_lens, labels_batch):
-        paths = []
-        accuracy = 0
-        for logit, text_len, labels in zip(logits, text_lens, labels_batch):
-            viterbi_path, _ = tf_ad.text.viterbi_decode(logit[:text_len], self.model.transition_params)
-            paths.append(viterbi_path)
-            correct_prediction = tf.equal(
-                tf.convert_to_tensor(tf.keras.preprocessing.sequence.pad_sequences([viterbi_path], padding='post'),
-                                     dtype=tf.int32),
-                tf.convert_to_tensor(tf.keras.preprocessing.sequence.pad_sequences([labels[:text_len]], padding='post'),
-                                     dtype=tf.int32)
-            )
-            accuracy = accuracy + tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-            # print(tf.reduce_mean(tf.cast(correct_prediction, tf.float32)))
-        accuracy = accuracy / len(paths)
-        return accuracy
+    def plot(self, history):
+        from matplotlib import pyplot
+        # plot training history
+        pyplot.plot(history.history['accuracy'], label='train')
+        pyplot.plot(history.history['val_accuracy'], label='test')
+        pyplot.legend()
+        pyplot.show()
+        pyplot.savefig("accuracy_epochs2.png")
 
-    best_name = "bestmodel"
-    def train(self):
-        best_acc = 0
-        step = 0
-        best_loss = 10000
+    def validate(self):
+        # evaluate the model
+        _, train_acc = self.model.evaluate(self.train_ds, verbose=0)
+        _, test_acc = self.model.evaluate(self.test_ds, verbose=0)
+        logging.info('Train: %.3f, Test: %.3f' % (train_acc, test_acc))
 
+        self.val_ds
+        y_new = self.model.predict_classes(self.val_ds, batch_size=None)
+        logging.info('Validation')
+        for x, y in zip(self.val_ds.unbatch(), y_new):
+            logging.info(f'{x[1]} --->>> {y}')
+        logging.warning(f'Legend {pprint.pformat(self.label_lookup.id_to_token, indent=4)}')
 
-        for epoch in range(self.epoch):
-            dataset = list(enumerate(self.train_dataset))
-            for _, (text_batch, labels_batch) in dataset:
+    def save(self):
+        self.model.save(self.model_path)
 
-                step = step + 1
-                loss, logits, text_lens = self.train_one_step(text_batch, labels_batch)
+    def load(self):
+        self.model = tf.saved_model.load(self.model_path)
 
-                accuracy = self.get_acc_one_step(logits, text_lens, labels_batch)
-                logging.info(f'epoch {epoch}, step {step}/{len(dataset)}, '
-                                f'loss {loss}, accuracy {accuracy}, lr {self.lr}')
-
-                if True and  accuracy > best_acc and step>10:
-                    best_loss = loss
-                    best_acc = accuracy
-
-                    logits, text_lens = self.model.predict(text_batch[0:2])
-                    paths = []
-                    for logit, text_len in zip(logits, text_lens):
-                        viterbi_path, _ = tf_ad.text.viterbi_decode(logit[:text_len], self.model.transition_params)
-                        paths.append(viterbi_path)
-                    print(paths[0])
-
-                    unique_labels = set(flatten(paths))
-                    logging.info(
-                        f"\n{numpy.array(paths)} | \n"
-                        f"{labels_batch[0:2]} \n"
-                        f"{dict(zip(unique_labels, self.label_lookup.ids_to_tokens(unique_labels)))}")
-                    #tf.saved_model.save(self.model, self.output_dir + self.best_name)
-                    logging.warning("Saved best model up to now")
-
-    def predict(self, features):
-        self.prepare(features)
-        dataset = list(enumerate(self.train_dataset))
-        for _, (text_batch, labels_batch) in dataset:
-            logits, text_lens = self.model.predict(dataset)
-            paths = []
-            for logit, text_len in zip(logits, text_lens):
-                viterbi_path, _ = tf_ad.text.viterbi_decode(logit[:text_len], model.transition_params)
-                paths.append(viterbi_path)
-            print(paths[0])
-            print([self.label_lookup[id] for id in paths[0]])
-
-    def make_model(self, model_path):
-        modeler = Make(model_path)
-        self.modeler  modeler()
+    def __call__(self, debug=False, **train_kwargs):
+        feature_df = self.load_pandas_file(self.feature_path)
+        feature_columns = self.prepare_features(feature_df)
+        history = self.train(feature_columns, **train_kwargs)
+        if debug:
+            self.plot(history)
+        self.validate()
+        self.save()
+        logging.info(f'made model, saved to {self.feature_path}')
 
 
-    def load_model(self, model_path):
-        self.model = tf.saved_model.load(model_path)
+if __name__ == '__main__':
+    modeler = LayoutModeler()
+    modeler(debug=True)

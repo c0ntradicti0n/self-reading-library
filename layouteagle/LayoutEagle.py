@@ -2,10 +2,10 @@ import os
 
 from layouteagle import config
 from layouteagle.LatexReplacer.latex_replacer import LatexReplacer
+from layouteagle.LayoutModel.layoutmodel import LayoutModeler
 from layouteagle.LayoutReader.feature_maker import FeatureMaker
 from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
 from layouteagle.ScienceTexScraper.scrape import ScienceTexScraper
-from layouteagle.LayoutModel.layoutmodel import LayoutModel
 
 import logging
 logging.basicConfig(level = logging.INFO)
@@ -29,7 +29,7 @@ class LayoutEagle:
 
         self.pandas_path = pandas_path
 
-        self.model = LayoutModel(output_dir=model_path)
+        self.model = LayoutModeler(output_dir=model_path)
         self.feature_maker = FeatureMaker(
             pandas_pickle_path=".layouteagle/features.pckl",
             debug=True, parameterize=False)
