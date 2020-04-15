@@ -31,18 +31,15 @@ class LayoutModeler:
                         'chars', 'nums', 'signs']
     }
 
-    def __init__(self, feature_path='.layouteagle/features.pckl', model_path='.layouteagle/layoutmodel.keras'):
+    def __init__(self, feature_path='.layouteagle/features.pckl', model_path='.layouteagle/layoutmodel.keras', debug=False):
         self.feature_path = feature_path
         self.model_path = model_path
+        self.debug = debug
 
         try:
             self.model = self.load()
         except OSError:
-            logging.error("no model found")
-            try:
-                self.model = self()
-            except FileNotFoundError:
-                logging.error("no features found to make model from, waiting for self.make_model)")
+            logging.error("no model found, not initializing model, call the model with the path to the feature df dump")
 
     def load_pandas_file(self, feature_path):
         return pandas.read_pickle(feature_path)
@@ -171,11 +168,11 @@ class LayoutModeler:
     def load(self):
         self.model = tf.saved_model.load(self.model_path)
 
-    def __call__(self, debug=False, **train_kwargs):
+    def __call__(self, **train_kwargs):
         feature_df = self.load_pandas_file(self.feature_path)
         feature_columns = self.prepare_features(feature_df)
         history = self.train(feature_columns, **train_kwargs)
-        if debug:
+        if self.debug:
             self.plot(history)
         self.validate()
         self.save()
@@ -183,5 +180,5 @@ class LayoutModeler:
 
 
 if __name__ == '__main__':
-    modeler = LayoutModeler()
-    modeler(debug=True)
+    modeler = LayoutModeler(debug=True)
+    modeler()
