@@ -176,7 +176,7 @@ class LayoutModeler:
 
     def __call__(self, feature_path):
         if feature_path:
-            self.feature_path = feature_path
+            self.feature_path = next(feature_path)
         feature_df = self.load_pandas_file(self.feature_path)
         feature_columns = self.prepare_features(feature_df)
         history = self.train(feature_columns, self.train_kwargs)
