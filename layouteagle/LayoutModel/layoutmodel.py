@@ -1,3 +1,5 @@
+from typing import Dict
+
 import pandas
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
@@ -31,9 +33,14 @@ class LayoutModeler:
                         'chars', 'nums', 'signs']
     }
 
-    def __init__(self, feature_path='.layouteagle/features.pckl', model_path='.layouteagle/layoutmodel.keras', debug=False):
+    def __init__(self,
+                 feature_path: str = '.layouteagle/features.pckl',
+                 model_path: str = '.layouteagle/layoutmodel.keras',
+                 override_train_kwargs: Dict= {},
+                 debug: bool = False):
         self.feature_path = feature_path
         self.model_path = model_path
+        self.kwargs.update(override_train_kwargs)
         self.debug = debug
 
         try:
