@@ -27,7 +27,7 @@ class Make:
         'labels': 'column_labels',
         'cols_to_use': ['x', 'y', 'len', 'height', 'page_number', 'font-size',
                             'fine_grained_pdf', 'coarse_grained_pdf','line-height',
-                            'chars', 'nums', 'signs', 'column_labels']
+                            'chars', 'nums', 'signs']
     }
 
     def __init__(self, feature_path='.layouteagle/features.pckl', model_path='.layouteagle/layoutmodel.keras'):
@@ -48,7 +48,7 @@ class Make:
         feature_df.column_labels = label_lookup(token_s=feature_df.column_labels.tolist())
 
         self.cols_to_use = self.kwargs['cols_to_use'] + [self.kwargs['labels']]
-        feature_df = feature_df.reset_index()
+        feature_df = feature_df.reset_index(drop=True)
 
         distance_col_prefix = 'd_'
         max_distance = max([max(x) for x in feature_df[1:]['distance_vector']])
@@ -83,10 +83,12 @@ class Make:
             dataframe = dataframe.copy()
             dataframe = dataframe.reset_index(drop=True)
             try:
-                labels = to_categorical(dataframe.pop(self.kwargs['labels']))
+                labels = dataframe[self.kwargs['labels']].tolist()
+                dataframe.pop(self.kwargs['labels'])
+                categorical_labels = to_categorical(labels)
             except:
                 raise
-            ds = tf.data.Dataset.from_tensor_slices((dict(dataframe), labels))
+            ds = tf.data.Dataset.from_tensor_slices((dict(dataframe), categorical_labels))
             if shuffle:
                 ds = ds.shuffle(buffer_size=len(dataframe))
             ds = ds.batch(batch_size)
