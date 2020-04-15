@@ -27,6 +27,7 @@ class LayoutModeler:
         'adam': {'lr': 0.00003},
         'epochs': 100,
         'batch_size': 32,
+        'patience': 7,
         'labels': 'column_labels',
         'cols_to_use': ['x', 'y', 'len', 'height', 'page_number', 'font-size',
                         'fine_grained_pdf', 'coarse_grained_pdf','line-height',
@@ -127,7 +128,7 @@ class LayoutModeler:
         self.train_kwargs.update(override_kwargs)
         feature_layer = tf.keras.layers.DenseFeatures(feature_columns=feature_columns, dtype='float64')
 
-        es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=3)
+        es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=self.train_kwargs['patience'])
         mc = ModelCheckpoint(self.model_path + ".h5", monitor='val_accuracy', mode='max', verbose=1, save_best_only=True)
 
         self.model = tf.keras.Sequential([
@@ -164,8 +165,9 @@ class LayoutModeler:
 
         y_new = self.model.predict_classes(self.val_ds, batch_size=None)
         logging.info('Validation')
-        for x, y in zip(self.val_ds.unbatch(), y_new):
-            logging.info(f'{x[1]} --->>> {y}')
+        for x_y_pred, y_true in zip(self.val_ds.unbatch(), y_new):
+            y_pred = tf.keras.backend.argmax(x_y_pred[1])
+            logging.info(f'{y_pred} --->>> {y_true}')
         logging.warning(f'Legend {pprint.pformat(self.label_lookup.id_to_token, indent=4)}')
 
     def save(self):
