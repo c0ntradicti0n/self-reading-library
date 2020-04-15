@@ -38,7 +38,11 @@ class LayoutModeler:
         try:
             self.model = self.load()
         except OSError:
-            self.model = self()
+            logging.error("no model found")
+            try:
+                self.model = self()
+            except FileNotFoundError:
+                logging.error("no features found to make model from, waiting for self.make_model)")
 
     def load_pandas_file(self, feature_path):
         return pandas.read_pickle(feature_path)
