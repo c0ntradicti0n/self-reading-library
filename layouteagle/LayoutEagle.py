@@ -29,7 +29,7 @@ class LayoutEagle:
 
         self.pandas_path = pandas_path
 
-        self.model = LayoutModeler(output_dir=model_path)
+        self.model = LayoutModeler()
         self.feature_maker = FeatureMaker(
             pandas_pickle_path=".layouteagle/features.pckl",
             debug=True, parameterize=False)
