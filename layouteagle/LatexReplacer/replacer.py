@@ -3,12 +3,14 @@ from collections import Callable
 from types import GeneratorType
 from typing import Dict, Tuple
 
+from pathant.PathSpec import PathSpec
 
 
-class SoupReplacer:
-    def __init__(self, what:Dict[Callable, Tuple[Callable, Callable]]):
+class SoupReplacer(PathSpec):
+    def __init__(self, replacements: Dict[Callable, Tuple[Callable, Callable]], path_spec=None):
         super().__init__()
-        self.what = what
+        self.replacements = replacements
+        self.path_spec = path_spec
 
     def replace_node(self, node, how):
         self.make_replacement(node, how)

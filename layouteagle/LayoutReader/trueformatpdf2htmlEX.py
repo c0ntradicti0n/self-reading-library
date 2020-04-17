@@ -22,12 +22,24 @@ from layouteagle import config
 from layouteagle.helpers.list_tools import threewise
 
 from layouteagle.LayoutReader.trueformatupmarker import TrueFormatUpmarker
+from pathant.Converter import converter
+from pathant.PathSpec import PathSpec
 
 logging.getLogger().setLevel(logging.WARNING)
 
 class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
+    replacement_mapping_tag2tag = {
+        "div": "z"
+    }
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, replacements=self.replacement_mapping_tag2tag, **kwargs)
+
+    def __call__(self, pdf_paths, **kwargs):
+        for pdf_path in pdf_paths:
+            self.pdf2htmlEX(pdf_path)
+            pdf_obj = self.generate_css_tagging_document()
+            yield pdf_obj
+
 
     def generate_css_tagging_document(self, html_read_from="", html_write_to="", parameterizing=False, premade_features=None, premade_soup=None):
         """
@@ -52,9 +64,10 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
                   encoding='utf8') as file:
             file.write(str(soup).replace("<coolwanglu@gmail.com>", "coolwanglu@gmail.com"))
 
-        self.collect_data_for_file.features = features
-        self.collect_data_for_file.text = " ".join(self.indexed_words.values())
-        self.collect_data_for_file.indexed_words = self.indexed_words
+        self.pdf_obj.features = features
+        self.pdf_obj.text = " ".join(self.indexed_words.values())
+        self.pdf_obj.indexed_words = self.indexed_words
+        return self.pdf_obj
 
     def generate_data_for_file(self, html_read_from):
         with open(html_read_from, 'r', encoding='utf8') as f:
@@ -62,9 +75,9 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
         # create data and features for clustering
         self.css_dict = self.get_css(soup)
         self.features = self.extract_features(soup=soup)
-        self.collect_data_for_file.columns = self.number_columns
+        self.pdf_obj.columns = self.number_columns
         self.assign_labels_from_div_content(features=self.features)
-        self.collect_data_for_file.features = self.features
+        self.pdf_obj.features = self.features
         return self.features, soup
 
     def get_page_tags(self, soup):
@@ -101,11 +114,11 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
         features["relevant"] = True
 
 
-        self.collect_data_for_file.pages_to_column_to_text = {page_number:{cluster: " ".join([div.text for div in cluster_content["divs"].tolist()])
-                                                                           for cluster, cluster_content in page_content}
-                                                              for page_number, page_content in page_cluster_lr_groups.items()
+        self.pdf_obj.pages_to_column_to_text = {page_number:{cluster: " ".join([div.text for div in cluster_content["divs"].tolist()])
+                                                             for cluster, cluster_content in page_content}
+                                                for page_number, page_content in page_cluster_lr_groups.items()
 
-                                                              }
+                                                }
         return features
 
     FeatureStuff = namedtuple("FeatureStuff", ["divs", "coords", "data", "density_field", "labels"])
@@ -352,7 +365,6 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
 import unittest
 
 class TestPaperReader(unittest.TestCase):
-    tfu_pdf = TrueFormatUpmarkerPDF2HTMLEX(debug=True, parameterize=False)
 
     def test_dump_features(self):
         files = list(pathlib.Path('testdata').glob('*.html'))
@@ -385,7 +397,7 @@ class TestPaperReader(unittest.TestCase):
             kwargs['html_write_to']  = path + ".computed.htm"
             columns = int(regex.search(r"\d", path).group(0))
 
-            pdf_obj = self.tfu_pdf.convert_and_index(**kwargs)
+            pdf_obj = TrueFormatUpmarkerPDF2HTMLEX(**kwargs)
 
             score = pdf_obj.verify(serious=True, test_document=True)
             logging.info(f"PDF extraction score: {score}")

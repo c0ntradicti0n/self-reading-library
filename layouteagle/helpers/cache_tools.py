@@ -1,4 +1,4 @@
-
+import functools
 import json
 import logging
 
@@ -15,16 +15,20 @@ def file_persistent_cached_generator(filename):
                 cache = []
 
             for result in cache:
-                yield json.loads(result)
+                content, meta = json.loads(result)
+                yield content, meta
 
             generator = original_func(*param)
 
             for result in generator:
                 result_string =  json.dumps(result) + "\n"
                 if result_string not in cache:
+                    content, meta = result
                     with open(filename, 'a') as f:
                         f.write(result_string)
-                    yield result
+                    yield content, meta
+
+        functools.update_wrapper(new_func, original_func)
 
         return new_func
 

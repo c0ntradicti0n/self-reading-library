@@ -8,5 +8,5 @@ regex
 seaborn
 tinycss
 lxml
-tensorflow-addons
 TexSoup
+networkx

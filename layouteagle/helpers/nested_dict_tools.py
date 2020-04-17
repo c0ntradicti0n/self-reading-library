@@ -2,6 +2,12 @@ from collections import abc, Mapping, Collection
 import numpy as np
 from pip._vendor.pyparsing import basestring
 
+def get_dict_wo_key(dictionary, key):
+    """Returns a **shallow** copy of the dictionary without a key."""
+    _dict = dictionary.copy()
+    _dict.pop(key, None)
+    return _dict
+
 def flatten(*args):
     """
     Flatten a list.

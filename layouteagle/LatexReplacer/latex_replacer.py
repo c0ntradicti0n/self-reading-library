@@ -17,11 +17,27 @@ from layouteagle.helpers.os_tools import get_path_filename_extension
 from layouteagle.helpers.str_tools import find_all, insert
 from regex import regex
 
+from pathant.Converter import converter
 
+
+@converter("tex", "labeled.pdf")
 class LatexReplacer(SoupReplacer):
-    def __init__(self, add_extension, timout_sec=10):
+    replacement_mapping_tag2tex = OrderedDict({
+        None: ["document", "abstract", "keywords"],
+
+        "title": ["Title", "title"],
+        "staff": ["name", "Author", "email", "corres", "affiliation", "affil", "corresp", "author", "markboth",
+                  "email", "address", "adress", "emailAdd", "authorrunning", "institute", "ead", "caption",
+                  "footnote", "tfootnote", "thanks"],
+        "content": ["section*", "subsection", "subsection*", "subsubsection*",
+                    "section""subsection", "subsubsection"],
+    })
+
+    def __init__(self, *args, timout_sec=10, **kwargs):
+        super().__init__(*args, replacements=self.replacement_mapping_tag2tex, **kwargs)
+
         self.replacement_target = TexNode
-        self.add_extension = lambda path: path + add_extension
+        self.add_extension = lambda path: path + self.path_spec._to
         self.timeout_sec = timout_sec
 
         # TODO add new command support, as option to new commands enclosing text
@@ -31,20 +47,6 @@ class LatexReplacer(SoupReplacer):
         self.forbidden_nargs = ["baselineskip"]
         self.forbidden_envs = ["$", "tikzpicture",  "eqnarray", "equation", "tabular"]
         self.forbidden_envs = self.forbidden_envs + [env + "*" for env in self.forbidden_envs]
-
-
-        replacement_mapping_tag2tex = OrderedDict({
-            None: ["document", "abstract", "keywords"],
-
-            "title": ["Title", "title"],
-            "staff": ["name","Author","email","corres","affiliation","affil","corresp","author","markboth",
-                      "email","address","adress","emailAdd","authorrunning","institute","ead","caption",
-                      "footnote","tfootnote", "thanks"],
-            "content":["section*","subsection","subsection*","subsubsection*",
-                                   "section""subsection","subsubsection"],
-        })
-
-        self.replacements = replacement_mapping_tag2tex
 
     def find_all(self, soup, tex_string):
         if tex_string==None:
@@ -82,13 +84,13 @@ class LatexReplacer(SoupReplacer):
         """
         :param path_to_read_from:
         """
-        for path_to_read_from in paths:
+        for path_to_read_from, meta in paths:
             new_pdf_path = self.work(path_to_read_from)
             if new_pdf_path:
-                yield  new_pdf_path
+                yield  new_pdf_path, meta
 
 
-    def append_expression(possible_part_string, replaced_contents):
+    def append_expression(self, possible_part_string, replaced_contents):
         replaced_contents.append(possible_part_string.expr)
 
     def replace_this_text(self, content_generator, possible_part_string, replaced_contents, replacement_string):
@@ -147,19 +149,19 @@ class LatexReplacer(SoupReplacer):
                 if where.name in self.allowed_oargs:
                     node_to_replace = self.make_replacement(node_to_replace, replacement_string)
 
-                    LatexReplacer.append_expression(node_to_replace, replaced_contents)
+                    self.append_expression(node_to_replace, replaced_contents)
                 else:
-                    LatexReplacer.append_expression(node_to_replace, replaced_contents)
+                    self.append_expression(node_to_replace, replaced_contents)
             elif isinstance(node_to_replace.expr, RArg):
                 try:
                     if where.args and node_to_replace.expr == where.args[-1] and where.name not in self.forbidden_nargs:
                         node_to_replace = self.make_replacement(node_to_replace, replacement_string)
-                        LatexReplacer.append_expression(node_to_replace, replaced_contents)
+                        self.append_expression(node_to_replace, replaced_contents)
                     else:
-                        LatexReplacer.append_expression(node_to_replace, replaced_contents)
+                        self.append_expression(node_to_replace, replaced_contents)
                 except AttributeError:
                     logging.error("RArg without children (it's blocks like {\"a})")
-                    LatexReplacer.append_expression(node_to_replace, replaced_contents)
+                    self.append_expression(node_to_replace, replaced_contents)
 
 
             elif isinstance(node_to_replace.expr, (TokenWithPosition, str)):
@@ -167,17 +169,21 @@ class LatexReplacer(SoupReplacer):
                     self.replace_this_text(content_generator, node_to_replace, replaced_contents,
                                            replacement_string)
                 else:
-                    LatexReplacer.append_expression(node_to_replace, replaced_contents)
+                    try:
+                        self.append_expression(node_to_replace, replaced_contents)
+                    except AttributeError:
+                        logging.error("function object has no attribute")
+
             elif isinstance(node_to_replace.expr, TexText) and not node_to_replace.expr._text.strip():
-                LatexReplacer.append_expression(node_to_replace, replaced_contents)
+                self.append_expression(node_to_replace, replaced_contents)
 
             elif isinstance(node_to_replace.expr, TexEnv):
                 if not node_to_replace.expr.name in self.forbidden_envs:
                     node_to_replace = self.make_replacement(node_to_replace, replacement_string)
-                    LatexReplacer.append_expression(node_to_replace, replaced_contents)
+                    self.append_expression(node_to_replace, replaced_contents)
                 else:
                     self.log_not_replace("environment", node_to_replace.name)
-                    LatexReplacer.append_expression(node_to_replace, replaced_contents)
+                    self.append_expression(node_to_replace, replaced_contents)
 
             elif isinstance(node_to_replace.expr, TexText):
                 self.replace_this_text(content_generator, node_to_replace, replaced_contents,
@@ -186,13 +192,13 @@ class LatexReplacer(SoupReplacer):
             elif isinstance(node_to_replace.expr, TexCmd):
                 if node_to_replace.expr.name in self.allowed_recursion_tags:
                     node_to_replace = self.make_replacement(node_to_replace, replacement_string)
-                    LatexReplacer.append_expression(node_to_replace, replaced_contents)
+                    self.append_expression(node_to_replace, replaced_contents)
                 else:
                     self.log_not_replace("command", node_to_replace.name)
-                    LatexReplacer.append_expression(node_to_replace, replaced_contents)
+                    self.append_expression(node_to_replace, replaced_contents)
 
             else:
-                LatexReplacer.append_expression(node_to_replace, replaced_contents)
+                self.append_expression(node_to_replace, replaced_contents)
 
         if not all(isinstance(rc, (TexCmd, TexEnv, TexText))
                         for rc in replaced_contents):
@@ -246,15 +252,19 @@ class LatexReplacer(SoupReplacer):
             output = stdout.decode('latin1')
             errors = stderr.decode('latin1')
 
-            if (any(error  in output.lower() for error in ["latex error", "fatal error"])):
+            if (any(error in output.lower() for error in ["latex error", "fatal error"])):
                 where = output.lower().index('error')
                 error_msg_at = output[where-150:where+150]
                 logging.error(f'compilation failed on \n""" {error_msg_at}"""')
                 line_number_match = regex.search(r":(\d+):", error_msg_at)
                 if line_number_match:
                     line_number = int(line_number_match.groups(1)[0])
-                    with open(filename) as f:
-                        lines = f.readlines()
+                    try:
+                        with open(filename) as f:
+                            lines = f.readlines()
+                    except UnicodeDecodeError:
+                        logging.error("Could not read latex file because of encoding")
+                        break
                     faulty_code = "\n".join(lines[max(0, line_number - 1):
                                                   min(len(lines), line_number + 1)])
                     logging.error(f'  --->  see file {tex_file_path}: """\n{faulty_code}"""')
@@ -307,7 +317,7 @@ class LatexReplacer(SoupReplacer):
             logging.error("Column functionality could not be inserted")
             return
 
-        if "\input{" in f_content:
+        if r"\input{" in f_content:
             input_files = list(soup.find_all("input"))
             for input_file in input_files:
                 ipath, ifilename, iextension, ifilename_without_extension = get_path_filename_extension(path_to_read_from)

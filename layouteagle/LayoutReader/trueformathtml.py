@@ -1,4 +1,6 @@
 import os
+
+from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
 from layouteagle.LayoutReader.trueformatupmarker import TrueFormatUpmarker
 from layouteagle.helpers.color_logger import *
 import bs4
@@ -6,6 +8,10 @@ from bs4 import NavigableString, Tag
 
 
 class TrueFormatUpmarkerHTML (TrueFormatUpmarker):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pdf2html = TrueFormatUpmarkerPDF2HTMLEX()
+
     def collect_all_divs(self, soup):
         self.text_divs = []
         self.cuts = []
@@ -25,17 +31,12 @@ class TrueFormatUpmarkerHTML (TrueFormatUpmarker):
     def is_cut(self, tag):
         return tag.name == "p" or (tag.name == "p")
 
-
-    def generate_css_tagging_document(self, html_before_path, html_after_path, debug_folder):
-        with open(html_before_path, "r") as f:
-            html = f.read()
-
-        soup = bs4.BeautifulSoup(html, features="lxml")
-
-        self.manipulate_document(soup, sorting = [], clusters_dict = {})
-
-        with open(html_after_path, 'w') as f:
-            f.write(str(soup))
+    def __call__(self, paths):
+        for html_before_path in paths:
+            pdf_path = f"{html_before_path}.pdf"
+            os.system(f"chrome --headless --print-to-pdf='{pdf_path}' '{html_before_path}'")
+            html_path, css_path, json_path = self.pdf2html()
+            yield (html_path, css_path, json_path)
 
 
 import unittest

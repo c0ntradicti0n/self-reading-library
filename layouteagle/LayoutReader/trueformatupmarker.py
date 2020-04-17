@@ -15,12 +15,22 @@ import numpy
 from regex import regex
 
 from layouteagle import config
+from layouteagle.LatexReplacer.replacer import SoupReplacer
 from layouteagle.LayoutReader.pdf import Pdf
 
 
-class TrueFormatUpmarker:
-    def __init__(self, min_bottom=None, max_bottom=None, debug=False, parameterize=False):
-        self.collect_data_for_file = Pdf()
+class TrueFormatUpmarker(SoupReplacer):
+    def __init__(self, *args,
+                 min_bottom=None,
+                 max_bottom=None,
+                 debug=False,
+                 parameterize=False,
+                 debug_folder='./.layouteagle/debug/',
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.pdf_obj = Pdf()
+        self.debug_folder =  debug_folder
 
         self.cuts = []
         self.text_divs = []
@@ -47,9 +57,9 @@ class TrueFormatUpmarker:
         logging.warning(f"working on {html_read_from}")
 
         self.generate_css_tagging_document(html_read_from, html_write_to)
-        self.collect_data_for_file.indexed_words = self.indexed_words
-        self.collect_data_for_file.text = " ".join(self.indexed_words.values())
-        return self.collect_data_for_file
+        self.pdf_obj.indexed_words = self.indexed_words
+        self.pdf_obj.text = " ".join(self.indexed_words.values())
+        return self.pdf_obj
 
 
     def get_indexed_words(self):
@@ -232,5 +242,7 @@ class TrueFormatUpmarker:
 
     def collect_all_divs(self, soup):
         raise NotImplementedError
+
+
 
 

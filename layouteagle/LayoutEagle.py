@@ -3,12 +3,12 @@ import os
 from layouteagle import config
 from layouteagle.LatexReplacer.latex_replacer import LatexReplacer
 from layouteagle.LayoutModel.layoutmodel import LayoutModeler
-from layouteagle.LayoutReader.feature_maker import FeatureMaker
+from layouteagle.LayoutReader.labeled_feature_maker import LabeledFeatureMaker
 from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
 from layouteagle.ScienceTexScraper.scrape import ScienceTexScraper
 
 import logging
-logging.basicConfig(level = logging.INFO)
+logging.basicConfig(level = logging.DEBUG)
 loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
 for logger in loggers:
     logger.setLevel(logging.INFO)
@@ -30,22 +30,24 @@ class LayoutEagle:
         self.pandas_path = pandas_path
 
         self.model = LayoutModeler()
-        self.feature_maker = FeatureMaker(
+        self.feature_maker = LabeledFeatureMaker(
             pandas_pickle_path=".layouteagle/features.pckl",
             debug=True, parameterize=False)
         self.trueFormatPDF2HTMLEX = TrueFormatUpmarkerPDF2HTMLEX()
 
-    def make_document(self, pdf_path=None, html1_path=None, html2_path=None, css_path=None):
+    def make_document(self, pdf_path=None, html1_path=None, html2_path=None, css_path=None, debug=True):
+
         div_features = self.feature_maker.work(pdf_path, html1_path=None)
-        self.feature_maker = FeatureMaker(
+        self.feature_maker = LabeledFeatureMaker(
             pandas_pickle_path=self.pandas_path,
             debug=True,
             parameterize=False)
+
         labeled_div_features = self.model.predict(features=div_features)
         if pdf_path and not html1_path:
             return labeled_div_features
 
-        self.trueFormatPDF2HTMLEX(labeled_div_features, html2_path=html2_path)
+        self.trueFormatPDF2HTMLEX(labeled_div_features, html2_path=html2_path, css_path=css_path, debug=debug)
 
     def make_model(self, n):
         science_tex_scraper = ScienceTexScraper(url = config.tex_source)

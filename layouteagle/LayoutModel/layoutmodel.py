@@ -11,12 +11,16 @@ from layouteagle.helpers.list_tools import Lookup, sorted_by_zipped
 import logging
 import pprint
 
+from pathant.Converter import converter
+from pathant.PathSpec import PathSpec
 
-class LayoutModeler:
+
+@converter("features", "keras")
+class LayoutModeler(PathSpec):
     train_kwargs = {
-        'dropout': {'rate': 0.2,
+        'dropout': {'rate': 0.1,
                     'dtype': 'float64'},
-        'dense1': {'units': 200,
+        'dense1': {'units': 300,
                    'trainable': True,
                    'activation': 'tanh',
                    'dtype': 'float64'},
@@ -35,12 +39,15 @@ class LayoutModeler:
     }
 
     def __init__(self,
-                 feature_path: str = '.layouteagle/features.pckl',
-                 model_path: str = '.layouteagle/layoutmodel.keras',
+                 *args,
+                 feature_path: str = '.layouteagle/features',
+                 model_path: str = '.layouteagle/layoutmodel',
                  override_train_kwargs: Dict= {},
-                 debug: bool = False):
-        self.feature_path = feature_path
-        self.model_path = model_path
+                 debug: bool = False, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.feature_path = feature_path + self.path_spec._from
+        self.model_path = model_path +  self.path_spec._to
         self.train_kwargs.update(override_train_kwargs)
         self.debug = debug
 
@@ -163,9 +170,9 @@ class LayoutModeler:
         _, test_acc = self.model.evaluate(self.test_ds, verbose=0)
         logging.info('Train: %.3f, Test: %.3f' % (train_acc, test_acc))
 
-        y_new = self.model.predict_classes(self.val_ds, batch_size=None)
+        xy_new = self.model.predict_classes(self.val_ds, batch_size=None)
         logging.info('Validation')
-        for x_y_pred, y_true in zip(self.val_ds.unbatch(), y_new):
+        for x_y_pred, y_true in zip(self.val_ds.unbatch(), xy_new):
             y_pred = tf.keras.backend.argmax(x_y_pred[1])
             logging.info(f'{y_pred} --->>> {y_true}')
         logging.warning(f'Legend {pprint.pformat(self.label_lookup.id_to_token, indent=4)}')
@@ -186,7 +193,8 @@ class LayoutModeler:
             self.plot(history)
         self.validate()
         self.save()
-        logging.info(f'made model, saved to {self.feature_path}')
+        logging.info(f'made model, saved to {self.model_path}')
+        yield self.model_path
 
 
 if __name__ == '__main__':
