@@ -2,7 +2,7 @@ from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2
 from pathant.Converter import converter
 
 
-@converter(('feature', 'keras'), 'zfeature')
+@converter(('feature', 'keras'), 'layoutprediction')
 class FeatureAssigner(TrueFormatUpmarkerPDF2HTMLEX):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

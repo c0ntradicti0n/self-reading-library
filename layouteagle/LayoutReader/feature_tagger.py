@@ -11,8 +11,8 @@ from pathant.Converter import converter
 from pathant.PathSpec import PathSpec
 
 
-@converter("features", "layoutprediction")
-class FeatureMaker(TrueFormatUpmarkerPDF2HTMLEX, PathSpec):
+@converter("layoutprediction", ["layouted.html", "css", "json", "txt"])
+class PredictedLayout(TrueFormatUpmarkerPDF2HTMLEX, PathSpec):
     def __init__(self, debug=True, *args, labels='column_labels', **kwargs):
         super().__init__(*args, **kwargs)
         self.labels = labels

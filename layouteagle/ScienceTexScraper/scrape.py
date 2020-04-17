@@ -18,7 +18,7 @@ from pathant.PathSpec import PathSpec
 
 logging.basicConfig(level = logging.INFO)
 
-@converter("url", "tex")
+@converter("arxiv.org", "tex")
 class ScienceTexScraper(PathSpec):
     def __init__(self, *args, url="arxiv.org", **kwargs):
         super().__init__(*args, **kwargs)

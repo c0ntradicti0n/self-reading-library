@@ -30,41 +30,67 @@ class PathAnt:
         pipeline = [self.G[_from][_to]['functional_object'] for _from, _to in pairwise(converters_path)]
         return Pipeline(pipeline)
 
-    def info(self, path="pathant.png"):
+    def info(self, path="pathant.png", pipelines_to_highlight=None):
         import pylab as plt
-        dG = self.G.copy()
-        for (u, v, d) in dG.edges(data=True):
-            del d["functional_object"]
 
-        pos = nx.spring_layout(dG)
+        dG = self.G.copy()
+
+
+        if pipelines_to_highlight:
+            for pipeline, color in zip(pipelines_to_highlight, ['red', 'green', 'orange']):
+                edge_colors = [color
+                               if attrs['functional_object'] in pipeline.pipeline else 'black'
+                               for u,v, attrs  in dG.edges(data=True)]
+        else:
+            edge_colors = 'black'
+
+        for (u, v, d) in dG.edges(data=True):
+            d["functional_object"] = d['functional_object'].__class__.__name__
+
+        pos = nx.planar_layout(dG)
 
         edge_labels = nx.get_edge_attributes(dG,'implicite')
+        edge_labels = {tup: f"needs {lab} too" for tup, lab in edge_labels.items()}
 
-        nx.draw_networkx_edge_labels(dG, pos, labels=edge_labels)
+        nx.draw_networkx_edge_labels(dG, pos, edge_labels=edge_labels)
         nx.draw(dG, pos, node_color="blue",
-                with_labels=True, font_weight='bold',
+                font_weight='bold',
+                edge_color = edge_colors,
+                edge_labels=False,
                 arrowsize=20, label='Path Ant',
-                node_size=150, edge_color="black", edge_cmap=plt.cm.Reds)
-        pylab.show()
+                node_size=150, edge_cmap=plt.cm.Reds)
+
+
+        pos_attrs = {}
+        for node, coords in pos.items():
+            pos_attrs[node] = coords[0] + 0.28, coords[1]
+
+
+        nx.draw_networkx_labels(dG, pos_attrs)
         pylab.savefig(path)
 
-    def add_edge(self, _from, _to, functional_object, **kwargs):
-        if isinstance(_from, (List)):
-            for __from in _from:
-                self.add_edge(__from, _to, functional_object, **kwargs)
-        elif isinstance(_from, Tuple):
-            for __from in _from:
-                self.add_edge(__from, _to, functional_object,
-                              **{"implicite":
-                                   list(_from).pop(_from.index(__from))})
+        plt.show()
 
-        elif isinstance(_to, (List, Tuple)):
-            for __to in _to:
-                self.add_edge(_from,_to, functional_object, **kwargs)
+
+    def add_edge(self, froms, tos, functional_object, **kwargs):
+        if isinstance(froms, (List)):
+            for _from in froms:
+                self.add_edge(_from, tos, functional_object, **kwargs)
+        elif isinstance(froms, Tuple):
+            for _from in froms:
+                others = list(froms)
+                others.remove(_from)
+                self.add_edge(_from, tos, functional_object,
+                              **{"implicite":
+                                   others})
+
+        elif isinstance(tos, (List, Tuple)):
+            for _to in tos:
+                self.add_edge(froms,_to, functional_object, **kwargs)
         else:
-            functional_object.path_spec._from = "." + _from
-            functional_object.path_spec._to = "." + _to
-            self.G.add_edge(_from,_to, functional_object=functional_object, **kwargs)
+            functional_object.path_spec._from = "." + froms
+            functional_object.path_spec._to = "." + tos
+            self.G.add_edge(froms,tos, functional_object=functional_object, **kwargs)
 
 
 
@@ -80,17 +106,22 @@ class TestPathAnt(unittest.TestCase):
         from layouteagle.LayoutReader.feature_label_assigner import TrueFormatUpmarkerPDF2HTMLEX
 
         from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
+        from layouteagle.LayoutReader.feature_tagger import PredictedLayout
+        from layouteagle.LayoutReader.feature_tagger import PredictedLayout
+
+
         from layouteagle.LayoutReader.feature2features import Feature2Features
         from layouteagle.LayoutModel.layoutmodel import LayoutModeler
 
         ant = PathAnt()
-        ant.info()
 
         #pipe = ant("url", "tex")
         #result = list(pipe("http://arxiv.org"))
 
-        pipe = ant("url", "keras")
-        result = list(pipe("http://arxiv.org"))
+        pipe = ant("arxiv.org", "keras")
+        ant.info(pipelines_to_highlight=[pipe])
+        list(pipe)
+
 
 
 if __name__=="__init__":
