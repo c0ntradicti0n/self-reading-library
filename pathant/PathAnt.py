@@ -32,6 +32,7 @@ class PathAnt:
 
     def info(self, path="pathant.png", pipelines_to_highlight=None):
         import pylab as plt
+        pylab.rcParams['figure.figsize'] = 20, 20
 
         dG = self.G.copy()
 
@@ -47,12 +48,12 @@ class PathAnt:
         for (u, v, d) in dG.edges(data=True):
             d["functional_object"] = d['functional_object'].__class__.__name__
 
-        pos = nx.planar_layout(dG)
+        pos = nx.kamada_kawai_layout(dG, dist={n1:{n2:1 for n2 in dG.nodes} for n1 in dG.nodes})
 
-        edge_labels = nx.get_edge_attributes(dG,'implicite')
-        edge_labels = {tup: f"needs {lab} too" for tup, lab in edge_labels.items()}
+        edge_labels = {(u,v): f"{a['functional_object']} " + ("(needs also " + (", ".join(a['implicite'])) +')' if 'implicite' in a else "")  for u, v, a in dG.edges(data=True)}
 
-        nx.draw_networkx_edge_labels(dG, pos, edge_labels=edge_labels)
+
+        nx.draw_networkx_edge_labels(dG, pos, edge_labels=edge_labels, rotate=False)
         nx.draw(dG, pos, node_color="blue",
                 font_weight='bold',
                 edge_color = edge_colors,
@@ -63,7 +64,7 @@ class PathAnt:
 
         pos_attrs = {}
         for node, coords in pos.items():
-            pos_attrs[node] = coords[0] + 0.28, coords[1]
+            pos_attrs[node] = coords[0] + 0.028, coords[1]
 
 
         nx.draw_networkx_labels(dG, pos_attrs)
@@ -107,7 +108,8 @@ class TestPathAnt(unittest.TestCase):
 
         from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
         from layouteagle.LayoutReader.feature_tagger import PredictedLayout
-        from layouteagle.LayoutReader.feature_tagger import PredictedLayout
+        from layouteagle.NLP.nlp_blub import NLPBlub
+
 
 
         from layouteagle.LayoutReader.feature2features import Feature2Features
@@ -120,7 +122,7 @@ class TestPathAnt(unittest.TestCase):
 
         pipe = ant("arxiv.org", "keras")
         ant.info(pipelines_to_highlight=[pipe])
-        list(pipe)
+        list(pipe("https://arxiv.org"))
 
 
 
