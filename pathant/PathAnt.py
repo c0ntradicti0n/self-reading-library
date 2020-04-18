@@ -10,10 +10,11 @@ from more_itertools import pairwise
 from layouteagle.helpers.os_tools import make_dirs_recursive
 from pathant.Pipeline import Pipeline
 from pathant.converters import converters
+from pathant.logger import *
 
 
 class PathAnt:
-    def __init__(self, necessary_paths={".layouteagle":["tex_data", "cache"]}):
+    def __init__(self, necessary_paths={".layouteagle":["tex_data", "cache", "log"]}):
         make_dirs_recursive(necessary_paths)
         self.G = nx.DiGraph()
 
@@ -58,9 +59,12 @@ class PathAnt:
         for (u, v, d) in dG.edges(data=True):
             d["functional_object"] = d['functional_object'].__class__.__name__
 
-        pos = nx.nx_agraph.graphviz_layout(dG)  #nx.kamada_kawai_layout(dG)
+        pos = nx.nx_agraph.graphviz_layout(dG)
 
-        edge_labels = {(u,v): f"{a['functional_object']} " + ("(needs also " + (", ".join(a['implicite'])) +')' if 'implicite' in a else "")  for u, v, a in dG.edges(data=True)}
+        edge_labels = {(u,v):
+                           f"{a['functional_object']} " +
+                           ("(needs also " + (", ".join(a['implicite'])) +')' if 'implicite' in a else "")
+                       for u, v, a in dG.edges(data=True)}
 
 
         nx.draw_networkx_edge_labels(dG, pos, edge_labels=edge_labels, rotate=False)
@@ -101,6 +105,8 @@ class PathAnt:
         else:
             functional_object.path_spec._from = "." + froms
             functional_object.path_spec._to = "." + tos
+            functional_object.path_spec.logger = palogger
+
             self.G.add_edge(froms,tos, functional_object=functional_object, **kwargs)
 
 
@@ -126,15 +132,11 @@ class TestPathAnt(unittest.TestCase):
 
 
         ant = PathAnt()
-
-        #pipe = ant("url", "tex")
-        #result = list(pipe("http://arxiv.org"))
-
         model_pipe = ant("arxiv.org", "keras")
         prediction_pipe = ant("html", "apache")
 
         ant.info(pipelines_to_highlight=[model_pipe, prediction_pipe])
-        list(pipe("https://arxiv.org"))
+        list(model_pipe("https://arxiv.org"))
 
 
 

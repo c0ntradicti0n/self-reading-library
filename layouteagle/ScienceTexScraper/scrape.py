@@ -20,7 +20,7 @@ logging.basicConfig(level = logging.INFO)
 
 @converter("arxiv.org", "tex")
 class ScienceTexScraper(PathSpec):
-    def __init__(self, *args, url="arxiv.org", **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not os.path.isdir(config.tex_data):
             os.system(f"mkdir {config.tex_data}")

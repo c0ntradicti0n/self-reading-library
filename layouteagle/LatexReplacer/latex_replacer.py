@@ -1,6 +1,7 @@
 import codecs
 import logging
 import os
+import pprint
 import subprocess
 from collections import Callable, defaultdict, OrderedDict
 from functools import partial
@@ -37,7 +38,8 @@ class LatexReplacer(SoupReplacer):
         super().__init__(*args, replacements=self.replacement_mapping_tag2tex, **kwargs)
 
         self.replacement_target = TexNode
-        self.add_extension = lambda path: path + self.path_spec._to
+        self.labeled_tex_path = lambda path: path + ".labeled.tex"
+        self.pdf_path = lambda path: path + self.path_spec._to
         self.timeout_sec = timout_sec
 
         # TODO add new command support, as option to new commands enclosing text
@@ -84,10 +86,14 @@ class LatexReplacer(SoupReplacer):
         """
         :param path_to_read_from:
         """
-        for path_to_read_from, meta in paths:
-            new_pdf_path = self.work(path_to_read_from)
-            if new_pdf_path:
-                yield  new_pdf_path, meta
+        with open(".layouteagle/log/unreplace.list", "w") as ur:
+
+            for path_to_read_from, meta in paths:
+                new_pdf_path = self.work(path_to_read_from)
+                if new_pdf_path:
+                    yield  new_pdf_path, meta
+                else:
+                    ur.write(path_to_read_from + "\n")
 
 
     def append_expression(self, possible_part_string, replaced_contents):
@@ -254,7 +260,7 @@ class LatexReplacer(SoupReplacer):
             if (any(error in output.lower() for error in ["latex error", "fatal error"])):
                 where = output.lower().index('error')
                 error_msg_at = output[where-150:where+150]
-                logging.error(f'compilation failed on \n""" {error_msg_at}"""')
+                self.path_spec.logger.error(f'{tex_file_path} -->> compilation failed on \n""" {error_msg_at}"""')
                 line_number_match = regex.search(r":(\d+):", error_msg_at)
                 if line_number_match:
                     line_number = int(line_number_match.groups(1)[0])
@@ -262,17 +268,17 @@ class LatexReplacer(SoupReplacer):
                         with open(filename) as f:
                             lines = f.readlines()
                     except UnicodeDecodeError:
-                        logging.error("Could not read latex file because of encoding")
+                        self.path_spec.logger.error("Could not read latex file because of encoding")
                         break
                     faulty_code = "\n".join(lines[max(0, line_number - 1):
                                                   min(len(lines), line_number + 1)])
-                    logging.error(f'  --->  see file {tex_file_path}: """\n{faulty_code}"""')
+                    self.path_spec.logger.error(f'  --->  see file {tex_file_path}: """\n{faulty_code}"""')
                 break
         os.chdir(cwd)
 
         if process.returncode != 0:
             return None
-        logging.warning(f"{tex_file_path} compiled")
+        self.path_spec.logger.info(f"{tex_file_path} compiled")
         pdf_path = path + "/"  + filename_without_extension + ".pdf"
         return pdf_path
 
@@ -282,7 +288,7 @@ class LatexReplacer(SoupReplacer):
         if compile:
             try:
                 if not self.compiles(path_to_read_from, clean=True) and compile:
-                    logging.error(f"Latex file '{path_to_read_from}' could not be compiled")
+                    self.path_spec.logger.error(f"Latex file '{path_to_read_from}' could not be compiled")
                     return
             except FileNotFoundError:
                 logging.error ("Input not found! ")
@@ -293,10 +299,10 @@ class LatexReplacer(SoupReplacer):
                 try:
                     f_content = f.read()
                 except UnicodeDecodeError:
-                    logging.error(f"Decode error on {[path_to_read_from]}")
+                    self.path_spec.logger.error(f"Decode error on {[path_to_read_from]}")
                     return
         except FileNotFoundError:
-            logging.error("Included file in latex could not be found")
+            self.path_spec.logger.error("Included file in latex could not be found")
             raise
 
         try:
@@ -304,7 +310,7 @@ class LatexReplacer(SoupReplacer):
             if not soup:
                 raise ValueError("Parse of texfile was None")
         except Exception as e:
-            logging.error(f"Error in Tex-file {path_to_read_from}:\n {e}")
+            self.path_spec.logger.error(f"Error in Tex-file {path_to_read_from}:\n {e}")
             return
 
 
@@ -312,8 +318,8 @@ class LatexReplacer(SoupReplacer):
         try:
             if compile:
                 self.column_placeholder = self.insert_functionality(soup, f_content)
-        except Exception:
-            logging.error("Column functionality could not be inserted")
+        except Exception as e:
+            self.path_spec.logger.error(f"Column functionality could not be inserted {e}")
             return
 
         if r"\input{" in f_content:
@@ -321,16 +327,16 @@ class LatexReplacer(SoupReplacer):
             for input_file in input_files:
                 ipath, ifilename, iextension, ifilename_without_extension = get_path_filename_extension(path_to_read_from)
                 options = {"with extension":
-                                    self.add_extension(input_file.expr.args[-1].value + iextension),
+                                    self.labeled_tex_path(input_file.expr.args[-1].value + iextension),
                            "LatexInput solo":
-                                    self.add_extension(input_file.expr.args[-1].value + ".tex")}
+                                    self.labeled_tex_path(input_file.expr.args[-1].value + ".tex")}
 
                 for version, path in options.items():
                     try:
                         sub_instance = LatexReplacer(add_extension=self.add_extension, timout_sec=self.timeout_sec)
                         new_path = sub_instance.work(path, compile=False)
                     except Exception as e:
-                        logging.error(f"LatexInput version {version} for {path} failed, because: \n{e}")
+                        self.path_spec.logger.error(f"LatexInput version {version} for {path} failed, because: \n{e}")
                         return
 
                 try:
@@ -339,7 +345,7 @@ class LatexReplacer(SoupReplacer):
                     logging.error(f"Input Tag bad: Failed to replace input tag {str(input_file)}")
                     return
 
-            logging.info(f"Replacing included input from {path_to_read_from}: {input_files}")
+            self.path_spec.logger.info(f"Replacing included input from {path_to_read_from}: {input_files}")
 
 
         # REPLACE
@@ -349,20 +355,20 @@ class LatexReplacer(SoupReplacer):
         # WRITE BACK
         result = str(soup.__repr__())
 
-        if compile and not self.check_result(result):
-            logging.error("There was not much text replaced, skip")
-            return
-
-        out_path = self.add_extension(path_to_read_from)
+        out_path = self.labeled_tex_path(path_to_read_from)
         with open(out_path, 'w') as f:
             f.write(result)
+
+        if compile and not self.check_result(result):
+            self.path_spec.logger.error(f"There was not much text replaced {path_to_read_from}, skip")
+            return
 
         if compile:
             pdf_path = self.compiles(out_path, n=4)
             if pdf_path:
                 return pdf_path
             else:
-                logging.error(f"Replaced result could not be parsed by pdflatex {out_path}")
+                self.path_spec.logger.error(f"Replaced result could not be parsed by pdflatex {out_path}")
                 return
         return out_path
 
