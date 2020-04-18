@@ -32,5 +32,7 @@ This will
 To get an html file and a coresponding css file and a layouted document object, call:
 
 ```
-layouteagle.generate_htmlcss_document(pdf_path)
 ```
+
+sudo apt-get install libgraphviz-dev
+

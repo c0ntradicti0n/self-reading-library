@@ -10,3 +10,4 @@ tinycss
 lxml
 TexSoup
 networkx
+pygraphviz

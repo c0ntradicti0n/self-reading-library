@@ -24,11 +24,14 @@ class PathAnt:
     def realize_node(self, node):
         os.system(f"mkdir {node.dir}")
 
+    def make_path(self, G, source, target):
+        return nx.shortest_path(G, source, target)
+
     def __call__(self, source, target, *args, **kwargs):
-        converters_path = nx.shortest_path(self.G, source, target)
+        converters_path = self.make_path(self.G, source, target)
         logging.debug(f"found path: {converters_path}")
         pipeline = [self.G[_from][_to]['functional_object'] for _from, _to in pairwise(converters_path)]
-        return Pipeline(pipeline)
+        return Pipeline(pipeline, source, target)
 
     def info(self, path="pathant.png", pipelines_to_highlight=None):
         import pylab as plt
@@ -36,19 +39,26 @@ class PathAnt:
 
         dG = self.G.copy()
 
+        nx.set_edge_attributes(dG, 0, 'color')
+        nx.set_edge_attributes(dG, " ", 'label')
 
         if pipelines_to_highlight:
-            for pipeline, color in zip(pipelines_to_highlight, ['red', 'green', 'orange']):
-                edge_colors = [color
-                               if attrs['functional_object'] in pipeline.pipeline else 'black'
-                               for u,v, attrs  in dG.edges(data=True)]
-        else:
-            edge_colors = 'black'
+            for  color, pipeline in enumerate(pipelines_to_highlight):
+                pipe_path = self.make_path(dG, pipeline.source, pipeline.target)
+                edges = pairwise(pipe_path)
+                for u, v in edges:
+                    dG[u][v]['color'] = color + 1
+                for n in pipe_path:
+                    dG.nodes[n]['label'] =  str(pipeline)
+
+
+
+        edge_colors = nx.get_edge_attributes(dG, 'color').values()
 
         for (u, v, d) in dG.edges(data=True):
             d["functional_object"] = d['functional_object'].__class__.__name__
 
-        pos = nx.kamada_kawai_layout(dG, dist={n1:{n2:1 for n2 in dG.nodes} for n1 in dG.nodes})
+        pos = nx.nx_agraph.graphviz_layout(dG)  #nx.kamada_kawai_layout(dG)
 
         edge_labels = {(u,v): f"{a['functional_object']} " + ("(needs also " + (", ".join(a['implicite'])) +')' if 'implicite' in a else "")  for u, v, a in dG.edges(data=True)}
 
@@ -59,17 +69,17 @@ class PathAnt:
                 edge_color = edge_colors,
                 edge_labels=False,
                 arrowsize=20, label='Path Ant',
-                node_size=150, edge_cmap=plt.cm.Reds)
+                node_size=150, edge_cmap=plt.cm.plasma)
 
 
         pos_attrs = {}
         for node, coords in pos.items():
-            pos_attrs[node] = coords[0] + 0.028, coords[1]
+            pos_attrs[node] = coords[0] + 0.08, coords[1]
 
 
         nx.draw_networkx_labels(dG, pos_attrs)
         pylab.savefig(path)
-
+        plt.legend(scatterpoints = 1)
         plt.show()
 
 
@@ -105,23 +115,25 @@ class TestPathAnt(unittest.TestCase):
     def test_make_model(self):
         from layouteagle.LayoutReader.labeled_feature_maker import TrueFormatUpmarkerPDF2HTMLEX
         from layouteagle.LayoutReader.feature_label_assigner import TrueFormatUpmarkerPDF2HTMLEX
-
         from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
         from layouteagle.LayoutReader.feature_tagger import PredictedLayout
-        from layouteagle.NLP.nlp_blub import NLPBlub
-
-
-
+        from TestArchitecture.NLP.nlp_blub import NLPBlub
+        from TestArchitecture.NLP.topicape import TopicApe
+        from layouteagle.LayoutReader.HTML2PDF import PrintToFile
         from layouteagle.LayoutReader.feature2features import Feature2Features
         from layouteagle.LayoutModel.layoutmodel import LayoutModeler
+        from TestArchitecture.publisher import NLPPublisher, TopicPublisher
+
 
         ant = PathAnt()
 
         #pipe = ant("url", "tex")
         #result = list(pipe("http://arxiv.org"))
 
-        pipe = ant("arxiv.org", "keras")
-        ant.info(pipelines_to_highlight=[pipe])
+        model_pipe = ant("arxiv.org", "keras")
+        prediction_pipe = ant("html", "apache")
+
+        ant.info(pipelines_to_highlight=[model_pipe, prediction_pipe])
         list(pipe("https://arxiv.org"))
 
 

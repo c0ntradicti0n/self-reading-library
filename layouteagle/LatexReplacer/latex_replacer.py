@@ -229,7 +229,6 @@ class LatexReplacer(SoupReplacer):
         except:
             raise
         if clean:
-            subprocess.run(['rm', '*.labeled.*'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             subprocess.run(['rm', '*.pdf.html'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             subprocess.run(['rm', '*.pdf'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             subprocess.run(['rm', '*.aux'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

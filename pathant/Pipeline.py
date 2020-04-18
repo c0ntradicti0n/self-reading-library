@@ -1,5 +1,7 @@
 class Pipeline:
-    def __init__(self, pipeline):
+    def __init__(self, pipeline, source, target):
+        self.target = target
+        self.source = source
         self.pipeline = pipeline
 
     def __call__(self, arg):
