@@ -30,9 +30,18 @@ class PathAnt:
 
     def __call__(self, source, target, *args, **kwargs):
         converters_path = self.make_path(self.G, source, target)
+        converters_implications = {uv: [_a for _a in a if _a not in converters_path ]
+                                   for uv, a in nx.get_edge_attributes(self.G, 'implicite').items()
+                                   if uv[1] in converters_path
+                                      and [_a for _a in a if _a not in converters_path ] }
+        extra_paths = {self.lookup(edge[0],edge[1]):
+                           [self.estimate_targeting_paths(intermediate_target)  for intermediate_target in intermediate_targets]
+               for edge, intermediate_targets in converters_implications.items()
+                      }
+
         logging.debug(f"found path: {converters_path}")
-        pipeline = [self.G[_from][_to]['functional_object'] for _from, _to in pairwise(converters_path)]
-        return Pipeline(pipeline, source, target)
+        pipeline = [self.lookup(*_from_to) for _from_to in pairwise(converters_path)]
+        return Pipeline(pipeline, source, target, extra_paths)
 
     def info(self, path="pathant.png", pipelines_to_highlight=None):
         import pylab as plt
@@ -109,10 +118,13 @@ class PathAnt:
 
             self.G.add_edge(froms,tos, functional_object=functional_object, **kwargs)
 
+    def lookup(self, _from, _to, attr='functional_object'):
+        return self.G[_from][_to][attr]
 
-
-
-
+    def estimate_targeting_paths(self, intermediate_target):
+        for possible_path in nx.single_target_shortest_path(self.G, intermediate_target).values():
+            if len(possible_path) == 2:
+                return self.lookup(*possible_path)
 
 
 import unittest
@@ -122,21 +134,28 @@ class TestPathAnt(unittest.TestCase):
         from layouteagle.LayoutReader.labeled_feature_maker import TrueFormatUpmarkerPDF2HTMLEX
         from layouteagle.LayoutReader.feature_label_assigner import TrueFormatUpmarkerPDF2HTMLEX
         from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
-        from layouteagle.LayoutReader.feature_tagger import PredictedLayout
+        from layouteagle.LayoutReader.feature_prediction import LayoutPrediction
+        from layouteagle.LayoutReader.MarkupDocument import MarkupDocument
+
         from TestArchitecture.NLP.nlp_blub import NLPBlub
         from TestArchitecture.NLP.topicape import TopicApe
         from layouteagle.LayoutReader.HTML2PDF import PrintToFile
         from layouteagle.LayoutReader.feature2features import Feature2Features
-        from layouteagle.LayoutModel.layoutmodel import LayoutModeler
+        from layouteagle.LayoutModel.layouttrain import LayoutTrainer
+        from layouteagle.LayoutModel.layoutpredict import LayouPredictor
         from TestArchitecture.publisher import NLPPublisher, TopicPublisher
 
 
         ant = PathAnt()
         model_pipe = ant("arxiv.org", "keras")
-        prediction_pipe = ant("html", "apache")
+        prediction_pipe = ant("pdf", "layout.html")
+        print (list(model_pipe("https://arxiv.org")))
 
         ant.info(pipelines_to_highlight=[model_pipe, prediction_pipe])
-        list(model_pipe("https://arxiv.org"))
+
+        pdfs = [".layouteagle/tex_data/2adf47ffbf65696180417ca86e91eb90/crypto_github_preprint_v1.pdf",
+                ".layouteagle/tex_data/2922d1d785d9620f9cdf8ac9132c59a8/ZV_PRL_rev.pdf"]
+        list(prediction_pipe((pdf, {}) for pdf in pdfs))
 
 
 

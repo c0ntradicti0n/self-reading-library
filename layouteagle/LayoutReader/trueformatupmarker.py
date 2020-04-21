@@ -23,7 +23,7 @@ class TrueFormatUpmarker(SoupReplacer):
     def __init__(self, *args,
                  min_bottom=None,
                  max_bottom=None,
-                 debug=False,
+                 debug=True,
                  parameterize=False,
                  debug_folder='./.layouteagle/debug/',
                  **kwargs):
@@ -57,18 +57,18 @@ class TrueFormatUpmarker(SoupReplacer):
         logging.warning(f"working on {html_read_from}")
 
         self.generate_css_tagging_document(html_read_from, html_write_to)
-        self.pdf_obj.indexed_words = self.indexed_words
-        self.pdf_obj.text = " ".join(self.indexed_words.values())
+        self.pdf_obj.indexed_words = self.word_index
+        self.pdf_obj.text = " ".join(self.word_index.values())
         return self.pdf_obj
 
 
     def get_indexed_words(self):
-        return self.indexed_words
+        return self.word_index
 
     def save_doc_json(self, json_path):
         doc_dict = {
-            "text": " ".join(list(self.indexed_words.values())),
-            "indexed_words": self.indexed_words,
+            "text": " ".join(list(self.word_index.values())),
+            "indexed_words": self.word_index,
             "cuts": self.cuts}
         with open(json_path, "w", encoding="utf8") as f:
             f.write(json.dumps(doc_dict))
@@ -83,12 +83,12 @@ class TrueFormatUpmarker(SoupReplacer):
                             soup: bs4.BeautifulSoup,
                             **kwargs
                             ):
-        self.indexed_words = {}  # reset container for words
-        self.count_i = itertools.count()  # counter for next indices for new html-tags
-        self.index_words(soup=soup,
-                         features=features,
-                         **kwargs,
-                         )
+
+        # reset container for words
+        self.make_word_index(soup=soup,
+                             features=features,
+                             **kwargs,
+                             )
         if self.debug:
             self.add_text_coverage_markup(soup)
 
@@ -188,12 +188,12 @@ class TrueFormatUpmarker(SoupReplacer):
             (features["shift_down"].str.contains("column")))
 
             features["pcl"][where] = features["shift_down"]
-        features["column_labels"] = features["pcl"]
+        features["layoutlabel"] = features["pcl"]
 
-    def index_labels(string):
-        return list(TrueFormatUpmarker.label_strings.values()).index(string)
+    def index_labels(self, string):
+        return self.label_lookup.token_to_id[string] / len(self.label_lookup.token_to_id)
 
-    def index_words(self,
+    def make_word_index(self,
                     soup,  # for generating new tags
                     features
                     ):
@@ -201,13 +201,11 @@ class TrueFormatUpmarker(SoupReplacer):
             splitter is a function that gives back a list of 2-tuples, that mean the starting index,
             where to replace and list of tokens
         """
+        self.word_index = {}
+        self.count_i = itertools.count()  # counter for next indices for new html-tags
         features.sort_values(by="reading_sequence", inplace=True)
-        features["debug_color"] = abs(features.column_labels.apply(lambda string: TrueFormatUpmarker.index_labels(string)) + 2) / (5)
+        features["debug_color"] = abs(features.layoutlabel.apply(lambda string: self.index_labels(string)))
         for index, feature_line in features.iterrows():
-
-            if not feature_line.relevant:
-                continue
-
             div = feature_line.divs
 
             change_list = list(self.tags_to_change(feature_line.debug_color, soup, div))
@@ -221,7 +219,8 @@ class TrueFormatUpmarker(SoupReplacer):
                         indexed_word_tag.tag)
                     indexing_css_update[indexed_word_tag.index] = indexed_word_tag.word
 
-            self.indexed_words.update(dict(indexing_css_update))
+            self.word_index.update(dict(indexing_css_update))
+        return self.word_index
 
     IndexedDivContent = namedtuple("IndexedDivContent", ["div_content_index", "parent", "indexed_word_tags"])
 

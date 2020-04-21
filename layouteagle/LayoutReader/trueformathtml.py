@@ -54,7 +54,7 @@ class TestPaperReader(unittest.TestCase):
 
         for kwargs in docs:
             self.tfu.convert_and_index(**kwargs)
-            assert self.tfu.indexed_words
+            assert self.tfu.word_index
             assert os.path.exists(kwargs['html_path_after'])
 
 if __name__ == '__main__':

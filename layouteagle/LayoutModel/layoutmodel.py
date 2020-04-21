@@ -1,125 +1,74 @@
+import pickle
 from typing import Dict
 
+import more_itertools
 import pandas
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
-from tensorflow_core.python.keras.callbacks import EarlyStopping, ModelCheckpoint
-from tensorflow_core.python.keras.utils import to_categorical
-
-from layouteagle.helpers.list_tools import Lookup, sorted_by_zipped
-
+from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
+from tensorflow.python.keras.utils.np_utils import to_categorical
 import logging
 import pprint
 
-from pathant.Converter import converter
+from layouteagle.helpers.list_tools import Lookup, sorted_by_zipped
 from pathant.PathSpec import PathSpec
 
 
-@converter("features", "keras")
 class LayoutModeler(PathSpec):
     train_kwargs = {
         'dropout': {'rate': 0.1,
                     'dtype': 'float64'},
-        'dense1': {'units': 300,
+        'dense1': {'units': 1333,
                    'trainable': True,
                    'activation': 'tanh',
                    'dtype': 'float64'},
-        'denseE': { # 'units' are set by us self to necessary
+        'denseE': { # 'units' are set by us self to the necessary value
                    'trainable': True,
                    'activation': 'softmax',
                    'dtype': 'float64'},
-        'adam': {'lr': 0.00003},
-        'epochs': 100,
+        'adam': {'lr': 0.0001},
+        'epochs': 1000,
         'batch_size': 32,
-        'patience': 7,
-        'labels': 'column_labels',
+        'patience': 20,
+        'labels': 'layoutlabel',
         'cols_to_use': ['x', 'y', 'len', 'height', 'page_number', 'font-size',
-                        'fine_grained_pdf', 'coarse_grained_pdf','line-height',
-                        'chars', 'nums', 'signs']
+                        'fine_grained_pdf', 'coarse_grained_pdf','line-height']
     }
 
     def __init__(self,
                  *args,
-                 feature_path: str = '.layouteagle/features',
-                 model_path: str = '.layouteagle/layoutmodel',
                  override_train_kwargs: Dict= {},
-                 debug: bool = False, **kwargs):
+                 lookup_path = ".layouteagle/lookup.pickle",
+                 debug: bool = True, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.feature_path = feature_path + self.path_spec._from
-        self.model_path = model_path +  self.path_spec._to
+        self.lookup_path = lookup_path
         self.train_kwargs.update(override_train_kwargs)
         self.debug = debug
-
-        try:
-            self.model = self.load()
-        except OSError:
-            logging.error("no model found, not initializing model, call the model with the path to the feature df dump")
 
     def load_pandas_file(self, feature_path):
         return pandas.read_pickle(feature_path)
 
-    def prepare_features(self, feature_df):
-        self.label_set = list(set(feature_df['column_labels'].tolist()))
-        self.label_lookup = Lookup([self.label_set])
-        feature_df.column_labels = self.label_lookup(token_s=feature_df.column_labels.tolist())
+    def prepare_features(self, feature_df, training=True):
+        self.label_set = list(set(feature_df['layoutlabel'].tolist()))
+        if training:
+            self.label_lookup = Lookup([self.label_set])
+        feature_df.layoutlabel = self.label_lookup(token_s=feature_df.layoutlabel.tolist())
 
-        self.cols_to_use = self.train_kwargs['cols_to_use'] + [self.train_kwargs['labels']]
-        feature_df = feature_df.reset_index(drop=True)
+        feature_df = self.prepare_df(feature_df, training=training)
 
-        distance_col_prefix = 'd_'
-        max_distance = max([max(x) for x in feature_df[1:]['distance_vector']])
-        feature_df.distance_vector = feature_df[1:].distance_vector.apply(lambda x: x / max_distance)
-        feature_df.distance_vector = feature_df[1:].distance_vector.apply(lambda x: list(sorted(x)))
-        feature_df = feature_df.assign(
-            **feature_df.distance_vector.apply(pandas.Series).add_prefix(distance_col_prefix))
-        feature_df = feature_df.fillna(1)
+        if training:
+            train, test = train_test_split(feature_df, test_size=0.2)
+            train, val = train_test_split(train, test_size=0.2)
+            logging.info(f'{len(train)} train samples')
+            logging.info(f'{len(val)} validation samples')
+            logging.info(f'{len(test)} test samples')
 
-        angle_col_prefix = 'a_'
-        feature_df.angle = feature_df[1:].angle.apply(lambda x: list(x))
-        feature_df['da'] = list(zip(feature_df['angle'], feature_df['distance_vector']))
-        feature_df.angle = feature_df[1:]['da'].apply(lambda x: list(sorted_by_zipped(x))[:50])
-        feature_df = feature_df.assign(**feature_df.angle.apply(pandas.Series).add_prefix(angle_col_prefix))
-        feature_df = feature_df.fillna(1)
-
-        with pandas.option_context('display.max_rows', None, 'display.max_columns', None):
-            logging.info(str(feature_df.head()))
-
-        self.cols_to_use += [col for col in feature_df.columns if
-                             col.startswith(distance_col_prefix) or col.startswith(angle_col_prefix)]
-        feature_df = feature_df.sample(frac=1).reset_index(drop=True)
-        feature_df = feature_df[self.cols_to_use]
-
-        train, test = train_test_split(feature_df, test_size=0.2)
-        train, val = train_test_split(train, test_size=0.2)
-        logging.info(f'{len(train)} train samples')
-        logging.info(f'{len(val)} validation samples')
-        logging.info(f'{len(test)} test samples')
-
-        # A utility method to create a tf.data dataset from a Pandas Dataframe
-        def df_to_dataset(dataframe, shuffle=True, batch_size=self.train_kwargs['batch_size']):
-            dataframe = dataframe.copy()
-            dataframe = dataframe.reset_index(drop=True)
-            try:
-                labels = dataframe[self.train_kwargs['labels']].tolist()
-                dataframe.pop(self.train_kwargs['labels'])
-                categorical_labels = to_categorical(labels)
-            except:
-                raise
-            ds = tf.data.Dataset.from_tensor_slices((dict(dataframe), categorical_labels))
-            if shuffle:
-                ds = ds.shuffle(buffer_size=len(dataframe))
-            ds = ds.batch(batch_size)
-            return ds
-
-        self.train_ds = df_to_dataset(train)
-        self.val_ds = df_to_dataset(val, shuffle=False)
-        self.test_ds = df_to_dataset(test, shuffle=False)
-
-        for feature_batch, label_batch in self.train_ds.take(1):
-            logging.debug(f'Every feature: {list(feature_batch.keys())}')
-            logging.debug(f'A batch of ages: {feature_batch["chars"]}')
-            logging.debug(f'A batch of targets: {str(label_batch)}')
+            self.train_ds = self.df_to_dataset(train, batch_size=self.train_kwargs['batch_size'])
+            self.val_ds = self.df_to_dataset(val, shuffle=False, batch_size=self.train_kwargs['batch_size'])
+            self.test_ds = self.df_to_dataset(test, shuffle=False, batch_size=self.train_kwargs['batch_size'])
+        else:
+            self.predict_ds =  self.df_to_dataset(feature_df, shuffle=False, batch_size=self.train_kwargs['batch_size'])
 
         feature_columns = []
 
@@ -129,9 +78,68 @@ class LayoutModeler(PathSpec):
         # all are numeric cols
         for header in self.cols_to_use:
             feature_columns.append(tf.feature_column.numeric_column(header))
-        return feature_columns
+
+        as_numpy = feature_df[self.cols_to_use].to_numpy()
+        return feature_columns, as_numpy
+
+    # A utility method to create a tf.data dataset from a Pandas Dataframe
+    def df_to_dataset(self, dataframe, shuffle=True, batch_size=None):
+        dataframe = dataframe.copy()
+        dataframe = dataframe.reset_index(drop=True)
+
+        labels = dataframe[self.train_kwargs['labels']].tolist()
+        dataframe.pop(self.train_kwargs['labels'])
+        categorical_labels = to_categorical(labels)
+
+
+        try:
+            ds = tf.data.Dataset.from_tensor_slices((dict(dataframe), categorical_labels))
+        except:
+            raise
+        if shuffle:
+            ds = ds.shuffle(buffer_size=len(dataframe))
+        ds = ds.batch(batch_size)
+        return ds
+
+    def prepare_df(self, feature_df, training=True):
+        self.cols_to_use = self.train_kwargs['cols_to_use'] + [self.train_kwargs['labels']] #([self.train_kwargs['labels']] if training else [])
+        feature_df = feature_df.reset_index(drop=True)
+
+        N = 60
+
+        distance_col_prefix = 'd_'
+        max_distance = max([max(x) for x in feature_df[1:]['distance_vector']])
+        feature_df.distance_vector = feature_df[1:].distance_vector.apply(lambda x: x / max_distance)
+        feature_df.distance_vector = feature_df[1:].distance_vector.apply(lambda x: list(more_itertools.padded(list(sorted(x))[:N], 0, 8)))
+        feature_df = feature_df.assign(
+            **feature_df.distance_vector.apply(pandas.Series).add_prefix(distance_col_prefix))
+        feature_df = feature_df.fillna(1)
+
+        angle_col_prefix = 'a_'
+        feature_df.angle = feature_df[1:].angle.apply(lambda x: list(x))
+        feature_df['da'] = list(zip(feature_df['angle'], feature_df['distance_vector']))
+        feature_df.angle = feature_df[1:]['da'].apply(lambda x: list(more_itertools.padded(list(sorted_by_zipped(x))[:N], 0, N)))
+        feature_df = feature_df.assign(**feature_df.angle.apply(pandas.Series).add_prefix(angle_col_prefix))
+        feature_df = feature_df.fillna(1)
+        with pandas.option_context('display.max_rows', None, 'display.max_columns', None):
+            logging.info(str(feature_df.head()))
+        self.cols_to_use = self.cols_to_use + [col for col in feature_df.columns if
+                             col.startswith(distance_col_prefix) or col.startswith(angle_col_prefix)]
+
+        if training:
+            feature_df = feature_df.sample(frac=1).reset_index(drop=True)
+        feature_df = feature_df[self.cols_to_use]
+
+        shift1 = feature_df.shift(periods=1, fill_value = 0)
+        shift_1 = feature_df.shift(periods=-1, fill_value = 0)
+        names =['bef', '', 'aft']
+        dfs = [feature_df, shift1, shift_1]
+        feature_df = pandas.concat([df.add_prefix(name) for name, df in zip(names, dfs)], axis=1).dropna()
+
+        return feature_df
 
     def train(self, feature_columns, override_kwargs={}):
+        logging.info(f"Model will go to {self.model_path}")
         self.train_kwargs.update(override_kwargs)
         feature_layer = tf.keras.layers.DenseFeatures(feature_columns=feature_columns, dtype='float64')
 
@@ -141,7 +149,11 @@ class LayoutModeler(PathSpec):
         self.model = tf.keras.Sequential([
             feature_layer,
             tf.keras.layers.Dropout(**self.train_kwargs['dropout']),
+            #tf.keras.layers.PReLU(alpha_initializer='zeros', alpha_regularizer=None, alpha_constraint=None,
+            #                      shared_axes=None),
             tf.keras.layers.Dense(**self.train_kwargs['dense1']),
+            #tf.keras.layers.PReLU(alpha_initializer='zeros', alpha_regularizer=None, alpha_constraint=None,
+            #                   shared_axes=None),
             tf.keras.layers.Dense(units=len(self.label_set), **self.train_kwargs['denseE'])
         ])
 
@@ -177,25 +189,23 @@ class LayoutModeler(PathSpec):
             logging.info(f'{y_pred} --->>> {y_true}')
         logging.warning(f'Legend {pprint.pformat(self.label_lookup.id_to_token, indent=4)}')
 
+    def predict(self, features_df):
+        self.prepare_features(features_df, training=False)
+        return self.model.predict_classes(self.predict_ds, batch_size=None, verbose=100)
+
     def save(self):
+        with open(self.lookup_path, "wb") as f:
+            pickle.dump(self.label_lookup,f)
         self.model.save(self.model_path)
 
     def load(self):
-        self.model = tf.saved_model.load(self.model_path)
-
-    def __call__(self, feature_path):
-        if feature_path:
-            self.feature_path = next(feature_path)
-        feature_df = self.load_pandas_file(self.feature_path)
-        feature_columns = self.prepare_features(feature_df)
-        history = self.train(feature_columns, self.train_kwargs)
-        if self.debug:
-            self.plot(history)
-        self.validate()
-        self.save()
-        logging.info(f'made model, saved to {self.model_path}')
-        yield self.model_path
-
+        try:
+            self.model = tf.keras.models.load_model (self.model_path)
+            with open(self.lookup_path, "rb") as f:
+                self.label_lookup = pickle.load(f)
+        except OSError as e:
+            e.args = (e.args[0] + f"\n Please train model first and it should be written to {self.model_path}",)
+            raise
 
 if __name__ == '__main__':
     modeler = LayoutModeler(debug=True)

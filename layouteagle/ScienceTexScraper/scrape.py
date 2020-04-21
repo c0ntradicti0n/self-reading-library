@@ -43,12 +43,14 @@ class ScienceTexScraper(PathSpec):
             soup = BeautifulSoup(response.text, "lxml")
             links = soup.findAll('a')
             random.shuffle(links)
+            if response.status_code == 404:
+                logging.error(f"404 for {url}")
+                links = []
         except Exception as e:
             logging.error(f"Connection error, maybe timeout, maybe headers, maybe bad connection, continuing elsewhere: {e}")
             links = []
 
-        if response.status_code == 404:
-            yield from []
+
 
         hrefs = []
         for link in links:

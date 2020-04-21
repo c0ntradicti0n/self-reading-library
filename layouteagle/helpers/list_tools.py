@@ -76,6 +76,21 @@ class Lookup:
             logging.error(f"{[id for id in ids if id not in self.id_to_token]} not in labels dict {self.id_to_token}")
 
 
+def pad_along_axis(array: numpy.ndarray, target_length, axis=0):
+
+    pad_size = target_length - array.shape[axis]
+    axis_nb = len(array.shape)
+
+    if pad_size < 0:
+        return array
+
+    npad = [(0, 0) for x in range(axis_nb)]
+    npad[axis] = (0, pad_size)
+
+    b = numpy.pad(array, pad_width=npad, mode='constant', constant_values=0)
+
+    return b
+
 
 
 

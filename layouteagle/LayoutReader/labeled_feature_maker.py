@@ -17,37 +17,34 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
         self.n = n
         self.debug = debug
 
-    @file_persistent_cached_generator(config.cache + 'collected_features.json')
     def __call__(self, labeled_paths, *args, **kwargs):
-        all_feature_dfs = []
-        doc_id = 0
-        while doc_id < self.n:
+        for doc_id, (labeled_pdf_path, meta) in enumerate(labeled_paths):
             logging.info(f"Got {doc_id}/{self.n}")
-            labeled_pdf_path, meta = next(labeled_paths)
 
             labeled_html_path = labeled_pdf_path + ".htm"
             self.pdf2htmlEX(labeled_pdf_path, labeled_html_path)
+            meta['pdf2htmlEX.html'] = labeled_html_path
             try:
-                features, soup = self.generate_data_for_file(labeled_html_path)
+                feature_df, soup = self.generate_data_for_file(labeled_html_path)
             except FileNotFoundError:
                 logging.error("output of pdf2html looks damaged")
                 continue
-            pdf_doc = self.pdf_obj
-            pdf_doc.features["doc_id"] = doc_id
-            all_feature_dfs.append(pdf_doc.features)
 
+            feature_df["doc_id"] = doc_id
             if False and self.debug:
                 debug_html_path = labeled_html_path+".debug.html"
                 self.tfu = TrueFormatUpmarkerPDF2HTMLEX(debug=True)
-                self.tfu.generate_css_tagging_document(premade_soup=soup, html_write_to=debug_html_path, premade_features=features)
+                self.tfu.generate_css_tagging_document(premade_soup=soup, html_write_to=debug_html_path, premade_features=feature_df)
                 os.system(f"google-chrome {debug_html_path}")
 
-            pandas_pickle_path = labeled_pdf_path + self.path_spec._to
-            pdf_doc.features.divs = pdf_doc.features.divs.astype(str)
+            #feature_df['chars'] = feature_df.divs.apply(lambda div: sum(div.text.count(c) for c in string.ascii_letters))
+            #feature_df['nums'] = feature_df.divs.apply(lambda div: sum(div.text.count(c) for c in string.digits))
+            #feature_df['signs'] = feature_df.divs.apply(lambda div: sum(div.text.count(c) for c in string.punctuation))
 
-            pdf_doc.features.to_pickle(pandas_pickle_path)
+            meta['filename'] = labeled_pdf_path
+            meta['soup'] = soup
 
-            yield pandas_pickle_path, meta
+            yield feature_df, meta
 
 
 

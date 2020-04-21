@@ -65,38 +65,51 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
             file.write(str(soup).replace("<coolwanglu@gmail.com>", "coolwanglu@gmail.com"))
 
         self.pdf_obj.features = features
-        self.pdf_obj.text = " ".join(self.indexed_words.values())
-        self.pdf_obj.indexed_words = self.indexed_words
+        self.pdf_obj.text = " ".join(self.word_index.values())
+        self.pdf_obj.indexed_words = self.word_index
         return self.pdf_obj
 
     def generate_data_for_file(self, html_read_from):
-        with open(html_read_from, 'r', encoding='utf8') as f:
-            soup = bs4.BeautifulSoup(f.read(), features='lxml')
+        soup = self.make_soup(html_read_from)
         # create data and features for clustering
         self.css_dict = self.get_css(soup)
         self.features = self.extract_features(soup=soup)
         self.pdf_obj.columns = self.number_columns
-        self.assign_labels_from_div_content(features=self.features)
         self.pdf_obj.features = self.features
         return self.features, soup
+
+    def make_soup(self, html_read_from):
+        with open(html_read_from, 'r', encoding='utf8') as f:
+            soup = bs4.BeautifulSoup(f.read(), features='lxml')
+        return soup
 
     def get_page_tags(self, soup):
         return soup.select("div[data-page-no]")
 
-    SortedClusteredDivs = namedtuple("SortedClusteredDivs", ["reading_sequence", "index_to_clusters"])
-    def assign_labels_from_div_content(self,
-                                       features: pandas.DataFrame,
-                                       ) -> SortedClusteredDivs:
+    def assign_labels_from_div_content(self, feature_df: pandas.DataFrame):
+        page_cluster_lr_groups = self.make_reading_sequence(feature_df)
+        self.make_text_per_page(page_cluster_lr_groups)
+        return feature_df
+
+    def make_text_per_page(self, page_cluster_lr_groups):
+        self.pdf_obj.pages_to_column_to_text = {
+            page_number: {cluster: " ".join([div.text for div in cluster_content["divs"].tolist()])
+                          for cluster, cluster_content in page_content}
+            for page_number, page_content in page_cluster_lr_groups.items()
+
+            }
+
+    def make_reading_sequence(self, feature_df):
         page_cluster_lr_groups = defaultdict(list)
-        for page, page_group in features.groupby(by="page_number"):
+        for page, page_group in feature_df.groupby(by="page_number"):
             # itertools would break up the clusters, when the clusters are unsorted
             # TODO right to left and up to down!
+            # Assuming, also column labels have bpdf2htmlEX.htmleen sorted yet from left to right
 
-            # Assuming, also column labels have been sorted yet from left to right
+            groups_of_clusters = page_group.groupby(by="layoutlabel")
 
-            groups_of_clusters = page_group.groupby(by="column_labels")
-
-            groups_of_clusters = sorted(groups_of_clusters, key=lambda cluster_and_cluster_group: cluster_and_cluster_group[1].x.mean() )
+            groups_of_clusters = sorted(groups_of_clusters,
+                                        key=lambda cluster_and_cluster_group: cluster_and_cluster_group[1].x.mean())
 
             page_cluster_up_bottom_groups = \
                 [(new_cluster, cluster_group.sort_values(by="y"))
@@ -105,21 +118,12 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
 
             page_cluster_lr_groups[page] = \
                 sorted(page_cluster_up_bottom_groups, key=lambda c: c[1].x.mean())
-
-        features["reading_sequence"] = list(more_itertools.flatten([cluster_content["index"].tolist()
-                                for page_number, page_content in page_cluster_lr_groups.items()
-                                for cluster, cluster_content in page_content
-                                ]))
-
-        features["relevant"] = True
-
-
-        self.pdf_obj.pages_to_column_to_text = {page_number:{cluster: " ".join([div.text for div in cluster_content["divs"].tolist()])
-                                                             for cluster, cluster_content in page_content}
-                                                for page_number, page_content in page_cluster_lr_groups.items()
-
-                                                }
-        return features
+        feature_df["reading_sequence"] = list(more_itertools.flatten([cluster_content["index"].tolist()
+                                                                      for page_number, page_content in
+                                                                      page_cluster_lr_groups.items()
+                                                                      for cluster, cluster_content in page_content
+                                                                      ]))
+        return page_cluster_lr_groups
 
     FeatureStuff = namedtuple("FeatureStuff", ["divs", "coords", "data", "density_field", "labels"])
     def extract_features(self, soup) -> FeatureStuff:
