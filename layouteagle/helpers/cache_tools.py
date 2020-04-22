@@ -1,12 +1,14 @@
 import functools
 import json
 import logging
+import os
 
 def file_persistent_cached_generator(filename):
 
     def decorator(original_func):
 
         def new_func(*param):
+            cwd = os.getcwd()
 
             try:
                 with open(filename, 'r') as f:
@@ -16,6 +18,7 @@ def file_persistent_cached_generator(filename):
 
             for result in cache:
                 content, meta = json.loads(result)
+                os.chdir(cwd)
                 yield content, meta
 
             generator = original_func(*param)
@@ -26,7 +29,9 @@ def file_persistent_cached_generator(filename):
                     content, meta = result
                     with open(filename, 'a') as f:
                         f.write(result_string)
+                    os.chdir(cwd)
                     yield content, meta
+            os.chdir(cwd)
 
         functools.update_wrapper(new_func, original_func)
 

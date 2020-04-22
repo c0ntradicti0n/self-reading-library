@@ -10,7 +10,6 @@ from more_itertools import pairwise
 from layouteagle.helpers.os_tools import make_dirs_recursive
 from pathant.Pipeline import Pipeline
 from pathant.converters import converters
-from pathant.logger import *
 
 
 class PathAnt:
@@ -114,7 +113,6 @@ class PathAnt:
         else:
             functional_object.path_spec._from = "." + froms
             functional_object.path_spec._to = "." + tos
-            functional_object.path_spec.logger = palogger
 
             self.G.add_edge(froms,tos, functional_object=functional_object, **kwargs)
 

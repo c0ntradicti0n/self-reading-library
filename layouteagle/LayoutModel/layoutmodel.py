@@ -6,28 +6,31 @@ import pandas
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
+from tensorflow.python.keras.layers import Attention
 from tensorflow.python.keras.utils.np_utils import to_categorical
 import logging
 import pprint
+
 
 from layouteagle.helpers.list_tools import Lookup, sorted_by_zipped
 from pathant.PathSpec import PathSpec
 
 
+
 class LayoutModeler(PathSpec):
     train_kwargs = {
-        'dropout': {'rate': 0.1,
+        'dropout': {'rate': 0.01,
                     'dtype': 'float64'},
-        'dense1': {'units': 1333,
+        'dense1': {'units': 420,
                    'trainable': True,
-                   'activation': 'tanh',
+                   'activation': 'selu',
                    'dtype': 'float64'},
         'denseE': { # 'units' are set by us self to the necessary value
                    'trainable': True,
                    'activation': 'softmax',
                    'dtype': 'float64'},
         'adam': {'lr': 0.0001},
-        'epochs': 1000,
+        'epochs': 400,
         'batch_size': 32,
         'patience': 20,
         'labels': 'layoutlabel',
@@ -152,6 +155,8 @@ class LayoutModeler(PathSpec):
             #tf.keras.layers.PReLU(alpha_initializer='zeros', alpha_regularizer=None, alpha_constraint=None,
             #                      shared_axes=None),
             tf.keras.layers.Dense(**self.train_kwargs['dense1']),
+            tf.keras.layers.ELU(),
+            tf.keras.layers.Dense(**self.train_kwargs['dense1']),
             #tf.keras.layers.PReLU(alpha_initializer='zeros', alpha_regularizer=None, alpha_constraint=None,
             #                   shared_axes=None),
             tf.keras.layers.Dense(units=len(self.label_set), **self.train_kwargs['denseE'])
@@ -196,11 +201,15 @@ class LayoutModeler(PathSpec):
     def save(self):
         with open(self.lookup_path, "wb") as f:
             pickle.dump(self.label_lookup,f)
+
+        self.model.load_weights(".layouteagle/layoutmodelkeras.h5")
+
         self.model.save(self.model_path)
 
     def load(self):
         try:
             self.model = tf.keras.models.load_model (self.model_path)
+
             with open(self.lookup_path, "rb") as f:
                 self.label_lookup = pickle.load(f)
         except OSError as e:

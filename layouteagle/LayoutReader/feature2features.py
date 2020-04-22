@@ -1,4 +1,5 @@
 import itertools
+import logging
 
 import pandas
 
@@ -18,7 +19,10 @@ class Feature2Features(PathSpec):
     @file_persistent_cached_generator(config.cache + 'collected_features.json')
     def __call__(self, feature_dfs_meta,  *args, **kwargs):
         df_paths, meta = zip(*list(itertools.islice(feature_dfs_meta, self.n)))
-        dfs = [pandas.read_pickle(df_path) for df_path in df_paths]
+        try:
+            dfs = [pandas.read_pickle(df_path) for df_path in df_paths]
+        except FileNotFoundError:
+            raise FileNotFoundError(f" df_path from {df_paths} not found")
         df = pandas.concat(dfs)
         df.to_pickle(self.pandas_path)
         yield self.pandas_path, meta

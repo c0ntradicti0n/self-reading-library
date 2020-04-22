@@ -32,7 +32,7 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
 
             feature_df["doc_id"] = doc_id
             if False and self.debug:
-                debug_html_path = labeled_html_path+".debug.html"
+                debug_html_path = labeled_html_path + ".debug.html"
                 self.tfu = TrueFormatUpmarkerPDF2HTMLEX(debug=True)
                 self.tfu.generate_css_tagging_document(premade_soup=soup, html_write_to=debug_html_path, premade_features=feature_df)
                 os.system(f"google-chrome {debug_html_path}")

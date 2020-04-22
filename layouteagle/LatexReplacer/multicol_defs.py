@@ -53,4 +53,16 @@ defs = r"""
         nexprex@current@column@\arabic{nexprex@current@column@call}\endcsname
     \fi
   }
+
+\makeatother
+"""
+
+
+
+multicol_begin = r"""
+\begin{multicols}{%s}
+"""
+
+multicol_end = r"""
+\end{multicols}
 """

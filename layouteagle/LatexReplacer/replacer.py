@@ -13,14 +13,23 @@ class SoupReplacer(PathSpec):
         self.path_spec = path_spec
 
     def replace_node(self, node, how):
-        self.make_replacement(node, how)
+        try:
+            self.make_replacement(node.expr, how)
+        except:
+            raise
 
     def __call__(self, soup):
         for tag, tex_strings in self.replacements.items():
             for tex_string in tex_strings:
-                nodes = list(self.find_all(soup, tex_string))
+
+                if tex_string != None:
+                    nodes = list(self.find_all(soup, tex_string))
+                else:
+                    nodes = [soup]
+
                 if not nodes:
                     continue
+
                 for i, node in enumerate(nodes): # plural
                     self.replace_node(node, tag)
 
