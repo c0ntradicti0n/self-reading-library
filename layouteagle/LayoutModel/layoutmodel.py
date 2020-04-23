@@ -23,18 +23,18 @@ class LayoutModeler(PathSpec):
                     'dtype': 'float64'},
         'dense1': {'units': 300,
                    'trainable': True,
-                   'activation': 'selu',
+                   'activation': 'tanh',
                    'dtype': 'float64'},
         'denseE': { # 'units' are set by us self to the necessary value
                    'trainable': True,
                    'activation': 'softmax',
                    'dtype': 'float64'},
-        'adam': {'lr': 0.00006},
+        'adam': {'lr': 0.0002},
         'epochs': 80,
         'batch_size': 32,
         'patience': 20,
         'labels': 'layoutlabel',
-        'cols_to_use': ['x', 'y', 'len', 'height', 'page_number', 'font-size',
+        'cols_to_use': ['x', 'y', 'height', 'font-size',
                         'fine_grained_pdf', 'coarse_grained_pdf','line-height']
     }
 
@@ -67,7 +67,7 @@ class LayoutModeler(PathSpec):
             logging.info(f'{len(val)} validation samples')
             logging.info(f'{len(test)} test samples')
 
-            self.train_ds = self.df_to_dataset(train, batch_size=self.train_kwargs['batch_size'], training=training)
+            self.train_ds = self.df_to_dataset(train, shuffle=False, batch_size=self.train_kwargs['batch_size'], training=training)
             self.val_ds = self.df_to_dataset(val, shuffle=False, batch_size=self.train_kwargs['batch_size'], training=training)
             self.test_ds = self.df_to_dataset(test, shuffle=False, batch_size=self.train_kwargs['batch_size'], training=training)
         else:
@@ -137,11 +137,11 @@ class LayoutModeler(PathSpec):
 
         feature_df = feature_df[self.cols_to_use]
 
-        #shift1 = feature_df.shift(periods=1, fill_value = 0)
-        #shift_1 = feature_df.shift(periods=-1, fill_value = 0)
-        #names =['bef', '', 'aft']
-        #dfs = [feature_df, shift1, shift_1]
-        #feature_df = pandas.concat([df.add_prefix(name) for name, df in zip(names, dfs)], axis=1).dropna()
+        shift1 = feature_df.shift(periods=1, fill_value = 0)
+        shift_1 = feature_df.shift(periods=-1, fill_value = 0)
+        names =['bef', '', 'aft']
+        dfs = [feature_df, shift1, shift_1]
+        feature_df = pandas.concat([df.add_prefix(name) for name, df in zip(names, dfs)], axis=1).dropna()
 
         return feature_df
 

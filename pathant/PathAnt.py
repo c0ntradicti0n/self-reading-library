@@ -25,7 +25,11 @@ class PathAnt:
         os.system(f"mkdir {node.dir}")
 
     def make_path(self, G, source, target):
-        return nx.shortest_path(G, source, target)
+        try:
+            return nx.shortest_path(G, source, target)
+        except:
+            self.info()
+            raise
 
     def __call__(self, source, target, *args, **kwargs):
         converters_path = self.make_path(self.G, source, target)
@@ -128,19 +132,21 @@ class PathAnt:
 import unittest
 
 class TestPathAnt(unittest.TestCase):
+    from layouteagle.ScienceTexScraper.scrape import ScienceTexScraper
+    from layouteagle.LatexReplacer.latex_replacer import LatexReplacer
     from layouteagle.LayoutReader.labeled_feature_maker import TrueFormatUpmarkerPDF2HTMLEX
     from layouteagle.LayoutReader.feature_label_assigner import TrueFormatUpmarkerPDF2HTMLEX
     from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
     from layouteagle.LayoutReader.feature_prediction import LayoutPrediction
     from layouteagle.LayoutReader.MarkupDocument import MarkupDocument
-
-    from TestArchitecture.NLP.nlp_blub import NLPBlub
-    from TestArchitecture.NLP.topicape import TopicApe
-    from layouteagle.LayoutReader.HTML2PDF import PrintToFile
     from layouteagle.LayoutReader.feature2features import Feature2Features
     from layouteagle.LayoutModel.layouttrain import LayoutTrainer
     from layouteagle.LayoutModel.layoutpredict import LayouPredictor
+
+    from layouteagle.LayoutReader.HTML2PDF import PrintToFile
     from TestArchitecture.publisher import NLPPublisher, TopicPublisher
+    from TestArchitecture.NLP.nlp_blub import NLPBlub
+    from TestArchitecture.NLP.topicape import TopicApe
 
     def setUp(self):
         self.ant = PathAnt()

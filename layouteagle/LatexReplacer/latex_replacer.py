@@ -24,12 +24,12 @@ class LatexReplacer(SoupReplacer):
     replacement_mapping_tag2tex = OrderedDict({
         None: ["document", "abstract", "keywords", None],
 
-        "title": ["Title", "title"],
-        "staff": ["name", "Author", "email", "corres", "affiliation", "affil", "corresp", "author", "markboth",
-                  "email", "address", "adress", "emailAdd", "authorrunning", "institute", "ead", "caption",
-                  "footnote", "tfootnote", "thanks"],
-        "content": ["section*", "subsection", "subsection*", "subsubsection*",
-                    "section", "subsection", "subsubsection"],
+        #"title": ["Title", "title"],
+        #"staff": ["name", "Author", "email", "corres", "affiliation", "affil", "corresp", "author", "markboth",
+        #          "email", "address", "adress", "emailAdd", "authorrunning", "institute", "ead", "caption",
+        #          "footnote", "tfootnote", "thanks"],
+        #"content": ["section*", "subsection", "subsection*", "subsubsection*",
+        #            "section", "subsection", "subsubsection"],
     })
 
     def __init__(self, *args, max_cols=3, timout_sec=10, **kwargs):

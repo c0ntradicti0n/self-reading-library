@@ -26,7 +26,6 @@ class MarkupDocument(TrueFormatUpmarkerPDF2HTMLEX):
             self.assign_labels_from_div_content(feature_df)
             self.label_lookup = meta['label_lookup']
             indexed_words = self.make_word_index(soup, feature_df)
-            print (indexed_words)
 
             html_path = meta['pdf2htmlEX.html'] + outputs['html']
             with open(html_path, 'w') as f:
