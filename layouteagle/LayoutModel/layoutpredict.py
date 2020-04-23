@@ -1,6 +1,6 @@
 import itertools
 from layouteagle.LayoutModel.layoutmodel import LayoutModeler
-from pathant.Converter import converter
+from layouteagle.pathant.Converter import converter
 
 @converter("keras", "predictor")
 class LayouPredictor(LayoutModeler):

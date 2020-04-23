@@ -1,9 +1,7 @@
-import logging
 from collections import Callable
-from types import GeneratorType
 from typing import Dict, Tuple
 
-from pathant.PathSpec import PathSpec
+from layouteagle.pathant.PathSpec import PathSpec
 
 
 class SoupReplacer(PathSpec):

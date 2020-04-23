@@ -1,5 +1,5 @@
-from pathant.Converter import converter
-from pathant.PathSpec import PathSpec
+from layouteagle.pathant.Converter import converter
+from layouteagle.pathant.PathSpec import PathSpec
 
 
 @converter('text.json', 'text.css')

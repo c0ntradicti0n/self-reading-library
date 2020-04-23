@@ -1,6 +1,5 @@
 import logging
 import os
-from collections import Iterable
 from typing import List, Tuple
 
 import networkx as nx
@@ -8,8 +7,8 @@ import pylab
 from more_itertools import pairwise
 
 from layouteagle.helpers.os_tools import make_dirs_recursive
-from pathant.Pipeline import Pipeline
-from pathant.converters import converters
+from layouteagle.pathant.Pipeline import Pipeline
+from layouteagle.pathant.converters import converters
 
 
 class PathAnt:

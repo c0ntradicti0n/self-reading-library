@@ -6,14 +6,13 @@ import pandas
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
-from tensorflow.python.keras.layers import Attention
 from tensorflow.python.keras.utils.np_utils import to_categorical
 import logging
 import pprint
 
 
 from layouteagle.helpers.list_tools import Lookup, sorted_by_zipped
-from pathant.PathSpec import PathSpec
+from layouteagle.pathant.PathSpec import PathSpec
 
 
 

@@ -1,8 +1,6 @@
-from layouteagle import config
 from layouteagle.LayoutModel.layoutmodel import LayoutModeler
-from layouteagle.helpers.cache_tools import file_persistent_cached_generator
 import logging
-from pathant.Converter import converter
+from layouteagle.pathant.Converter import converter
 
 
 @converter("features", "keras")

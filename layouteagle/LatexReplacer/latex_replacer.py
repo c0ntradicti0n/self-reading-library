@@ -13,10 +13,9 @@ from layouteagle.LatexReplacer import multicol_defs
 from layouteagle.LatexReplacer.replacer import SoupReplacer
 from layouteagle.helpers.cache_tools import file_persistent_cached_generator
 from layouteagle.helpers.os_tools import get_path_filename_extension
-from layouteagle.helpers.str_tools import find_all
 from regex import regex
 
-from pathant.Converter import converter
+from layouteagle.pathant.Converter import converter
 
 
 @converter("tex", "labeled.pdf")

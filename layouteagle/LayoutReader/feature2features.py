@@ -1,12 +1,11 @@
 import itertools
-import logging
 
 import pandas
 
 from layouteagle import config
 from layouteagle.helpers.cache_tools import file_persistent_cached_generator
-from pathant.Converter import converter
-from pathant.PathSpec import PathSpec
+from layouteagle.pathant.Converter import converter
+from layouteagle.pathant.PathSpec import PathSpec
 
 
 @converter(["assigned.feature"], "features")

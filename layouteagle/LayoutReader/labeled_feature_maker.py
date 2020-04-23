@@ -1,13 +1,8 @@
 import logging
 import os
-import string
 
-import pandas
-
-from layouteagle import config
 from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
-from layouteagle.helpers.cache_tools import file_persistent_cached_generator
-from pathant.Converter import converter
+from layouteagle.pathant.Converter import converter
 
 
 @converter(["labeled.pdf", "pdf"], "feature")

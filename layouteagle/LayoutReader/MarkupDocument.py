@@ -1,10 +1,9 @@
 import json
-import logging
 import os
 from pprint import pprint
 
 from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
-from pathant.Converter import converter
+from layouteagle.pathant.Converter import converter
 
 outputs = {
  'html':'layout.html', # same looking html

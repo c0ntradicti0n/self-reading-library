@@ -9,12 +9,12 @@ import time
 from bs4 import BeautifulSoup
 
 from layouteagle import config
-from layouteagle.helpers.cache_tools import persist_to_file, file_persistent_cached_generator
+from layouteagle.helpers.cache_tools import file_persistent_cached_generator
 
 import logging
 
-from pathant.Converter import converter
-from pathant.PathSpec import PathSpec
+from layouteagle.pathant.Converter import converter
+from layouteagle.pathant.PathSpec import PathSpec
 
 logging.basicConfig(level = logging.INFO)
 

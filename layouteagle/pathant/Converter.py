@@ -1,6 +1,6 @@
 import functools
 
-from pathant.converters import converters
+from layouteagle.pathant.converters import converters
 
 
 class converter(object):

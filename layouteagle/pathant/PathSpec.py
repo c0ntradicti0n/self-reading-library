@@ -1,4 +1,4 @@
-from pathant.logger import palogger
+from layouteagle.pathant.logger import palogger
 
 
 class PathSpec:

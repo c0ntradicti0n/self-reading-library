@@ -22,8 +22,6 @@ from layouteagle import config
 from layouteagle.helpers.list_tools import threewise
 
 from layouteagle.LayoutReader.trueformatupmarker import TrueFormatUpmarker
-from pathant.Converter import converter
-from pathant.PathSpec import PathSpec
 
 logging.getLogger().setLevel(logging.WARNING)
 

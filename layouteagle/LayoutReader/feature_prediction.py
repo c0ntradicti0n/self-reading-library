@@ -1,7 +1,5 @@
-import logging
-
 from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
-from pathant.Converter import converter
+from layouteagle.pathant.Converter import converter
 
 
 @converter(("feature", "predictor"), 'predicted.feature')
