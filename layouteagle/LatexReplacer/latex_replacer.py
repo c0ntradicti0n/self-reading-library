@@ -407,7 +407,11 @@ class LatexReplacer(SoupReplacer):
             super().__call__(soup)
 
             # WRITE BACK
-            result = soup.__str__()
+            try:
+                result = soup.__str__()
+            except TypeError:
+                logging.error("Soup damaged, continue")
+                return
 
             out_path = self.labeled_tex_path(path_to_read_from + str(col_num))
             with open(out_path, 'w') as f:

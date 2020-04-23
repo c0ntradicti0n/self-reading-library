@@ -23,7 +23,11 @@ class SoupReplacer(PathSpec):
             for tex_string in tex_strings:
 
                 if tex_string != None:
-                    nodes = list(self.find_all(soup, tex_string))
+                    try:
+                        nodes = list(self.find_all(soup, tex_string))
+                    except TypeError:
+                        nodes = [soup]
+
                 else:
                     nodes = [soup]
 
