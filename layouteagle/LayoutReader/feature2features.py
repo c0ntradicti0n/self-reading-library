@@ -11,7 +11,7 @@ from pathant.PathSpec import PathSpec
 
 @converter(["assigned.feature"], "features")
 class Feature2Features(PathSpec):
-    def __init__(self, *args,  n=14, pandas_path=".layouteagle/labeled_features", **kwargs):
+    def __init__(self, *args,  n=34, pandas_path=".layouteagle/labeled_features", **kwargs):
         super().__init__(*args, **kwargs)
         self.pandas_path = pandas_path
         self.n = n

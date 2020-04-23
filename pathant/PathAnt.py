@@ -128,34 +128,38 @@ class PathAnt:
 import unittest
 
 class TestPathAnt(unittest.TestCase):
+    from layouteagle.LayoutReader.labeled_feature_maker import TrueFormatUpmarkerPDF2HTMLEX
+    from layouteagle.LayoutReader.feature_label_assigner import TrueFormatUpmarkerPDF2HTMLEX
+    from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
+    from layouteagle.LayoutReader.feature_prediction import LayoutPrediction
+    from layouteagle.LayoutReader.MarkupDocument import MarkupDocument
+
+    from TestArchitecture.NLP.nlp_blub import NLPBlub
+    from TestArchitecture.NLP.topicape import TopicApe
+    from layouteagle.LayoutReader.HTML2PDF import PrintToFile
+    from layouteagle.LayoutReader.feature2features import Feature2Features
+    from layouteagle.LayoutModel.layouttrain import LayoutTrainer
+    from layouteagle.LayoutModel.layoutpredict import LayouPredictor
+    from TestArchitecture.publisher import NLPPublisher, TopicPublisher
+
+    def setUp(self):
+        self.ant = PathAnt()
+        self.model_pipe = self.ant("arxiv.org", "keras")
+        self.prediction_pipe = self.ant("pdf", "layout.html")
+
+
     def test_make_model(self):
-        from layouteagle.LayoutReader.labeled_feature_maker import TrueFormatUpmarkerPDF2HTMLEX
-        from layouteagle.LayoutReader.feature_label_assigner import TrueFormatUpmarkerPDF2HTMLEX
-        from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
-        from layouteagle.LayoutReader.feature_prediction import LayoutPrediction
-        from layouteagle.LayoutReader.MarkupDocument import MarkupDocument
-
-        from TestArchitecture.NLP.nlp_blub import NLPBlub
-        from TestArchitecture.NLP.topicape import TopicApe
-        from layouteagle.LayoutReader.HTML2PDF import PrintToFile
-        from layouteagle.LayoutReader.feature2features import Feature2Features
-        from layouteagle.LayoutModel.layouttrain import LayoutTrainer
-        from layouteagle.LayoutModel.layoutpredict import LayouPredictor
-        from TestArchitecture.publisher import NLPPublisher, TopicPublisher
-
-
-        ant = PathAnt()
-        model_pipe = ant("arxiv.org", "keras")
-        prediction_pipe = ant("pdf", "layout.html")
+        model_pipe = self.ant("arxiv.org", "keras")
         print (list(model_pipe("https://arxiv.org")))
 
-        ant.info(pipelines_to_highlight=[model_pipe, prediction_pipe])
+    def test_info(self):
+        self.ant.info(pipelines_to_highlight=[self.model_pipe, self.prediction_pipe])
 
-        pdfs = [".layouteagle/tex_data/2adf47ffbf65696180417ca86e91eb90/crypto_github_preprint_v1.pdf",
-                ".layouteagle/tex_data/2922d1d785d9620f9cdf8ac9132c59a8/ZV_PRL_rev.pdf",
+    def test_prediction(self):
+        pdfs = [".layouteagle/tex_data/2adf47ffbf65696180417ca86e91eb90//crypto_github_preprint_v1.pdf",
+                ".layouteagle/tex_data/2922d1d785d9620f9cdf8ac9132c59a8//ZV_PRL_rev.pdf",
                 ".layouteagle/tex_data/9389d5a6fd9fcc41050f32bcb2a204ef//Manuscript.tex1.labeled.pdf"]
-        list(prediction_pipe((pdf, {}) for pdf in pdfs))
-
+        list(self.prediction_pipe((pdf, {}) for pdf in pdfs))
 
 
 if __name__=="__init__":

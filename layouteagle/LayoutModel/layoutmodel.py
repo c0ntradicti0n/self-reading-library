@@ -67,11 +67,11 @@ class LayoutModeler(PathSpec):
             logging.info(f'{len(val)} validation samples')
             logging.info(f'{len(test)} test samples')
 
-            self.train_ds = self.df_to_dataset(train, batch_size=self.train_kwargs['batch_size'])
-            self.val_ds = self.df_to_dataset(val, shuffle=False, batch_size=self.train_kwargs['batch_size'])
-            self.test_ds = self.df_to_dataset(test, shuffle=False, batch_size=self.train_kwargs['batch_size'])
+            self.train_ds = self.df_to_dataset(train, batch_size=self.train_kwargs['batch_size'], training=training)
+            self.val_ds = self.df_to_dataset(val, shuffle=False, batch_size=self.train_kwargs['batch_size'], training=training)
+            self.test_ds = self.df_to_dataset(test, shuffle=False, batch_size=self.train_kwargs['batch_size'], training=training)
         else:
-            self.predict_ds =  self.df_to_dataset(feature_df, shuffle=False, batch_size=self.train_kwargs['batch_size'])
+            self.predict_ds =  self.df_to_dataset(feature_df, shuffle=False, batch_size=len(feature_df), training=False)
 
         feature_columns = []
 
@@ -86,7 +86,7 @@ class LayoutModeler(PathSpec):
         return feature_columns, as_numpy
 
     # A utility method to create a tf.data dataset from a Pandas Dataframe
-    def df_to_dataset(self, dataframe, shuffle=True, batch_size=None):
+    def df_to_dataset(self, dataframe, shuffle=True, batch_size=None, training=True):
         dataframe = dataframe.copy()
         dataframe = dataframe.reset_index(drop=True)
 
@@ -101,8 +101,11 @@ class LayoutModeler(PathSpec):
             raise
         if shuffle:
             ds = ds.shuffle(buffer_size=len(dataframe))
+
         ds = ds.batch(batch_size)
+
         return ds
+
 
     def prepare_df(self, feature_df, training=True):
         self.cols_to_use = self.train_kwargs['cols_to_use'] + [self.train_kwargs['labels']] #([self.train_kwargs['labels']] if training else [])
@@ -116,14 +119,14 @@ class LayoutModeler(PathSpec):
         feature_df.distance_vector = feature_df.distance_vector.apply(lambda x: list(more_itertools.padded(list(sorted(x))[:N], 0, 8)))
         feature_df = feature_df.assign(
             **feature_df.distance_vector.apply(pandas.Series).add_prefix(distance_col_prefix))
-        feature_df = feature_df.fillna(0)
+        feature_df = feature_df.fillna(1)
 
         angle_col_prefix = 'a_'
         feature_df.angle = feature_df.angle.apply(lambda x: list(x))
         feature_df['da'] = list(zip(feature_df['angle'], feature_df['distance_vector']))
         feature_df.angle = feature_df['da'].apply(lambda x: list(more_itertools.padded(list(sorted_by_zipped(x))[:N], 0, N)))
         feature_df = feature_df.assign(**feature_df.angle.apply(pandas.Series).add_prefix(angle_col_prefix))
-        feature_df = feature_df.fillna(0)
+        feature_df = feature_df.fillna(1)
         with pandas.option_context('display.max_rows', None, 'display.max_columns', None):
             logging.info(str(feature_df.head()))
         self.cols_to_use = self.cols_to_use + [col for col in feature_df.columns if
@@ -131,13 +134,14 @@ class LayoutModeler(PathSpec):
 
         if training:
             feature_df = feature_df.sample(frac=1).reset_index(drop=True)
+
         feature_df = feature_df[self.cols_to_use]
 
-        shift1 = feature_df.shift(periods=1, fill_value = 0)
-        shift_1 = feature_df.shift(periods=-1, fill_value = 0)
-        names =['bef', '', 'aft']
-        dfs = [feature_df, shift1, shift_1]
-        feature_df = pandas.concat([df.add_prefix(name) for name, df in zip(names, dfs)], axis=1).dropna()
+        #shift1 = feature_df.shift(periods=1, fill_value = 0)
+        #shift_1 = feature_df.shift(periods=-1, fill_value = 0)
+        #names =['bef', '', 'aft']
+        #dfs = [feature_df, shift1, shift_1]
+        #feature_df = pandas.concat([df.add_prefix(name) for name, df in zip(names, dfs)], axis=1).dropna()
 
         return feature_df
 
@@ -151,7 +155,7 @@ class LayoutModeler(PathSpec):
 
         self.model = tf.keras.Sequential([
             feature_layer,
-            tf.keras.layers.Dropout(**self.train_kwargs['dropout']),
+            #tf.keras.layers.Dropout(**self.train_kwargs['dropout']),
             #tf.keras.layers.PReLU(alpha_initializer='zeros', alpha_regularizer=None, alpha_constraint=None,
             #                      shared_axes=None),
             tf.keras.layers.Dense(**self.train_kwargs['dense1']),
@@ -201,9 +205,9 @@ class LayoutModeler(PathSpec):
             logging.info(f'{y_pred} --->>> {y_true}')
         logging.warning(f'Legend {pprint.pformat(self.label_lookup.id_to_token, indent=4)}')
 
-    def predict(self, features_df):
-        self.prepare_features(features_df, training=False)
-        return self.model.predict_classes(self.predict_ds, batch_size=None, verbose=100)
+    def predict(self, feature_df):
+        self.prepare_features(feature_df, training=False)
+        return self.model.predict_classes(self.predict_ds, batch_size=len(feature_df), verbose=100)
 
     def save(self):
         with open(self.lookup_path, "wb") as f:
