@@ -134,11 +134,12 @@ class TrueFormatUpmarker(SoupReplacer):
     IndexedWordTag = namedtuple("IndexedWordTag", ["index", "word", "tag"])
     def make_new_tag(self, soup, word, debug_percent, **kwargs) -> IndexedWordTag:
         self.id = self.count_i.__next__()
+        color_code = f"color:hsl({int(debug_percent * 360)}, 100%, 50%);"
         if self.debug:
             kwargs.update(
                 {
                     "style":
-                        f"color:hsl({int(debug_percent * 360)}, 100%, 50%);"
+                        color_code
                 }
             )
         tag = soup.new_tag(self.WRAP_TAG,
@@ -155,12 +156,7 @@ class TrueFormatUpmarker(SoupReplacer):
         "column4": "column 4",
         "column5": "column 5",
         "title": "title",
-        "subtitle": "subtitle",
-        "author": "author",
-        "abstract": "abstact",
-        "section": "section",
-        "subsection": "subsection",
-        "table": "table",
+        "staff": "staff",
         "no_label":"NONE"
     }
     def check_for_label_in_string(self, text):
@@ -181,6 +177,7 @@ class TrueFormatUpmarker(SoupReplacer):
                 features["pcl"].shift(1), features["page_number"].shift(1)
             )
 
+            # fill in, where is NONE between other labels, to keep these included parts
             where = ((features["shift_up"] == features["shift_down"]) &
             (features["shift_pn_up"] == features["shift_pn_down"]) &
             (features["pcl"].str.contains("NONE")) &

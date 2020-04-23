@@ -108,22 +108,22 @@ class LayoutModeler(PathSpec):
         self.cols_to_use = self.train_kwargs['cols_to_use'] + [self.train_kwargs['labels']] #([self.train_kwargs['labels']] if training else [])
         feature_df = feature_df.reset_index(drop=True)
 
-        N = 60
+        N = 20
 
         distance_col_prefix = 'd_'
-        max_distance = max([max(x) for x in feature_df[1:]['distance_vector']])
-        feature_df.distance_vector = feature_df[1:].distance_vector.apply(lambda x: x / max_distance)
-        feature_df.distance_vector = feature_df[1:].distance_vector.apply(lambda x: list(more_itertools.padded(list(sorted(x))[:N], 0, 8)))
+        max_distance = max([max(x) for x in feature_df['distance_vector']])
+        feature_df.distance_vector = feature_df.distance_vector.apply(lambda x: x / max_distance)
+        feature_df.distance_vector = feature_df.distance_vector.apply(lambda x: list(more_itertools.padded(list(sorted(x))[:N], 0, 8)))
         feature_df = feature_df.assign(
             **feature_df.distance_vector.apply(pandas.Series).add_prefix(distance_col_prefix))
-        feature_df = feature_df.fillna(1)
+        feature_df = feature_df.fillna(0)
 
         angle_col_prefix = 'a_'
-        feature_df.angle = feature_df[1:].angle.apply(lambda x: list(x))
+        feature_df.angle = feature_df.angle.apply(lambda x: list(x))
         feature_df['da'] = list(zip(feature_df['angle'], feature_df['distance_vector']))
-        feature_df.angle = feature_df[1:]['da'].apply(lambda x: list(more_itertools.padded(list(sorted_by_zipped(x))[:N], 0, N)))
+        feature_df.angle = feature_df['da'].apply(lambda x: list(more_itertools.padded(list(sorted_by_zipped(x))[:N], 0, N)))
         feature_df = feature_df.assign(**feature_df.angle.apply(pandas.Series).add_prefix(angle_col_prefix))
-        feature_df = feature_df.fillna(1)
+        feature_df = feature_df.fillna(0)
         with pandas.option_context('display.max_rows', None, 'display.max_columns', None):
             logging.info(str(feature_df.head()))
         self.cols_to_use = self.cols_to_use + [col for col in feature_df.columns if

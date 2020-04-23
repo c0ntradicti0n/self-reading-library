@@ -152,7 +152,8 @@ class TestPathAnt(unittest.TestCase):
         ant.info(pipelines_to_highlight=[model_pipe, prediction_pipe])
 
         pdfs = [".layouteagle/tex_data/2adf47ffbf65696180417ca86e91eb90/crypto_github_preprint_v1.pdf",
-                ".layouteagle/tex_data/2922d1d785d9620f9cdf8ac9132c59a8/ZV_PRL_rev.pdf"]
+                ".layouteagle/tex_data/2922d1d785d9620f9cdf8ac9132c59a8/ZV_PRL_rev.pdf",
+                ".layouteagle/tex_data/9389d5a6fd9fcc41050f32bcb2a204ef//Manuscript.tex1.labeled.pdf"]
         list(prediction_pipe((pdf, {}) for pdf in pdfs))
 
 
