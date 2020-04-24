@@ -46,7 +46,7 @@ class LatexReplacer(SoupReplacer):
         self.allowed_recursion_tags = ["revised", "textbf", "uppercase", "textit", "LARGE", "thanks", "Large", "large", "footnotesize",
                                        'texttt', "emph", "item", "bf", "IEEEauthorblockN", "IEEEauthorblockA", "textsc", "textsl"]
         self.allowed_oargs = ['title', 'author', 'section', 'item']
-        self.forbidden_nargs = ["baselineskip"]
+        self.forbidden_nargs = ["baselineskip", 'pdfoutput']
         self.forbidden_envs = ["$", "tikzpicture",  "eqnarray", "equation", "tabular"]
         self.forbidden_envs = self.forbidden_envs + [env + "*" for env in self.forbidden_envs]
 
@@ -151,7 +151,7 @@ class LatexReplacer(SoupReplacer):
 
         new_content = "\n".join(new_contents)
 
-        new_positional_string = TexText(" " + new_content)
+        new_positional_string = TexText(new_content)
         replaced_contents.append(new_positional_string)
 
     def make_replacement(self, where, replacement_string):
@@ -244,8 +244,6 @@ class LatexReplacer(SoupReplacer):
 
             self.append_expression(node_to_replace, replaced_contents)
 
-        if isinstance(where, TexEnv):
-            replaced_contents = [' '] + replaced_contents + [' ']
         back(replaced_contents)
 
         return where

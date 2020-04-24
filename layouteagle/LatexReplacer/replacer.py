@@ -25,9 +25,11 @@ class SoupReplacer(PathSpec):
                         nodes = list(self.find_all(soup, tex_string))
                     except TypeError:
                         nodes = [soup]
-
                 else:
-                    nodes = [soup]
+                    if not soup.find("document"):
+                        nodes = [soup]
+                    else:
+                        nodes = []
 
                 if not nodes:
                     continue
