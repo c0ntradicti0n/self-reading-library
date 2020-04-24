@@ -142,7 +142,9 @@ class TestPathAnt(unittest.TestCase):
     from layouteagle.LayoutModel.layouttrain import LayoutTrainer
     from layouteagle.LayoutModel.layoutpredict import LayouPredictor
 
-    from layouteagle.LayoutReader.HTML2PDF import PrintToFile
+    from layouteagle.LayoutReader.HTML2PDF import HTML2PDF
+    from layouteagle.LayoutReader.PDF2HTML import PDF2HTML
+
     from TestArchitecture.publisher import NLPPublisher, TopicPublisher
     from TestArchitecture.NLP.nlp_blub import NLPBlub
     from TestArchitecture.NLP.topicape import TopicApe
@@ -164,7 +166,7 @@ class TestPathAnt(unittest.TestCase):
         pdfs = [".layouteagle/tex_data/2adf47ffbf65696180417ca86e91eb90//crypto_github_preprint_v1.pdf",
                 ".layouteagle/tex_data/2922d1d785d9620f9cdf8ac9132c59a8//ZV_PRL_rev.pdf",
                 ".layouteagle/tex_data/9389d5a6fd9fcc41050f32bcb2a204ef//Manuscript.tex1.labeled.pdf"]
-        list(self.prediction_pipe((pdf, {}) for pdf in pdfs))
+        list(self.prediction_pipe([(pdf, {}) for pdf in pdfs]))
 
 
 if __name__=="__init__":

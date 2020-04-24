@@ -1,3 +1,4 @@
+import os
 import pickle
 from typing import Dict
 
@@ -37,11 +38,11 @@ class LayoutModeler(PathSpec):
                    'activation': 'softmax',
                    'dtype': 'float64'},
         'adam': {'lr': 0.0002},
-        'epochs': 80,
+        'epochs': 200,
         'batch_size': 32,
         'patience': 20,
         'labels': 'layoutlabel',
-        'cols_to_use': ['x', 'y', 'height', 'font-size',
+        'cols_to_use': ['x', 'y', 'height', 'font-size', 'len',
                         'fine_grained_pdf', 'coarse_grained_pdf','line-height']
     }
 
@@ -60,9 +61,10 @@ class LayoutModeler(PathSpec):
         return pandas.read_pickle(feature_path)
 
     def prepare_features(self, feature_df, training=True):
-        self.label_set = list(set(feature_df['layoutlabel'].tolist()))
         if training:
+            self.label_set = list(set(feature_df['layoutlabel'].tolist()))
             self.label_lookup = Lookup([self.label_set])
+
         feature_df.layoutlabel = self.label_lookup(token_s=feature_df.layoutlabel.tolist())
 
         feature_df = self.prepare_df(feature_df, training=training)
@@ -144,16 +146,19 @@ class LayoutModeler(PathSpec):
 
         feature_df = feature_df[self.cols_to_use]
 
-        shift1 = feature_df.shift(periods=1, fill_value = 0)
-        shift_1 = feature_df.shift(periods=-1, fill_value = 0)
-        names =['bef', '', 'aft']
-        dfs = [feature_df, shift1, shift_1]
-        feature_df = pandas.concat([df.add_prefix(name) for name, df in zip(names, dfs)], axis=1).dropna()
+        #shift1 = feature_df.shift(periods=1, fill_value = 0)
+        #shift_1 = feature_df.shift(periods=-1, fill_value = 0)
+        #names =['bef', '', 'aft']
+        #dfs = [feature_df, shift1, shift_1]
+        #feature_df = pandas.concat([df.add_prefix(name) for name, df in zip(names, dfs)], axis=1).dropna()
 
         return feature_df
 
     def train(self, feature_columns, override_kwargs={}):
         logging.info(f"Model will go to {self.model_path}")
+        os.system(f"rm {self.model_path}")
+        os.system(f"rm {self.model_path}.h5")
+
         self.train_kwargs.update(override_kwargs)
         feature_layer = tf.keras.layers.DenseFeatures(feature_columns=feature_columns, dtype='float64')
 
@@ -162,21 +167,24 @@ class LayoutModeler(PathSpec):
 
         self.model = tf.keras.Sequential([
             feature_layer,
-            #tf.keras.layers.Dropout(**self.train_kwargs['dropout']),
-            #tf.keras.layers.PReLU(alpha_initializer='zeros', alpha_regularizer=None, alpha_constraint=None,
-            #                      shared_axes=None),
+            #tf.keras.layers.Reshape((3, len(self.cols_to_use))),
+            #tf.keras.layers.Conv1D(1 # Filters
+            #       ,  1,
+            #       activation='relu'
+            #       ),
+            #tf.keras.layers.Flatten(),
             tf.keras.layers.Dense(**self.train_kwargs['dense1']),
             tf.keras.layers.Dense(**self.train_kwargs['dense2']),
+            tf.keras.layers.Dense(**self.train_kwargs['dense3']),
 
-            #tf.keras.layers.PReLU(alpha_initializer='zeros', alpha_regularizer=None, alpha_constraint=None,
-            #                   shared_axes=None),
+
             tf.keras.layers.Dense(units=len(self.label_set), **self.train_kwargs['denseE'])
         ])
 
         optimizer = tf.optimizers.Adam(**self.train_kwargs['adam'])
         self.model.compile(optimizer=optimizer,
                       loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
-                      metrics=['accuracy'])
+                      metrics=['accuracy'])#, 'mse'])
 
         history = self.model.fit(self.train_ds,
                             validation_data=self.val_ds,
@@ -202,18 +210,22 @@ class LayoutModeler(PathSpec):
         logging.info('Validation')
         for x_y_pred, y_true in zip(self.val_ds.unbatch(), xy_new):
             y_pred = tf.keras.backend.argmax(x_y_pred[1])
-            logging.info(f'{y_pred} --->>> {y_true}')
-        logging.warning(f'Legend {pprint.pformat(self.label_lookup.id_to_token, indent=4)}')
+            print(f'{y_pred} --->>> {y_true}')
+        print(f'Legend {pprint.pformat(self.label_lookup.id_to_token, indent=4)}')
 
     def predict(self, feature_df):
         self.prepare_features(feature_df, training=False)
-        return self.model.predict_classes(self.predict_ds, batch_size=len(feature_df), verbose=100)
+        pred = self.model.predict(self.predict_ds)
+        #indices = [i for i, v in enumerate(pred) if pred[i] != y_test[i]]
+        #subset_of_wrongly_predicted = [x_test[i] for i in indices]
+        pred = tf.argmax(pred, axis=-1)
+        return pred #self.model.predict_classes(self.predict_ds, batch_size=len(feature_df), verbose=100)
 
     def save(self):
         with open(self.lookup_path, "wb") as f:
             pickle.dump(self.label_lookup,f)
 
-        self.model.load_weights(".layouteagle/layoutmodelkeras.h5")
+        #self.model.load_weights(".layouteagle/layoutmodelkeras.h5")
 
         self.model.save(self.model_path)
 

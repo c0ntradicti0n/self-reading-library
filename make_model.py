@@ -1,8 +1,6 @@
+import unittest
 
-from layouteagle.pathant.PathAnt import PathAnt
-
-
-class LayoutEagle:
+class Mak(unittest.TestCase):
     from layouteagle.ScienceTexScraper.scrape import ScienceTexScraper
     from layouteagle.LatexReplacer.latex_replacer import LatexReplacer
     from layouteagle.LayoutReader.labeled_feature_maker import TrueFormatUpmarkerPDF2HTMLEX
@@ -21,13 +19,13 @@ class LayoutEagle:
     from TestArchitecture.NLP.nlp_blub import NLPBlub
     from TestArchitecture.NLP.topicape import TopicApe
 
-    def __init__(self):
+    def setUp(self):
         self.ant = PathAnt()
         self.model_pipe = self.ant("arxiv.org", "keras")
         self.prediction_pipe = self.ant("pdf", "layout.html")
 
 
-    def make_model(self):
+    def test_make_model(self):
         model_pipe = self.ant("arxiv.org", "keras")
         print (list(model_pipe("https://arxiv.org")))
 
@@ -41,7 +39,5 @@ class LayoutEagle:
         list(self.prediction_pipe([(pdf, {}) for pdf in pdfs]))
 
 
-if __name__=="__main__":
-    le = LayoutEagle()
-    le.make_model()
-    le.test_prediction()
+if __name__=="__init__":
+    unittest()

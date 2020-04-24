@@ -27,6 +27,7 @@ def file_persistent_cached_generator(filename):
                 result_string =  json.dumps(result) + "\n"
                 if result_string not in cache:
                     content, meta = result
+                    os.chdir(cwd)
                     with open(filename, 'a') as f:
                         f.write(result_string)
                     os.chdir(cwd)

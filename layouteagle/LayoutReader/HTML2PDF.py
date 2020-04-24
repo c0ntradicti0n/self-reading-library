@@ -5,7 +5,7 @@ from layouteagle.pathant.PathSpec import PathSpec
 
 
 @converter('html', 'pdf')
-class PrintToFile(PathSpec):
+class HTML2PDF(PathSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         pass

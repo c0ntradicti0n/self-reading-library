@@ -18,7 +18,7 @@ class LayoutTrainer(LayoutModeler):
         if feature_path:
             self.feature_path, meta = next(feature_path)
         feature_df = self.load_pandas_file(self.feature_path)
-        feature_columns, features_as_numpy = self.prepare_features(feature_df)
+        feature_columns, features_as_numpy = self.prepare_features(feature_df, training=True)
         history = self.train(feature_columns, self.train_kwargs)
         if self.debug:
             self.plot(history)

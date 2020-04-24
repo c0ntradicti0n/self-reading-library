@@ -149,26 +149,19 @@ class TrueFormatUpmarker(SoupReplacer):
         tag.append(word)
         return self.IndexedWordTag(self.id, word, tag)
 
-    label_strings = {
-        "column1": "column 1",
-        "column2": "column 2",
-        "column3": "column 3",
-        "column4": "column 4",
-        "column5": "column 5",
-        "title": "title",
-        "staff": "staff",
-        "no_label":"NONE"
-    }
+    label_strings = \
+        ["cc 1", "cc 2", "cc 3","cc 4","cc 5","title","staff","NONE"]
     def check_for_label_in_string(self, text):
-        contained_labels = [s for s in self.label_strings.values() if s in text.lower()]
+        contained_labels = [s for s in self.label_strings if s in text.lower()]
         if contained_labels:
             if len(contained_labels) > 1:
                 logging.warning("More labels in div text found than wanted")
             return contained_labels[0]
-        else: return self.label_strings["no_label"]
+        else:
+            return self.label_strings[-1]
 
     shifts = 0
-    def override_by_labeled_document(self, features):
+    def overwrite_by_labeled_document(self, features):
         features["text"] = features.divs.apply(lambda div: div.text)
         features["pcl"] = features["text"].apply(lambda text: self.check_for_label_in_string(text))
         for shift in range(self.shifts, 0, -1):
@@ -200,7 +193,7 @@ class TrueFormatUpmarker(SoupReplacer):
         """
         self.word_index = {}
         self.count_i = itertools.count()  # counter for next indices for new html-tags
-        features.sort_values(by="reading_sequence", inplace=True)
+        #features.sort_values(by="reading_sequence", inplace=True)
         features["debug_color"] = abs(features.layoutlabel.apply(lambda string: self.index_labels(string)))
         for index, feature_line in features.iterrows():
             div = feature_line.divs

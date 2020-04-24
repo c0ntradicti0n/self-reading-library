@@ -116,11 +116,11 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
 
             page_cluster_lr_groups[page] = \
                 sorted(page_cluster_up_bottom_groups, key=lambda c: c[1].x.mean())
-        feature_df["reading_sequence"] = list(more_itertools.flatten([cluster_content["index"].tolist()
-                                                                      for page_number, page_content in
-                                                                      page_cluster_lr_groups.items()
-                                                                      for cluster, cluster_content in page_content
-                                                                      ]))
+        #feature_df["reading_sequence"] = list(more_itertools.flatten([cluster_content["index"].tolist()
+        #                                                              for page_number, page_content in
+        #                                                              page_cluster_lr_groups.items()
+        #                                                              for cluster, cluster_content in page_content
+        #                                                              ]))
         return page_cluster_lr_groups
 
     FeatureStuff = namedtuple("FeatureStuff", ["divs", "coords", "data", "density_field", "labels"])
@@ -220,7 +220,7 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
         features["distance_vector"] =  [dv for distance_matrix in other_feature_kinds_stacked.distances for dv in distance_matrix]
         features["angle"] =  [dv for distance_matrix in other_feature_kinds_stacked.angles for dv in distance_matrix]
 
-        self.override_by_labeled_document(features)
+        self.overwrite_by_labeled_document(features)
 
 
         return coarse_grained_field

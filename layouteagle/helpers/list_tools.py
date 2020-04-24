@@ -59,7 +59,7 @@ class Lookup:
     def __init__(self, tokens: List):
         if all(isinstance(t, List) for t in tokens):
           tokens = flatten(tokens)
-        self.id_to_token = OrderedDict(sorted((i, t) for i, t in list(enumerate(tokens))))
+        self.id_to_token = OrderedDict(sorted((i, t) for i, t in list(enumerate(sorted(tokens)))))
         self.token_to_id = OrderedDict(sorted((k,v) for v,k in self.id_to_token.items()))
 
     def __call__(self, id_s=None, token_s=None):

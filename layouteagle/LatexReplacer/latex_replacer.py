@@ -21,12 +21,13 @@ from layouteagle.pathant.Converter import converter
 @converter("tex", "labeled.pdf")
 class LatexReplacer(SoupReplacer):
     replacement_mapping_tag2tex = OrderedDict({
-        None: ["document", "abstract", "keywords", None],
+        None: ["document", "abstract", "keywords", None] + \
+               ["name", "Author", "email", "corres", "affiliation", "affil", "corresp", "author", "markboth",
+                        "email", "address", "adress", "emailAdd", "authorrunning", "institute", "ead", "caption",
+                        "footnote", "tfootnote", "thanks"],
 
         #"title": ["Title", "title"],
-        #"staff": ["name", "Author", "email", "corres", "affiliation", "affil", "corresp", "author", "markboth",
-        #          "email", "address", "adress", "emailAdd", "authorrunning", "institute", "ead", "caption",
-        #          "footnote", "tfootnote", "thanks"],
+
         #"content": ["section*", "subsection", "subsection*", "subsubsection*",
         #            "section", "subsection", "subsubsection"],
     })
@@ -70,11 +71,11 @@ class LatexReplacer(SoupReplacer):
             document_environment.insert(0, twocolumn_defs.multicol_begin)
             document_environment.append(twocolumn_defs.multicol_end)
 
-            return r"column \currentcolumn{}"
+            return r"cc \currentcolumn{}"
         elif "multicol{" in file_content:"""
 
         orig_twocolumn = any(arg in file_content for arg in
-                ["lrec", "ieeeconf", "IEEEtran", "acmart", "twocolumn", "acl2020", "ansmath"])
+                ["lrec", "ieeeconf", "IEEEtran", "acmart", "twocolumn", "acl2020", "ansmath", 'svjour'])
 
         if col_num > 1:
             # start in document environment
@@ -102,11 +103,11 @@ class LatexReplacer(SoupReplacer):
             document_environment.insert(maketitle_index,  multicol_defs.multicol_begin % str(col_num))
             document_environment.append( multicol_defs.multicol_end)
 
-            return r"column \currentcolumn{}"
+            return r"cc \currentcolumn{}"
         else:
             # normal fill text
             logging.info("No multi column instruction found, so its single col")
-            return r"column 1"
+            return r"cc 1"
 
     @file_persistent_cached_generator(config.cache + 'labeled_tex_paths.json')
     def __call__(self, paths, compile=True):
@@ -136,7 +137,7 @@ class LatexReplacer(SoupReplacer):
         new_lines = expr_text.count( '\n')
 
         if '\currentcolumn{}' in replacement_string:
-            effective_length = len(replacement_string) - len('\currentcolumn{}')
+            effective_length = len(replacement_string)# - len('\currentcolumn{}')
         else:
             effective_length = len(replacement_string)
 
@@ -147,7 +148,7 @@ class LatexReplacer(SoupReplacer):
         for j in range(new_lines):
             new_content = new_content[:j] + new_content[j:]
         else:
-            new_content = " " + " ".join(new_content) + " "
+            new_content = "\n " + " ".join(new_content) + " "
 
         new_positional_string = TexText(" " + new_content)
         replaced_contents.append(new_positional_string)
@@ -471,23 +472,7 @@ class TestRegexReplacer(unittest.TestCase):
         latex_replacer = LatexReplacer
         latex_replacer.work("layouteagle/LatexReplacer/test/strange/strange.tex")
 
-    def test_1(self):
-        latex_replacer = LatexReplacer(add_extension=".labeled.tex")
-        latex_replacer.work("test/few/Palatini_quantum-FINAL.tex")
 
-    def test_2(self):
-        latex_replacer = LatexReplacer(add_extension=".labeled.tex")
-        latex_replacer.work("test/test2/main.tex")
-
-    def test_3(self):
-        latex_replacer = LatexReplacer(add_extension=".labeled.tex")
-        latex_replacer.work("test/test3/main.tex")
-
-
-    def test_integration(self):
-        latex_replacer = LatexReplacer(add_extension=".labeled.tex")
-        f = lambda: (x for x in ["./tex_data/7c6b2116adae604a504099c4d08483e7/main.tex"])
-        assert all(os.path.exists(r) and latex_replacer.compiles(r, n=10) for r in latex_replacer(f))
 
 
 if __name__ == '__main__':

@@ -22,7 +22,8 @@ class MarkupDocument(TrueFormatUpmarkerPDF2HTMLEX):
     def __call__(self, feature_meta, *args, **kwargs):
         for feature_df, meta in feature_meta:
             soup = meta['soup']
-            self.assign_labels_from_div_content(feature_df)
+            self.label_lookup = meta['label_lookup']
+            #self.assign_labels_from_div_content(feature_df)
             self.label_lookup = meta['label_lookup']
             indexed_words = self.make_word_index(soup, feature_df)
 
