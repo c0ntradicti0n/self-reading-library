@@ -15,6 +15,7 @@ from layouteagle.helpers.cache_tools import file_persistent_cached_generator
 from layouteagle.helpers.os_tools import get_path_filename_extension
 from regex import regex
 
+from layouteagle.helpers.str_tools import find_all
 from layouteagle.pathant.Converter import converter
 
 
@@ -133,22 +134,22 @@ class LatexReplacer(SoupReplacer):
 
         content_generator = cycle([replacement_string])
 
-
-        new_lines = expr_text.count( '\n')
-
         if '\currentcolumn{}' in replacement_string:
-            effective_length = len(replacement_string)# - len('\currentcolumn{}')
+            effective_length = len(replacement_string)  # - len('\currentcolumn{}')
         else:
             effective_length = len(replacement_string)
 
-        how_often = max(1, int((len(expr_text) / effective_length) + 0.99))
+        new_contents = []
+        for line in expr_text.split('\n'):
+            if line.strip():
+                how_often = max(1, int((len(line) / effective_length)))
+                content_list = list(itertools.islice(content_generator, how_often))
+                new_contents.append(" ".join (content_list))
+            else:
+                new_contents.append("")
 
-        new_content = list(itertools.islice(content_generator, how_often))
 
-        for j in range(new_lines):
-            new_content = new_content[:j] + new_content[j:]
-        else:
-            new_content = "\n " + " ".join(new_content) + " "
+        new_content = "\n".join(new_contents)
 
         new_positional_string = TexText(" " + new_content)
         replaced_contents.append(new_positional_string)
@@ -184,7 +185,7 @@ class LatexReplacer(SoupReplacer):
             forth = where._contents
 
             def _(x):
-                where._contents = x + ['\n']
+                where._contents =  x
             back = _
 
         elif isinstance(where, (RArg, OArg)):
@@ -203,18 +204,12 @@ class LatexReplacer(SoupReplacer):
                 try:
                     if where.name in self.allowed_oargs:
                         node_to_replace = self.make_replacement(node_to_replace, replacement_string)
-                        self.append_expression(node_to_replace, replaced_contents)
-                    else:
-                        self.append_expression(node_to_replace, replaced_contents)
+
                 except AttributeError:
-                    self.append_expression(node_to_replace, replaced_contents)
                     self.path_spec.logger.error(f"OArg without children in {node_to_replace}")
             elif isinstance(node_to_replace, RArg):
                     if hasattr(where, "args") and where.args and node_to_replace == where.args[-1] and where.name not in self.forbidden_nargs:
                         node_to_replace = self.make_replacement(node_to_replace, replacement_string)
-                        self.append_expression(node_to_replace, replaced_contents)
-                    else:
-                        self.append_expression(node_to_replace, replaced_contents)
 
             elif isinstance(node_to_replace, (TokenWithPosition, str)):
 
@@ -222,12 +217,8 @@ class LatexReplacer(SoupReplacer):
 
                     self.replace_this_text(node_to_replace, replaced_contents,
                                            replacement_string)
-                else:
-                    try:
-                        self.append_expression(node_to_replace, replaced_contents)
-                    except AttributeError:
-                        logging.error("function object has no attribute")
-                        self.append_expression(node_to_replace, replaced_contents)
+                    continue
+
 
 
             elif isinstance(node_to_replace, TexText) and not node_to_replace._text.strip():
@@ -236,25 +227,22 @@ class LatexReplacer(SoupReplacer):
             elif isinstance(node_to_replace, TexEnv):
                 if not node_to_replace.name in self.forbidden_envs:
                     node_to_replace = self.make_replacement(node_to_replace, replacement_string)
-                    self.append_expression(node_to_replace, replaced_contents)
                 else:
                     self.log_not_replace("environment", node_to_replace.name)
-                    self.append_expression(node_to_replace, replaced_contents)
 
             elif isinstance(node_to_replace, TexText ):
                 self.replace_this_text(node_to_replace._text, replaced_contents,
                                         replacement_string)
+                continue
+
 
             elif isinstance(node_to_replace, TexCmd):
                 if node_to_replace.name in self.allowed_recursion_tags:
                     node_to_replace = self.make_replacement(node_to_replace, replacement_string)
-                    self.append_expression(node_to_replace, replaced_contents)
                 else:
                     self.log_not_replace("command", node_to_replace.name)
-                    self.append_expression(node_to_replace, replaced_contents)
 
-            else:
-                self.append_expression(node_to_replace, replaced_contents)
+            self.append_expression(node_to_replace, replaced_contents)
 
         if isinstance(where, TexEnv):
             replaced_contents = [' '] + replaced_contents + [' ']
@@ -447,6 +435,17 @@ import unittest
 
 
 class TestRegexReplacer(unittest.TestCase):
+
+    def test_normal_math(self):
+        latex_replacer = LatexReplacer
+        latex_replacer.work("layouteagle/LatexReplacer/test/single_feature/normal_math.tex")
+
+
+    def test_itemize_args(self):
+        latex_replacer = LatexReplacer
+        latex_replacer.work("layouteagle/LatexReplacer/test/single_feature/item_args.tex")
+
+
     def test_newlines(self):
         latex_replacer = LatexReplacer
         latex_replacer.work("layouteagle/LatexReplacer/test/single_feature/newlines.tex")
