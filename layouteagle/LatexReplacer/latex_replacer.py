@@ -82,7 +82,7 @@ class LatexReplacer(SoupReplacer):
         elif "multicol{" in file_content:"""
 
         orig_twocolumn = any(arg in file_content for arg in
-                ["lrec", "ieeeconf", "IEEEtran", "acmart", "twocolumn", "acl2020", "ansmath", 'svjour'])
+                ["lrec", "ieeeconf", "IEEEtran", "acmart", "twocolumn", "acl2020", "ansmath", 'svjour', 'revtex4'])
 
         if col_num > 1:
             # start in document environment
@@ -125,10 +125,11 @@ class LatexReplacer(SoupReplacer):
 
             for path_to_read_from, meta in paths:
                 new_pdf_paths = self.work(path_to_read_from)
-                if new_pdf_paths:
-                    yield from [(new_pdf_path, meta) for new_pdf_path in new_pdf_paths]
-                else:
-                    ur.write(path_to_read_from + "\n")
+                if new_pdf_paths and len(new_pdf_paths) > 1:
+                    if new_pdf_paths:
+                        yield from [(new_pdf_path, meta) for new_pdf_path in new_pdf_paths]
+                    else:
+                        ur.write(path_to_read_from + "\n")
 
 
     def append_expression(self, possible_part_string, replaced_contents):

@@ -17,7 +17,7 @@ def file_persistent_cached_generator(filename):
                 cache = []
 
             if isinstance( param[1], list):
-                yield from apply_iterating_and_caching(cache, cwd, param)
+                yield from apply_iterating_and_caching(cache, cwd, param, no_cache=True)
             else:
                 for result in cache:
                     content, meta = json.loads(result)
@@ -27,12 +27,12 @@ def file_persistent_cached_generator(filename):
                 yield from apply_iterating_and_caching(cache, cwd, param)
             os.chdir(cwd)
 
-        def apply_iterating_and_caching(cache, cwd, param):
+        def apply_iterating_and_caching(cache, cwd, param, no_cache=False):
             generator = original_func(*param)
             for result in generator:
 
                 result_string = json.dumps(result) + "\n"
-                if result_string not in cache:
+                if no_cache or result_string not in cache:
                     content, meta = result
                     os.chdir(cwd)
                     with open(filename, 'a') as f:

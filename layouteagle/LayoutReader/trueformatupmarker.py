@@ -178,7 +178,10 @@ class TrueFormatUpmarker(SoupReplacer):
             (features["shift_down"].str.contains("column")))
 
             features["pcl"][where] = features["shift_down"]
+
         features["layoutlabel"] = features["pcl"]
+        del features["pcl"]
+
 
     def index_labels(self, string):
         return self.label_lookup.token_to_id[string] / len(self.label_lookup.token_to_id)
