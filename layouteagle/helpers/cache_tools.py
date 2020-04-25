@@ -16,15 +16,22 @@ def file_persistent_cached_generator(filename):
             except (IOError, ValueError):
                 cache = []
 
-            for result in cache:
-                content, meta = json.loads(result)
-                os.chdir(cwd)
-                yield content, meta
+            if isinstance( param[1], list):
+                yield from apply_iterating_and_caching(cache, cwd, param)
+            else:
+                for result in cache:
+                    content, meta = json.loads(result)
+                    os.chdir(cwd)
+                    yield content, meta
 
+                yield from apply_iterating_and_caching(cache, cwd, param)
+            os.chdir(cwd)
+
+        def apply_iterating_and_caching(cache, cwd, param):
             generator = original_func(*param)
-
             for result in generator:
-                result_string =  json.dumps(result) + "\n"
+
+                result_string = json.dumps(result) + "\n"
                 if result_string not in cache:
                     content, meta = result
                     os.chdir(cwd)
@@ -32,7 +39,6 @@ def file_persistent_cached_generator(filename):
                         f.write(result_string)
                     os.chdir(cwd)
                     yield content, meta
-            os.chdir(cwd)
 
         functools.update_wrapper(new_func, original_func)
 

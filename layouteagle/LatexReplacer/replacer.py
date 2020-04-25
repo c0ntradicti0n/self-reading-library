@@ -21,14 +21,15 @@ class SoupReplacer(PathSpec):
             for tex_string in tex_strings:
 
                 if tex_string != None:
-                    try:
                         nodes = list(self.find_all(soup, tex_string))
-                    except TypeError:
                         nodes = [soup]
                 else:
-                    if not soup.find("document"):
-                        nodes = [soup]
-                    else:
+                    try:
+                        if not soup.find("document"):
+                            nodes = [soup]
+                        else:
+                            nodes = []
+                    except TypeError:
                         nodes = []
 
                 if not nodes:

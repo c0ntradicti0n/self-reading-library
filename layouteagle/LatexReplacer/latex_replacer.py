@@ -46,15 +46,21 @@ class LatexReplacer(SoupReplacer):
         self.allowed_recursion_tags = ["revised", "textbf", "uppercase", "textit", "LARGE", "thanks", "Large", "large", "footnotesize",
                                        'texttt', "emph", "item", "bf", "IEEEauthorblockN", "IEEEauthorblockA", "textsc", "textsl"]
         self.allowed_oargs = ['title', 'author', 'section', 'item']
-        self.forbidden_nargs = ["baselineskip", 'pdfoutput']
-        self.forbidden_envs = ["$", "tikzpicture",  "eqnarray", "equation", "tabular"]
+        self.forbidden_nargs = ["baselineskip", 'pdfoutput', 'vskip']
+        self.skip_commands = self.forbidden_nargs
+        self.forbidden_envs = ["$", "tikzpicture",  "eqnarray", "equation", "tabular", 'eqsplit', 'subequations']
         self.forbidden_envs = self.forbidden_envs + [env + "*" for env in self.forbidden_envs]
 
     def find_all(self, soup, tex_string):
         if tex_string==None:
             yield from soup
         else:
-            yield from soup.find_all(tex_string)
+            _return = []
+            try:
+                texpr = list(soup.find_all(tex_string))
+            except TypeError:
+                logging.error(f'no {tex_string} in document')
+            yield from  _return
 
 
     def insert_functionality(self, soup, file_content, col_num):
@@ -166,9 +172,20 @@ class LatexReplacer(SoupReplacer):
         if isinstance(where, TexCmd):
             try:
                 forth = where.args.all
+                if where.name == 'item':
+                    forth = where.args.all + where._contents
+                    item_text_start = len(where.args.all)
+
+                if not any(forth):
+                    forth = []
 
                 def _(x):
-                    where.args = x
+                    if not where.name == 'item':
+                        where.args = x
+                    else:
+                        if x[:item_text_start] and any(x[:item_text_start]):
+                            where.args = [x[:item_text_start]]
+                        where._contents = x[item_text_start:]
 
                 back = _
             except:
@@ -179,19 +196,17 @@ class LatexReplacer(SoupReplacer):
 
                 back = _
 
-
-
         elif isinstance(where, (TexEnv, TexNode)):
             forth = where._contents
 
-            def _(x):
+            def _(x, ** kwargs):
                 where._contents =  x
             back = _
 
         elif isinstance(where, (RArg, OArg)):
             forth = where.contents
 
-            def _(x):
+            def _(x, ** kwargs):
                 where.contents = x
             back = _
 
@@ -199,7 +214,7 @@ class LatexReplacer(SoupReplacer):
             logging.error("visited node not to visit")
 
 
-        for node_to_replace in forth:
+        for i, node_to_replace in enumerate(forth):
             if isinstance(node_to_replace, OArg):
                 try:
                     if where.name in self.allowed_oargs:
@@ -223,6 +238,7 @@ class LatexReplacer(SoupReplacer):
 
             elif isinstance(node_to_replace, TexText) and not node_to_replace._text.strip():
                 self.append_expression(node_to_replace, replaced_contents)
+                continue
 
             elif isinstance(node_to_replace, TexEnv):
                 if not node_to_replace.name in self.forbidden_envs:
@@ -231,9 +247,12 @@ class LatexReplacer(SoupReplacer):
                     self.log_not_replace("environment", node_to_replace.name)
 
             elif isinstance(node_to_replace, TexText ):
-                self.replace_this_text(node_to_replace._text, replaced_contents,
+                if i-1>=0 and isinstance(forth[i-1], TexCmd) and forth[i-1].name in self.skip_commands:
+                    pass
+                else:
+                    self.replace_this_text(node_to_replace._text, replaced_contents,
                                         replacement_string)
-                continue
+                    continue
 
 
             elif isinstance(node_to_replace, TexCmd):
@@ -442,6 +461,11 @@ class TestRegexReplacer(unittest.TestCase):
     def test_itemize_args(self):
         latex_replacer = LatexReplacer
         latex_replacer.work("layouteagle/LatexReplacer/test/single_feature/item_args.tex")
+
+
+    def test_command_open_arg(self):
+        latex_replacer = LatexReplacer
+        latex_replacer.work("layouteagle/LatexReplacer/test/single_feature/cmd_open_arg.tex")
 
 
     def test_newlines(self):
