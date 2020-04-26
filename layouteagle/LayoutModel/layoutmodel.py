@@ -202,9 +202,13 @@ class LayoutModeler(PathSpec):
 
     def validate(self):
         # evaluate the model
-        _, train_acc = self.model.evaluate(self.train_ds, verbose=0)
-        _, test_acc = self.model.evaluate(self.test_ds, verbose=0)
-        logging.info('Train: %.3f, Test: %.3f' % (train_acc, test_acc))
+        try:
+            _, train_acc = self.model.evaluate(self.train_ds, verbose=0)
+            _, test_acc = self.model.evaluate(self.test_ds, verbose=0)
+            logging.info('Train: %.3f, Test: %.3f' % (train_acc, test_acc))
+
+        except ValueError:
+            logging.error("Bad distribution of training data, shapes did'nt match, no extra evaluation")
 
         xy_new = self.model.predict_classes(self.val_ds, batch_size=None)
         logging.info('Validation')

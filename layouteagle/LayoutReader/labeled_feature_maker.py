@@ -7,14 +7,13 @@ from layouteagle.pathant.Converter import converter
 
 @converter("htm", "feature")
 class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
-    def __init__(self, debug=True, *args, n=45, **kwargs):
+    def __init__(self, debug=True, *args,  **kwargs):
         super().__init__(*args, **kwargs)
-        self.n = n
         self.debug = debug
 
     def __call__(self, labeled_paths, *args, **kwargs):
         for doc_id, (labeled_html_path, meta) in enumerate(labeled_paths):
-
+            print(doc_id, labeled_html_path)
             try:
                 feature_df, soup = self.generate_data_for_file(labeled_html_path)
             except FileNotFoundError:

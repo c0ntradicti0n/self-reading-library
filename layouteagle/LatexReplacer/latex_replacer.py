@@ -46,7 +46,7 @@ class LatexReplacer(SoupReplacer):
         self.allowed_recursion_tags = ["revised", "textbf", "uppercase", "textit", "LARGE", "thanks", "Large", "large", "footnotesize",
                                        'texttt', "emph", "item", "bf", "IEEEauthorblockN", "IEEEauthorblockA", "textsc", "textsl"]
         self.allowed_oargs = ['title', 'author', 'section', 'item']
-        self.forbidden_nargs = ["baselineskip", 'pdfoutput', 'vskip']
+        self.forbidden_nargs = ['@sanitize', '@', "baselineskip", 'pdfoutput',  'vskip', 'topmargin', 'oddsidemargin', 'binoppenalty', 'def', 'href', 'providecommand', 'csname', "parindent", "parskip"]
         self.skip_commands = self.forbidden_nargs
         self.forbidden_envs = ["$", "tikzpicture",  "eqnarray", "equation", "tabular", 'eqsplit', 'subequations']
         self.forbidden_envs = self.forbidden_envs + [env + "*" for env in self.forbidden_envs]
@@ -93,7 +93,12 @@ class LatexReplacer(SoupReplacer):
             soup.insert(insert_index, insert_definitions)
 
             # make title should be before
-            document_environment = soup.document.expr._contents
+            try:
+                document_environment = soup.document.expr._contents
+            except AttributeError:
+                logging.warning("document without document environment")
+                return "nix"
+
             if soup.find('maketitle'):
                 maketitle_index = [
                              i
@@ -125,8 +130,8 @@ class LatexReplacer(SoupReplacer):
 
             for path_to_read_from, meta in paths:
                 new_pdf_paths = self.work(path_to_read_from)
-                if new_pdf_paths and len(new_pdf_paths) > 1:
-                    if new_pdf_paths:
+                if new_pdf_paths and len(new_pdf_paths):
+                    if new_pdf_paths :
                         yield from [(new_pdf_path, meta) for new_pdf_path in new_pdf_paths]
                     else:
                         ur.write(path_to_read_from + "\n")
@@ -142,7 +147,7 @@ class LatexReplacer(SoupReplacer):
         content_generator = cycle([replacement_string])
 
         if '\currentcolumn{}' in replacement_string:
-            effective_length = len(replacement_string)  # - len('\currentcolumn{}')
+            effective_length = len(replacement_string) # -4 #- int (len('\currentcolumn{}') *0.8)
         else:
             effective_length = len(replacement_string)
 
@@ -344,7 +349,7 @@ class LatexReplacer(SoupReplacer):
 
         results = []
         logging.info(f"Working on {path_to_read_from}")
-        for col_num in range(1, self.max_cols +1):
+        for col_num in range(2, self.max_cols +1):
             try:
                 with open(path_to_read_from, 'r') as f:
                     try:
@@ -428,7 +433,7 @@ class LatexReplacer(SoupReplacer):
                 return
 
             if compiling:
-                pdf_path = self.compiles(out_path, n=4)
+                pdf_path = self.compiles(out_path, n=4, clean=True)
                 if pdf_path:
                     results.append(pdf_path)
                 else:

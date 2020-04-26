@@ -1,27 +1,35 @@
+# For what?
+
+
+When you copy text from a journal to cite it , you will have to delete newlines,
+page numbers footnotes, if there is something going over the page breaks. It's more complicated with
+ the layout tricks, that are used every where: columns, pictures, captions, tables, headers.
+ Getting the actual text in a layouted document is very different from getting all the text.
+
+ It is not perfect, but the concept works somehow:
+
+![resulting prediction](https://github.com/c0ntradicti0n/LayoutEagle/raw/master/show/2col.html)
+
+(red: not the actual text, light green: column 1, dark green: column 2, blue: 3rd column)
+
 # Why?
-
-Maybe you know the problem of copying text from a journal to cite it one day. You will have to delete newlines,
-page numbers footnotes, if there is something going over the page breaks. This is also a bigger problem for
-natural language processing with scientific information, because one has to extract the text from the articles.
-And this task gets the more difficult, the more one thinks of all the columns, pictures, captions, tables, that are
-thrown between the text.
-
-There are some other projects, that try to get text and other data from PDF-files.
-There are rule-based approaches, that make mistakes due to problems, that arise from defining rules for many different layouts.
-And there are recommendations for using deep learning and non-free services for this.
 
 The aim of this project is especially to get text from column layouts.
 
-So this is another attempt, trying with a manifold neuronal network, that is fed with features of the texboxes in the pdf.
-The training data is automatically produced, by replacing the text in real journal articles by labels for the text and
-recognizing them afterwards as the labels for the texboxes in the pdfs after parsing the LateX documents.
+So this is another attempt, trying with a supervised deep learning approach.
+
+A neuronal network is fed with features of the texboxes in the pdf.
+The training data is automatically collected and produced: We use free publications with
+ the LateX source files and replace all the text in real journal articles by the labels,
+ that shoud be learned by the neuronal network.
+ .
 (These LateX documents are scraped from the arxiv.org website)
-It achieves around 97.5 % on the validation set, as the learning curve reveals:
+It's learning curve:
 
-![learning curve](https://github.com/c0ntradicti0n/CorpusCookApp/raw/master/accuracy_epocs2.png)
+![learning curve](https://github.com/c0ntradicti0n/LayoutEagle/raw/master/accuracy_epocs2.png)
 
-But the result is not such a succes yet:
-![resulting prediction](https://github.com/c0ntradicti0n/CorpusCookApp/raw/master/result.png)
+But the result is not a total succes yet:
+![resulting prediction](https://github.com/c0ntradicti0n/LayoutEagle/raw/master/show/2col.html)
 
 The design of this project follows a "new design pattern", called here "path-ant". It's named like this because ants
 like to bring things from one location to another, leaving it there, when they don't know where to bring it further
@@ -29,7 +37,7 @@ and go along to find something new to bring. Alike in the software of this repos
 "converters", because they transform one kind of data to another, without knowing to what end. And the full conversion
 pipelines are made from a graph of the class registry by looking for the shortest path:
 
-![path-ants graph](https://github.com/c0ntradicti0n/CorpusCookApp/raw/master/pathant.png)
+![path-ants graph](https://github.com/c0ntradicti0n/LayoutEagle/raw/master/pathant.png)
 
 (One of the colored paths is the pipeline to generate the model data and the other one is to get some predicted output-
 documents, to see the results.)

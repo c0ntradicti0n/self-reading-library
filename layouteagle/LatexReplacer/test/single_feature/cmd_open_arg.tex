@@ -4,12 +4,18 @@
 % Preamble
 \documentclass[11pt]{article}
 
+
 % Packages
 \usepackage{amsmath}
 
 % Document
 \begin{document}
     % should not! be replaced
+    \def\ann cc 1{\textcolor{magenta}{#1}}
+\csname cc \currentcolumn{}\endcsname{endmcitethebibliography}{\let\endmcitethebibliography\endthebibliography}{}
+\providecommand \@ cc 1[1]{\endgroup#1\@@endlink}%
+
+\providecommand \@sanitize cc 1[0]{\catcode `\\12\catcode `\$12\catcode
 \vskip 10pt
 \vskip 10pt
 \end{document}
