@@ -6,11 +6,11 @@ page numbers footnotes, if there is something going over the page breaks. It's m
  the layout tricks, that are used every where: columns, pictures, captions, tables, headers.
  Getting the actual text in a layouted document is very different from getting all the text.
 
- It is not perfect, but the concept works somehow:
+ It is not perfect, but the concept works somehow. The folowing link opens a html-document with a document, that looks the same like the original pdf (made with pdf2htmlEX), but the text is colored to represent the recognized layout.
+ (red: not to be included in the actual text, light green: column 1, dark green: column 2, blue: column 3)
 
-![resulting prediction](https://github.com/c0ntradicti0n/LayoutEagle/raw/master/show/2col.html)
+[resulting document](https://github.com/c0ntradicti0n/LayoutEagle/raw/master/show/col2.pdf)
 
-(red: not the actual text, light green: column 1, dark green: column 2, blue: 3rd column)
 
 # Why?
 

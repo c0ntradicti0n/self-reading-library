@@ -1,5 +1,5 @@
 tf-nightly
-tensorflow-addons==0.6.0
+tensorflow-addons==0.8.3
 more_itertools
 bs4
 pandas
