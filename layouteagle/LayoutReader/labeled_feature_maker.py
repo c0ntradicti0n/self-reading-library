@@ -19,6 +19,9 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
             except FileNotFoundError:
                 logging.error("output of pdf2htmlEX looks damaged")
                 continue
+            except IndexError:
+                logging.error("output of pdf2htmlEX looks damaged, no CSS in there?")
+                continue
 
             feature_df["doc_id"] = doc_id
             if False and self.debug:

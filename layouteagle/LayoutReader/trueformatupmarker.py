@@ -96,7 +96,11 @@ class TrueFormatUpmarker(SoupReplacer):
         css_parts = [tag for tag in soup.select('style[type="text/css"]') if isinstance(tag, bs4.Tag)]
         big_css = max(css_parts, key=lambda x: len(x.text))
         style_rules = tinycss.make_parser().parse_stylesheet(big_css.string, encoding="utf8").rules
-        style_dict = OrderedDict(self.css_rule2entry(rule) for rule in style_rules)
+        try:
+            style_dict = OrderedDict(self.css_rule2entry(rule) for rule in style_rules)
+        except IndexError:
+            logging.error("could not get CSS style from soup")
+            raise
         if None in style_dict:
             del style_dict[None]
         return style_dict
