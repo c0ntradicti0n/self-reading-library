@@ -120,7 +120,7 @@ class LayoutModeler(PathSpec):
         self.cols_to_use = self.train_kwargs['cols_to_use'] + [self.train_kwargs['labels']] #([self.train_kwargs['labels']] if training else [])
         feature_df = feature_df.reset_index(drop=True)
 
-        N = 20
+        N = 50
 
         distance_col_prefix = 'd_'
         max_distance = max([max(x) for x in feature_df['distance_vector']])

@@ -150,7 +150,7 @@ class TrueFormatUpmarker(SoupReplacer):
         return self.IndexedWordTag(self.id, word, tag)
 
     label_strings = \
-        ["cc 1", "cc 2", "cc 3","cc 4","cc 5","title","staff","NONE"]
+        ["cc 1", "cc 2", "cc 3", "NONE"]
     def check_for_label_in_string(self, text):
         contained_labels = [s for s in self.label_strings if s in text.lower()]
         if contained_labels:
