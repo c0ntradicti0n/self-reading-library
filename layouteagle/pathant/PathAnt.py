@@ -30,7 +30,12 @@ class PathAnt:
             self.info()
             raise
 
-    def __call__(self, source, target, *args, **kwargs):
+    def __call__(self, source, target, *args, over=None, **kwargs):
+        if over:
+            if isinstance(over, str):
+                return self.__call__(source, over, *args) + self.__call__(over, target, **kwargs)
+
+
         converters_path = self.make_path(self.G, source, target)
         converters_implications = {uv: [_a for _a in a if _a not in converters_path ]
                                    for uv, a in nx.get_edge_attributes(self.G, 'implicite').items()

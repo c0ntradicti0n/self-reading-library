@@ -22,15 +22,15 @@ class LayoutEagle:
     from TestArchitecture.publisher import NLPPublisher, TopicPublisher
     from TestArchitecture.NLP.nlp_blub import NLPBlub
     from TestArchitecture.NLP.topicape import TopicApe
+    from UserOk import UserOk
 
     def __init__(self):
         self.ant = PathAnt()
         self.model_pipe = self.ant("arxiv.org", "keras")
         self.prediction_pipe = self.ant("pdf", "layout.html")
 
-
     def make_model(self):
-        model_pipe = self.ant("arxiv.org", "keras")
+        model_pipe = self.ant("arxiv.org", "keras" )
         print (list(model_pipe("https://arxiv.org")))
 
     def test_info(self):

@@ -2,6 +2,7 @@ import logging
 import os
 
 from layouteagle.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
+from layouteagle.helpers.list_tools import Lookup
 from layouteagle.pathant.Converter import converter
 
 
@@ -27,7 +28,8 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
             if False and self.debug:
                 debug_html_path = labeled_html_path + ".debug.html"
                 self.tfu = TrueFormatUpmarkerPDF2HTMLEX(debug=True)
-                self.tfu.generate_css_tagging_document(premade_soup=soup, html_write_to=debug_html_path, premade_features=feature_df)
+                self.tfu.label_lookup = Lookup(self.tfu.label_strings)
+                self.tfu.generate_css_tagging_document(html_read_from=labeled_html_path, html_write_to=debug_html_path)
                 os.system(f"google-chrome {debug_html_path}")
 
             #feature_df['chars'] = feature_df.divs.apply(lambda div: sum(div.text.count(c) for c in string.ascii_letters))
@@ -37,6 +39,15 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
             meta['soup'] = soup
 
             yield feature_df, meta
+
+
+
+
+if __name__ == '__main__':
+    latex_maker = LabeledFeatureMaker
+    list(latex_maker.__call__(
+        [("layouteagle/.layouteagle/tex_data/efd00a7cbb96f4b5e25d06863834b0e7/bare_jrnl.tex2.labeled.pdf.htm", {})]))
+
 
 
 

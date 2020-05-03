@@ -217,9 +217,16 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
 
         features["coarse_grained_pdf"] = numpy.hstack(other_feature_kinds_stacked.coarse_grained_pdfs)
         features["fine_grained_pdf"] = numpy.hstack(other_feature_kinds_stacked.fine_grained_pdfs)
-        features["distance_vector"] =  [dv for distance_matrix in other_feature_kinds_stacked.distances for dv in distance_matrix]
-        features["angle"] =  [dv for distance_matrix in other_feature_kinds_stacked.angles for dv in distance_matrix]
 
+        features["distance_vector"] =  [distance_vector for distance_matrix in other_feature_kinds_stacked.distances for distance_vector in distance_matrix]
+        features["angle"] =  [angle_vector for angle_matrix in other_feature_kinds_stacked.angles for angle_vector in angle_matrix]
+        features["x_profile"] = [x_profile_vector
+                                 for x_profile_vector, angle_matrix in zip(other_feature_kinds_stacked.x_profile,
+                                                             other_feature_kinds_stacked.angles) for _ in angle_matrix]
+
+        features["y_profile"] = [y_profile_vector
+                                 for y_profile_vector, angle_matrix in zip(other_feature_kinds_stacked.y_profile,
+                                                             other_feature_kinds_stacked.angles) for _ in angle_matrix]
         self.overwrite_by_labeled_document(features)
 
 
@@ -231,7 +238,10 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
     def normalized(self, a):
         return a/[a_line.max()-a_line.min() for a_line in a.T]
 
-    FeatureKinds = namedtuple("FeatureKinds", ["coarse_grained_pdfs", "fine_grained_pdfs", "coarse_grained_field", "number_of_columns", "distances", "angles"])
+    FeatureKinds = namedtuple(
+        "FeatureKinds",
+        ["coarse_grained_pdfs", "fine_grained_pdfs", "coarse_grained_field", "number_of_columns",
+         "distances", "angles", 'x_profile', 'y_profile'])
 
     def analyse_point_density_frequence(self, page_features, debug=True, axe_len_X=100, axe_len_Y=100) -> FeatureKinds:
         points2d = numpy.column_stack((page_features.x, page_features.y))
@@ -248,6 +258,8 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
         except IndexError:
             logging.error("indexes wrong after index nomralisation ")
 
+
+
         coarse_grained_field =  gaussian_filter(dotted, sigma=3)
         coarse_grained_pdfs = coarse_grained_field [indices[:,0], indices[:,1]]
 
@@ -259,7 +271,10 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
 
         number_of_columns = self.number_of_columns(density2D=fine_grained_field.T)
 
-        return self.FeatureKinds(coarse_grained_pdfs, fine_grained_pdfs, coarse_grained_field, number_of_columns, distances, angles)
+        x_profile = numpy.sum(dotted, axis=0)
+        y_profile = numpy.sum(dotted, axis=1)
+
+        return self.FeatureKinds(coarse_grained_pdfs, fine_grained_pdfs, coarse_grained_field, number_of_columns, distances, angles, x_profile, y_profile)
 
     def most_common_value(self, values, constraint=None):
         if constraint:

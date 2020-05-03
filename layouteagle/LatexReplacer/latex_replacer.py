@@ -4,6 +4,7 @@ import os
 import subprocess
 from collections import defaultdict, OrderedDict
 from itertools import cycle
+from random import randint
 from threading import Timer
 
 from TexSoup import TexSoup, TexNode, TokenWithPosition, TexText, TexEnv, OArg, RArg, TexCmd
@@ -19,7 +20,7 @@ from layouteagle.helpers.str_tools import find_all
 from layouteagle.pathant.Converter import converter
 
 
-@converter("tex", "labeled.pdf")
+@converter("tex", "replaced.pdf")
 class LatexReplacer(SoupReplacer):
     replacement_mapping_tag2tex = OrderedDict({
         None: ["document", "abstract", "keywords", None] + \
@@ -46,7 +47,9 @@ class LatexReplacer(SoupReplacer):
         self.allowed_recursion_tags = ["revised", "textbf", "uppercase", "textit", "LARGE", "thanks", "Large", "large", "footnotesize",
                                        'texttt', "emph", "item", "bf", "IEEEauthorblockN", "IEEEauthorblockA", "textsc", "textsl"]
         self.allowed_oargs = ['title', 'author', 'section', 'item']
-        self.forbidden_nargs = ['@sanitize', '@', "baselineskip", 'pdfoutput',  'vskip', 'topmargin', 'oddsidemargin', 'binoppenalty', 'def', 'href', 'providecommand', 'csname', "parindent", "parskip"]
+        self.forbidden_nargs = ['@sanitize', '@', "baselineskip", 'pdfoutput',  'vskip', 'topmargin', 'oddsidemargin',
+                                'binoppenalty', 'def', 'href', 'providecommand', 'csname', "parindent", "parskip", "font"
+                                "pdfminorversion"]
         self.skip_commands = self.forbidden_nargs
         self.forbidden_envs = ["$", "tikzpicture",  "eqnarray", "equation", "tabular", 'eqsplit', 'subequations']
         self.forbidden_envs = self.forbidden_envs + [env + "*" for env in self.forbidden_envs]
@@ -70,7 +73,7 @@ class LatexReplacer(SoupReplacer):
         else:
             insert_index = 7
 
-        """if any(arg in file_content for arg in ["lrec", "ieeeconf", "IEEEtran", "acmart", "twocolumn", "acl2020", "ansmath"]):
+        """if any(arg in file_content for arg in ["spconf", "lrec", "ieeeconf", "IEEEtran", "acmart", "twocolumn", "acl2020", "ansmath"]):
             soup.insert(insert_index, twocolumn_defs.defs)
             # TODO put multicol begin after first section(!) of doc and the rest to the end
 
@@ -87,9 +90,9 @@ class LatexReplacer(SoupReplacer):
         if col_num > 1:
             # start in document environment
             if orig_twocolumn:
-                insert_definitions = multicol_defs.defs
+                insert_definitions = "\n\onecolumn\n" +  multicol_defs.defs
             else:
-                insert_definitions = "\n\onecolumn\n" + multicol_defs.defs
+                insert_definitions = multicol_defs.defs
             soup.insert(insert_index, insert_definitions)
 
             # make title should be before
@@ -118,10 +121,17 @@ class LatexReplacer(SoupReplacer):
             return r"cc \currentcolumn{}"
         else:
             # normal fill text
+            if orig_twocolumn:
+                insert_definitions = "\n\onecolumn\n"
+            else:
+                insert_definitions = multicol_defs.defs
+            soup.insert(insert_index, insert_definitions)
+
+
             logging.info("No multi column instruction found, so its single col")
             return r"cc 1"
 
-    @file_persistent_cached_generator(config.cache + 'labeled_tex_paths.json')
+    @file_persistent_cached_generator(config.cache + 'replaced_tex_paths.json')
     def __call__(self, paths, compile=True):
         """
         :param path_to_read_from:
@@ -144,27 +154,39 @@ class LatexReplacer(SoupReplacer):
         expr_text = possible_part_string
         assert isinstance(expr_text, str)
 
-        content_generator = cycle([replacement_string])
-
-        if '\currentcolumn{}' in replacement_string:
-            effective_length = len(replacement_string) # -4 #- int (len('\currentcolumn{}') *0.8)
+        if replacement_string in expr_text:
+            new_positional_string = TexText(possible_part_string)
+            replaced_contents.append(new_positional_string)
+            return
         else:
-            effective_length = len(replacement_string)
 
-        new_contents = []
-        for line in expr_text.split('\n'):
-            if line.strip():
-                how_often = max(1, int((len(line) / effective_length)))
-                content_list = list(itertools.islice(content_generator, how_often))
-                new_contents.append(" ".join (content_list))
+            content_generator = cycle([replacement_string])
+
+            if '\currentcolumn{}' in replacement_string:
+                effective_length = len(replacement_string) - int (len('\currentcolumn{}') *0.8)
             else:
-                new_contents.append("")
+                effective_length = len(replacement_string)
+
+            new_contents = []
+            for line in expr_text.split('\n'):
+                if line.strip():
+                    how_often = max(1, int((len(line) / effective_length)))
+
+                    content_list = list(itertools.islice(content_generator, how_often))
+                    if how_often > 60:
+                        nl = randint(15,60)
+                        content_list.insert(nl, r'\\')
 
 
-        new_content = "\n".join(new_contents)
+                    new_contents.append(" ".join (content_list))
+                else:
+                    new_contents.append("")
 
-        new_positional_string = TexText(new_content)
-        replaced_contents.append(new_positional_string)
+
+            new_content = "\n".join(new_contents)
+
+            new_positional_string = TexText(new_content)
+            replaced_contents.append(new_positional_string)
 
     def make_replacement(self, where, replacement_string):
         if isinstance(replacement_string, str):
@@ -349,7 +371,7 @@ class LatexReplacer(SoupReplacer):
 
         results = []
         logging.info(f"Working on {path_to_read_from}")
-        for col_num in range(2, self.max_cols +1):
+        for col_num in range(1, self.max_cols + 1):
             try:
                 with open(path_to_read_from, 'r') as f:
                     try:
@@ -493,6 +515,10 @@ class TestRegexReplacer(unittest.TestCase):
     def test_multicol(self):
         latex_replacer = LatexReplacer
         latex_replacer.work("layouteagle/LatexReplacer/test/single_feature/multicolumn.tex")
+
+    def test_stycol(self):
+        latex_replacer = LatexReplacer
+        latex_replacer.work("layouteagle/LatexReplacer/test/single_feature/colsty.tex")
 
 
     def test_strange(self):

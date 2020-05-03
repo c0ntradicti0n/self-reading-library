@@ -154,9 +154,9 @@ class TrueFormatUpmarker(SoupReplacer):
         return self.IndexedWordTag(self.id, word, tag)
 
     label_strings = \
-        ["cc 1", "cc 2", "cc 3", "NONE"]
+        ["cc1", "cc2", "cc3", "NONE"]
     def check_for_label_in_string(self, text):
-        contained_labels = [s for s in self.label_strings if s in text.lower()]
+        contained_labels = [s for s in self.label_strings if s in text.lower().replace(" ", "")]
         if contained_labels:
             if len(contained_labels) > 1:
                 logging.warning("More labels in div text found than wanted")
@@ -164,9 +164,10 @@ class TrueFormatUpmarker(SoupReplacer):
         else:
             return self.label_strings[-1]
 
-    shifts = 0
+    shifts = 2
     def overwrite_by_labeled_document(self, features):
         features["text"] = features.divs.apply(lambda div: div.text)
+        features["spans_no"] = features.divs.apply(lambda div:  div.__str__().count(r'/span') -  div.__str__().count('"_'))
         features["pcl"] = features["text"].apply(lambda text: self.check_for_label_in_string(text))
         for shift in range(self.shifts, 0, -1):
             features["shift_up"], features["shift_pn_up"], features["shift_down"], features["shift_pn_down"]= (
