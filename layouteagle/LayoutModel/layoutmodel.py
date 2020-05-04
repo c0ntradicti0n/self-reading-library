@@ -25,27 +25,31 @@ class LayoutModeler(PathSpec):
     train_kwargs = {
         'dropout': {'rate': 0.01,
                     'dtype': 'float64'},
+        'dense0': {'units': 44,
+                   'trainable': True,
+                   'activation': 'swish',
+                   'dtype': 'float64'},
         'dense1': {'units': 27,
                    'trainable': True,
-                   'activation': 'tanh',
+                   'activation': 'swish',
                    'dtype': 'float64'},
         'dense2': {'units': 17,
                    'trainable': True,
-                   'activation': 'tanh',
+                   'activation': 'swish',
                    'dtype': 'float64'},
         'dense3': {'units': 10,
                    'trainable': True,
-                   'activation': 'tanh',
+                   'activation': 'swish',
                    'dtype': 'float64'},
         'dense4': {'units': 7,
                    'trainable': True,
-                   'activation': 'tanh',
+                   'activation': 'swish',
                    'dtype': 'float64'},
         'denseE': { # 'units' are set by us self to the necessary value
                    'trainable': True,
                    'activation': 'softmax',
                    'dtype': 'float64'},
-        'adam': {'lr': 0.0001},
+        'adam': {'lr': 0.0005},
         'epochs': 200,
         'batch_size': 320,
         'patience': 3,
@@ -206,13 +210,15 @@ class LayoutModeler(PathSpec):
 
         self.model = tf.keras.Sequential([
             feature_layer,
+
+            tf.keras.layers.Dense(**self.train_kwargs['dense0']),
             tf.keras.layers.Dense(**self.train_kwargs['dense1']),
             tf.keras.layers.Dense(**self.train_kwargs['dense2']),
             tf.keras.layers.Dense(**self.train_kwargs['dense3']),
             tf.keras.layers.Dense(**self.train_kwargs['dense4']),
 
             tf.keras.layers.Dense(units=len(self.label_set), **self.train_kwargs['denseE']),
-            tf.keras.layers.Dropout(**self.train_kwargs['dropout']),
+            #tf.keras.layers.Dropout(**self.train_kwargs['dropout']),
 
         ])
 
@@ -261,7 +267,7 @@ class LayoutModeler(PathSpec):
         return pred #self.model.predict_classes(self.predict_ds, batch_size=len(feature_df), verbose=100)
 
     def save(self):
-        self.model.load_weights(self.model_path)
+        #self.model.load_weights(self.model_path)
         self.model.save(self.model_path + ".kerasmodel")
         with open(self.lookup_path, "wb") as f:
             pickle.dump(self.label_lookup,f)

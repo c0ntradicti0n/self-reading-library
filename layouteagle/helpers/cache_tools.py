@@ -13,22 +13,22 @@ def file_persistent_cached_generator(filename):
             try:
                 with open(filename, 'r') as f:
                     cache = list(f.readlines())
+                cache = dict([tuple(json.loads(line)) for line in cache])
             except (IOError, ValueError):
-                cache = []
+                cache = {}
 
             if isinstance( param[1], list):
                 yield from apply_iterating_and_caching(cache, cwd, param, no_cache=True)
             else:
-                for result in cache:
-                    content, meta = json.loads(result)
+                for result in cache.items():
                     os.chdir(cwd)
-                    yield content, meta
+                    yield result
 
                 yield from apply_iterating_and_caching(cache, cwd, param)
             os.chdir(cwd)
 
         def apply_iterating_and_caching(cache, cwd, param, no_cache=False):
-            generator = original_func(*param)
+            generator = original_func(*param, cache=cache)
             for result in generator:
 
                 result_string = json.dumps(result) + "\n"

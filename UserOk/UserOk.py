@@ -15,13 +15,14 @@ class OK(PathSpec):
         pass
 
     @file_persistent_cached_generator(config.cache + 'user_ok_tex_paths.json')
-    def __call__(self, paths, *args, **kwargs):
+    def __call__(self, paths, *args, cache=None, **kwargs):
         while True:
-            batch = list(itertools.islice(paths, 25))
+            batch = list(itertools.islice(paths, 165))
 
             for in_path, meta in batch:
                 out_path = in_path + self.path_spec._to
-
+                if out_path in cache:
+                    continue
                 os.system(f"FoxitReader {in_path}")
 
 
