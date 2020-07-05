@@ -10,3 +10,7 @@ lxml
 TexSoup
 networkx
 pygraphviz
+databases[postgresql]
+falcon
+
+gunicorn
