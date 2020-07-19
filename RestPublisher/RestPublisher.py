@@ -9,6 +9,7 @@ import falcon as falcon
 import pandas
 from pip._vendor import msgpack
 
+from RestPublisher.Resource import Resource
 from RestPublisher.react import react
 from layouteagle import config
 from layouteagle.helpers.cache_tools import file_persistent_cached_generator
@@ -56,22 +57,31 @@ class RestPublisher(PathSpec, react) :
                  *args,
                  port=7770,
                  url = "localhost",
-                 resource = None,
+                 resource : Resource = None,
                  **kwargs):
 
         react.__init__(self, *args, **kwargs)
         PathSpec.__init__(self, *args, **kwargs)
-        assert resource
+        assert resource and isinstance(resource, Resource)
         self.url = url
         self.port = port
         self.resource = resource
         self.contents = []
-        self.logger.info("publishing")
+        self.logger.warning("publishing")
 
-        with open(self.npm_project + self.resource.path, "w") as f:
-            f.write(self.react_code.format(**self.resource, port = self.port, url=self.url))
+        self.logger.warning(f"Creating service for {self.resource.title}")
 
+        with open("/".join([self.npm_resources, self.resource.title + ".ts"]), "w") as f:
+            f.write(self.react_code.format(**self.resource, port = self.port, url=self.url, access=self.resource.accsess))
 
+        self.logger.warning(f"Creating components for {self.resource.title}")
+
+        self.write_components("/".join([self.npm_components, self.resource.title + ".ts"]))
+
+        self.logger.warning(f"Creating page for {self.resource.title}")
+
+        with open("/".join([self.npm_pages, self.resource.title + ".ts"]), "w") as f:
+            f.write(self.page.format(**self.resource, port = self.port, url=self.url, access=self.resource.accsess))
 
 
     def __iter__(self, incoming):
@@ -82,46 +92,47 @@ class RestPublisher(PathSpec, react) :
     react_code = \
 """
 
-class ??title!! {
-    async function which() {
-
-    let response = await fetch('??url!! + ":" + ??port!! + "/" + ??route!!');
-
-    console.log(response.status); // 200
-    console.log(response.statusText); // OK
-
-    if (response.status === 200) {
-        let data = await response.text();
-        // handle data
-        return data
+class ??title!! extends ServerResource<??title!!>{
+    constructor () {
+        super(
+         fetch_allowed = ??access[fetch]!!, 
+         read_allowed =  ??access[read]!!, 
+         upload_allowed =  ??access[upload]!!,
+         correct_allowed =  ??access[correct]!!,
+         delete_allowed =  ??access[delete]!!
+        )
     }
-    
-    // Example POST method implementation:
-    async function give(url = '', data = {}) {
-      // Default options are marked with *
-      const response = await fetch(url, {
-        method: 'POST', // *GET, POST, PUT, DELETE, etc.
-        mode: 'cors', // no-cors, *cors, same-origin
-        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        credentials: 'same-origin', // include, *same-origin, omit
-        headers: {
-          'Content-Type': 'application/json'
-          // 'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        redirect: 'follow', // manual, *follow, error
-        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-        body: JSON.stringify(data) // body data type must match "Content-Type" header
-      });
-      return response.json(); // parses JSON response into native JavaScript objects
-    }
-    
-        async function upload(url = '', data = {}) {
-    async function correct(url = '', data = {}) {
-    async function hide(url = '', data = {}) {
-
 }
 
 """.replace("{", "{{").replace("}", "}}").replace("??", r"{").replace("!!", "}")
+
+
+    page = """
+import Router from 'next/router'
+
+    
+    """.replace("{", "{{").replace("}", "}}").replace("??", r"{").replace("!!", "}")
+
+    components = {
+        "??resource!!Container": """
+        ??access[fetch]!!Container extends TemplateContainer {
+            
+        }
+        """.replace("{", "{{").replace("}", "}}").replace("??", r"{").replace("!!", "}"),
+        "??resource!!Fetch": """
+    ??access[fetch]!!Container extends TemplateContainer {
+
+    }
+    """.replace("{", "{{").replace("}", "}}").replace("??", r"{").replace("!!", "}")
+    }
+
+    def write_components(self, param):
+        written_componens= []
+        for component, code in self.components.items():
+            with open("/".join([self.npm_resources, self.resource.title + ".ts"]), "w") as f:
+                f.write(code.format(**self.resource, port=self.port, url=self.url, access=self.resource.accsess))
+                written_componens.append(component)
+
 
 
 

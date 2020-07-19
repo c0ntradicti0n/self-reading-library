@@ -1,5 +1,13 @@
 class Resource(dict):
-    def __init__(self, title, path, route):
+    def __init__(self, title, path, route, accsess =
+             {'fetch':True,
+              "read": True,
+              "correct": True,
+              "upload" : True,
+              "delete": True
+              }
+                 ):
+        self.accsess = accsess
         self.route = route
         self.path = path
         self.title = title
