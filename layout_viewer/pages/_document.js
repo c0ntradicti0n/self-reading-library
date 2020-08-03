@@ -1,9 +1,25 @@
 import Document, { Head, Main, NextScript } from 'next/document';
+import glob from 'glob'
+
 
 export default class MyDocument extends Document {
-  static getInitialProps({ renderPage }) {
-    return {html : "asdabc"}
+  constructor(props) {
+    super(props);
+    this.state = {
+      pages : []
+    }
+
+    let a = (async () => {
+  try {
+    result =  await glob('pages/**/*.js', {cwd: './'}, (res) => this.setState({pages:res}));
+  } catch(e) {}
+})()
   }
+
+   static getInitialProps({ renderPage }) {
+    return {html : "", ... this.state}
+  }
+
 
   render() {
     return (

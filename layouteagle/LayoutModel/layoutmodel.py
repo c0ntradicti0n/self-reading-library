@@ -61,7 +61,7 @@ class LayoutModeler(PathSpec):
     def __init__(self,
                  *args,
                  override_train_kwargs: Dict= {},
-                 lookup_path = ".layouteagle/lookup.pickle",
+                 lookup_path = "./layouteagle/.layouteagle/lookup.pickle",
                  debug: bool = True, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -275,12 +275,17 @@ class LayoutModeler(PathSpec):
 
     def load(self):
         try:
-            self.model = tf.keras.models.load_model (self.model_path + ".kerasmodel")
+            if not hasattr(self, "model"):
+                self.model = tf.keras.models.load_model (self.model_path + ".kerasmodel")
 
-            with open(self.lookup_path, "rb") as f:
-                self.label_lookup = pickle.load(f)
+            if not hasattr(self, "label_lookup"):
+                with open(self.lookup_path, "rb") as f:
+                    self.label_lookup = pickle.load(f)
+            else:
+                raise ValueError(f"No lookup table could be loaded from {self.lookup_path} (cwd= {os.getcwd()}")
+
         except OSError as e:
-            e.args = (e.args[0] + f"\n Please train model first and it should be written to {self.model_path}",)
+            e.args = (str(e.args[0]) + f"\n Please train model first and it should be written to {self.model_path}",)
             raise
 
 if __name__ == '__main__':

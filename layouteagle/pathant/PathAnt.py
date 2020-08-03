@@ -122,6 +122,8 @@ class PathAnt:
             functional_object.path_spec._from = "." + froms
             functional_object.path_spec._to = "." + tos
 
+            functional_object.ant = self
+
             self.G.add_edge(froms,tos, functional_object=functional_object, **kwargs)
 
     def lookup(self, _from, _to, attr='functional_object'):

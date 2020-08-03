@@ -6,7 +6,7 @@ from layouteagle.pathant.Converter import converter
 class LayouPredictor(LayoutModeler):
     def __init__(self,
                  *args,
-                 model_path: str = '.layouteagle/layoutmodel',
+                 model_path: str = 'layouteagle/.layouteagle/layoutmodel',
                  debug: bool = True, **kwargs):
         super().__init__(*args, **kwargs)
         self.debug = debug

@@ -30,8 +30,25 @@ class RestPublisher(PathSpec, react) :
     """
 
     # deliver paths
-    def on_get(self):
+    def on_post(self, *args, **kwargs): # get one
+        print(args, kwargs)
+
+        source_node, what_to_put_first = self.answer_or_ask_neighbors(None)
+        self.ant(source_node, self, what_to_put_first)
+        #return jsonify(meta=self.meta), 200
+
+        return jsonify({"BANANA": "YEAH"}), 200
         return jsonify(meta=self.meta), 200
+
+
+    def on_get(self, *args, **kwargs): # get all
+        print(args, kwargs)
+
+        source_node, what_to_put_first = self.answer_or_ask_neighbors(None)
+        self.ant(source_node, self, what_to_put_first)
+        #return jsonify(meta=self.meta), 200
+
+        return jsonify({"BANANA": "YEAH"}), 200
 
     # get html
     def on_post(self, i):
@@ -71,17 +88,19 @@ class RestPublisher(PathSpec, react) :
 
         self.logger.warning(f"Creating service for {self.resource.title}")
 
-        with open("/".join([self.npm_resources, self.resource.title + ".ts"]), "w") as f:
-            f.write(self.react_code.format(**self.resource, port = self.port, url=self.url, access=self.resource.accsess))
+        with open("/".join([self.npm_resources, self.resource.Title + "Service.ts"]), "w") as f:
+            f.write(self.server_resource_code.format(**self.resource, port = self.port, url=self.url, **self.resource.access))
 
         self.logger.warning(f"Creating components for {self.resource.title}")
 
-        self.write_components("/".join([self.npm_components, self.resource.title + ".ts"]))
+        self.write_components("/".join([self.npm_components, self.resource.title + ".tsx"]))
+
+        self.logger.warning(f"Creating model object for {self.resource.Title}")
 
         self.logger.warning(f"Creating page for {self.resource.title}")
 
-        with open("/".join([self.npm_pages, self.resource.title + ".ts"]), "w") as f:
-            f.write(self.page.format(**self.resource, port = self.port, url=self.url, access=self.resource.accsess))
+        with open("/".join([self.npm_pages, self.resource.title + ".tsx"]), "w") as f:
+            f.write(self.page_code.format(**self.resource, port = self.port, url=self.url, **self.resource.access))
 
 
     def __iter__(self, incoming):
@@ -89,17 +108,19 @@ class RestPublisher(PathSpec, react) :
             self.contents = list(incoming)
 
 
-    react_code = \
+    server_resource_code = \
 """
+import ServerResource from './GeneralResource'
 
-class ??title!! extends ServerResource<??title!!>{
+export default class ??Title!!Service extends ServerResource {
     constructor () {
         super(
-         fetch_allowed = ??access[fetch]!!, 
-         read_allowed =  ??access[read]!!, 
-         upload_allowed =  ??access[upload]!!,
-         correct_allowed =  ??access[correct]!!,
-         delete_allowed =  ??access[delete]!!
+         '/??title!!', 
+         ??access[fetch]!!, 
+         ??access[read]!!, 
+         ??access[upload]!!,
+         ??access[correct]!!,
+         ??access[delete]!!
         )
     }
 }
@@ -107,14 +128,28 @@ class ??title!! extends ServerResource<??title!!>{
 """.replace("{", "{{").replace("}", "}}").replace("??", r"{").replace("!!", "}")
 
 
-    page = """
+    page_code = """
 import Router from 'next/router'
+import Graph from '../components/Graph'
+import ??title!!Service from '../resources/??Title!!Service'
 
+export default class ??title!! extends React.Component  {
+    constructor (props)  {
+        super(props)
+        this.??title!!Service = new ??title!!Service()
+    }
+    render ()  {
+        return (<>
+            <Graph graph={this.??title!!Service.fetch_all()}/>
+        </>
+        )
+    }    
+} 
     
     """.replace("{", "{{").replace("}", "}}").replace("??", r"{").replace("!!", "}")
 
     components = {
-        "??resource!!Container": """
+        "??Title!!Container": """
         ??access[fetch]!!Container extends TemplateContainer {
             
         }
@@ -129,8 +164,8 @@ import Router from 'next/router'
     def write_components(self, param):
         written_componens= []
         for component, code in self.components.items():
-            with open("/".join([self.npm_resources, self.resource.title + ".ts"]), "w") as f:
-                f.write(code.format(**self.resource, port=self.port, url=self.url, access=self.resource.accsess))
+            with open("/".join([self.npm_resources, self.resource.title + ".s"]), "w") as f:
+                f.write(code.format(**self.resource, port=self.port, url=self.url, **self.resource.access))
                 written_componens.append(component)
 
 

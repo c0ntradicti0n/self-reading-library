@@ -28,12 +28,16 @@ def file_persistent_cached_generator(filename):
             os.chdir(cwd)
 
         def apply_iterating_and_caching(cache, cwd, param, no_cache=False):
-            generator = original_func(*param, cache=cache)
+            generator = original_func(*param)#, cache=cache)
+
+
             for result in generator:
 
                 result_string = json.dumps(result) + "\n"
                 if no_cache or result_string not in cache:
                     content, meta = result
+
+
                     os.chdir(cwd)
                     with open(filename, 'a') as f:
                         f.write(result_string)

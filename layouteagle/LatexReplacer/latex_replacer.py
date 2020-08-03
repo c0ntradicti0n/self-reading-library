@@ -20,7 +20,7 @@ from layouteagle.helpers.str_tools import find_all
 from layouteagle.pathant.Converter import converter
 
 
-@converter("tex", "replaced.pdf")
+@converter("tex", "labeled.pdf")
 class LatexReplacer(SoupReplacer):
     replacement_mapping_tag2tex = OrderedDict({
         None: ["document", "abstract", "keywords", None] + \

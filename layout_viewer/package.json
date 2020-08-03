@@ -1,0 +1,27 @@
+{
+  "name": "with-three-js",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "drei": "0.0.60",
+    "glob": "^7.1.6",
+    "next": "9.4.4",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "react-force-graph": "^1.36.5",
+    "react-three-fiber": "4.2.12",
+    "three": "0.118.3"
+  },
+  "devDependencies": {
+    "@types/loadable__component": "^5.13.0",
+    "@loadable/component": "^5.13.0",
+    "@types/node": "^14.0.27",
+    "next-transpile-modules": "3.3.0",
+    "typescript": "^3.9.7"
+  }
+}

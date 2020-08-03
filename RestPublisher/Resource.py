@@ -1,5 +1,8 @@
+from typing import Dict
+
+
 class Resource(dict):
-    def __init__(self, title, path, route, accsess =
+    def __init__(self, title, path, route, access : Dict=
              {'fetch':True,
               "read": True,
               "correct": True,
@@ -7,10 +10,12 @@ class Resource(dict):
               "delete": True
               }
                  ):
-        self.accsess = accsess
+        self.access = {k:str(v).lower() for k, v in access.items() }
         self.route = route
         self.path = path
-        self.title = title
+        self.Title = title.title()
+        self.title = title.lower()
+
 
     def __getattr__(self, name):
         if name in self:

@@ -8,11 +8,9 @@ from layouteagle.pathant.Converter import converter
 class MarkupPublisher(RestPublisher, react) :
     def __init__(self,
                  *args,
-                 port=7770,
-                 url = "localhost",
                  **kwargs):
         super().__init__(*args, **kwargs, resource=Resource(
             title="Markup",
             path="markup",
             route="markup",
-            accsess={"fetch": True, "read": True, "upload":True, "correct":True, "delete":True}))
+            access={"fetch": True, "read": True, "upload":True, "correct":True, "delete":True}))
