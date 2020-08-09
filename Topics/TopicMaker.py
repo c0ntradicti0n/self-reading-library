@@ -3,8 +3,12 @@ from collections import defaultdict
 from pprint import pprint
 
 import nltk
+import scipy
 import textacy
+from gensim.parsing import remove_stopwords
 from multi_rake import Rake
+from numpy.lib.recfunctions import find_duplicates
+from scipy.optimize import linear_sum_assignment
 from sklearn import mixture, decomposition
 from textacy.keyterms import sgrank, textrank
 
@@ -32,17 +36,17 @@ class TopicMaker:
     def test(self):
         logging.warning("Reading texts")
 
+        #with open("/home/stefan/PycharmProjects/LayoutEagle/test/corpus/faust.txt") as f:
+        #    text = " ".join([l for l in f.readlines() ])
         with open("/home/stefan/PycharmProjects/LayoutEagle/test/corpus/faust.txt") as f:
-            text = " ".join([l for l in f.readlines() ])
-        with open("/home/stefan/PycharmProjects/LayoutEagle/test/corpus/faust2.txt") as f:
-            text = " ".join([l  for l in f.readlines() ])
+            text = " ".join([l  for l in f.readlines() ])[:50000]
 
         doc = self.nlp(text)
 
         logging.warning("Tokenizing texts")
 
         def paragraphs(document):
-            length = 50
+            length = 20
             start = 0
             try:
                 for token in document:
@@ -71,7 +75,8 @@ class TopicMaker:
         embeddings = self.embed(texts=texts)
         labels = self.cluster(embeddings=embeddings)
         topic_ids_2_doc_ids = self.labels2docs(texts=texts, labels=labels)
-        topics = self.make_titles(topic_2_docids=topic_ids_2_doc_ids, texts=texts)
+        keywords = self.make_keywords(topic_2_docids=topic_ids_2_doc_ids, texts=texts)
+        topics = self.make_titles(keywords)
         return topics, meta
 
     def embed(self, texts):
@@ -104,7 +109,7 @@ class TopicMaker:
         print(X.shape)
         logging.warning("sizing embeddings")
 
-        pca = decomposition.PCA(n_components=39)
+        pca = decomposition.PCA(n_components=100)
         pca.fit(X)
         X = pca.transform(X)
 
@@ -127,22 +132,66 @@ class TopicMaker:
         print (topic_2_docids)
         return topic_2_docids
 
-    def make_titles(self, topic_2_docids, texts):
+    def make_keywords(self, topic_2_docids, texts):
+        from nltk.corpus import stopwords
 
-        titled_clustered_documents = {}
+        stop_words = stopwords.words()
+
+        def stop_word_removal(x):
+            token = x.split()
+            return ' '.join([w for w in token if not w in stop_words])
+
+        titled_clustered_documents = []
         for topic_id, text_ids in topic_2_docids.items():
             constructed_doc = " ".join([w.title() for id in text_ids for w in texts[id]] )
-
+            constructed_doc = remove_stopwords(stop_word_removal(constructed_doc.lower()))
             doc = textacy.make_spacy_doc(constructed_doc, lang="en_core_web_md")
-            keywords = textrank(doc, normalize="lemma", n_keyterms=3)
+            keywords = textrank(doc, normalize="lemma", n_keyterms=15)
 
             print (keywords)
             print(constructed_doc[:2000])
 
-            titled_clustered_documents[keywords[0] if keywords else "."] = \
-                [texts[id] for id in text_ids]
+            titled_clustered_documents.append(
+                ([keywords if keywords else []] ,
+                 [texts[id] for id in text_ids]))
 
         return titled_clustered_documents
+
+    def numpy_fillna(self, data):
+        # Get lengths of each row of data
+        lens = np.array([len(i) for i in data])
+
+        # Mask of valid places in each row
+        mask = np.arange(lens.max()) < lens[:, None]
+
+        # Setup output array and put elements from data into masked positions
+        out = np.zeros(mask.shape, dtype=np.float64)
+        out[mask] = np.concatenate(data)
+        return out
+
+    def make_titles(self, keywords_to_texts):
+        words = np.array([[kw[0] for kw in keys[0]] for keys, values in list(keywords_to_texts)])
+        scores = self.numpy_fillna([[kw[1] for kw in keys[0]] for keys, values in list(keywords_to_texts)])
+
+        scores = -scores
+        unq, count = np.unique(words, return_counts=True)
+        dups = unq[count > 1]
+        vec_in_fun = np.vectorize(lambda w: w in dups)
+        mask = vec_in_fun(words)
+        scores[mask] = 1
+        print(scores)
+
+        row_ids, col_ids = linear_sum_assignment(scores)
+        titles_to_texts =  {keywords_to_texts[row][0][0][col][0]:keywords_to_texts[row][1]
+                           for col, row in zip(col_ids, row_ids)}
+        pprint({k: " ".join(u for w in v[:10] for u in w) for k, v in titles_to_texts.items()})
+
+        return  titles_to_texts
+
+
+
+
+
 
 if __name__=="__main__":
     tm = TopicMaker()
