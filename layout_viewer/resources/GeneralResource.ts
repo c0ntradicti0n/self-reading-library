@@ -24,21 +24,24 @@ export default class ServerResource <T> {
         this.delete_allowed = delete_allowed
     }
 
-    async request (method : String, data = {}) {
+
+
+
+    async request (method : String, data = {}, callback: Function) {
       // Default options are marked with *
-        console.log("URL", AppSettings.SAUSSAGEPOINT + this.route)
+        console.log("URL", AppSettings.SAUSSAGEPOINT + this.route, callback)
 
         var fetch_init = {
             method: method.toUpperCase(),
             mode: 'cors', // no-cors, *cors, same-origin
-            cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+            //cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
             credentials: 'same-origin', // include, *same-origin, omit
             headers: {
                 'Content-Type': 'application/json'
                 // 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            redirect: 'follow', // manual, *follow, error
-            referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+            //redirect: 'follow', // manual, *follow, error
+            //referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
             body: JSON.stringify(data)
         }
         if (method === "get")  {
@@ -46,7 +49,14 @@ export default class ServerResource <T> {
         }
         const response = await fetch(
             AppSettings.SAUSSAGEPOINT + this.route, fetch_init )
-      return response.json(); // parses JSON response into native JavaScript objects
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(response.statusText)
+                }
+                return callback(response.json())
+            })
+
+        return 1
     }
 
     async fetch_one(url = '', data) {
@@ -55,10 +65,10 @@ export default class ServerResource <T> {
         }
     }
 
-    async fetch_all(url = '') {
-        console.log("FETCH ALL", this.fetch_allowed)
+    async fetch_all(callback) {
+        console.log("FETCH ALL", this.fetch_allowed, callback)
         if (this.fetch_allowed) {
-            return this.request("get", undefined)
+            return this.request("get", undefined, callback)
         }
     }
 

@@ -133,14 +133,42 @@ import Router from 'next/router'
 import Graph from '../components/Graph'
 import ??title!!Service from '../resources/??Title!!Service'
 
-export default class ??title!! extends React.Component  {
+interface ??Title!!State {
+    ??title!!s: any
+    meta: any
+}
+
+interface ??Title!!Props {}
+
+export default class ??title!! extends React.Component<State, Props> {
     constructor (props)  {
         super(props)
+        this.state = {
+            ??title!!s: null,
+            meta: null
+        }
         this.??title!!Service = new ??title!!Service()
+        console.log(this.set_??title!!)
+        this.set_??title!! = this.set_??title!!.bind(this)
+        this.??title!!Service.fetch_all(this.set_??title!!)
     }
+    
+    set_??title!! (v) {
+        v.then(prom => {
+            console.log('VALUES', prom.response)
+
+            this.setState({
+                ??title!!s: prom.response.value,
+                meta: prom.response.meta[0]
+                }
+                )})
+    }
+    
     render ()  {
+        console.log("RENDER", this.state.??title!!s)
         return (<>
-            <Graph graph={this.??title!!Service.fetch_all()}/>
+            <Graph graph={this.state.??title!!s}
+            />
         </>
         )
     }    

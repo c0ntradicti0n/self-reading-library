@@ -2,8 +2,10 @@ import functools
 import json
 import logging
 import os
+from pprint import pprint
 
-def file_persistent_cached_generator(filename):
+
+def file_persistent_cached_generator(filename, if_cache_then_finished=False, if_cached_then_forever=False):
 
     def decorator(original_func):
 
@@ -13,19 +15,36 @@ def file_persistent_cached_generator(filename):
             try:
                 with open(filename, 'r') as f:
                     cache = list(f.readlines())
-                cache = dict([tuple(json.loads(line)) for line in cache])
+
+                cache = [tuple(json.loads(line)) for line in cache]
+                cache = [(a if not isinstance(a, list) else tuple(a), b) for a, b in cache]
+                try:
+                    cache = dict(cache)
+                except:
+                    pass
             except (IOError, ValueError):
                 cache = {}
 
-            if isinstance( param[1], list):
+            if isinstance(param[1], list) and (not if_cache_then_finished and cache):
                 yield from apply_iterating_and_caching(cache, cwd, param, no_cache=True)
             else:
-                for result in cache.items():
-                    os.chdir(cwd)
-                    yield result
+                if not if_cached_then_forever:
+                    for res in cache:
+                        yield from yield_cache(res, cwd)
+                else:
+                    for res, meta in cache:
+                        print ("yielding")
+                        yield res, meta
 
-                yield from apply_iterating_and_caching(cache, cwd, param)
+                if (not cache or not if_cache_then_finished):
+                    yield from apply_iterating_and_caching(cache, cwd, param)
+
             os.chdir(cwd)
+
+        def yield_cache(cache, cwd):
+            for result in cache.items():
+                os.chdir(cwd)
+                yield result
 
         def apply_iterating_and_caching(cache, cwd, param, no_cache=False):
             generator = original_func(*param)#, cache=cache)
@@ -36,7 +55,6 @@ def file_persistent_cached_generator(filename):
                 result_string = json.dumps(result) + "\n"
                 if no_cache or result_string not in cache:
                     content, meta = result
-
 
                     os.chdir(cwd)
                     with open(filename, 'a') as f:

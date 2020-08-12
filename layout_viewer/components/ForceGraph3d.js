@@ -1,3 +1,3 @@
-import { ForceGraph2D } from "react-force-graph"
+import { ForceGraphVR } from "react-force-graph"
 
-export default ForceGraph2D
+export default ForceGraphVR

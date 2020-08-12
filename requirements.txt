@@ -12,8 +12,14 @@ networkx~=2.4
 pygraphviz
 databases[postgresql]
 falcon~=2.0.0
+falcon-cors
 
 gunicorn
+wordninja
+wn
+spacy
+allennlp
+nltk
 
 numpy~=1.18.2
 lda~=1.1.0

@@ -218,7 +218,8 @@ class TrueFormatUpmarker(SoupReplacer):
                     indexing_css_update[indexed_word_tag.index] = indexed_word_tag.word
 
             self.word_index.update(dict(indexing_css_update))
-        return self.word_index
+
+        return dict(sorted(self.word_index.items(), key=lambda x: int(x[0])))
 
     IndexedDivContent = namedtuple("IndexedDivContent", ["div_content_index", "parent", "indexed_word_tags"])
 

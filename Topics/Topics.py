@@ -1,10 +1,15 @@
 import glob
+import json
 import logging
+import os
 from collections import Callable
 from typing import Dict, Tuple
+import networkx as nx
+import falcon
 import numpy as np
 import lda
 import lda.datasets
+import wordninja
 from gensim import models
 from gensim.corpora import Dictionary
 from gensim.models import Word2Vec, FastText
@@ -13,6 +18,9 @@ from gensim.test.test_hdpmodel import dictionary
 from RestPublisher.Resource import Resource
 from RestPublisher.RestPublisher import RestPublisher
 from RestPublisher.react import react
+from Topics.TopicMaker import TopicMaker
+from layouteagle import config
+from layouteagle.helpers.cache_tools import file_persistent_cached_generator
 from layouteagle.pathant.Converter import converter
 
 @converter("layout.txt", "topics")
@@ -30,75 +38,55 @@ class Topics(RestPublisher, react) :
 
 
 
+
+    @file_persistent_cached_generator(config.cache + 'topics.json', if_cache_then_finished=True, if_cached_then_forever=True)
     def __call__(self, documents):
-        if not self.topics:
-            """documents = list(documents)
+        documents = list(documents)
+        self.topic_maker = TopicMaker()
 
-            print (len(list(zip(documents))))
-            html_paths_json_paths_txt_paths, metas = list(zip(*documents))
-            print (html_paths_json_paths_txt_paths)
-            html_paths, json_paths, txt_paths = list(zip(*html_paths_json_paths_txt_paths))
-            print (txt_paths)
-            """
-            texts = map(lambda x: x.split(" "),
-                        "Converting the sentences to a vector space model would transform them in such a way that looks at the words in all sentences, and then represents the words in the sentence with a number. "
-                        "2If the sentences were One-Hot encoded:".split("."))
+        print (len(list(zip(documents))))
+        html_paths_json_paths_txt_paths, metas = list(zip(*documents))
+        print (html_paths_json_paths_txt_paths)
+        html_paths, json_paths, txt_paths = list(zip(*html_paths_json_paths_txt_paths))
+        print (txt_paths)
+        texts = []
+        for txt in txt_paths:
+            o = os.getcwd()
+            print (f"opening {txt} {o}")
+            with open(txt, 'r') as f:
+                texts.append(wordninja.split(" ".join(f.readlines())[:1000]))
 
-            X = lda.datasets.load_reuters()
-            vocab = lda.datasets.load_reuters_vocab()
-            titles = lda.datasets.load_reuters_titles()
+        print (texts)
 
-            logging.warning("Building corpus")
-            dictionary = Dictionary(texts)
-            logging.warning("Performing Hierarchical Dirichlet Process, HDP is a non-parametric bayesian method (note the missing number of requested topics)")
-            model = models.HdpModel(
-                corpus=dictionary.doc2bow(map(texts, lambda x: x.split(" "))),
-                id2word=dictionary,
-                max_time=10)
+        self.topics, text_ids = self.topic_maker(texts, txt_paths)
+        #self.dig = self.to_graph_dcit(self.topics)
+        yield self.dig, text_ids
 
+    def to_graph_dcit(self, topics):
+        dig = nx.DiGraph(topics)
+        ddic = nx.to_dict_of_dicts(dig)
+        print (ddic)
+        levels = 3
+        nodes = [{'id': k, 'name': k, 'val': 2**(levels-1) if v else 2**(levels-2) } for k, v in ddic.items() ] \
+                + [{'id': "CENTER", 'name': "CENTER", 'val': 2**(levels)}]
 
-            print (model)
-            print (dir(model))
-            logging.warning("GENSIM")
+        center_links = [{'source': "CENTER", 'target': k}  for k, v in ddic.items() if list(v.items())]
+        links = [{'source': k, 'target': n } for k, v in ddic.items() for n in v if v] + center_links
+        ddick = {'nodes': nodes, 'links': links }
+        return ddick
 
-            w2v = Word2Vec(texts, min_count=1, size=5)
-
-            vocab = list(w2v.wv.vocab)
-
-
-            # X.shape
-            (395, 4258)
-            X.sum()
-            # 84010
-            print(X)
-            model = lda.LDA(n_topics=2, n_iter=1500, random_state=1)
-            model.fit_transform(X)  # model.fit_transform(X) is also available
-            topic_word = model.topic_word_  # model.components_ also works
-            n_top_words = 8
-            topics = []
-            print(X)
-            for i, topic_dist in enumerate(topic_word):
-                topic_words = np.array(vocab)[np.argsort(topic_dist)][:-(n_top_words+1):-1]
-                topics.append(topics)
-                print('Topic {}: {}'.format(i, ' '.join(topic_words)))
-
-
-            doc_topic = model.doc_topic_
-            text2topic = []
-            for i in range(10):
-                print("{} (top topic: {})".format(titles[i], ))
-                text2topic.append([doc_topic[i].argmax(), texts[i], metas[i]])
-
-            self.topics = text2topic
-
-        return self.topics
-
-    def on_get(self, *args, **kwargs): # get all
+    def on_get(self, req, resp): # get all
         #self.prediction_pipe = self.ant("pdf", "layout.html")
-        pdfs = [file for file in glob.glob("layouteagle/test/*.pdf")]
+        pdfs = [file for file in glob.glob("test/pdfs/*.pdf")]
 
         #result_paths = list(self.prediction_pipe([(pdf, {}) for pdf in pdfs]))
-        return list(self.ant("pdf", "topics")([(pdf, {}) for pdf in pdfs]))
+        value, meta = list(zip(*list(self.ant("pdf", "topics")([(pdf, {}) for pdf in pdfs]))))
+        res = {
+            'value': self.to_graph_dcit(value[0]),
+            'meta': meta
+        }
+        resp.status = falcon.HTTP_200
+        resp.body = json.dumps({"response": res, "status": resp.status})
 
 
 import unittest

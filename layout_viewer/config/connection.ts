@@ -1,4 +1,4 @@
 
 export class AppSettings {
-    public static SAUSSAGEPOINT = "http:localhost:6666"
+    public static SAUSSAGEPOINT = "http://localhost:7789"
 }

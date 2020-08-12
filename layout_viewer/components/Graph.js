@@ -2,7 +2,7 @@
 import loadable from '@loadable/component'
 import * as React from 'react'
 
-const ForceGraph = loadable(() => import('./ForceGraph3d'))
+const ForceGraphVR = loadable(() => import('./ForceGraph3d.js'))
 
 
 
@@ -37,7 +37,15 @@ export default class Graph extends React.Component  {
     render()  {
            console.log("GRAPH DATA", this.props.graph??this.state.graph)
            return  (
-               <ForceGraph graphData={this.state.graph} />)
+               <ForceGraphVR graphData={ this.props.graph??this.state.graph}
+               nodeAutoColorBy="group"
+                  nodeThreeObject={node => {
+                    const sprite = new SpriteText(node.id);
+                    sprite.color = node.color;
+                    sprite.textHeight = 8;
+                    return sprite;
+                  }}
+               />)
 
 
     }
