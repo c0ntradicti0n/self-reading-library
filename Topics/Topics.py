@@ -67,13 +67,13 @@ class Topics(RestPublisher, react) :
         ddic = nx.to_dict_of_dicts(dig)
         print (ddic)
         levels = 3
-        nodes = [{'id': k, 'name': k, 'val': 2**(levels-1) if v else 2**(levels-2) } for k, v in ddic.items() ] \
-                + [{'id': "CENTER", 'name': "CENTER", 'val': 2**(levels)}]
+        nodes = [{'id': k, 'name': k.replace("test/pdfs/", ""). replace("pdf.htmlayout.txt", ""), 'val': 2**(levels-1) if v else 2**(levels-2) } for k, v in ddic.items() ] \
+                + [{'id': "CENTER", 'name': "The One", 'val': 2**(levels)}]
 
         center_links = [{'source': "CENTER", 'target': k}  for k, v in ddic.items() if list(v.items())]
         links = [{'source': k, 'target': n } for k, v in ddic.items() for n in v if v] + center_links
-        ddick = {'nodes': nodes, 'links': links }
-        return ddick
+        d = {'nodes': nodes, 'links': links }
+        return d
 
     def on_get(self, req, resp): # get all
         #self.prediction_pipe = self.ant("pdf", "layout.html")

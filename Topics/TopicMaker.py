@@ -93,11 +93,15 @@ class TopicMaker:
         texts = list(texts)
 
         embeddings = self.embed(texts=texts)
+        topics = self.topicize_recursivelzy(embeddings, meta, texts)
+        return topics, meta
+
+    def topicize_recursivelzy(self, embeddings, meta, texts):
         labels = self.cluster(embeddings=embeddings)
         topic_ids_2_doc_ids = self.labels2docs(texts=texts, labels=labels)
         keywords = self.make_keywords(topic_2_docids=topic_ids_2_doc_ids, texts=texts, lookup=meta)
         topics = self.make_titles(keywords)
-        return topics, meta
+        return topics
 
     def embed(self, texts):
         logging.info("Topic modelling")
