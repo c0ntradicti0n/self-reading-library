@@ -14,17 +14,14 @@ from textacy.keyterms import sgrank, textrank
 
 from layouteagle import config
 
-
-
-
 from nltk.corpus import wordnet as wn
 import hdbscan
 import numpy as np
 
 import spacy
 
-
 from allennlp.modules.elmo import Elmo, batch_to_ids
+
 
 class TopicMaker:
     options_file = "https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x1024_128_2048cnn_1xhighway/elmo_2x1024_128_2048cnn_1xhighway_options.json"
@@ -32,7 +29,7 @@ class TopicMaker:
 
     def __init__(self, nouns_file_path=None):
         if not nouns_file_path:
-            nouns_file_path =  config.cache + "nouns.txt"
+            nouns_file_path = config.cache + "nouns.txt"
         if not os.path.isfile(nouns_file_path):
             logging.warning("NLTK Download")
 
@@ -46,19 +43,17 @@ class TopicMaker:
             with open(nouns_file_path, 'r') as f:
                 self.nouns = [w.strip() for w in f.readlines()]
 
-
     def test(self):
         self.nlp = spacy.load("en_core_web_md")
 
         logging.warning("Reading texts")
 
-        #with open("/home/stefan/PycharmProjects/LayoutEagle/test/corpus/faust.txt") as f:
+        # with open("/home/stefan/PycharmProjects/LayoutEagle/test/corpus/faust.txt") as f:
         #    text = " ".join([l for l in f.readlines() ])
         with open("/home/stefan/PycharmProjects/LayoutEagle/test/corpus/faust.txt") as f:
-            text = " ".join([l  for l in f.readlines() ])[:500000]
+            text = " ".join([l for l in f.readlines()])[:500000]
 
         doc = self.nlp(text)
-
 
         logging.warning("Tokenizing texts")
 
@@ -74,17 +69,17 @@ class TopicMaker:
             except IndexError:
                 logging.error("accessing doc after end")
 
-        def nps (d):
+        def nps(d):
             for t in d:
-                    try:
-                        yield t.text
-                    except IndexError as e:
-                        logging.error("token not found")
-                    continue
+                try:
+                    yield t.text
+                except IndexError as e:
+                    logging.error("token not found")
+                continue
 
         texts = list(map(lambda d: list(nps(d)), paragraphs(doc)))
 
-        print (texts[:3])
+        print(texts[:3])
         return texts, {}
 
     def __call__(self, texts, meta, *args, **kwargs):
@@ -96,11 +91,24 @@ class TopicMaker:
         topics = self.topicize_recursivelzy(embeddings, meta, texts)
         return topics, meta
 
-    def topicize_recursivelzy(self, embeddings, meta, texts):
+    def topicize_recursively(self, embeddings, meta, texts, split_size=10, max_level=3, level=0):
         labels = self.cluster(embeddings=embeddings)
         topic_ids_2_doc_ids = self.labels2docs(texts=texts, labels=labels)
         keywords = self.make_keywords(topic_2_docids=topic_ids_2_doc_ids, texts=texts, lookup=meta)
         topics = self.make_titles(keywords)
+
+        if max_level == level:
+            return topics
+
+        for label, group in topics.items():
+            if len(group) > split_size:
+                self.topicize_recursively(
+                    embeddings,
+                    meta,
+                    group,
+                    split_size,
+                    max_level=max_level, level=level + 1)
+
         return topics
 
     def embed(self, texts):
@@ -119,7 +127,7 @@ class TopicMaker:
         chunks_ = list(chunks(character_ids, 30))
 
         for n, chunk in enumerate(chunks_):
-            print (f" · {n+1} of {len(chunks_)}")
+            print(f" · {n + 1} of {len(chunks_)}")
             embeddings = self.elmo(chunk)
             X = embeddings['elmo_representations'][0].detach().numpy()
             X = X.reshape(X.shape[0], -1)
@@ -143,7 +151,7 @@ class TopicMaker:
     def cluster(self, embeddings):
         X = embeddings
         g = mixture.GaussianMixture(n_components=min(
-            X.shape[0]/2, 10), covariance_type="spherical", reg_covar=1e-5)
+            X.shape[0] / 2, 10), covariance_type="spherical", reg_covar=1e-5)
         g.fit(X)
 
         labels = g.predict(X)
@@ -154,7 +162,7 @@ class TopicMaker:
         for i in range(len(texts)):
             topic_2_docids[labels[i]].append(i)
 
-        print (topic_2_docids)
+        print(topic_2_docids)
         return topic_2_docids
 
     def make_keywords(self, topic_2_docids, texts, lookup=None):
@@ -172,17 +180,17 @@ class TopicMaker:
 
         titled_clustered_documents = []
         for topic_id, text_ids in topic_2_docids.items():
-            constructed_doc = " ".join([w.title() for id in text_ids for w in texts[id] ]
+            constructed_doc = " ".join([w.title() for id in text_ids for w in texts[id]]
                                        )
             constructed_doc = remove_stopwords(stop_word_removal(constructed_doc.lower()))
             doc = textacy.make_spacy_doc(constructed_doc, lang="en_core_web_md")
             keywords = textrank(doc, normalize="lemma", n_keyterms=35)
 
-            print (keywords)
+            print(keywords)
             print(constructed_doc[:2000])
 
             titled_clustered_documents.append(
-                ([keywords if keywords else []] ,
+                ([keywords if keywords else []],
                  [lookup[id] for id in text_ids]))
 
         return titled_clustered_documents
@@ -200,7 +208,7 @@ class TopicMaker:
         yet_used = []
         titles_found = defaultdict(list)
 
-        for i in range(1,4):
+        for i in range(1, 4):
             words = self.numpy_fillna([[kw[0] for kw in keys[0]] for keys, values in list(keywords_to_texts)],
                                       fill_value='untitled')
             scores = self.numpy_fillna([[kw[1] for kw in keys[0]] for keys, values in list(keywords_to_texts)])
@@ -217,30 +225,26 @@ class TopicMaker:
             print(words.shape)
 
             row_ids, col_ids = linear_sum_assignment(scores)
-            print (row_ids)
+            print(row_ids)
             print(col_ids)
-            print (f"{i} SEEN {yet_used}")
+            print(f"{i} SEEN {yet_used}")
 
-            yet_used.extend([words[row,col] for col, row in zip(col_ids, row_ids)])
+            yet_used.extend([words[row, col] for col, row in zip(col_ids, row_ids)])
             titles_found.update(
                 {row: titles_found[row] + [words[row, col]]
                  for col, row in zip(col_ids, row_ids)
                  }
 
             )
-            print (titles_found)
+            print(titles_found)
 
-        titles_to_texts =  {" ".join(tit): keywords_to_texts[row][1]
+        titles_to_texts = {" ".join(tit): keywords_to_texts[row][1]
                            for row, tit in titles_found.items()}
         pprint({k: "".join(str(u).replace("\n", "") for w in v[:30] for u in w) for k, v in titles_to_texts.items()})
 
-        return  titles_to_texts
+        return titles_to_texts
 
 
-
-
-
-
-if __name__=="__main__":
+if __name__ == "__main__":
     tm = TopicMaker()
     tm(*tm.test())

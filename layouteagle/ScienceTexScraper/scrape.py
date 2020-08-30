@@ -25,7 +25,7 @@ class ScienceTexScraper(PathSpec):
         if not os.path.isdir(config.tex_data):
             os.system(f"mkdir {config.tex_data}")
 
-    @file_persistent_cached_generator(config.cache + 'scraped_tex_paths.json')
+    @file_persistent_cached_generator(config.cache + 'scraped_tex_paths.json', if_cache_then_finished=True)
     def __call__(self, url):
         self.scrape_count = count()
         self.i = 0

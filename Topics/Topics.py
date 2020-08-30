@@ -1,19 +1,9 @@
 import glob
 import json
-import logging
 import os
-from collections import Callable
-from typing import Dict, Tuple
 import networkx as nx
 import falcon
-import numpy as np
-import lda
-import lda.datasets
 import wordninja
-from gensim import models
-from gensim.corpora import Dictionary
-from gensim.models import Word2Vec, FastText
-from gensim.test.test_hdpmodel import dictionary
 
 from RestPublisher.Resource import Resource
 from RestPublisher.RestPublisher import RestPublisher
@@ -23,8 +13,9 @@ from layouteagle import config
 from layouteagle.helpers.cache_tools import file_persistent_cached_generator
 from layouteagle.pathant.Converter import converter
 
-@converter("layout.txt", "topics")
-class Topics(RestPublisher, react) :
+
+@converter("layout.wordi", "topics")
+class Topics(RestPublisher, react):
     def __init__(self,
                  *args,
                  **kwargs):
@@ -36,50 +27,49 @@ class Topics(RestPublisher, react) :
 
         self.topics = None
 
-
-
-
-    @file_persistent_cached_generator(config.cache + 'topics.json', if_cache_then_finished=True, if_cached_then_forever=True)
+    @file_persistent_cached_generator(config.cache + 'topics.json', if_cache_then_finished=True,
+                                      if_cached_then_forever=True)
     def __call__(self, documents):
         documents = list(documents)
         self.topic_maker = TopicMaker()
 
-        print (len(list(zip(documents))))
+        print(len(list(zip(documents))))
         html_paths_json_paths_txt_paths, metas = list(zip(*documents))
-        print (html_paths_json_paths_txt_paths)
+        print(html_paths_json_paths_txt_paths)
         html_paths, json_paths, txt_paths = list(zip(*html_paths_json_paths_txt_paths))
-        print (txt_paths)
+        print(txt_paths)
         texts = []
         for txt in txt_paths:
             o = os.getcwd()
-            print (f"opening {txt} {o}")
+            print(f"opening {txt} {o}")
             with open(txt, 'r') as f:
                 texts.append(wordninja.split(" ".join(f.readlines())[:1000]))
 
-        print (texts)
+        print(texts)
 
         self.topics, text_ids = self.topic_maker(texts, txt_paths)
-        #self.dig = self.to_graph_dcit(self.topics)
+        # self.dig = self.to_graph_dcit(self.topics)
         yield self.dig, text_ids
 
     def to_graph_dcit(self, topics):
         dig = nx.DiGraph(topics)
         ddic = nx.to_dict_of_dicts(dig)
-        print (ddic)
+        print(ddic)
         levels = 3
-        nodes = [{'id': k, 'name': k.replace("test/pdfs/", ""). replace("pdf.htmlayout.txt", ""), 'val': 2**(levels-1) if v else 2**(levels-2) } for k, v in ddic.items() ] \
-                + [{'id': "CENTER", 'name': "The One", 'val': 2**(levels)}]
+        nodes = [{'id': k, 'name': k.replace("test/pdfs/", "").replace("pdf.htmlayout.txt", ""),
+                  'val': 2 ** (levels - 1) if v else 2 ** (levels - 2)} for k, v in ddic.items()] \
+                + [{'id': "CENTER", 'name': "The One", 'val': 2 ** (levels)}]
 
-        center_links = [{'source': "CENTER", 'target': k}  for k, v in ddic.items() if list(v.items())]
-        links = [{'source': k, 'target': n } for k, v in ddic.items() for n in v if v] + center_links
-        d = {'nodes': nodes, 'links': links }
+        center_links = [{'source': "CENTER", 'target': k} for k, v in ddic.items() if list(v.items())]
+        links = [{'source': k, 'target': n} for k, v in ddic.items() for n in v if v] + center_links
+        d = {'nodes': nodes, 'links': links}
         return d
 
-    def on_get(self, req, resp): # get all
-        #self.prediction_pipe = self.ant("pdf", "layout.html")
+    def on_get(self, req, resp):  # get all
+        # self.prediction_pipe = self.ant("pdf", "layout.html")
         pdfs = [file for file in glob.glob("test/pdfs/*.pdf")]
 
-        #result_paths = list(self.prediction_pipe([(pdf, {}) for pdf in pdfs]))
+        # result_paths = list(self.prediction_pipe([(pdf, {}) for pdf in pdfs]))
         value, meta = list(zip(*list(self.ant("pdf", "topics")([(pdf, {}) for pdf in pdfs]))))
         res = {
             'value': self.to_graph_dcit(value[0]),

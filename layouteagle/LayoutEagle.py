@@ -17,6 +17,8 @@ class LayoutEagle:
     from layouteagle.LayoutModel.layoutpredict import LayouPredictor
 
     from layouteagle.LayoutReader.HTML2PDF import HTML2PDF
+    from layouteagle.LayoutReader.PDF2ETC import PDF2ETC
+
     from layouteagle.LayoutReader.PDF2HTML import PDF2HTML
 
     from TestArchitecture.publisher import NLPPublisher, TopicPublisher

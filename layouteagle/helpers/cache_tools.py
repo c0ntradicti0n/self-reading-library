@@ -30,7 +30,7 @@ def file_persistent_cached_generator(filename, if_cache_then_finished=False, if_
             else:
                 if not if_cached_then_forever:
                     for res in cache:
-                        yield from yield_cache(res, cwd)
+                        yield from yield_cache(cache, cwd)
                 else:
                     for res, meta in cache:
                         print ("yielding")
@@ -51,16 +51,18 @@ def file_persistent_cached_generator(filename, if_cache_then_finished=False, if_
 
 
             for result in generator:
+                try:
+                    result_string = json.dumps(result) + "\n"
+                    if no_cache or result_string not in cache:
+                        content, meta = result
 
-                result_string = json.dumps(result) + "\n"
-                if no_cache or result_string not in cache:
-                    content, meta = result
-
-                    os.chdir(cwd)
-                    with open(filename, 'a') as f:
-                        f.write(result_string)
-                    os.chdir(cwd)
+                        os.chdir(cwd)
+                        with open(filename, 'a') as f:
+                            f.write(result_string)
+                        os.chdir(cwd)
                     yield content, meta
+                except Exception as e:
+                    logging.error(f"ERROR {str(e)} while computing on {str(result)} in {str(original_func)}")
 
         functools.update_wrapper(new_func, original_func)
 

@@ -34,7 +34,7 @@ class LatexReplacer(SoupReplacer):
         #            "section", "subsection", "subsubsection"],
     })
 
-    def __init__(self, *args, max_cols=3, timout_sec=10, **kwargs):
+    def __init__(self, *args, max_cols=1, timout_sec=10, **kwargs):
         super().__init__(*args, replacements=self.replacement_mapping_tag2tex, **kwargs)
 
         self.max_cols = max_cols
@@ -132,7 +132,7 @@ class LatexReplacer(SoupReplacer):
             return r"cc 1"
 
     @file_persistent_cached_generator(config.cache + 'replaced_tex_paths.json')
-    def __call__(self, paths, compile=True):
+    def __call__(self, paths, compile=True, *args, **kwargs):
         """
         :param path_to_read_from:
         """
@@ -350,6 +350,7 @@ class LatexReplacer(SoupReplacer):
         os.chdir(cwd)
 
         if process.returncode != 0:
+            print (errors)
             return None
         self.path_spec.logger.info(f"{tex_file_path} compiled")
         pdf_path = path + "/"  + filename_without_extension + ".pdf"

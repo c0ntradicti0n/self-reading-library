@@ -23,6 +23,9 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
             except IndexError:
                 logging.error("output of pdf2htmlEX looks damaged, no CSS in there?")
                 continue
+            except ValueError:
+                logging.error("probably error on counting columns")
+                continue
 
             feature_df["doc_id"] = doc_id
             if False and self.debug:

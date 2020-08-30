@@ -4,34 +4,9 @@ from time import sleep
 import falcon
 import logging
 
-from RestPublisher.PublishHtmls import MarkupPublisher
-from Topics.Topics import Topics
-from layouteagle.LayoutEagle import LayoutEagle
-
 logging.basicConfig()
 
 logging.getLogger().setLevel(logging.INFO)
-
-from falcon_cors import CORS
-
-cors = CORS(
-    allow_all_origins=True,
-    allow_all_headers=True,
-    allow_all_methods=True,
-)
-api = falcon.API(middleware=[cors.middleware])
-
-publishing = {
-    '/markup': MarkupPublisher,
-    '/topics':  Topics,
-    #'commands':  RestPublisher("commands")
-}
-
-le = LayoutEagle()
-#le.test_info()
-
-for route, module in publishing.items():
-    api.add_route(route, module)
 
 if __name__ ==  "__main__":
     import subprocess
@@ -52,10 +27,39 @@ if __name__ ==  "__main__":
 
     while True:
         try:
-            cmd_parts = ["gunicorn", "--reload", "backend:api", "-b", "127.0.0.1:6666"]
+            cmd_parts = ["gunicorn", "--reload", "backend:api", "-b", "127.0.0.1:6789",
+                         "-t", "90000"]
             print(" ".join(cmd_parts))
             # start the resource server with gunicorn, that it can recompile, when changed
             subprocess.check_call(cmd_parts,
                                   stdout=sys.stdout, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             sleep(10)
+
+else:
+
+    from RestPublisher.PublishHtmls import MarkupPublisher
+    from Topics.Topics import Topics
+    from layouteagle.LayoutEagle import LayoutEagle
+
+    publishing = {
+        '/markup': MarkupPublisher,
+        '/topics': Topics,
+        # 'commands':  RestPublisher("commands")
+    }
+
+    le = LayoutEagle()
+    le.test_info()
+
+
+    from falcon_cors import CORS
+
+    cors = CORS(
+        allow_all_origins=True,
+        allow_all_headers=True,
+        allow_all_methods=True,
+    )
+    api = falcon.API(middleware=[cors.middleware])
+    for route, module in publishing.items():
+        api.add_route(route, module)
+
