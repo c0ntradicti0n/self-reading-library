@@ -4,6 +4,8 @@ import logging
 import os
 from pprint import pprint
 
+import falcon
+
 
 def file_persistent_cached_generator(filename, if_cache_then_finished=False, if_cached_then_forever=False):
 
@@ -29,8 +31,7 @@ def file_persistent_cached_generator(filename, if_cache_then_finished=False, if_
                 yield from apply_iterating_and_caching(cache, cwd, param, no_cache=True)
             else:
                 if not if_cached_then_forever:
-                    for res in cache:
-                        yield from yield_cache(cache, cwd)
+                    yield from yield_cache(cache, cwd)
                 else:
                     for res, meta in cache:
                         print ("yielding")
@@ -41,10 +42,12 @@ def file_persistent_cached_generator(filename, if_cache_then_finished=False, if_
 
             os.chdir(cwd)
 
+
         def yield_cache(cache, cwd):
             for result in cache.items():
                 os.chdir(cwd)
                 yield result
+
 
         def apply_iterating_and_caching(cache, cwd, param, no_cache=False):
             generator = original_func(*param)#, cache=cache)
@@ -57,12 +60,19 @@ def file_persistent_cached_generator(filename, if_cache_then_finished=False, if_
                         content, meta = result
 
                         os.chdir(cwd)
-                        with open(filename, 'a') as f:
+
+                        if os.path.exists(filename):
+                            append_write = 'a'  # append if already exists
+                        else:
+                            append_write = 'w'  # make a new file if not
+
+                        with open(filename, append_write) as f:
                             f.write(result_string)
                         os.chdir(cwd)
                     yield content, meta
                 except Exception as e:
-                    logging.error(f"ERROR {str(e)} while computing on {str(result)} in {str(original_func)}")
+                    logging.error(f"ERROR {str(e)} while computing on \n {str(result)}\n in {str(original_func)}\n being in {os.getcwd()}")
+                    raise e
 
         functools.update_wrapper(new_func, original_func)
 
@@ -121,3 +131,35 @@ def persist_to_file(file_name):
         return new_func
 
     return decorator
+
+
+
+memory_caches = {}
+def uri_with_cache(fun):
+
+
+    def replacement_fun(self, req, resp, *args, **kwargs):
+        global memory_caches
+
+        if args:
+            print ("extra args", args)
+        if kwargs:
+            print ("extra kwargs", kwargs)
+
+        if not fun in memory_caches:
+            print (req, resp, *args, **kwargs)
+            print (memory_caches)
+            memory_caches[fun] = "working..."
+            res = fun(self, req, resp)
+            memory_caches[fun] = res
+            if res == None:
+                fun.cache = "No result was returned"
+            resp.status = falcon.HTTP_200
+            resp.body = json.dumps({"response": res, "status": resp.status})
+
+        resp.status = falcon.HTTP_200
+        resp.body = json.dumps({"response": memory_caches[fun], "status": resp.status})
+
+    return replacement_fun
+
+

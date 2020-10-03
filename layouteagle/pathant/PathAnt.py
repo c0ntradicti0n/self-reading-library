@@ -1,15 +1,19 @@
+import itertools
 import logging
 import os
+from pprint import pprint
 from typing import List, Tuple
 
 import networkx as nx
 import pylab
 from more_itertools import pairwise
 
+from StandardConverter.Dict2Graph import Dict2Graph
 from layouteagle.helpers.os_tools import make_dirs_recursive
+from layouteagle.pathant.MatchDescription import match, list_or_values
 from layouteagle.pathant.Pipeline import Pipeline
 from layouteagle.pathant.converters import converters
-
+from regex import regex
 
 class PathAnt:
     def __init__(self, necessary_paths={".layouteagle":["tex_data", "cache", "log"]}):
@@ -18,6 +22,20 @@ class PathAnt:
 
         for _from, _to, functional_object in converters:
             self.add_edge(_from, _to, functional_object)
+
+        for (_froms1, _tos1, functional_object1), \
+            (_froms2, _tos2, functional_object2)  \
+                in itertools.permutations(converters, 2):
+
+            for (_to1, _from1, _to2, _from2) in list_or_values(_tos1, _froms1,_tos2, _froms2) :
+                try:
+                    if match(_to1, _from2):
+                        self.add_edge(_to1, regex.sub(_from2+'$', _to2, _to1), functional_object2)
+                    if match(_to2, _from1):
+                        self.add_edge(_to2, regex.sub(_from1+'$', _to1, _to2), functional_object1)
+                except Exception as e:
+                    logging.error(f"_to1 = {_to1}")
+                    logging.error(f"failing to compare {_to1} and {_to2} and {_from1} and {_from2} as regexes because {e}")
 
 
     def realize_node(self, node):
@@ -46,7 +64,7 @@ class PathAnt:
                for edge, intermediate_targets in converters_implications.items()
                       }
 
-        logging.debug(f"found path: {converters_path}")
+        logging.warning(f"found path: {converters_path}")
         pipeline = [self.lookup(*_from_to) for _from_to in pairwise(converters_path)]
         return Pipeline(pipeline, source, target, extra_paths)
 
@@ -87,7 +105,6 @@ class PathAnt:
         nx.draw(dG, pos, node_color="blue",
                 font_weight='bold',
                 edge_color = edge_colors,
-                edge_labels=False,
                 arrowsize=20, label='Path Ant',
                 node_size=150, edge_cmap=plt.cm.plasma)
 
@@ -134,6 +151,12 @@ class PathAnt:
             if len(possible_path) == 2:
                 return self.lookup(*possible_path)
 
+    def graph(self):
+        d2g = Dict2Graph
+        pprint(nx.to_dict_of_dicts(self.G))
+
+        return list(d2g([nx.to_dict_of_dicts(self.G, edge_data=[])]))[0]
+
 
 import unittest
 
@@ -170,6 +193,8 @@ class TestPathAnt(unittest.TestCase):
         self.ant.info(pipelines_to_highlight=[self.model_pipe, self.prediction_pipe])
 
     def test_prediction(self):
+        self.ant.info()
+
         pdfs = [".layouteagle/tex_data/2adf47ffbf65696180417ca86e91eb90//crypto_github_preprint_v1.pdf",
                 ".layouteagle/tex_data/2922d1d785d9620f9cdf8ac9132c59a8//ZV_PRL_rev.pdf",
                 ".layouteagle/tex_data/9389d5a6fd9fcc41050f32bcb2a204ef//Manuscript.tex1.labeled.pdf"]

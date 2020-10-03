@@ -7,7 +7,8 @@ from itertools import cycle
 from random import randint
 from threading import Timer
 
-from TexSoup import TexSoup, TexNode, TokenWithPosition, TexText, TexEnv, OArg, RArg, TexCmd
+from TexSoup import TexSoup, TexNode#, TokenWithPosition, TexText, TexEnv, OArg, RArg, TexCmd
+from TexSoup.data import TexEnv, TexCmd
 
 from layouteagle import config
 from layouteagle.LatexReplacer import multicol_defs

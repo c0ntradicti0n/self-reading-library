@@ -171,3 +171,114 @@ def recursive_map(something, func):
     else:
         return func(something)
 
+
+
+
+# Note: Typing for elements of iterable types such as Set, List, or Dict
+# use a variation of Run Length Encoding.
+
+def type_spec_iterable(iterable, name="Types of it are "):
+    def iterable_info(iterable):
+        # With an iterable for it to be comparable
+        # the identity must contain the name and length
+        # and for the elements the type, order and count.
+        length = 0
+        types_list = []
+        pervious_identity_type = None
+        pervious_identity_type_count = 0
+        first_item_done = False
+        for e in iterable:
+            item_type = type_spec(e)
+            if (item_type != pervious_identity_type):
+                if not first_item_done:
+                    first_item_done = True
+                else:
+                    types_list.append((pervious_identity_type, pervious_identity_type_count))
+                pervious_identity_type = item_type
+                pervious_identity_type_count = 1
+            else:
+                pervious_identity_type_count += 1
+            length += 1
+        types_list.append((pervious_identity_type, pervious_identity_type_count))
+        return (length, types_list)
+    (length, identity_list) = iterable_info(iterable)
+    element_types = ""
+    for (identity_item_type, identity_item_count) in identity_list:
+        if element_types == "":
+            pass
+        else:
+            element_types += ","
+        element_types += identity_item_type
+        if (identity_item_count != length) and (identity_item_count != 1):
+            element_types += "[" + str(identity_item_count) + "]"
+
+    if name in ["list", "set", "dict"]:
+        name = name.title()
+    result = name + "=" + str(length) + "[" + element_types + "]"
+    return result
+
+def type_spec_dict(dict, name):
+    def dict_info(dict):
+        # With a dict for it to be comparable
+        # the identity must contain the name and length
+        # and for the key and value combinations the type, order and count.
+        length = 0
+        types_list = []
+        pervious_identity_type = None
+        pervious_identity_type_count = 0
+        first_item_done = False
+        for (k, v) in dict.items():
+            key_type = type_spec(k)
+            value_type = type_spec(v)
+            item_type = (key_type, value_type)
+            if (item_type != pervious_identity_type):
+                if not first_item_done:
+                    first_item_done = True
+                else:
+                    types_list.append((pervious_identity_type, pervious_identity_type_count))
+                pervious_identity_type = item_type
+                pervious_identity_type_count = 1
+            else:
+                pervious_identity_type_count += 1
+            length += 1
+        types_list.append((pervious_identity_type, pervious_identity_type_count))
+        return (length, types_list)
+    (length, identity_list) = dict_info(dict)
+    element_types = ""
+    for ((identity_key_type,identity_value_type), identity_item_count) in identity_list:
+        if element_types == "":
+            pass
+        else:
+            element_types += ","
+        identity_item_type = "(" + identity_key_type + "," + identity_value_type + ")"
+        element_types += identity_item_type
+        if (identity_item_count != length) and (identity_item_count != 1):
+            element_types += "[" + str(identity_item_count) + "]"
+    result = name + "[" + str(length) + "]<" + element_types + ">"
+    return result
+
+def type_spec_tuple(tuple, name):
+    return name + "<" + ", ".join(type_spec(e) for e in tuple) + ">"
+
+def type_spec(obj):
+    object_type = type(obj)
+    name = object_type.__name__
+    if (object_type is int) or (object_type is bytes) or (object_type is str) or (object_type is bool) or (object_type is float):
+        result = name
+    elif object_type is type(None):
+        result = "(none)"
+    elif (object_type is list) or (object_type is set):
+        result = type_spec_iterable(obj, name)
+    elif (object_type is dict):
+        result = type_spec_dict(obj, name)
+    elif (object_type is tuple):
+        result = type_spec_tuple(obj, name)
+    else:
+        if name == 'ndarray':
+            ndarray = obj
+            ndarray_shape = "[" + str(ndarray.shape).replace("L","").replace(" ","").replace("(","").replace(")","") + "]"
+            ndarray_data_type = str(ndarray.dtype).split("'")[1]
+            result = name + ndarray_shape + "<" + ndarray_data_type + ">"
+        else:
+            result = "Unknown type: " , name
+    return result

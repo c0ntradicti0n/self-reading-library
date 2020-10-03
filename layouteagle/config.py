@@ -1,3 +1,6 @@
+test_dir = "test/small_pdfs/"
+
+
 parse_pdf2htmlEX = True
 
 recursive = True
@@ -14,6 +17,8 @@ hidden_folder = ".layouteagle/"
 cache = hidden_folder + "cache/"
 tex_data = hidden_folder + "tex_data/"
 models = hidden_folder + "models/"
+
+
 
 tex_source = "http://arxiv.org"
 

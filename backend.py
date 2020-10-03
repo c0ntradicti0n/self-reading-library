@@ -2,7 +2,10 @@ from pprint import pprint
 from time import sleep
 
 import falcon
+
 import logging
+
+from layouteagle.pathant.PathAnt import PathAnt
 
 logging.basicConfig()
 
@@ -17,8 +20,6 @@ if __name__ ==  "__main__":
     for logger in loggers:
         logger.setLevel(logging.INFO)
 
-
-
     # start react app and proceed
     os.chdir("layout_viewer_made")
     # os.popen("yarn dev")
@@ -27,7 +28,7 @@ if __name__ ==  "__main__":
 
     while True:
         try:
-            cmd_parts = ["gunicorn", "--reload", "backend:api", "-b", "127.0.0.1:6789",
+            cmd_parts = ["gunicorn", "--reload", "backend:api", "-b", "127.0.0.1:7789",
                          "-t", "90000"]
             print(" ".join(cmd_parts))
             # start the resource server with gunicorn, that it can recompile, when changed
@@ -38,13 +39,14 @@ if __name__ ==  "__main__":
 
 else:
 
-    from RestPublisher.PublishHtmls import MarkupPublisher
+    from RestPublisher.MarkupPublisher import MarkupPublisher
     from Topics.Topics import Topics
     from layouteagle.LayoutEagle import LayoutEagle
 
     publishing = {
         '/markup': MarkupPublisher,
         '/topics': Topics,
+        '/ant': PathAnt
         # 'commands':  RestPublisher("commands")
     }
 
@@ -59,7 +61,9 @@ else:
         allow_all_headers=True,
         allow_all_methods=True,
     )
+
     api = falcon.API(middleware=[cors.middleware])
+
     for route, module in publishing.items():
         api.add_route(route, module)
 

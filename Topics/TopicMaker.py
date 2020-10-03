@@ -1,5 +1,6 @@
 import logging
 import os
+import pickle
 from collections import defaultdict
 from pprint import pprint
 
@@ -10,12 +11,11 @@ from nltk.corpus import stopwords
 from gensim.parsing import remove_stopwords
 from scipy.optimize import linear_sum_assignment
 from sklearn import mixture, decomposition
-from textacy.keyterms import sgrank, textrank
+from textacy.ke import textrank
 
 from layouteagle import config
 
 from nltk.corpus import wordnet as wn
-import hdbscan
 import numpy as np
 
 import spacy
@@ -88,10 +88,14 @@ class TopicMaker:
         texts = list(texts)
 
         embeddings = self.embed(texts=texts)
-        topics = self.topicize_recursivelzy(embeddings, meta, texts)
+        topics = self.topicize_recursively(embeddings, meta, texts)
+
+        with open( "./topics.pickle", 'wb') as f:
+            pickle.dump(topics, f)
         return topics, meta
 
     def topicize_recursively(self, embeddings, meta, texts, split_size=10, max_level=3, level=0):
+        print(f"Making Topics {level} of {max_level}")
         labels = self.cluster(embeddings=embeddings)
         topic_ids_2_doc_ids = self.labels2docs(texts=texts, labels=labels)
         keywords = self.make_keywords(topic_2_docids=topic_ids_2_doc_ids, texts=texts, lookup=meta)
@@ -100,14 +104,23 @@ class TopicMaker:
         if max_level == level:
             return topics
 
-        for label, group in topics.items():
-            if len(group) > split_size:
-                self.topicize_recursively(
-                    embeddings,
-                    meta,
-                    group,
-                    split_size,
-                    max_level=max_level, level=level + 1)
+        for i_group_label, i_group in topic_ids_2_doc_ids.items():
+            try:
+                group_embeddings = embeddings[i_group]
+                group_meta = [meta[i] for i in i_group]
+                group_texts = [texts[i] for i in i_group]
+                if len(i_group) > split_size:
+                    sub_topics = self.topicize_recursively(
+                        group_embeddings,
+                        group_meta,
+                        group_texts,
+                        split_size,
+                        max_level=max_level, level=level + 1)
+                    topics[list(topics)[i_group_label]] = sub_topics
+            except TypeError as e:
+                logging.error(f"computing gaussian mixture {e}")
+
+
 
         return topics
 
@@ -138,7 +151,7 @@ class TopicMaker:
             del X
 
         X = np.vstack(Xs)
-        print(X.shape)
+        # print(X.shape)
         logging.warning("sizing embeddings")
 
         pca = decomposition.PCA(n_components=min(X.shape[0], 1000))
@@ -150,11 +163,18 @@ class TopicMaker:
 
     def cluster(self, embeddings):
         X = embeddings
-        g = mixture.GaussianMixture(n_components=min(
-            X.shape[0] / 2, 10), covariance_type="spherical", reg_covar=1e-5)
+
+        g = mixture.GaussianMixture(
+            n_components=min(X.shape[0] / 2, 10),
+            covariance_type="full",
+            reg_covar=1e-1,
+            n_init=20
+        )
+
         g.fit(X)
 
         labels = g.predict(X)
+
         return labels
 
     def labels2docs(self, texts, labels):
@@ -162,7 +182,7 @@ class TopicMaker:
         for i in range(len(texts)):
             topic_2_docids[labels[i]].append(i)
 
-        print(topic_2_docids)
+        # print(topic_2_docids)
         return topic_2_docids
 
     def make_keywords(self, topic_2_docids, texts, lookup=None):
@@ -178,20 +198,19 @@ class TopicMaker:
                              if (not w in stop_words)
                              and (w in self.nouns)])
 
-        titled_clustered_documents = []
+        titled_clustered_documents = dict()
         for topic_id, text_ids in topic_2_docids.items():
             constructed_doc = " ".join([w.title() for id in text_ids for w in texts[id]]
                                        )
             constructed_doc = remove_stopwords(stop_word_removal(constructed_doc.lower()))
             doc = textacy.make_spacy_doc(constructed_doc, lang="en_core_web_md")
-            keywords = textrank(doc, normalize="lemma", n_keyterms=35)
+            keywords = textrank(doc, normalize="lemma", topn=35)
 
-            print(keywords)
-            print(constructed_doc[:2000])
+            # print(keywords)
+            # print(constructed_doc[:2000])
 
-            titled_clustered_documents.append(
-                ([keywords if keywords else []],
-                 [lookup[id] for id in text_ids]))
+            titled_clustered_documents[tuple(keywords) if keywords else ("no keywords",)] = \
+                    {lookup[id]:{} for id in text_ids}
 
         return titled_clustered_documents
 
@@ -209,9 +228,9 @@ class TopicMaker:
         titles_found = defaultdict(list)
 
         for i in range(1, 4):
-            words = self.numpy_fillna([[kw[0] for kw in keys[0]] for keys, values in list(keywords_to_texts)],
+            words = self.numpy_fillna([[kw[0] for kw in keys] for keys, values in keywords_to_texts.items()],
                                       fill_value='untitled')
-            scores = self.numpy_fillna([[kw[1] for kw in keys[0]] for keys, values in list(keywords_to_texts)])
+            scores = self.numpy_fillna([[kw[1] for kw in keys] for keys, values in keywords_to_texts.items()])
 
             scores = -scores
             uniques, count = np.unique(words, return_counts=True)
@@ -219,10 +238,10 @@ class TopicMaker:
             vec_in_fun = np.vectorize(lambda w: w in duplicates or w in yet_used)
             mask = vec_in_fun(words)
             scores[mask] = scores[mask] + i
-            print(scores)
-            print(words)
-            print(scores.shape)
-            print(words.shape)
+            # print(scores)
+            # print(words)
+            # print(scores.shape)
+            # print(words.shape)
 
             row_ids, col_ids = linear_sum_assignment(scores)
             print(row_ids)
@@ -238,9 +257,11 @@ class TopicMaker:
             )
             print(titles_found)
 
-        titles_to_texts = {" ".join(tit): keywords_to_texts[row][1]
+        k2t = list(keywords_to_texts.items())
+
+        titles_to_texts = {" ".join(tit): k2t[row][1]
                            for row, tit in titles_found.items()}
-        pprint({k: "".join(str(u).replace("\n", "") for w in v[:30] for u in w) for k, v in titles_to_texts.items()})
+        # pprint({k: "".join(str(u).replace("\n", "") for w in v[:30] for u in w) for k, v in titles_to_texts.items()})
 
         return titles_to_texts
 

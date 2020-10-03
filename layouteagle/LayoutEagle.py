@@ -1,6 +1,9 @@
 import glob
 import os
+from pprint import pprint
 
+from layouteagle import config
+from layouteagle.pathant.AntPublisher import AntPublisher
 from layouteagle.pathant.PathAnt import PathAnt
 
 
@@ -24,12 +27,22 @@ class LayoutEagle:
     from TestArchitecture.publisher import NLPPublisher, TopicPublisher
     from TestArchitecture.NLP.nlp_blub import NLPBlub
     from TestArchitecture.NLP.topicape import TopicApe
+    from StandardConverter.Dict2Graph import Dict2Graph
+
+    from Topics.Topics import Topics
     from UserOk import UserOk
 
     def __init__(self):
         self.ant = PathAnt()
         self.model_pipe = self.ant("arxiv.org", "keras")
         self.prediction_pipe = self.ant("pdf", "layout.html")
+
+    def test_topics(self):
+        pdfs = [file for file in glob.glob(config.test_dir + "*.pdf")]
+        pipeline = self.ant("pdf", "topics.graph")
+
+        value, meta = list(zip(*list(pipeline([(pdf, {}) for pdf in pdfs]))))
+        pprint(value)
 
     def make_model(self):
         model_pipe = self.ant("arxiv.org", "keras" )
@@ -39,7 +52,7 @@ class LayoutEagle:
         self.ant.info(pipelines_to_highlight=[self.model_pipe, self.prediction_pipe])
 
     def test_prediction(self):
-        pdfs = [file for file in glob.glob("test/*.pdf")]
+        pdfs = [file for file in glob.glob(config.test_dir + "*.pdf")]
         result_paths = list(self.prediction_pipe([(pdf, {}) for pdf in pdfs]))
         print(result_paths)
         for (html_path, json_path, txt_path), meta in result_paths:
@@ -48,5 +61,8 @@ class LayoutEagle:
 
 if __name__=="__main__":
     le = LayoutEagle()
-    le.make_model()
-    le.test_prediction()
+    le.ant.info()
+    #print(list(AntPublisher([123])))
+    le.test_topics()
+    #le.make_model()
+    #le.test_prediction()

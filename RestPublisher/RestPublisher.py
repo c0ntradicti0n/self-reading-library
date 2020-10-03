@@ -18,7 +18,6 @@ from layouteagle.pathant.PathAnt import PathAnt
 from layouteagle.pathant.PathSpec import PathSpec
 
 from flask import request, jsonify, Blueprint
-from flask_login import login_required, login_user, current_user, logout_user
 
 
 bp = Blueprint('blueprint', __name__, template_folder='templates')
@@ -129,9 +128,18 @@ export default class ??Title!!Service extends ServerResource {
 
 
     page_code = """
+import React from 'react'
 import Router from 'next/router'
-import Graph from '../components/Graph'
 import ??title!!Service from '../resources/??Title!!Service'
+
+import dynamic from 'next/dynamic'
+const Graph = dynamic(
+    () => import('./../components/Graph.js'),
+    {
+        loading: () => <p>...</p>,
+        ssr: false
+    }
+)
 
 interface ??Title!!State {
     ??title!!s: any
@@ -158,20 +166,19 @@ export default class ??title!! extends React.Component<State, Props> {
             console.log('VALUES', prom.response)
 
             this.setState({
-                ??title!!s: prom.response.value,
-                meta: prom.response.meta[0]
-                }
+                ??title!!s: prom.response}
                 )})
     }
     
     render ()  {
-        console.log("RENDER", this.state.??title!!s)
-        return (<>
-            <Graph graph={this.state.??title!!s}
-            />
-        </>
-        )
-    }    
+        if ("??type!!" == "text")  {
+            console.log("RENDER", this.state.??title!!s)
+            return (<>
+                {JSON.stringify(this.state)} 
+            </>)
+        }
+        if ("??type!!" == "graph")  return <Graph data={this.state.??title!!s}/>
+    }
 } 
     
     """.replace("{", "{{").replace("}", "}}").replace("??", r"{").replace("!!", "}")

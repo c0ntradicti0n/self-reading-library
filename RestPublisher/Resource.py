@@ -2,7 +2,7 @@ from typing import Dict
 
 
 class Resource(dict):
-    def __init__(self, title, path, route, access : Dict=
+    def __init__(self, title, type, path, route, access : Dict=
              {'fetch':True,
               "read": True,
               "correct": True,
@@ -13,6 +13,7 @@ class Resource(dict):
         self.access = {k:str(v).lower() for k, v in access.items() }
         self.route = route
         self.path = path
+        self.type = type
         self.Title = title.title()
         self.title = title.lower()
 

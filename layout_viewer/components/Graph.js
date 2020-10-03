@@ -1,23 +1,32 @@
-
 import loadable from '@loadable/component'
+import dynamic from 'next/dynamic'
 import * as React from 'react'
 
 if (typeof window === 'undefined') {
     global.window = {}
 }
-import SpriteText from 'three-spritetext';
 
 
-const ForceGraph3D = loadable(() => import('./ForceGraph3d.js'))
+// const ForceGraph3D = loadable(() => )
+const ForceGraph3D = dynamic(
+    () => import('./ForceGraph3d.js'),
+    {
+        loading: () => <p>...</p>,
+        ssr: false
+    }
+)
+// const ForceGraph3D = loadable(() => )
+import SpriteText from './SpriteText.js'
+
 
 export default class Graph extends React.Component  {
     constructor(props) {
         super(props);
         this.myRef = React.createRef();
 
-
+        console.log(props)
         this.state = {
-            graph: {
+            graph: this.props.data ?? {
                 "nodes": [
                     {
                         "id": "id1",
@@ -57,7 +66,7 @@ export default class Graph extends React.Component  {
     }
 
     render()  {
-           console.log(this.myRef)
+           console.log("REF", this.myRef, this.state)
            return  (
                <ForceGraph3D
                   ref={this.myRef}
@@ -68,21 +77,18 @@ export default class Graph extends React.Component  {
 
         nodeThreeObject = {(node) =>
         {
+                      const obj = new THREE.Mesh(
+            new THREE.SphereGeometry(10),
+            new THREE.MeshBasicMaterial({ depthWrite: false, transparent: true, opacity: 0 })
+          );
 
-            // extend link with text sprite
-            const sprite = new SpriteText(`${node.name}`)
+          // add text sprite as child
+          const sprite = new SpriteText(node.id);
+          sprite.color = node.color;
+          sprite.textHeight = 8;
+          obj.add(sprite);
 
-
-            const obj = new THREE.Mesh(
-                new THREE.SphereGeometry(10),
-                new THREE.MeshBasicMaterial({depthWrite: false, transparent: true, opacity: 0})
-            );
-
-            // add text sprite as child
-            sprite.color = node.color;
-            sprite.textHeight = 1;
-            obj.add(sprite);
-            return obj
+          return obj;
         }}
                         onNodeClick={(node) => this.handleClick(node)}
                         onNodeRightClick={(node) => console.log("FORWARD To DOCUMENT")}
