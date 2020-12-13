@@ -29,7 +29,7 @@ class LayoutEagle:
     from TestArchitecture.NLP.topicape import TopicApe
     from StandardConverter.Dict2Graph import Dict2Graph
 
-    from Topics.Topics import Topics
+    from Topics.TopicsPublisher import TopicsPublisher
     from UserOk import UserOk
 
     def __init__(self):

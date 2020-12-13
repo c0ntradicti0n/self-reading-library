@@ -40,13 +40,14 @@ if __name__ ==  "__main__":
 else:
 
     from RestPublisher.MarkupPublisher import MarkupPublisher
-    from Topics.Topics import Topics
+    from layouteagle.pathant.AntPublisher import AntPublisher
+    from Topics.TopicsPublisher import TopicsPublisher
     from layouteagle.LayoutEagle import LayoutEagle
 
     publishing = {
         '/markup': MarkupPublisher,
-        '/topics': Topics,
-        '/ant': PathAnt
+        '/topics': TopicsPublisher,
+        '/ant': AntPublisher
         # 'commands':  RestPublisher("commands")
     }
 

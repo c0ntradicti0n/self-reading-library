@@ -22,6 +22,7 @@ class PathAnt:
 
         for _from, _to, functional_object in converters:
             self.add_edge(_from, _to, functional_object)
+            functional_object.ant = self
 
         for (_froms1, _tos1, functional_object1), \
             (_froms2, _tos2, functional_object2)  \

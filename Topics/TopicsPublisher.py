@@ -20,7 +20,7 @@ from layouteagle.pathant.Converter import converter
 
 
 @converter("wordi", "topics.dict")
-class Topics(RestPublisher, react):
+class TopicsPublisher(RestPublisher, react):
     def __init__(self,
                  *args,
                  **kwargs):
@@ -60,7 +60,7 @@ class Topics(RestPublisher, react):
                 with open(wordi, 'r', encoding='utf-8', errors='ignore')  as f:
                     firstlines = [f.readline() for i in range(1000)]
 
-                    words = [Topics.wordi_regex.search(w).group(1) for w in firstlines if Topics.wordi_regex.search(w)]
+                    words = [TopicsPublisher.wordi_regex.search(w).group(1) for w in firstlines if TopicsPublisher.wordi_regex.search(w)]
                     words = [w for w in words if w]
                     if words:
                         text = wordninja.split("".join(words)[:1000].replace(" ", ""))
@@ -81,5 +81,5 @@ class Topics(RestPublisher, react):
 
         pprint(type_spec_iterable(value))
 
-        return value[0]
+        return value[0][0]
 

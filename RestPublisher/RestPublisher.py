@@ -1,23 +1,12 @@
-import itertools
-import logging
-import mimetypes
-import os
-import uuid
-from typing import List, Tuple, Dict
 
-import falcon as falcon
-import pandas
-from pip._vendor import msgpack
+import os
 
 from RestPublisher.Resource import Resource
 from RestPublisher.react import react
-from layouteagle import config
-from layouteagle.helpers.cache_tools import file_persistent_cached_generator
-from layouteagle.pathant.Converter import converter
 from layouteagle.pathant.PathAnt import PathAnt
 from layouteagle.pathant.PathSpec import PathSpec
 
-from flask import request, jsonify, Blueprint
+from flask import jsonify, Blueprint
 
 
 bp = Blueprint('blueprint', __name__, template_folder='templates')
@@ -171,6 +160,7 @@ export default class ??title!! extends React.Component<State, Props> {
     }
     
     render ()  {
+    console.log("values", this.state.??title!!s)
         if ("??type!!" == "text")  {
             console.log("RENDER", this.state.??title!!s)
             return (<>

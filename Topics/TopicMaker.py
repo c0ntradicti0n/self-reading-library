@@ -119,6 +119,10 @@ class TopicMaker:
                     topics[list(topics)[i_group_label]] = sub_topics
             except TypeError as e:
                 logging.error(f"computing gaussian mixture {e}")
+                return topics
+            except IndexError as e:
+                logging.error(f"computing subtopics with {e}")
+                return topics
 
 
 
@@ -204,7 +208,7 @@ class TopicMaker:
                                        )
             constructed_doc = remove_stopwords(stop_word_removal(constructed_doc.lower()))
             doc = textacy.make_spacy_doc(constructed_doc, lang="en_core_web_md")
-            keywords = textrank(doc, normalize="lemma", topn=35)
+            keywords = textrank(doc, normalize="lemma", topn=7)[:3]
 
             # print(keywords)
             # print(constructed_doc[:2000])
@@ -237,7 +241,7 @@ class TopicMaker:
             duplicates = uniques[count > 1]
             vec_in_fun = np.vectorize(lambda w: w in duplicates or w in yet_used)
             mask = vec_in_fun(words)
-            scores[mask] = scores[mask] + i
+            scores[mask] = scores[mask] + 10
             # print(scores)
             # print(words)
             # print(scores.shape)
@@ -249,6 +253,8 @@ class TopicMaker:
             print(f"{i} SEEN {yet_used}")
 
             yet_used.extend([words[row, col] for col, row in zip(col_ids, row_ids)])
+            [print(i, words[row, col]) for col, row in zip(col_ids, row_ids)]
+
             titles_found.update(
                 {row: titles_found[row] + [words[row, col]]
                  for col, row in zip(col_ids, row_ids)
