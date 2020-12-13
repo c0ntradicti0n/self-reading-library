@@ -1,5 +1,5 @@
 test_dir = "test/small_pdfs/"
-
+topics_dump = "./topics.pickle"
 
 parse_pdf2htmlEX = True
 

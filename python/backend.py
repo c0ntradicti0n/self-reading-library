@@ -4,8 +4,6 @@ import falcon
 
 import logging
 
-from python.layouteagle.pathant.PathAnt import PathAnt
-
 logging.basicConfig()
 
 logging.getLogger().setLevel(logging.INFO)
@@ -13,16 +11,15 @@ logging.getLogger().setLevel(logging.INFO)
 if __name__ ==  "__main__":
     import subprocess
     import sys
-    import os
 
     loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
     for logger in loggers:
         logger.setLevel(logging.INFO)
 
     # start react app and proceed
-    os.chdir("../react/layout_viewer_made")
-    # os.popen("yarn dev")
-    os.chdir("../../python")
+    #os.chdir("../react/layout_viewer_made")
+    #os.popen("yarn dev")
+    #os.chdir("../../python")
 
 
     while True:

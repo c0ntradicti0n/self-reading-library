@@ -4,14 +4,14 @@ from python.layouteagle.RestPublisher.react import react
 from python.helpers.cache_tools import uri_with_cache
 from python.layouteagle.pathant.Converter import converter
 
-@converter("a",'o')
+@converter("The One",'The One')
 class AntPublisher(RestPublisher, react):
     def __init__(self,
                  *args,
                  **kwargs):
         super().__init__(*args, **kwargs, resource=Resource(
             title="Ant",
-            type = "text",
+            type="graph",
             path="ant",
             route="ant",
             access={"fetch": True, "read": True, "upload":True, "correct":True, "delete":True}))
@@ -22,6 +22,6 @@ class AntPublisher(RestPublisher, react):
     @uri_with_cache
     def on_get(self, req, resp):
         print("giving ant info")
-        return self.ant.graph()
+        return self.ant.graph()[0][0]
 
 

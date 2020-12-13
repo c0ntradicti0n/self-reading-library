@@ -1,7 +1,8 @@
 import loadable from '@loadable/component'
 import dynamic from 'next/dynamic'
 import * as React from 'react'
-import Router, { withRouter } from 'next/router'
+import Router, {withRouter} from 'next/router'
+import window from 'global'
 
 
 if (typeof window === 'undefined') {
@@ -9,7 +10,7 @@ if (typeof window === 'undefined') {
 }
 
 
-// const ForceGraph3D = loadable(() => )
+// Having enourmous problems with these imports: one dynamic as recommended in the internet
 const ForceGraph3D = dynamic(
     () => import('./ForceGraph3d.js'),
     {
@@ -17,14 +18,20 @@ const ForceGraph3D = dynamic(
         ssr: false
     }
 )
+
 const ForwardedRefForceGraph3D = React.forwardRef((props, ref) => (
-  <ForceGraph3D {...props} forwardedRef={ref} />
+    <ForceGraph3D {...props} forwardedRef={ref}/>
 ))
-// const ForceGraph3D = loadable(() => )
-//import SpriteText from './SpriteText.js'
+
+// two for the text items... don't think, one of them is superflouus
+// THIS IS THE TRICK: ONE IMPORT FOR SSR, ONE FOR THE 3D GRAPH ON CLIENT-SIDE
+const SpriteText2 = dynamic(() => import('../components/SpriteText.js'))
+import SpriteText from './SpriteText.js'
 
 
-class Graph extends React.Component  {
+class Graph extends React.Component {
+    myRef = React.createRef();
+
     constructor(props) {
         super(props);
 
@@ -57,57 +64,51 @@ class Graph extends React.Component  {
 
     /* */
 
-    handleClick (node)  {
+    handleClick(node) {
         // Aim at node from outside it
-          const distance = 40;
-          const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
-           console.log("REF", this.myRef, this.state)
+        const distance = 40;
+        const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
+        console.log("REF", this.myRef, this.state)
 
-          this.myRef.then(r => r.cameraPosition(
-            { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }, // new position
+        this.myRef.then(r => r.cameraPosition(
+            {x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio}, // new position
             node, // lookAt ({ x, y, z })
             3000  // ms transition duration
-          ));
+        ));
 
 
     }
 
-    render()  {
-                this.myRef = React.createRef();
+    render() {
 
-          console.log(this)
-           return  (
-               <ForwardedRefForceGraph3D
-                  ref={(ref) => this.myRef = ref}
+        console.log(this)
+        return (
+            <ForwardedRefForceGraph3D
+                ref={this.myRef}
+                graphData={this.props.graph ?? this.state.graph}
+                nodeLabel='name'
+                nodeAutoColorBy='group'
 
 
-                  graphData={ this.props.graph??this.state.graph}
-                  nodeLabel = 'name'
-                  nodeAutoColorBy = 'group'
-/*
-                  nodeThreeObject = {(node) =>
-                            {
-                                          const obj = new THREE.Mesh(
-                                new THREE.SphereGeometry(10),
-                                new THREE.MeshBasicMaterial({ depthWrite: false, transparent: true, opacity: 0 })
-                              );
-
-                          // add text sprite as child
-                          //const sprite = new SpriteText(node.name);
-                          //sprite.color = node.color;
-                          //sprite.textHeight = 8;
-                          //obj.add(sprite);
-
-                          return obj;
-                        }}
+                nodeThreeObject={(node) => {
+                    const obj = new THREE.Mesh(
+                        new THREE.SphereGeometry(10),
+                        new THREE.MeshBasicMaterial({depthWrite: false, transparent: true, opacity: 0})
+                    );
+                    const sprite = new SpriteText(node.name);
+                    sprite.color = node.color;
+                    sprite.textHeight = 8;
+                    obj.add(sprite);
+                    return obj;
+                }}
                 onNodeClick={(node) => this.handleClick(node)}
                 onNodeRightClick={(node) =>
                     Router.push({
-                    pathname: '/markup',
-                    query: { ... node }
-                })}*/
+                        pathname: '/markup',
+                        query: {...node}
+                    })}
 
-               />)
+            />)
     }
 }
 
