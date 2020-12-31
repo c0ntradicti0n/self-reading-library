@@ -37,7 +37,7 @@ class LayoutEagle:
         self.prediction_pipe = self.ant("pdf", "layout.html")
 
     def test_topics(self):
-        pdfs = [file for file in glob.glob(config.test_dir + "*.pdf")]
+        pdfs = [file for file in glob.glob(config.pdf_dir + "*.pdf")]
         self.ant.info()
         pipeline = self.ant("pdf", "topics")
 
@@ -52,7 +52,7 @@ class LayoutEagle:
         self.ant.info(pipelines_to_highlight=[self.model_pipe, self.prediction_pipe])
 
     def test_prediction(self):
-        pdfs = [file for file in glob.glob(config.test_dir + "*.pdf")]
+        pdfs = [file for file in glob.glob(config.pdf_dir + "*.pdf")]
         result_paths = list(self.prediction_pipe([(pdf, {}) for pdf in pdfs]))
         print(result_paths)
         for (html_path, json_path, txt_path), meta in result_paths:

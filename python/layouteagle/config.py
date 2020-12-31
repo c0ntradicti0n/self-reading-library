@@ -1,5 +1,4 @@
-test_dir = "test/small_pdfs/"
-topics_dump = "./topics.pickle"
+
 
 parse_pdf2htmlEX = True
 
@@ -88,3 +87,8 @@ reader_height = numpy.sqrt(2) * reader_width
 
 page_margin_bottom = 0.06
 page_margin_top = 0.15
+
+pdf_dir = "test/small_pdfs/"
+topics_dump = "./topics.pickle"
+markup_dir = pdf_dir
+markup_suffix = "pdflayout.html"

@@ -1,0 +1,62 @@
+%! Author = stefan
+%! Date = 22.04.20
+
+% Preamble
+\documentclass[11pt]{article}
+
+\usepackage{amsthm}
+\usepackage{bm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{setspace}
+\usepackage{hyperref}
+%\usepackage{esint}
+\PassOptionsToPackage{normalem}{ulem}
+\usepackage{ulem}
+%\onehalfspacing
+
+\newcommand{\noprint}[1]{}
+\newcommand{\destacar}[1]{{\bfseries\slshape\color{red} #1}}
+\newcommand{\destacarj}[1]{{\bfseries\slshape\color{blue} #1}}
+\newcommand{\destacare}[1]{{\bfseries\slshape\color{green} #1}}
+\newcommand{\tr}{{\text{tr}}}
+\newcommand{\ft}{\tilde}
+\newcommand{\ii}{\mathrm{i}}
+\renewcommand{\d}{\mathrm{d}}
+\renewcommand{\Re}{\mathrm{Re}}
+\renewcommand{\Im}{\mathrm{Im}}
+\newcommand{\nn}{\nonumber}
+\newcommand{\edu}[1]{{\color{magenta} #1}}
+\newcommand{\educ}[1]{\textbf{{\color{magenta} [EDU: #1]}}}
+\newcommand{\pipo}[1]{{\color{red} #1}}
+\newcommand{\pipoc}[1]{\textbf{{\color{red} [Pipito: #1]}}}
+
+\newtheorem{defi}{Definition}
+\newtheorem{teor}{Theorem}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\usepackage{braket}
+\usepackage{bbm}
+
+\providecommand{\abs}[1]{\lvert#1\rvert}
+\providecommand{\norm}[1]{\lVert#1\rVert}
+%para comandos de valor absoluto y norma
+
+
+% Packages
+\usepackage{amsmath}
+
+% Document
+\begin{document}
+
+We consider a two-level quantum system subject to repeated interactions with an environment. Namely, the interaction of the system and the environment will be switched on and off for a finite number of times.  Consider that the evolution of  the system and the environment is described by the rather general Hamiltonian
+\begin{align}
+\hat{H}&=\hat{H}_{\textsc{s}}+\hat{H}_{\textsc{E}}+\hat{H}_{\textsc{se}},
+\end{align}
+where  $\hat{H}_{\textsc{E}}$ denotes the free evolution of the environment, which we leave arbitrary.  $\hat{H}_{\textsc{s}}=\Omega \mathbf{h}\cdot \bm{\hat{\sigma}}$ is the free Hamiltonian of the two-level system. The spin-environment interaction Hamiltonian is given by
+\begin{equation}
+    \hat{H}_{\textsc{se}}= \chi(t) \bm{\alpha}\cdot \bm{\hat{\sigma}} \otimes \hat{{O}}.
+\end{equation}
+Here  $\mathbf{h}\cdot \bm{\hat{\sigma}}$ and $\bm{\alpha}\cdot \bm{\hat{\sigma}}$ are Pauli observables in the directions $\mathbf{h}$ and $\bm{\alpha}$ respectively.  $\hat{{O}}$ is an observable of the environment, that is, a self-adjoint operator that also commutes with all observables of the spin.
+
+Finally $\chi(t)$ is a switching function that regulates the rate and intensity of the interactions between the two-level system and the environment. Note that outside the support of $\chi$ the two subsystems evolve independently.
+\end{document}

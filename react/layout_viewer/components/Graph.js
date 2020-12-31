@@ -25,7 +25,8 @@ const ForwardedRefForceGraph3D = React.forwardRef((props, ref) => (
 
 // two for the text items... don't think, one of them is superflouus
 // THIS IS THE TRICK: ONE IMPORT FOR SSR, ONE FOR THE 3D GRAPH ON CLIENT-SIDE
-const SpriteText2 = dynamic(() => import('../components/SpriteText.js'))
+const SpriteText2 = dynamic(() =>
+    import('../components/SpriteText.js'))
 import SpriteText from './SpriteText.js'
 
 
@@ -37,7 +38,7 @@ class Graph extends React.Component {
 
         console.log(props)
         this.state = {
-            graph: this.props.data ?? {
+            graph:  {
                 "nodes": [
                     {
                         "id": "id1",
@@ -81,11 +82,11 @@ class Graph extends React.Component {
 
     render() {
 
-        console.log(this)
+        console.log(this, this.props.data.length ? this.props.data : this.state.graph, this.props.data, this.state.graph)
         return (
             <ForwardedRefForceGraph3D
                 ref={this.myRef}
-                graphData={this.props.graph ?? this.state.graph}
+                graphData={this.props.data ? this.props.data : this.state.graph}
                 nodeLabel='name'
                 nodeAutoColorBy='group'
 

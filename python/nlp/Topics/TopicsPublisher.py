@@ -83,7 +83,7 @@ class TopicsPublisher(RestPublisher, react):
                 value = list(d2g([topics]))[0][0][0]
                 print (value)
         else:
-            pdfs = [file for file in glob.glob(config.test_dir + "*.pdf")]
+            pdfs = [file for file in glob.glob(config.pdf_dir + "*.pdf")]
 
             value, meta = list(zip(*list(self.ant("pdf", "topics.graph")([(pdf, {}) for pdf in pdfs]))))
 

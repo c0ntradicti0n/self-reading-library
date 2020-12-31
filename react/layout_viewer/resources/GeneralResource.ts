@@ -59,9 +59,9 @@ export default class ServerResource <T> {
         return 1
     }
 
-    async fetch_one(url = '', data) {
+    async fetch_one(id, callback: Function) {
         if (this.fetch_allowed) {
-            return this.request("get", data)
+            return this.request("post", id,  callback)
         }
     }
 

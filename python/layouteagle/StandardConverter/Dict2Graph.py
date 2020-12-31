@@ -28,7 +28,7 @@ class Dict2Graph(Ant):
         else: yield dict_list
 
 
-    def to_graph_dict(self, topics):
+    def to_graph_dict(self, topics, fun=None):
         """try:
             import textwrap
             edge_list = list(self.rec_items(topics))
@@ -48,27 +48,44 @@ class Dict2Graph(Ant):
 
         # Iterate through the layers
         q = list(topics.items())
+        n = 0
         while q:
-            v, d = q.pop()
-            for nv, nd in d.items():
+            v, dl = q.pop()
+            if isinstance(dl, (list, set)):
+                for l in dl:
+                    dig.add_edge(v, n)
+                    dig.add_node(n, attr=l)
+                    n += 1
+                continue
+            for nv, nd in dl.items():
                 dig.add_edge(v, nv)
                 if isinstance(nd, Mapping):
                     q.append((nv, nd))
 
         ddic = nx.to_dict_of_dicts(dig)
-        print(ddic)
+        pprint(ddic)
         levels = 3
         nodes = [{'id': k,
-                  'name': k.replace(config.test_dir, "").replace("pdf.htmlayout.txt", ""),
+                  'name': dig.nodes[k]['attr'] if 'attr' in dig.nodes[k]  else k,
+                  #'attr': ,
                   'val': 2 ** (levels - 1) if v else 2 ** (levels - 2)}
 
                  for k, v in ddic.items()] \
                 + [{'id': "ROOT", 'name': "root", 'val': 2 ** (levels)}]
 
-        center_links = [{'source': "ROOT", 'target': k} for k, v in ddic.items() if list(v.items())]
+        center_links = [{'source': "ROOT", 'target': k}
+                        for k, v in ddic.items() if list(v.items())]
 
-        links = [{'source': k, 'target': n} for k, v in ddic.items() for n in v if v] + center_links
+        links = [{'source': k, 'target': n}
+                 for k, v in ddic.items()
+                 for n in v if v] \
+                + center_links
+
         d = {'nodes': nodes, 'links': links}
+        pprint(nodes)
+        pprint(links)
+
+
         return d
 
 
