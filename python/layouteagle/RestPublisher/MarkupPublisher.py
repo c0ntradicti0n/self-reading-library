@@ -1,4 +1,5 @@
 import json
+from pprint import pprint
 
 import falcon
 
@@ -8,7 +9,11 @@ from python.layouteagle.RestPublisher.RestPublisher import RestPublisher
 from python.layouteagle.RestPublisher.react import react
 from python.helpers.cache_tools import uri_with_cache
 from python.layouteagle.pathant.Converter import converter
-from flask import request
+
+from python.layouteagle.StandardConverter.Wordi2Css import Wordi2Css
+from python.nlp.TransformerStuff.ElmoDifference import ElmoDifference
+from python.nlp.TransformerStuff.Pager import Pager
+from python.nlp.TransformerStuff.UnPager import UnPager
 
 @converter("html", "rest_markup")
 class MarkupPublisher(RestPublisher, react) :
@@ -54,10 +59,12 @@ class MarkupPublisher(RestPublisher, react) :
                 css_value, html_meta = list(
                     zip(
                         *list(
-                            self.ant("pdf", "difference.css")
+                            self.ant("pdf", "css.difference")
                             ([(pdf, {})
                               for pdf
                               in pdf_s]))))
+
+                pprint (css_value)
 
 
         except Exception as e:

@@ -7,6 +7,7 @@ from python.layouteagle.pathant.PathAnt import PathAnt
 
 
 class LayoutEagle:
+
     from python.layout.ScienceTexScraper.scrape import ScienceTexScraper
     from python.layout.LatexReplacer.latex_replacer import LatexReplacer
     from python.layout.LayoutReader.labeled_feature_maker import TrueFormatUpmarkerPDF2HTMLEX
@@ -27,6 +28,7 @@ class LayoutEagle:
     from python.TestArchitecture.NLP.nlp_blub import NLPBlub
     from python.TestArchitecture.NLP.topicape import TopicApe
     from python.layouteagle.StandardConverter.Dict2Graph import Dict2Graph
+
 
     from python.UserOk import UserOk
 

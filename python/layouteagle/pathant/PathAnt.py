@@ -8,12 +8,14 @@ import networkx as nx
 import pylab
 from more_itertools import pairwise
 
+from python.helpers.list_tools import flatten_optional_list_pair
 from python.layouteagle.StandardConverter.Dict2Graph import Dict2Graph
 from python.helpers.os_tools import make_dirs_recursive
 from python.layouteagle.pathant.MatchDescription import match, list_or_values
 from python.layouteagle.pathant.Pipeline import Pipeline
 from python.layouteagle.pathant.converters import converters
-from regex import regex
+from regex import regex, Regex
+
 
 class PathAnt:
     def __init__(self, necessary_paths={".layouteagle":["tex_data", "cache", "log"]}):
@@ -21,7 +23,9 @@ class PathAnt:
         self.G = nx.DiGraph()
 
         for _from, _to, functional_object in converters:
+
             self.add_edge(_from, _to, functional_object)
+            self.add_starred(_from, _to, functional_object, converters)
             functional_object.ant = self
 
         for (_froms1, _tos1, functional_object1), \
@@ -158,10 +162,40 @@ class PathAnt:
 
         return list(d2g([nx.to_dict_of_dicts(self.G, edge_data=[])]))[0]
 
+    def add_starred(self, _from1, _to1, functional_object, converters):
+        if "*" in _from1:
+            try:
+                other_things = [(f,t) for f,t, o in converters]
+                new_things_regex = Regex("^" + _from1.replace("*", r"(\w+)") + "$")
+
+                for _from2,_to2 in flatten_optional_list_pair(other_things):
+                    m = new_things_regex.match(_to2)
+                    if m:
+                        new_from = _to1.replace("*", m.group(1))
+                        self.add_edge(_to2, new_from, functional_object)
+                        self.add_starred_from_converters(_to2, new_from, functional_object, converters)
+            except Exception as e:
+                print ("failed to match starred for " + _from1 + "->"+_to1 + " " + str(e))
+
+    def add_starred_from_converters(self, _from1, _to1, functional_object, converters):
+        other_things = [(f, t) for f, t, o in converters]
+        for _from2, _to2 in flatten_optional_list_pair(other_things):
+            if "*" in _to2:
+
+                other_things_regex = Regex("^" + _from2.replace("*", r"(\w+)") + "$")
+                m = other_things_regex.match(_to1)
+
+                if m:
+                    new_to = _to2.replace("*", m.group(1))
+
+                    new_from = _to2.replace("*", m.group(1))
+                    self.add_edge(_to1, new_from, functional_object)
+
 
 import unittest
 
 class TestPathAnt(unittest.TestCase):
+    """
     from python.layout.ScienceTexScraper.scrape import ScienceTexScraper
     from python.layout.LatexReplacer.latex_replacer import LatexReplacer
     from python.layout.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
@@ -177,7 +211,7 @@ class TestPathAnt(unittest.TestCase):
     from python.TestArchitecture.publisher import NLPPublisher, TopicPublisher
     from python.TestArchitecture.NLP.nlp_blub import NLPBlub
     from python.TestArchitecture.NLP.topicape import TopicApe
-
+    """
     def setUp(self):
         self.ant = PathAnt()
         self.model_pipe = self.ant("arxiv.org", "keras")

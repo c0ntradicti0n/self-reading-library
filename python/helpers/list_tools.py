@@ -96,7 +96,15 @@ def pad_along_axis(array: numpy.ndarray, target_length, axis=0):
 
 
 
-
+def flatten_optional_list_pair(pair_list):
+    for a,b in pair_list:
+        if not isinstance(a, list):
+            a = [a]
+        if not isinstance(b, list):
+            b = [b]
+        for _a in a:
+            for _b in b:
+                yield _a, _b
 
 
 
@@ -110,10 +118,11 @@ class ListToolsTest(unittest.TestCase):
             print (new_range)
             s1, s2, s3 = s_tuple
             ds = s3 - s1
-            new_len = ds * 2 / 3
             logging.error(f" {s_tuple} is now {new_range}")
             #assert new_range.max() - new_range.min() == new_len
             #assert new_range[0] >= s1 and new_range[2] <= s3
+
+
 
 
 

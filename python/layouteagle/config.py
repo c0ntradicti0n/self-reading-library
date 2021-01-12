@@ -92,3 +92,6 @@ pdf_dir = "test/small_pdfs/"
 topics_dump = "./topics.pickle"
 markup_dir = pdf_dir
 markup_suffix = "pdflayout.html"
+
+
+corpus_conll = '/home/stefan/PycharmProjects/LayoutEagle/data/first.conll3'
