@@ -26,23 +26,12 @@ class DifferenceTaggerPredictor(Predictor):
     @overrides
     def predict_json(self, inputs: JsonDict) -> JsonDict:
         instance = self._json_to_instance(inputs)
-        self.model.vocab.extend_from_instances(None, instances=[instance])
+        #self.model.vocab.extend_from_instances(self.model., instances=[instance])
         #self.model.extend_embedder_vocab(embedding_sources_mapping)
         output = self.predict_instance(instance)
         print ('predict json',output)
-
-        table = BeautifulTable(max_width=120)
-        table.set_style(BeautifulTable.STYLE_RST)
-        table.append_column('words', output['words'])
-        table.append_column('tags', output['tags'])
-        table.append_column('logits', [" ".join([str(round(f, 1)) for f in l]) for l in output['logits']])
-
-
-        print ('predict json',output)
         output = list(zip(output['tags'], output['words']))
-        return str(table).replace('\n', '<br />')
-
-        return list(zip(result['tags'], result['words']))
+        return  output
 
     @overrides
     def _json_to_instance(self, json_dict: JsonDict) -> Instance:

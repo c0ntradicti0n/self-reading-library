@@ -1,22 +1,27 @@
-from python.layouteagle import config
-from python.layouteagle.pathant.Converter import converter
+from allennlp.common import Params
+from allennlp.predictors import Predictor
+
 from python.layouteagle.pathant.PathSpec import PathSpec
-from python.nlp.TransformerStuff.core.corpus import Corpus
-from python.nlp.TransformerStuff.core.model import Model
-from python.nlp.TransformerStuff.core.textsplitter import TextSplitter
+
+from allennlp.models.model import Model
+
+from python.nlp.TransformerStuff.difference_predictor.difference_predictor import DifferenceTaggerPredictor
+import python.nlp.TransformerStuff.attentivecrftagger.attentivecrftagger
 
 
 class ElmoPredict(PathSpec):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, config=None, train_output_dir, **kwargs):
         super().__init__(*args, **kwargs)
-        pass
+        self.config = Params.from_file(params_file=config)
+        self.model = Model.load(config=self.config, serialization_dir=train_output_dir)
+        self.default_predictor = Predictor.from_path(train_output_dir)
+        self.predictor = DifferenceTaggerPredictor(
+            self.default_predictor._model,
+            dataset_reader=self.default_predictor._dataset_reader)
 
-    corpus_first = Corpus(path=config.corpus_conll)
-    model_first = Model(model_path="server/models/model_first.tar.gz")
-
-    textsplitter = TextSplitter(model_first, None)
+    # textsplitter = TextSplitter(model_first, None)
 
     def __call__(self, feature_meta, *args, **kwargs):
         for wordi, meta in feature_meta:
-            css = "?"
-            yield css, meta
+            annotation = self.predictor.predict_json({"sentence":str(wordi)})
+            yield annotation, meta

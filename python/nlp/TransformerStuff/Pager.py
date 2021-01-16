@@ -38,12 +38,13 @@ class Pager(PathSpec):
                 doing = True
                 generator = self.make_tokenized_windows(i_word)
                 next(generator)
-                value = ""
+                window = ""
 
                 while doing:
-                    value = generator.send (len(value))
-                    print (f"value {value}")
+                    window, window_meta = generator.send (len(window))
+                    print (f"value {window}")
                     next(generator)
+                    yield window, {*window_meta, *meta}
                 yield "hallo", meta
 
     from spacy.lang.en import English
@@ -71,9 +72,14 @@ class Pager(PathSpec):
         start = 0
         while windowing:
             consumed_tokens =  yield
+            if not consumed_tokens:
+                consumed_tokens = 50
             start = start + consumed_tokens
-            start = start + end
+            end = start
             for sentence in sentences:
+                if len(sentence)> self.max_window:
+                    end += self.max_window - 1
+                    break
                 if end - start + len(sentence) < self.max_window:
                     end += len(sentence)
                 else:
@@ -81,20 +87,22 @@ class Pager(PathSpec):
 
 
             window = doc[start:end]
-            original_text = text[window[0].idx:window[-1].idx]
+            try:
+                print (window[0].idx, window[-1].idx)
+                original_text = text[window[0].idx:window[-1].idx]
 
+                tokens_in_window = [token.text for token in window]
+                window_text = " ".join(tokens_in_window)
 
+                indices = self.align_tokens_to_string(window_text,
+                                            tokens_in_window,
+                                            add=window[0].idx)
 
-            tokens_in_window = [token.text for token in window]
-            window_text = " ".join(tokens_in_window)
+                print (window)
+            except Exception as e:
+                x =1
 
-            indices = self.align_tokens_to_string(window_text,
-                                        tokens_in_window,
-                                        add=window[0].idx)
-
-            print (window)
-
-            yield window
+            yield window, {"orifinal_indices": indices, "original_text": original_text}
 
 
     def align_tokens_to_string(self, window_text, tokens_in_window, add=0):

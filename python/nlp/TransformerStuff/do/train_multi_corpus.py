@@ -4,34 +4,32 @@ from pprint import pprint
 from _jsonnet import evaluate_file
 from allennlp.common.file_utils import cached_path
 from allennlp.common.params import parse_overrides, _environment_variables, with_fallback
+from python.nlp.TransformerStuff.attentivecrftagger.attentivecrftagger import AttentiveCrfTagger
+
+from python.layouteagle import config
 
 models  =  ['first', 'over']
 
 import os
 import argparse
-parser = argparse.ArgumentParser(description='Videos to images')
-parser.add_argument('config', type=str, help='input jason config to produce multiple models')
+parser = argparse.ArgumentParser(description='Seq2Seq Tagger')
+parser.add_argument('config', type=str, help='input json config to produce multiple models')
 args = parser.parse_args()
 
 for model in models:
-    config = args.config
-    json_override = """' {{"train_data_path": "manual_corpus/train_{model}.conll3",    """ \
-                    """  "validation_data_path": "manual_corpus/test_{model}.conll3"}}'""" 
+    tagger_config_file = args.config
+    json_override = """' {{"train_data_path": "nlp/TransformerStuff/manual_corpus/train_{model}.conll3",    """ \
+                    """  "validation_data_path": "nlp/TransformerStuff/manual_corpus/test_{model}.conll3"}}'"""
 
-    #overrides_dict = parse_overrides(json_override.format(model=model))
-    #params_file = cached_path(config)
-    #file_dict = json.loads(evaluate_file(params_file))
-
-    #param_dict = with_fallback(preferred=overrides_dict, fallback=file_dict)
-
-    #pprint (param_dict)
-
+    dir, fname = os.path.split(tagger_config_file)
     script = r"""
-    rm -r ./output/{out}
-    allennlp train --include-package attentivecrftagger.attentivecrftagger \
+    allennlp train --include-package nlp.TransformerStuff.attentivecrftagger.attentivecrftagger \
                    {config} \
-                   --serialization-dir  ./output/{out}/ \
+                   --serialization-dir  {out}/ \
                    -o {json_override}"""  \
-        .format(json_override=json_override, config=config, out='_'.join([model,config])).format(model=model)
+        .format(
+            json_override=json_override,
+            config=tagger_config_file,
+            out=config.hidden_folder + '_'.join([model,fname])).format(model=model)
     print (script)
     os.system(script)
