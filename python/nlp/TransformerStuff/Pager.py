@@ -44,7 +44,7 @@ class Pager(PathSpec):
                     window, window_meta = generator.send (len(window))
                     print (f"value {window}")
                     next(generator)
-                    yield window, {*window_meta, *meta}
+                    yield window, {**window_meta, **meta, 'doc_id': meta['pdf_path']}
                 yield "hallo", meta
 
     from spacy.lang.en import English
@@ -102,7 +102,7 @@ class Pager(PathSpec):
             except Exception as e:
                 x =1
 
-            yield window, {"orifinal_indices": indices, "original_text": original_text}
+            yield window, {"original_indices": indices, "original_text": original_text}
 
 
     def align_tokens_to_string(self, window_text, tokens_in_window, add=0):
