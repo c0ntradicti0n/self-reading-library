@@ -17,6 +17,14 @@ class RestPublisher(PathSpec, react) :
     publishes path-ant-path on a Representational State Transfer api with autocreated jsvascript class for reading.... to CRUPD class
     """
 
+    def __call__(self, pipeline, arg):
+        if not isinstance(arg[0], list) and not len(arg[0]) == 2:
+            arg = [(a, {}) for a in arg]
+        return list(
+            zip(
+                *list(pipeline(list(arg)))))
+
+
     # deliver paths
     def on_post(self, *args, **kwargs): # get one
         print(args, kwargs)

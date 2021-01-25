@@ -16,14 +16,13 @@ pipe = ant("pdf", "css.difference")
 vals = [('test/small_pdfs//5-Level Paging and 5-Level EPT - Intel - Revision 1.1 (May, 2017).pdf', {})]
 
 css_value, html_meta = list(
-                    zip(
-                        *list(
-                            pipe
-                            ([(val)
-                              for val
-                              in vals]))))
+                        zip(
+                            *list(
+                                pipe
+                                (vals))))
 
-print ("VALUE")
-pprint (css_value)
+
 print ("META")
 pprint (html_meta)
+print ("VALUE")
+print (css_value[0])

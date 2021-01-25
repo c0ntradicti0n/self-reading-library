@@ -4,11 +4,7 @@ import pickle
 from collections import defaultdict
 import nltk
 from nltk.corpus import stopwords
-
-from gensim.parsing import remove_stopwords
-from scipy.optimize import linear_sum_assignment
 from sklearn import mixture, decomposition
-from textacy.ke import textrank
 
 from python.layouteagle import config
 

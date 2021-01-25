@@ -5,6 +5,6 @@ class TemplateComponent extends React.Component {
   }
 
   render() {
-    return <div dangerouslySetInnerHTML={{__html: this.html}}/>
+    return <div dangerouslySetInnerHTML={{__html: this.html}} style={this.state.styleObj}/>
   }
 

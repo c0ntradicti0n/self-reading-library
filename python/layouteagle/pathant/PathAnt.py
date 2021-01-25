@@ -8,7 +8,7 @@ import networkx as nx
 import pylab
 from more_itertools import pairwise
 
-from python.helpers.list_tools import flatten_optional_list_pair
+from python.helpers.list_tools import flatten_optional_list_pair, flatten_optional_list_triple
 from python.layouteagle.StandardConverter.Dict2Graph import Dict2Graph
 from python.helpers.os_tools import make_dirs_recursive
 from python.layouteagle.pathant.MatchDescription import match, list_or_values
@@ -164,7 +164,7 @@ class PathAnt:
 
     def add_starred(self, _from1, _to1, functional_object, converters):
         if "*" in _from1:
-            try:
+
                 other_things = [(f,t) for f,t, o in converters]
                 new_things_regex = Regex("^" + _from1.replace("*", r"(\w+)") + "$")
 
@@ -174,12 +174,10 @@ class PathAnt:
                         new_from = _to1.replace("*", m.group(1))
                         self.add_edge(_to2, new_from, functional_object)
                         self.add_starred_from_converters(_to2, new_from, functional_object, converters)
-            except Exception as e:
-                print ("failed to match starred for " + _from1 + "->"+_to1 + " " + str(e))
 
     def add_starred_from_converters(self, _from1, _to1, functional_object, converters):
-        other_things = [(f, t) for f, t, o in converters]
-        for _from2, _to2 in flatten_optional_list_pair(other_things):
+        other_things = [(f, t, functional_object2) for f, t, functional_object2 in converters]
+        for _from2, _to2, functional_object2 in flatten_optional_list_triple(other_things):
             if "*" in _to2:
 
                 other_things_regex = Regex("^" + _from2.replace("*", r"(\w+)") + "$")
@@ -189,8 +187,7 @@ class PathAnt:
                     new_to = _to2.replace("*", m.group(1))
 
                     new_from = _to2.replace("*", m.group(1))
-                    self.add_edge(_to1, new_from, functional_object)
-
+                    self.add_edge(_to1, new_from, functional_object2)
 
 import unittest
 

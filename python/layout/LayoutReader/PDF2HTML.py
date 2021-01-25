@@ -13,6 +13,7 @@ class PDF2HTML(TrueFormatUpmarkerPDF2HTMLEX):
 
     @file_persistent_cached_generator(config.cache + 'pdf2html.json', )
     def __call__(self, labeled_paths, *args, **kwargs):
+        print("PDF2HTML" +str(labeled_paths))
         for doc_id, (pdf_path, meta) in enumerate(labeled_paths):
             html_path =  pdf_path + self.path_spec._to
             self.pdf2htmlEX(pdf_path, html_path)

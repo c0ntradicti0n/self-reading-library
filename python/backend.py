@@ -37,12 +37,12 @@ else:
 
     from python.layouteagle.RestPublisher.MarkupPublisher import MarkupPublisher
     from python.layouteagle.pathant.AntPublisher import AntPublisher
-    from python.nlp.Topics.TopicsPublisher import TopicsPublisher
+    #from python.nlp.Topics.TopicsPublisher import TopicsPublisher
     from python.layouteagle.LayoutEagle import LayoutEagle
 
     publishing = {
         '/markup': MarkupPublisher,
-        '/topics': TopicsPublisher,
+        #'/topics': TopicsPublisher,
         '/ant': AntPublisher
         # 'commands':  RestPublisher("commands")
     }

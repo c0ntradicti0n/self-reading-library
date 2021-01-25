@@ -1,20 +1,17 @@
-import functools
 import re
-from pprint import pprint
-from re import Pattern
-
+import textwrap
 import chardet
-
 from python.layouteagle.pathant.Converter import converter
 from python.layouteagle.pathant.PathSpec import PathSpec
-from python.nlp.TransformerStuff.conll_annnotation import CONLL_Annotation
-
+import paired
 
 @converter("wordi", 'wordi.page')
 class Pager(PathSpec):
     def __init__(self, *args, max_window = 200, **kwargs):
         super().__init__(*args, **kwargs)
         self.max_window = max_window
+
+    max_windows_per_text = 5
 
     WORD_I_LINE_REGEX = re.compile("^(\d+):(.*)", re.DOTALL);
     def match_wordi_line(self, line):
@@ -35,27 +32,32 @@ class Pager(PathSpec):
                 i_word = [self.match_wordi_line(line) for line in lines]
                 print (lines[:3])
 
-                doing = True
                 generator = self.make_tokenized_windows(i_word)
                 next(generator)
-                window = ""
+                window = "..."
+                i = 0
 
-                while doing:
+                while str(window):
                     window, window_meta = generator.send (len(window))
-                    print (f"value {window}")
+                    print (f"text window:")
+                    print (textwrap.fill(" ".join([t.text for t in window])))
                     next(generator)
                     yield window, {**window_meta, **meta, 'doc_id': meta['pdf_path']}
-                yield "hallo", meta
+
+
+                    i += 1
+                    if i > self.max_windows_per_text:
+                        i = 0
+                        break
 
     from spacy.lang.en import English
 
     nlp = English()
     sentencizer = nlp.create_pipe("sentencizer")
     nlp.add_pipe(sentencizer)
-    doc = nlp("This is a sentence. This is another sentence.")
 
-    def make_tokenized_windows (self, lines):
-        tokens = [word_snipped for _, word_snipped in lines]
+    def make_tokenized_windows (self, i_word):
+        _i, tokens = list(zip(*i_word))
 
         text = " ".join(tokens)
         original_indices_full = self.align_tokens_to_string(
@@ -65,7 +67,6 @@ class Pager(PathSpec):
 
         doc = self.nlp(text)
         sentences = doc.sents
-
 
         windowing = True
         end = 0
@@ -98,24 +99,45 @@ class Pager(PathSpec):
                                             tokens_in_window,
                                             add=window[0].idx)
 
-                print (window)
-            except Exception as e:
-                x =1
+                # needleman wunsch algorithm to align tokens
+                alignment = paired.align(
+                     tokens, tokens_in_window,
+                     match_score=5,
+                     mismatch_score=-1,
+                     gap_score=-5
+                )
+                original_indices = \
+                    [i for i, (_i2, _i2) in enumerate(alignment) if _i2]
 
-            yield window, {"original_indices": indices, "original_text": original_text}
+                print (window)
+                assert (len(window) == len(indices))
+
+            except Exception as e:
+                self.logger.error("Making windows and translating tokenized window and original token indices")
+                self.logger.error(str(e))
+
+
+            yield window, {
+                "original_indices":
+                    original_indices ,
+                "original_text":
+                    original_text,
+                "window_indices":
+                    indices}
 
 
     def align_tokens_to_string(self, window_text, tokens_in_window, add=0):
         indices = [0]
+        len_prev_substring = 0
         for i, substring in enumerate(tokens_in_window):
-            indices.append(window_text.find(substring, indices[i], len(window_text)))
-        ##pprint(indices)
-        indices = [i + add for i in indices]
+            try:
+                indices.append(window_text.find(substring, indices[i] + len_prev_substring, len(window_text)))
+                assert(len(indices) - 2 == i)
+                len_prev_substring = len(substring)
+            except Exception as e:
+                x = 1
+
+        indices = list( [i + add for i in indices])[1:]
+        assert (len(tokens_in_window) == len(indices))
+
         return indices
-
-
-
-
-
-
-

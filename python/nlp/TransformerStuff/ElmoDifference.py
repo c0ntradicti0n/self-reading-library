@@ -12,3 +12,9 @@ class ElmoDifference(ElmoPredict):
             **kwargs)
         pass
 
+    CSS_SIMPLE = {
+           'O': 'color: #123',
+           'SUBJECT': 'color: #f0f' ,
+           'CONTRAST': 'color: #7f7'
+    }
+

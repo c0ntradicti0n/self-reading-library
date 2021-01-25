@@ -97,6 +97,7 @@ def pad_along_axis(array: numpy.ndarray, target_length, axis=0):
 
 
 def flatten_optional_list_pair(pair_list):
+
     for a,b in pair_list:
         if not isinstance(a, list):
             a = [a]
@@ -106,6 +107,16 @@ def flatten_optional_list_pair(pair_list):
             for _b in b:
                 yield _a, _b
 
+
+def flatten_optional_list_triple(triple_list):
+    for a, b, o in triple_list:
+        if not isinstance(a, list):
+            a = [a]
+        if not isinstance(b, list):
+            b = [b]
+        for _a in a:
+            for _b in b:
+                yield _a, _b, o
 
 
 import unittest

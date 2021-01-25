@@ -371,7 +371,7 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
     def pdf2htmlEX(self, pdf_path, html):
         assert (pdf_path.endswith(".pdf"))
         logging.info(f"converting pdf {pdf_path} to html ")
-        os.system(f"pdf2htmlEX  "
+        os.system(f"{config.pdf2htmlEX} "
                   f"--space-as-offset 1 "
                   f"--decompose-ligature 1 "
                   f"--optimize-text 1 "

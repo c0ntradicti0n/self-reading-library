@@ -1,7 +1,7 @@
 from overrides import overrides
 
 from allennlp.common.util import JsonDict
-from allennlp.data import DatasetReader, Instance
+from allennlp.data import DatasetReader, Instance, Token
 from allennlp.data.tokenizers.word_splitter import SpacyWordSplitter
 from allennlp.models import Model
 from allennlp.predictors.predictor import Predictor
@@ -29,7 +29,6 @@ class DifferenceTaggerPredictor(Predictor):
         #self.model.vocab.extend_from_instances(self.model., instances=[instance])
         #self.model.extend_embedder_vocab(embedding_sources_mapping)
         output = self.predict_instance(instance)
-        print ('predict json',output)
         output = list(zip(output['tags'], output['words']))
         return  output
 
@@ -39,9 +38,6 @@ class DifferenceTaggerPredictor(Predictor):
         Expects JSON that looks like ``{"sentence": "..."}``.
         Runs the underlying model, and adds the ``"words"`` to the output.
         """
-        print ("HALLO json")
-        print (json_dict)
-
         sentence = json_dict["sentence"]
-        tokens = self._tokenizer.split_words(sentence)
+        tokens = [Token(token) for token in sentence]
         return self._dataset_reader.text_to_instance(tokens)

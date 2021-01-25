@@ -13,6 +13,7 @@ pygraphviz
 databases[postgresql]
 falcon~=2.0.0
 falcon-cors
+paired
 
 gunicorn
 wordninja

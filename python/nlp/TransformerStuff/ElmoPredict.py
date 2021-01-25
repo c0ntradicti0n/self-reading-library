@@ -1,5 +1,6 @@
 from allennlp.common import Params
 from allennlp.predictors import Predictor
+from texttable import Texttable
 
 from python.layouteagle.pathant.PathSpec import PathSpec
 
@@ -7,6 +8,7 @@ from allennlp.models.model import Model
 
 from python.nlp.TransformerStuff.difference_predictor.difference_predictor import DifferenceTaggerPredictor
 import python.nlp.TransformerStuff.attentivecrftagger.attentivecrftagger
+
 
 
 class ElmoPredict(PathSpec):
@@ -19,9 +21,32 @@ class ElmoPredict(PathSpec):
             self.default_predictor._model,
             dataset_reader=self.default_predictor._dataset_reader)
 
-    # textsplitter = TextSplitter(model_first, None)
+        self.CSS = {
+            (span_letter + "-" + tag) if tag != 'O'
+                else tag
+
+                    :
+                        css
+
+            for span_letter in ['L', 'I', 'B', 'U']
+            for tag, css in self.CSS_SIMPLE.items()
+        }
 
     def __call__(self, feature_meta, *args, **kwargs):
         for wordi, meta in feature_meta:
-            annotation = self.predictor.predict_json({"sentence":str(wordi)})
-            yield annotation, meta
+            try:
+                annotation = self.predictor.predict_json({"sentence": [w.text for w in wordi]})
+                assert (len(annotation) == len(meta['window_indices']))
+                self.info(annotation)
+                yield annotation, {**meta, 'CSS': self.CSS}
+
+            except Exception as e:
+                self.logger.error("Could not process " + str(wordi))
+                self.logger.error(str(e))
+
+    def info(self, annotation):
+        table = Texttable()
+        table.set_deco(Texttable.HEADER)
+        table.set_cols_align(["c", "l", "r"])
+        table.add_rows([['i', 'tag', 'word']] + [[i, t, w ] for i, (t, w) in enumerate(annotation)])
+        print (table.draw())

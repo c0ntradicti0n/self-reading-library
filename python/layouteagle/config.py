@@ -93,7 +93,7 @@ topics_dump = "./topics.pickle"
 markup_dir = pdf_dir
 markup_suffix = "pdflayout.html"
 
-
+pdf2htmlEX = "/home/stefan/CLionProjects/pdf2htmlEX/pdf2htmlEX/build/pdf2htmlEX"
 
 corpus_conll = '/home/stefan/PycharmProjects/LayoutEagle/data/first.conll3'
 difference_model_config = hidden_folder + "/first_elmo_lstm3_feedforward4_crf_straight_fitter.config/config.json"
