@@ -1,3 +1,4 @@
+import paired
 from more_itertools import pairwise
 
 from python.layouteagle.pathant.Converter import converter
@@ -39,29 +40,23 @@ class Wordi2Css(PathSpec):
     def __call__(self, feature_meta, *args, **kwargs):
         for annotation, meta in feature_meta:
             tags, words = list(zip(*annotation))
-            meta_original_window_words_indices = \
-                [
-                    list(set(filter(lambda x: bool(x),
-                           [self.window_overlap(i1, i2, j1, j2)
-                        for j1, j2 in pairwise(meta['original_indices'])
-                     ])))
-                    for i1, i2 in pairwise(meta['window_indices'])
-                ]
+            i, iwords = list(zip(*meta["i_word"]))
+
+            alignment = paired.align(
+                iwords, words,
+                match_score=5,
+                mismatch_score=-1,
+                gap_score=-5
+            )
             i_to_tag = \
-                 {
-                    j: tags[j]
-                     for j, window_indices in enumerate(meta_original_window_words_indices)
-                     for i, original_index in enumerate(window_indices)
-                 }
-
-
+                {i[_i1]: tags[_i2] for _i1, _i2 in alignment if _i2 and _i1}
 
             scss =  self.parse_to_sass(i_to_tag, meta)
             yield scss, meta
 
     def parse_to_sass(self, css_obj, meta):
             print (meta["CSS"])
-            return "\n".join([f""".z{i} {{
+            return "\n".join([f""".z{hex(i)[2:]} {{
             {meta["CSS"][tag]}
             }}
 """ for i, tag in css_obj.items()])

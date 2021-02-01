@@ -11,7 +11,7 @@ class Pager(PathSpec):
         super().__init__(*args, **kwargs)
         self.max_window = max_window
 
-    max_windows_per_text = 5
+    max_windows_per_text = 50
 
     WORD_I_LINE_REGEX = re.compile("^(\d+):(.*)", re.DOTALL);
     def match_wordi_line(self, line):
@@ -37,18 +37,22 @@ class Pager(PathSpec):
                 window = "..."
                 i = 0
 
+                prev_window = None
                 while str(window):
-                    window, window_meta = generator.send (len(window))
-                    print (f"text window:")
-                    print (textwrap.fill(" ".join([t.text for t in window])))
+                    window, window_meta = generator.send(len(window))
+                    print(f"text window:")
+                    print(textwrap.fill(" ".join([t.text for t in window])))
                     next(generator)
-                    yield window, {**window_meta, **meta, 'doc_id': meta['pdf_path']}
-
+                    yield window, {**window_meta, "i_word": i_word, **meta, 'doc_id': meta['pdf_path']}
 
                     i += 1
                     if i > self.max_windows_per_text:
                         i = 0
                         break
+
+                    if window == prev_window:
+                        break
+                    prev_window = window
 
     from spacy.lang.en import English
 
