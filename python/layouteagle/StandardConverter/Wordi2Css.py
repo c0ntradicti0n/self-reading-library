@@ -1,6 +1,3 @@
-import paired
-from more_itertools import pairwise
-
 from python.layouteagle.pathant.Converter import converter
 from python.layouteagle.pathant.PathSpec import PathSpec
 
@@ -40,16 +37,12 @@ class Wordi2Css(PathSpec):
     def __call__(self, feature_meta, *args, **kwargs):
         for annotation, meta in feature_meta:
             tags, words = list(zip(*annotation))
-            i, iwords = list(zip(*meta["i_word"]))
 
-            alignment = paired.align(
-                iwords, words,
-                match_score=5,
-                mismatch_score=-1,
-                gap_score=-5
-            )
-            i_to_tag = \
-                {i[_i1]: tags[_i2] for _i1, _i2 in alignment if _i2 and _i1}
+            i_to_tag = {}
+            for _i1, _i2 in meta["_i_to_i2"]:
+                if _i1 not in i_to_tag or i_to_tag[_i1] == "O":
+                    if (_i2< len(tags)):
+                        i_to_tag [ _i1] = annotation[_i2]
 
             scss =  self.parse_to_sass(i_to_tag, meta)
             yield scss, meta
@@ -57,6 +50,6 @@ class Wordi2Css(PathSpec):
     def parse_to_sass(self, css_obj, meta):
             print (meta["CSS"])
             return "\n".join([f""".z{hex(i)[2:]} {{
-            {meta["CSS"][tag]}
+            {meta["CSS"][annotation[0]]}
             }}
-""" for i, tag in css_obj.items()])
+""" for i, annotation in css_obj.items()])

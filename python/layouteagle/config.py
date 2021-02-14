@@ -98,3 +98,5 @@ pdf2htmlEX = "/home/stefan/CLionProjects/pdf2htmlEX/pdf2htmlEX/build/pdf2htmlEX"
 corpus_conll = '/home/stefan/PycharmProjects/LayoutEagle/data/first.conll3'
 difference_model_config = hidden_folder + "/first_elmo_lstm3_feedforward4_crf_straight_fitter.config/config.json"
 difference_model_train_output = hidden_folder + "/first_elmo_lstm3_feedforward4_crf_straight_fitter.config/"
+
+wordninjalanguagemodel = "nlp/english.txt.gz"

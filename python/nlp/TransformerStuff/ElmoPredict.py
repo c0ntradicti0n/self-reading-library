@@ -33,16 +33,37 @@ class ElmoPredict(PathSpec):
         }
 
     def __call__(self, feature_meta, *args, **kwargs):
-        for wordi, meta in feature_meta:
+        consumed_tokens = 0
+
+        while True:
+            try: # https://stackoverflow.com/questions/51700960/runtimeerror-generator-raised-stopiteration-every-time-i-try-to-run-app
+                next(feature_meta)
+            except StopIteration:
+                return
+
+            wordi, meta = feature_meta.send(consumed_tokens)
             try:
                 annotation = self.predictor.predict_json({"sentence": [w.text for w in wordi]})
-                assert (len(annotation) == len(meta['window_indices']))
                 self.info(annotation)
-                yield annotation, {**meta, 'CSS': self.CSS}
 
+
+                # rfind of not "O"
+                consumed_tokens = next(i for i, (tag, word) in list(enumerate(annotation))[::-1] if tag != 'O')
+                if consumed_tokens == 0:
+                    consumed_tokens = len(wordi)
+
+                yield annotation, {
+                    **meta,
+                    'CSS': self.CSS,
+                    "consumed_i1": meta["i2_to_i1"][consumed_tokens],
+                    "consumed_i2": consumed_tokens,
+                }
+
+            except StopIteration as e:
+                pass
             except Exception as e:
                 self.logger.error("Could not process " + str(wordi))
-                self.logger.error(str(e))
+                raise e
 
     def info(self, annotation):
         table = Texttable()

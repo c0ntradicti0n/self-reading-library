@@ -13,7 +13,7 @@ from python.layouteagle.pathant.PathAnt import PathAnt
 ant = PathAnt()
 ant.info("testAnnotationPipeline.png")
 pipe = ant("pdf", "css.difference")
-vals = [('test/small_pdfs//5-Level Paging and 5-Level EPT - Intel - Revision 1.1 (May, 2017).pdf', {})]
+vals = [('test/small_pdfs//diebold-oakland04.pdf', {})]
 
 css_value, html_meta = list(
                         zip(
