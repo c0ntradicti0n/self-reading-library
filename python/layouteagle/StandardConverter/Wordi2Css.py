@@ -48,7 +48,6 @@ class Wordi2Css(PathSpec):
             yield scss, meta
 
     def parse_to_sass(self, css_obj, meta):
-            print (meta["CSS"])
             return "\n".join([f""".z{hex(i)[2:]} {{
             {meta["CSS"][annotation[0]]}
             }}

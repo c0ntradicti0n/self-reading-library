@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import {createUseStyles} from 'react-jss';
 
 
 class HtmlRenderer extends Component {

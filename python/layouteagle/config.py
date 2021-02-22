@@ -1,5 +1,5 @@
 
-
+model_config = "elmo_multi_head_self_attention_crf_straight_fitter.config"
 parse_pdf2htmlEX = True
 
 recursive = True
@@ -66,7 +66,7 @@ train_venv_python = "../Distinctiopus4/venv/bin/activate"
 train_path= "../Distinctiopus4"
 train_script= "../Distinctiopus4/do/train_multi_corpus.py"
 train_log = "train.log"
-allennlp_config = "../Distinctiopus4/experiment_configs/elmo_lstm3_feedforward4_crf_straight_fitter.config"
+allennlp_config = f"../Distinctiopus4/experiment_configs/{model_config}"
 
 dist_model_path_first = "../Distinctiopus4/output/first_./experiment_configs/{config}/model.tar.gz".format(config=allennlp_config)
 cc_model_path_first   = "../CorpusCook/server/models/model_first.tar.gz"
@@ -88,15 +88,15 @@ reader_height = numpy.sqrt(2) * reader_width
 page_margin_bottom = 0.06
 page_margin_top = 0.15
 
-pdf_dir = "test/small_pdfs/"
+pdf_dir = "../test/"
 topics_dump = "./topics.pickle"
 markup_dir = pdf_dir
 markup_suffix = "pdflayout.html"
 
-pdf2htmlEX = "/home/stefan/CLionProjects/pdf2htmlEX/pdf2htmlEX/build/pdf2htmlEX"
+pdf2htmlEX = "/home/finn/CLionProjects/pdf2htmlEX-1/pdf2htmlEX/build/pdf2htmlEX"
 
 corpus_conll = '/home/stefan/PycharmProjects/LayoutEagle/data/first.conll3'
-difference_model_config = hidden_folder + "/first_elmo_lstm3_feedforward4_crf_straight_fitter.config/config.json"
-difference_model_train_output = hidden_folder + "/first_elmo_lstm3_feedforward4_crf_straight_fitter.config/"
+difference_model_train_output = hidden_folder + f"/first_{model_config}/"
+difference_model_config = hidden_folder + f"/first_{model_config}/config.json"
 
 wordninjalanguagemodel = "nlp/english.txt.gz"

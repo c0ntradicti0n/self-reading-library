@@ -1,14 +1,15 @@
 import json
+import subprocess
 from pprint import pprint
 
+import torch
 from _jsonnet import evaluate_file
 from allennlp.common.file_utils import cached_path
 from allennlp.common.params import parse_overrides, _environment_variables, with_fallback
 from python.nlp.TransformerStuff.attentivecrftagger.attentivecrftagger import AttentiveCrfTagger
 
 from python.layouteagle import config
-
-models  =  ['first', 'over']
+models = ['first'] #, 'over']
 
 import os
 import argparse
@@ -17,11 +18,14 @@ parser.add_argument('config', type=str, help='input json config to produce multi
 args = parser.parse_args()
 
 for model in models:
+
     tagger_config_file = args.config
     json_override = """' {{"train_data_path": "nlp/TransformerStuff/manual_corpus/train_{model}.conll3",    """ \
                     """  "validation_data_path": "nlp/TransformerStuff/manual_corpus/test_{model}.conll3"}}'"""
 
     dir, fname = os.path.split(tagger_config_file)
+    subprocess.run(["rm", "-rf", config.hidden_folder + '_'.join([model, fname])])
+
     script = r"""
     allennlp train --include-package nlp.TransformerStuff.attentivecrftagger.attentivecrftagger \
                    {config} \

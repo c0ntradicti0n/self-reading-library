@@ -58,7 +58,12 @@ class Pager(PathSpec):
                     next(generator)
 
                     last_annotated_token = yield
-                    window, window_meta = generator.send(last_annotated_token)
+
+                    try:
+                        window, window_meta = generator.send(last_annotated_token)
+                    except TypeError as e:
+                        self.logger.info(f"finished after {i} texts")
+                        break
 
                     print(f"text window:")
                     print(textwrap.fill(" ".join([t.text for t in window])))

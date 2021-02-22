@@ -30,7 +30,6 @@ class LayoutEagle:
     from python.layouteagle.StandardConverter.Dict2Graph import Dict2Graph
 
 
-    from python.UserOk import UserOk
 
     def __init__(self):
         self.ant = PathAnt()
