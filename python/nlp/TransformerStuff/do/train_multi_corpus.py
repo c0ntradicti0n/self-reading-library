@@ -9,7 +9,7 @@ from allennlp.common.params import parse_overrides, _environment_variables, with
 from python.nlp.TransformerStuff.attentivecrftagger.attentivecrftagger import AttentiveCrfTagger
 
 from python.layouteagle import config
-models = ['first'] #, 'over']
+models = ['over'] #, 'over']
 
 import os
 import argparse

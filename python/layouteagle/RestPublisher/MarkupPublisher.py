@@ -53,19 +53,11 @@ class MarkupPublisher(RestPublisher) :
         try:
             id = json.loads(req.stream.read())
             print(str(type(id)))
-            print(id)
             pdf_s = [f"{config.pdf_dir}/{id}.pdf"]
             self.logger.warning(f"analysing {pdf_s}")
             html_path, html_meta = self(self.html_pipeline, pdf_s)
             css_value, css_meta = self(self.css_pipeline, pdf_s)
-            pprint(css_value)
             print (html_path)
-
-            #css_value = ["""
-            #     .z5 {
-            #        color: #92f !important;
-            #        }
-            # """]
 
             with open(html_path[0], "r") as f:
                 html = "".join(f.readlines())

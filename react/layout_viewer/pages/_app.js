@@ -1,6 +1,9 @@
 import React from 'react'
 import App from 'next/app'
 import * as glob from 'glob'
+import SideBar from '../components/SideBar'
+//import 'react-pro-sidebar/dist/css/styles.css';
+
 
 class MyApp extends App {
   // Only uncomment this method if you have blocking data requirements for
@@ -28,6 +31,7 @@ class MyApp extends App {
 
     return (
         <div id="comp-wrapp">
+          <SideBar />
           <Component {...this.props.pageProps} />
         </div>
     )

@@ -1,3 +1,4 @@
+import copy
 from collections import defaultdict
 
 from python.layouteagle.pathant.Converter import converter
@@ -21,13 +22,15 @@ class UnPager(PathSpec):
                 whole_annotation = []
                 whole_meta = None
             if not whole_meta:
-                whole_meta = meta
+                whole_meta = copy.deepcopy(meta)
+                whole_meta['_i_to_i2'] = {}
+                consumed_until_now = 0
 
+            whole_meta['_i_to_i2'].update(
+                {_i: [_i2 + consumed_until_now for _i2 in _i2s] for _i, _i2s in meta['_i_to_i2'].items()}
+            )
 
-
-            whole_meta['_i_to_i2'] = (
-                    whole_meta['_i_to_i2'] if '_i_to_i2' in whole_meta else []
-                    ) + meta['_i_to_i2'][:meta['consumed_i1']]
+            consumed_until_now += meta['consumed_i2']
             whole_annotation.extend(annotation[:meta['consumed_i2']])
 
             try:

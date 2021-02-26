@@ -46,13 +46,17 @@ class ElmoPredict(PathSpec):
             try:
                 annotation = self.predictor.predict_json({"sentence": [w.text for w in wordi]})
                 self.info(annotation)
+            except RuntimeError as e:
+                self.logger.error("Faking annotation because of error " + str(e))
+                annotation = [('O', w.text) for w in wordi]
+                return
 
-
+            try:
                 # rfind of not "O"
                 try:
                     consumed_tokens = next(i for i, (tag, word) in list(enumerate(annotation))[::-1] if tag != 'O')
                 except StopIteration as e:
-                    consumed_tokens = len(wordi) -1
+                    consumed_tokens = len(wordi) - 1
 
                 yield annotation, {
                     **meta,
@@ -63,7 +67,7 @@ class ElmoPredict(PathSpec):
 
             except Exception as e:
                 self.logger.error("Could not process " + str(wordi))
-                raise e
+                pass
 
     def info(self, annotation):
         table = Texttable()

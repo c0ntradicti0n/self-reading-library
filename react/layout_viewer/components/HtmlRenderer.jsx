@@ -4,17 +4,17 @@ import React, { Component } from "react";
 class HtmlRenderer extends Component {
   componentDidMount() {
     console.log("HtmlRenderer", this);
-
-    //const useStyle = createUseStyles(JSON.parse(this.props.data.css));
-    //console.log(useStyle);
-    //this.setState({style: useStyle});
   }
 
   render() {
     console.log("HtmlRenderer", this);
     return (<>
-      <style dangerouslySetInnerHTML={{__html: this.props.data.css}} />
-      <div dangerouslySetInnerHTML={{__html: this.props.data.html}} />
+      <style dangerouslySetInnerHTML={{__html: this.props.data.css +
+      `\n\n#page-container { 
+         background-color: transparent !important;
+         background-image: none !important;
+       }`}} />
+      <div dangerouslySetInnerHTML={{__html: this.props.data.html}}/>
       </>
     );
   }

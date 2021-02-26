@@ -1,17 +1,15 @@
-# This software is a free software. Thus, it is licensed under GNU General Public License.
-# Python implementation to Smith-Waterman Algorithm for Homework 1 of Bioinformatics class.
-# Forrest Bao, Sept. 26 <http://fsbao.net> <forrest.bao aT gmail.com>
-from math import log
-from random import random, randint
+#This software is a free software. Thus, it is licensed under GNU General Public License.
+#Python implementation to Smith-Waterman Algorithm for Homework 1 of Bioinformatics class.
+#Forrest Bao, Sept. 26 <http://fsbao.net> <forrest.bao aT gmail.com>
 
-from strsimpy import SIFT4
-from strsimpy.jaro_winkler import JaroWinkler
+from fastDamerauLevenshtein import damerauLevenshtein
+from texttable import Texttable
 
-s = SIFT4()
+
+damerauLevenshtein('car', 'cars', similarity=True)  # expected result: 0.75
 
 # zeros() was origianlly from NumPy.
 # This version is implemented by alevchuk 2011-04-10
-
 def zeros(shape):
     retval = []
     for x in range(shape[0]):
@@ -21,65 +19,72 @@ def zeros(shape):
     return retval
 
 
-match_award = 20
-mismatch_penalty = -5
-gap_penalty = -5  # both for opening and extanding
-jaro_winkler = JaroWinkler()
+gap_penalty = -1
+
 
 def match_score(alpha, beta):
-    global jaro_winkler
-    sim =  jaro_winkler.similarity(alpha, beta)
-    if sim > 0.6:
-        return match_award + sim
-    elif alpha == None or beta == None:
-        return gap_penalty
-    else:
-        return mismatch_penalty
+    sim = damerauLevenshtein(alpha, beta, similarity=True,
+                             replaceWeight = 1
+                             )
+    return (sim -0.5)
+
+def none_window(seq, i1):
+    window = []
+    for i in range(i1, 0, -1):
+        if seq[i] == '-':
+           window.append(i)
+        else:
+           window.append(i)
+           break;
+    for i in range(i1, len(seq)):
+        if seq[i] == '-':
+           window.append(i)
+        else:
+           window.append(i)
+           break;
+
+    return list(sorted(set(window)) )
 
 
-def finalize(align1, align2):
-    align1.reverse()  # reverse sequence 1
-    align2.reverse()  # reverse sequence 2
+def rework_windows(align1, align2, ialign1, ialign2):
 
-    i, j = 0, 0
 
-    # calcuate identity, score and aligned sequeces
-
-    found = 0
-    score = 0
-    identity = 0
     for i in range(0, len(align1)):
-        # if two AAs are the same, then output the letter
-        if align1[i] == align2[i]:
 
-            identity = identity + 1
-            score += match_score(align1[i], align2[i])
+        if align1[i] == '-':
+            window = none_window(align1, i)
+            i_start = window[0]
+            i_end = window[-1]
+            word_right = "".join(align2[j] for j in window[1:]).replace('-', '').replace(':', '')
+            word_left = "".join(align2[j] for j in window[:-1]).replace('-', '').replace(':', '')
 
-        # if they are not identical and none of them is gap
-        elif align1[i] != align2[i] and align1[i] != None and align2[i] != None:
-            score += match_score(align1[i], align2[i])
-            found = 0
+            if match_score(word_right, align1[i_end]) > match_score(word_left, align2[i_start]):
+                i_real = i_end
+            else:
+                i_real = i_start
+            ialign1[i] = ialign1[i_real]
 
-        # if one of them is a gap, output a space
-        elif align1[i] == None or align2[i] == None:
-            score += gap_penalty
+        if align2[i] == '-':
+            window = none_window(align2, i)
+            i_start = window[0]
+            i_end = window[-1]
+            word_right = "".join(align1[j] for j in window[1:]).replace('-', '').replace(':', '')
+            word_left = "".join(align1[j] for j in window[:-1]).replace('-', '').replace(':', '')
 
-    if (len(align1) == 0):
-        identity = 1e10
-    else:
-        identity = float(identity) / len(align1)
+            if match_score(word_right, align2[i_end]) > match_score(word_left, align2[i_start]):
+                i_real = i_end
+            else:
+                i_real = i_start
+            ialign2[i] = ialign2[i_real]
 
-    
-    return identity, score, align1, align2
-
+    return align1, align2, ialign1, ialign2
 
 def needle(seq1, seq2):
-    m, n = len(seq1), len(seq2)  # length of two sequences
+    m, n = len(seq1), len(seq2)
 
-    # Generate DP table and traceback path pointer matrix
-    score = zeros((m + 1, n + 1))  # the DP table
+    score = zeros((m + 1, n + 1))
 
-    # Calculate DP table
+
     for i in range(0, m + 1):
         score[i][0] = gap_penalty * i
     for j in range(0, n + 1):
@@ -91,117 +96,121 @@ def needle(seq1, seq2):
             insert = score[i][j - 1] + gap_penalty
             score[i][j] = max(match, delete, insert)
 
-    # Traceback and compute the alignment
     align1, align2 = [], []
-    i, j = m, n  # start from the bottom right cell
-    while i > 0 and j > 0:  # end toching the top or the left edge
+    ialign1, ialign2 = [], []
+
+    i, j = m, n
+    while i > 0 and j > 0:
         score_current = score[i][j]
         score_diagonal = score[i - 1][j - 1]
         score_up = score[i][j - 1]
         score_left = score[i - 1][j]
+        if match_score(seq1[i - 1], seq2[j - 1]) > -0.1:
+            align1.append(seq1[i - 1])
+            align2.append(seq2[j - 1])
 
-        if score_current == score_diagonal + match_score(seq1[i - 1], seq2[j - 1]):
-            align1.append(seq1[i - 1])
-            align2.append(seq2[j - 1])
+            ialign1.append(i - 1)
+            ialign2.append(j - 1)
+
             i -= 1
             j -= 1
-        elif score_current == score_left + gap_penalty:
+        elif score_up < score_left:
             align1.append(seq1[i - 1])
-            align2.append(None)
+            align2.append('-')
+
+            ialign1.append(i - 1)
+            ialign2.append(None)
+
             i -= 1
-        elif score_current == score_up + gap_penalty:
-            align1.append(None)
+        else:
+            align1.append('-')
             align2.append(seq2[j - 1])
+
+            ialign1.append(None)
+            ialign2.append(j - 1)
+
             j -= 1
+        """
+        else:
+             if score_left <= score_up:
+                 align1.append(seq1[i - 1])
+                 align2.append('-')
+
+                 ialign1.append(i - 1)
+                 ialign2.append(None)
+
+                 i -= 1
+             elif score_current <= score_up:
+                 align1.append('-')
+                 align2.append(seq2[j - 1])
+
+                 ialign1.append(None)
+                 ialign2.append(j - 1)
+
+                 j -= 1
+             align1.append(seq1[i - 1] + "?")
+             align2.append(seq2[j - 1] + "?")
+
+             ialign1.append(i - 1)
+             ialign2.append(j - 1)
+
+             i -= 1
+             j -= 1"""
+
 
     # Finish tracing up to the top left cell
     while i > 0:
         align1.append(seq1[i - 1])
-        align2.append(None)
+        align2.append('-')
+
+        ialign1.append(i -1 )
+        ialign2.append(None)
+
         i -= 1
     while j > 0:
-        align1.append(None)
-        align2.append(seq2[j - 1])
+        align1.append(seq2[i - 1] + "?")
+        align2.append(seq2[j - 1] + "?")
+
+        ialign1.append(None)
+        ialign2.append(j - 1)
+
         j -= 1
 
-    return finalize(align1, align2)
+    align1.reverse()
+    align2.reverse()
+    ialign1.reverse()
+    ialign2.reverse()
+
+    align1, align2, ialign1, ialign2 = rework_windows(align1, align2, ialign1, ialign2)
+    return align1, align2, ialign1, ialign2
 
 
-def water(seq1, seq2):
-    m, n = len(seq1), len(seq2)  # length of two sequences
 
-    # Generate DP table and traceback path pointer matrix
-    score = zeros((m + 1, n + 1))  # the DP table
-    pointer = zeros((m + 1, n + 1))  # to store the traceback path
-    max_i = 0
-    max_j = 0
-    max_score = 0  # initial maximum score in DP table
-    # Calculate DP table and mark pointers
-    for i in range(1, m + 1):
-        for j in range(1, n + 1):
-            score_diagonal = score[i - 1][j - 1] + match_score(seq1[i - 1], seq2[j - 1])
-            score_up = score[i][j - 1] + gap_penalty
-            score_left = score[i - 1][j] + gap_penalty
-            score[i][j] = max(0, score_left, score_up, score_diagonal)
-            if score[i][j] == 0:
-                pointer[i][j] = 0  # 0 means end of the path
-            if score[i][j] == score_left:
-                pointer[i][j] = 1  # 1 means trace up
-            if score[i][j] == score_up:
-                pointer[i][j] = 2  # 2 means trace left
-            if score[i][j] == score_diagonal:
-                pointer[i][j] = 3  # 3 means trace diagonal
-            if score[i][j] >= max_score:
-                max_i = i
-                max_j = j
-                max_score = score[i][j];
 
-    align1, align2 = [], []  # initial sequences
-
-    i, j = max_i, max_j  # indices of path starting point
-
-    # traceback, follow pointers
-    while pointer[i][j] != 0:
-        if pointer[i][j] == 3:
-            align1.append(seq1[i - 1])
-            align2.append(seq2[j - 1])
-            i -= 1
-            j -= 1
-        elif pointer[i][j] == 2:
-            align1.append('-')
-            align2.append(seq2[j - 1])
-            j -= 1
-        elif pointer[i][j] == 1:
-            align1.append(seq1[i - 1])
-            align2.append('-')
-            i -= 1
-
-    return finalize(align1, align2)
-
-import timeit
-time_prev = 10
 if __name__ == "__main__":
-    for i in range(1,500):
-        start_time = timeit.default_timer()
 
-        fruits1 = [(str(i)) for i in range(i) ]
-        fruits2 = [(str(i+ randint(-1, 1))) for i in range(i+  randint(0, 10)) ]
-        res = needle(fruits1, fruits2)
-        score1, score2, aligment1, aligment2 = res
-        aligment1 = list(filter(lambda x: x != "-",aligment1))
-        aligment2 = list(filter(lambda x: x != "-",aligment2))
-
-        print (res)
-        print(res)
-        print (i)
-        t2 = (timeit.default_timer() - start_time)
-        print(t2)
-        print(t2/i)
-        print (t2/(i*log(i+1)))
-        print (len(aligment1)- len(fruits1))
-        print (len(aligment2)- len(fruits2))
-        print (len(fruits2)- len(fruits1))
+    fruits1 = ['Intro', 'duction', 'f', 'rom', ':', '', 'Distinction', ':', '', 'A', 'Social', 'Critique', 'of', 'the', 'J', 'udgement', 'of', 'Taste', '', 'by', 'Pierr', 'e', 'Bou', 'rdieu', '198', '4', 'Introduction',  'You', 'said', 'i', 't,', 'my', 'go', 'od', 'kn', 'ight', 'There', 'oug', 'ht', 'to', 'b', 'e', 'laws', 'to', '', 'protect', 'the', 'b', 'od', 'y', 'of', 'acquir', 'ed', 'know', 'ledg', 'e.', '', '', 'Take', 'one', 'of', 'our', 'g', 'ood', 'p', 'upils,', 'for', 'ex', 'ample:', 'mo', 'dest', '', 'and', 'd', 'iligent,', 'from', 'hi', 's', 'earl', 'iest', 'gramm', 'ar', 'c', 'lasse', 's', 'he', '\x19s', '', 'kept', 'a', 'lit']
+    fruits2 = ['Introduction', 'from', ':', 'Distinction', ':', 'A', 'Social', 'Critique', 'of', 'the', 'Judgement', 'of', 'Taste', 'by', 'Pierre', 'B', 'our', 'dieu', '1984', 'Introduction', 'You', 'said', 'it', ',', 'my', 'good', 'knight', 'There', 'ought', 'to', 'be', 'laws', 'to', 'protect', 'the', 'body', 'of', 'acquired', 'knowledge', '.', 'Take', 'one', 'of', 'our', 'good', 'pupils', ',', 'for', 'example', ':', 'modest', 'and', 'diligent', ',', 'from', 'his', 'earliest', 'grammar', 'classes', 'he', 's', 'kept', 'a', 'lit']
+    alignment = list(zip(*needle(fruits1, fruits2)))
+    print()
+    table = Texttable()
+    table.set_deco(Texttable.HEADER)
+    table.set_cols_align(["c", "r", "l", "r",  "l", 'r', 'l'])
+    table.add_rows([['i', 'w1', 'w2', 'i1', "->", 'i2', '->']] + [[i, t, w, x, fruits1[x], y, fruits2[y]] for i, (t, w, x, y)
+                                                      in enumerate(alignment)])
+    print(table.draw())
+    print(f"len 1 {len(fruits1)}  len 2 {len(fruits2)}")
 
 
-        time_prev = t2
 
+    fruits1 = ["con", "sump","t", "ion", "orange", "pear", "apple", "x,y,z", "pear", "orange", "consumption"]
+    fruits2 = ["consumption", "pear", "apple", "x,", "y,", "z", "con", "sump","t", "ion"]
+    alignment = list(zip(*needle(fruits1, fruits2)))
+    print()
+    table = Texttable()
+    table.set_deco(Texttable.HEADER)
+    table.set_cols_align(["c", "l", "r", "l", "r"])
+    table.add_rows([['i', 'w1', 'w2', 'i1', 'i2']] + [[i, t, w, x, y] for i, (t, w,x,y)
+                                          in enumerate(alignment)])
+    print(table.draw())
+    print (f"len 1 {len(fruits1)}  len 2 {len(fruits2)}")

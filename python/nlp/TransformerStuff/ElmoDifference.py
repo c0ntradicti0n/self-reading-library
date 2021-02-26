@@ -14,7 +14,7 @@ class ElmoDifference(ElmoPredict):
 
     CSS_SIMPLE = {
            'O': 'color: #123',
-           'SUBJECT': 'color: #f0f' ,
-           'CONTRAST': 'color: #7f7'
+           'SUBJECT': 'background-color: #FFDC00 ' ,
+           'CONTRAST': 'background-color: #F012BE '
     }
 

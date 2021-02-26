@@ -1,5 +1,4 @@
   import React from 'react';
-  import * as glob from "glob";
 
   export default class Nav extends React.Component {
 static async getInitialProps({ query }) {
@@ -8,7 +7,6 @@ static async getInitialProps({ query }) {
 }
 
     render() {
-
       return (
         <nav className="Nav">
           <div className="Nav__container">NAV

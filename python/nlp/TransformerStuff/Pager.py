@@ -1,10 +1,13 @@
 import re
 import textwrap
 import chardet
+
+from python.layouteagle import config
 from python.layouteagle.pathant.Converter import converter
 from python.layouteagle.pathant.PathSpec import PathSpec
-import paired
 import wordninja
+
+from python.nlp.TransformerStuff.alignment import needle
 
 
 @converter("wordi", 'wordi.page')
@@ -13,9 +16,14 @@ class Pager(PathSpec):
         super().__init__(*args, **kwargs)
         self.max_window = max_window
 
-    max_windows_per_text = 100
 
     WORD_I_LINE_REGEX = re.compile("^(\d+):(.*)", re.DOTALL);
+    lm = wordninja.LanguageModel('nlp/TransformerStuff/models/words.txt.gz')
+
+    from spacy.lang.en import English
+    nlp = English()
+    sentencizer = nlp.create_pipe("sentencizer")
+    nlp.add_pipe(sentencizer)
 
     def match_wordi_line(self, line):
         m = Pager.WORD_I_LINE_REGEX.match(line)
@@ -23,7 +31,6 @@ class Pager(PathSpec):
             self.logger.error(f"No match line in wordi! for {line}")
             return (-1, line)
         return int(m.group(1)), m.group(2)
-
 
     def split_to_interpunction_tuple_parts(self, str, interpunction_parts ):
         if len(interpunction_parts) == 0:
@@ -35,8 +42,7 @@ class Pager(PathSpec):
             for word in str.split(seperator):
                 things.append(
                     self.split_to_interpunction_tuple_parts(word, rest))
-            return  (seperator + " ").join(things)
-
+            return (seperator + " ").join(things)
 
     def __call__(self, paths, *args, **kwargs):
         for paths, meta in paths:
@@ -46,44 +52,35 @@ class Pager(PathSpec):
                 print(chardet.detect(content))
                 encoding = chardet.detect(content)['encoding']
                 lines = content.decode(encoding).split()
-                i_word = [self.match_wordi_line(line) for line in lines]
+                i_word = [self.match_wordi_line(line) for line in lines if len(line)>2]
                 print(lines[:3])
 
                 generator = self.make_tokenized_windows(i_word)
-                window = ""
                 i = 0
 
-                prev_window = None
                 while True:
-                    next(generator)
-
-                    last_annotated_token = yield
 
                     try:
+                        next(generator)
+                        last_annotated_token = yield
+
                         window, window_meta = generator.send(last_annotated_token)
-                    except TypeError as e:
+                    except StopIteration as e:
                         self.logger.info(f"finished after {i} texts")
-                        break
+                        return
 
                     print(f"text window:")
-                    print(textwrap.fill(" ".join([t.text for t in window])))
+                    print(textwrap.fill(" ".join([t.text for t in window]), width=200))
 
                     yield window, {**window_meta, "i_word": i_word, **meta, 'doc_id': meta['pdf_path']}
 
 
                     i += 1
-                    if i > self.max_windows_per_text:
+                    if i > config.max_windows_per_text:
                         i = 0
                         break
 
                     prev_window = window
-
-
-    from spacy.lang.en import English
-
-    nlp = English()
-    sentencizer = nlp.create_pipe("sentencizer")
-    nlp.add_pipe(sentencizer)
 
     def make_tokenized_windows(self, i_word):
         # holding three kinds of indices in parallel, splitting windows, keeping
@@ -102,14 +99,15 @@ class Pager(PathSpec):
 
         windowing = True
         start_i1 = 0
-        start_i2 = 0
 
         while windowing:
             consumed_tokens = yield
             if consumed_tokens:
-
-                start_i1 = i2_to_i1[consumed_tokens] + start_i1
-                start_i2 = consumed_tokens + start_i2
+                try:
+                    start_i1 = i2_to_i1[consumed_tokens] + start_i1
+                except KeyError:
+                    self.logger.error("error computing new beginning")
+                    return
 
 
             window_tokens = list(tokens[start_i1:start_i1 + 300])
@@ -132,71 +130,74 @@ class Pager(PathSpec):
                     break
 
             window = doc[0:end]
-            try:
-                print(window[0].idx, window[-1].idx)
-                original_text = text[window[0].idx:window[-1].idx]
 
-                tokens_in_window = [token.text for token in window]
+            if len(window) == 0:
+                return
 
-                alignment = paired.align(
-                    window_tokens, tokens_in_window
-                )
+            original_text = text[window[0].idx:window[-1].idx]
+            tokens_in_window = [token.text for token in window]
+            alignment = list(zip(*needle(
+                window_tokens, tokens_in_window
+            )[2:5]))
 
+            _i_to_i2 = {}
+            _i2_old = None
+            for _i1, _i2 in reversed(alignment):
+                if _i2:
+                    _i2_old = _i2
+                if _i1 and _i2_old:
+                    _i_to_i2.setdefault(_i[_i1+start_i1], []).append(_i2_old)
 
-                _i_to_i2 = []
+            """
+            _i_to_i2 = []
 
-                _i1_old, _i2_old = None, None
-                for _i1, _i2 in alignment:
-                    if  _i1 :
-                        _i1_old = _i1
-                    if  _i2:
-                        _i2_old = _i2
+            _i1_old, _i2_old = None, None
+            for _i1, _i2 in reversed(alignment):
+                if  _i1 :
+                    _i1_old = _i1
+                if  _i2:
+                    _i2_old = _i2
 
-                    if _i1_old and _i2_old:
-                        _i_to_i2.append((_i[
-                            (_i1 if _i1  is not None else _i1_old)
-                            + start_i1] ,
-                            (_i2 if _i2 is not None else _i2_old )
-                        ))
+                if _i1_old and _i2_old:
+                    _i_to_i2.append((_i[
+                        (_i1 if _i1  is not None else _i1_old)
+                        + start_i1] ,
+                        (_i2 if _i2 is not None else _i2_old )
+                    ))
+            _i_to_i2 = list(reversed(_i_to_i2))"""
 
-                # to translate the comsumed tokens to the index for the paper index
-                i2_to_i1 = {}
-                _i1_old, _i2_old = None, None
-                for _i1, _i2 in alignment:
-                    if  _i1 :
-                        _i1_old = _i1
-                    if  _i2:
-                        _i2_old = _i2
+            # to translate the comsumed tokens to the index for the paper index
+            i2_to_i1 = []
+            _i1_old, _i2_old = None, None
+            for _i1, _i2 in reversed(alignment):
+                if  _i1 :
+                    _i1_old = _i1
+                if  _i2:
+                    _i2_old = _i2
 
-                    if _i1_old and _i2_old:
-                        i2_to_i1[_i2 if _i2 is not None else _i2_old] = \
-                            _i1 if _i1 is not None else _i1_old
+                if _i1_old and _i2_old:
+                    i2_to_i1.append(
+                        (_i2 if _i2 is not None else _i2_old,
+                        _i1 if _i1 is not None else _i1_old)
+                    )
 
-
-                i2_to__i = \
-                    { _i2:_i[_i1] for _i1, _i2 in alignment if _i2 and _i1}
-
-                print(window)
-
-
-                yield window, {
-                    "_i_to_i2":
-                        _i_to_i2,
-                    "i2_to_i1":
-                        i2_to_i1,
-                    "alignment":
-                        alignment,
-                    "original_text":
-                        original_text
-
-                    }
+            i2_to_i1 = dict(list(reversed(i2_to_i1)))
+            print(window)
 
 
+            yield window, {
+                "_i_to_i2":
+                    _i_to_i2,
+                "i2_to_i1":
+                    i2_to_i1,
+                "alignment":
+                    alignment,
+                "original_text":
+                    original_text
+
+                }
 
 
-            except Exception as e:
-                self.logger.error("Making windows and translating tokenized window and original token indices")
-                self.logger.error(str(e))
 
 
 
