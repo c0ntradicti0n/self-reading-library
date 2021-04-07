@@ -1,13 +1,16 @@
 import re
 import textwrap
+
 import chardet
+from pdfminer.high_level import extract_text
 
 from python.layouteagle import config
 from python.layouteagle.pathant.Converter import converter
 from python.layouteagle.pathant.PathSpec import PathSpec
-import wordninja
-
+from python.nlp.NlpUtils.Regexes import SENTENCE_END_REGEX
+from python.nlp.NlpUtils.split_interpunction import split_punctuation
 from python.nlp.TransformerStuff.alignment import needle
+from python.nlp.TransformerStuff.simple_align import align
 
 
 @converter("wordi", 'wordi.page')
@@ -16,73 +19,68 @@ class Pager(PathSpec):
         super().__init__(*args, **kwargs)
         self.max_window = max_window
 
-
-    WORD_I_LINE_REGEX = re.compile("^(\d+):(.*)", re.DOTALL);
-    lm = wordninja.LanguageModel('nlp/TransformerStuff/models/words.txt.gz')
-
-    from spacy.lang.en import English
-    nlp = English()
-    sentencizer = nlp.create_pipe("sentencizer")
-    nlp.add_pipe(sentencizer)
+    WORD_I_LINE_REGEX = re.compile(r"^(\d+):(.*)", re.DOTALL);
 
     def match_wordi_line(self, line):
         m = Pager.WORD_I_LINE_REGEX.match(line)
         if not m:
             self.logger.error(f"No match line in wordi! for {line}")
-            return (-1, line)
+            return -1, line
         return int(m.group(1)), m.group(2)
-
-    def split_to_interpunction_tuple_parts(self, str, interpunction_parts ):
-        if len(interpunction_parts) == 0:
-            return " ".join(wordninja.split(str))
-        else:
-            seperator, *rest = interpunction_parts
-
-            things = []
-            for word in str.split(seperator):
-                things.append(
-                    self.split_to_interpunction_tuple_parts(word, rest))
-            return (seperator + " ").join(things)
 
     def __call__(self, paths, *args, **kwargs):
         for paths, meta in paths:
-            _, wordi_path, _ = paths
+            pdf_path, wordi_path, _ = paths
+
+            # read the text as it is referenced in the html from the wordi file
+            # containing the class index of the tags and the string, may contain
+            # errors: f"{index}:{string}"
             with open(wordi_path, 'rb') as f:
                 content = f.read()
-                print(chardet.detect(content))
-                encoding = chardet.detect(content)['encoding']
-                lines = content.decode(encoding).split()
-                i_word = [self.match_wordi_line(line) for line in lines if len(line)>2]
-                print(lines[:3])
+            print(chardet.detect(content))
+            encoding = chardet.detect(content)['encoding']
+            lines = content.decode(encoding).split()
+            i_word = [self.match_wordi_line(line) for line in lines if len(line) > 2]
+            print(lines[:3])
 
-                generator = self.make_tokenized_windows(i_word)
-                i = 0
+            # read pure text with better tokenization with pdfminer.six
+            text = extract_text(meta['pdf_path']).replace("/x19", "")
+            real_tokens = split_punctuation(text, ":!?;")
 
-                while True:
+            # TODO sorting and filtering by layout analysis
+            # ...
 
-                    try:
-                        next(generator)
-                        last_annotated_token = yield
+            # start iterating on windows of this text
+            generator = self.make_tokenized_windows(i_word, real_tokens)
+            i = 0
+            prev_window = ""
+            while True:
 
-                        window, window_meta = generator.send(last_annotated_token)
-                    except StopIteration as e:
-                        self.logger.info(f"finished after {i} texts")
-                        return
+                try:
+                    next(generator)
+                    last_annotated_token = yield
 
-                    print(f"text window:")
-                    print(textwrap.fill(" ".join([t.text for t in window]), width=200))
+                    window, window_meta = generator.send(last_annotated_token)
+                except StopIteration as e:
+                    self.logger.info(f"finished after {i} texts")
+                    return
 
-                    yield window, {**window_meta, "i_word": i_word, **meta, 'doc_id': meta['pdf_path']}
+                print(f"text window:")
+                print(textwrap.fill(" ".join([t for t in window]), width=200))
 
+                yield window, {**window_meta, "i_word": i_word, **meta, 'doc_id': meta['pdf_path']}
 
-                    i += 1
-                    if i > config.max_windows_per_text:
-                        i = 0
-                        break
+                i += 1
+                if i > config.max_windows_per_text:
+                    i = 0
+                    break
+                if window == prev_window:
+                    i = 0
+                    break
 
-                    prev_window = window
+                prev_window = window
 
-    def make_tokenized_windows(self, i_word):
+    def make_tokenized_windows(self, i_word, real_tokens):
         # holding three kinds of indices in parallel, splitting windows, keeping
         # information to retranslate results on the retokenized version of the
         # text:
@@ -94,51 +92,38 @@ class Pager(PathSpec):
         #      words
         #
 
-
         _i, tokens = list(zip(*i_word))
 
         windowing = True
         start_i1 = 0
+        start_i2 = 0
 
         while windowing:
             consumed_tokens = yield
             if consumed_tokens:
                 try:
                     start_i1 = i2_to_i1[consumed_tokens] + start_i1
+                    start_i2 = consumed_tokens + start_i2 + 1
+
                 except KeyError:
                     self.logger.error("error computing new beginning")
                     return
 
-
             window_tokens = list(tokens[start_i1:start_i1 + 300])
-            text = "".join(self.split_to_interpunction_tuple_parts(
-                "".join(window_tokens)
-                    .replace(" ", ""),
-                [',', '.', ';', ':', '<']
-            ))
-            doc = self.nlp(text)
-            sentences = doc.sents
-
-            end = 0
-            for sentence in sentences:
-                if len(sentence) > self.max_window:
-                    end += self.max_window - 1
+            window = []
+            sentences_i = 0
+            sentences_j = 0
+            for j, w in enumerate(real_tokens[start_i2: start_i2 + 300]):
+                window.append(w)
+                if len(window) > self.max_window:
+                    window = window[:sentences_j]
                     break
-                if end < self.max_window:
-                    end += len(sentence)
-                else:
-                    break
+                if SENTENCE_END_REGEX.match(w):
+                    sentences_i += 1
+                    sentences_j = j + 1
 
-            window = doc[0:end]
 
-            if len(window) == 0:
-                return
-
-            original_text = text[window[0].idx:window[-1].idx]
-            tokens_in_window = [token.text for token in window]
-            alignment = list(zip(*needle(
-                window_tokens, tokens_in_window
-            )[2:5]))
+            alignment = needle(window_tokens, window)[2:][0]
 
             _i_to_i2 = {}
             _i2_old = None
@@ -146,44 +131,25 @@ class Pager(PathSpec):
                 if _i2:
                     _i2_old = _i2
                 if _i1 and _i2_old:
-                    _i_to_i2.setdefault(_i[_i1+start_i1], []).append(_i2_old)
-
-            """
-            _i_to_i2 = []
-
-            _i1_old, _i2_old = None, None
-            for _i1, _i2 in reversed(alignment):
-                if  _i1 :
-                    _i1_old = _i1
-                if  _i2:
-                    _i2_old = _i2
-
-                if _i1_old and _i2_old:
-                    _i_to_i2.append((_i[
-                        (_i1 if _i1  is not None else _i1_old)
-                        + start_i1] ,
-                        (_i2 if _i2 is not None else _i2_old )
-                    ))
-            _i_to_i2 = list(reversed(_i_to_i2))"""
+                    _i_to_i2.setdefault(_i[_i1 + start_i1], []).append(_i2_old)
 
             # to translate the comsumed tokens to the index for the paper index
             i2_to_i1 = []
             _i1_old, _i2_old = None, None
             for _i1, _i2 in reversed(alignment):
-                if  _i1 :
+                if _i1:
                     _i1_old = _i1
-                if  _i2:
+                if _i2:
                     _i2_old = _i2
 
                 if _i1_old and _i2_old:
                     i2_to_i1.append(
                         (_i2 if _i2 is not None else _i2_old,
-                        _i1 if _i1 is not None else _i1_old)
+                         _i1 if _i1 is not None else _i1_old)
                     )
 
             i2_to_i1 = dict(list(reversed(i2_to_i1)))
             print(window)
-
 
             yield window, {
                 "_i_to_i2":
@@ -193,26 +159,5 @@ class Pager(PathSpec):
                 "alignment":
                     alignment,
                 "original_text":
-                    original_text
-
-                }
-
-
-
-
-
-    def align_tokens_to_string(self, window_text, tokens_in_window, add=0):
-        indices = [0]
-        len_prev_substring = 0
-        for i, substring in enumerate(tokens_in_window):
-            try:
-                indices.append(window_text.find(substring, indices[i] + len_prev_substring, len(window_text)))
-                assert (len(indices) - 2 == i)
-                len_prev_substring = len(substring)
-            except Exception as e:
-                x = 1
-
-        indices = list([i + add for i in indices])[1:]
-        assert (len(tokens_in_window) == len(indices))
-
-        return indices
+                    window_tokens
+            }

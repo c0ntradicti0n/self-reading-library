@@ -15,5 +15,4 @@ class converter(object):
         functools.update_wrapper(self, self.func)
         converters.append((self._from, self._to, self.func))
 
-
         return self.func

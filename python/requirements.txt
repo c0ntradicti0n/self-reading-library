@@ -1,4 +1,5 @@
 more_itertools
+pdfminer.six
 bs4~=0.0.1
 pandas~=1.0.3
 matplotlib~=3.2.1
@@ -13,6 +14,8 @@ databases[postgresql]
 falcon~=2.0.0
 falcon-cors
 paired
+coloredlogs
+pyyaml
 tensorflow
 gunicorn
 wordninja

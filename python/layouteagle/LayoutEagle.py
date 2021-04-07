@@ -4,7 +4,7 @@ from pprint import pprint
 
 from python.layouteagle import config
 from python.layouteagle.pathant.PathAnt import PathAnt
-
+import sys
 
 class LayoutEagle:
 

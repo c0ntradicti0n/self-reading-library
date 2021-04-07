@@ -1,3 +1,8 @@
+import os
+import sys
+
+sys.path.append(os.getcwd() + "/../")
+
 from pprint import pprint
 
 from python.layout.LayoutReader.PDF2ETC import PDF2ETC

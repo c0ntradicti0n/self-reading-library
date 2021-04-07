@@ -146,19 +146,19 @@ def uri_with_cache(fun):
         if kwargs:
             print ("extra kwargs", kwargs)
 
-        if not fun in memory_caches:
+        if not (fun, req) in memory_caches:
             print (req, resp, *args, **kwargs)
             print (memory_caches)
             memory_caches[fun] = "working..."
             res = fun(self, req, resp)
-            memory_caches[fun] = res
+            memory_caches[(fun, req)] = res
             if res == None:
                 fun.cache = "No result was returned"
             resp.status = falcon.HTTP_200
             resp.body = json.dumps({"response": res, "status": resp.status})
 
         resp.status = falcon.HTTP_200
-        resp.body = json.dumps({"response": memory_caches[fun], "status": resp.status})
+        resp.body = json.dumps({"response": memory_caches[(fun, req)], "status": resp.status})
 
     return replacement_fun
 

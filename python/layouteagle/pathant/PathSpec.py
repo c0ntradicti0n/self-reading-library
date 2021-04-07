@@ -1,4 +1,5 @@
 import logging
+import sys
 from enum import Enum
 
 from python.layouteagle import config
@@ -13,7 +14,7 @@ class cache_flow(Enum):
 class PathSpec:
     def __init__(self, *args, path_spec=None, cached: cache_flow = None, **kwargs):
         self.path_spec = path_spec
-        self.logger = logging.getLogger(str(path_spec) + __name__)
+        self.logger = logging.getLogger(sys.modules[self.__class__.__module__].__file__)
         self.temporary = config.hidden_folder
 
         self.meta_storage = []

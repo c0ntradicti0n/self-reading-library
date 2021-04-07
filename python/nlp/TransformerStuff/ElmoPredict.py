@@ -38,25 +38,25 @@ class ElmoPredict(PathSpec):
         while True:
             try: # https://stackoverflow.com/questions/51700960/runtimeerror-generator-raised-stopiteration-every-time-i-try-to-run-app
                 next(feature_meta)
-                wordi, meta = feature_meta.send(consumed_tokens)
+                words, meta = feature_meta.send(consumed_tokens)
 
             except StopIteration:
                 return
 
             try:
-                annotation = self.predictor.predict_json({"sentence": [w.text for w in wordi]})
+                annotation = self.predictor.predict_json({"sentence": words})
                 self.info(annotation)
-            except RuntimeError as e:
+            except Exception as e:
+
                 self.logger.error("Faking annotation because of error " + str(e))
-                annotation = [('O', w.text) for w in wordi]
-                return
+                annotation = [('O', w) for w in words]
 
             try:
                 # rfind of not "O"
                 try:
                     consumed_tokens = next(i for i, (tag, word) in list(enumerate(annotation))[::-1] if tag != 'O')
                 except StopIteration as e:
-                    consumed_tokens = len(wordi) - 1
+                    consumed_tokens = len(words) - 1
 
                 yield annotation, {
                     **meta,
@@ -66,7 +66,8 @@ class ElmoPredict(PathSpec):
                 }
 
             except Exception as e:
-                self.logger.error("Could not process " + str(wordi))
+                self.logger.error(e.__repr__())
+                self.logger.error("Could not process " + str(words))
                 pass
 
     def info(self, annotation):
