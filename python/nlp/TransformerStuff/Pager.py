@@ -9,8 +9,6 @@ from python.layouteagle.pathant.Converter import converter
 from python.layouteagle.pathant.PathSpec import PathSpec
 from python.nlp.NlpUtils.Regexes import SENTENCE_END_REGEX
 from python.nlp.NlpUtils.split_interpunction import split_punctuation
-from python.nlp.TransformerStuff.alignment import needle
-from python.nlp.TransformerStuff.simple_align import align
 
 
 @converter("wordi", 'wordi.page')
@@ -44,14 +42,14 @@ class Pager(PathSpec):
             print(lines[:3])
 
             # read pure text with better tokenization with pdfminer.six
-            text = extract_text(meta['pdf_path']).replace("/x19", "")
+            text = extract_text(meta['pdf_path']).replace('', "")
             real_tokens = split_punctuation(text, ":!?;")
 
             # TODO sorting and filtering by layout analysis
             # ...
 
             # start iterating on windows of this text
-            generator = self.make_tokenized_windows(i_word, real_tokens)
+            generator = self.make_tokenized_windows(real_tokens)
             i = 0
             prev_window = ""
             while True:
@@ -80,7 +78,7 @@ class Pager(PathSpec):
 
                 prev_window = window
 
-    def make_tokenized_windows(self, i_word, real_tokens):
+    def make_tokenized_windows(self, real_tokens):
         # holding three kinds of indices in parallel, splitting windows, keeping
         # information to retranslate results on the retokenized version of the
         # text:
@@ -92,26 +90,20 @@ class Pager(PathSpec):
         #      words
         #
 
-        _i, tokens = list(zip(*i_word))
-
         windowing = True
-        start_i1 = 0
         start_i2 = 0
 
         while windowing:
             consumed_tokens = yield
             if consumed_tokens:
                 try:
-                    start_i1 = i2_to_i1[consumed_tokens] + start_i1
                     start_i2 = consumed_tokens + start_i2 + 1
 
                 except KeyError:
                     self.logger.error("error computing new beginning")
                     return
 
-            window_tokens = list(tokens[start_i1:start_i1 + 300])
             window = []
-            sentences_i = 0
             sentences_j = 0
             for j, w in enumerate(real_tokens[start_i2: start_i2 + 300]):
                 window.append(w)
@@ -119,45 +111,8 @@ class Pager(PathSpec):
                     window = window[:sentences_j]
                     break
                 if SENTENCE_END_REGEX.match(w):
-                    sentences_i += 1
                     sentences_j = j + 1
 
-
-            alignment = needle(window_tokens, window)[2:][0]
-
-            _i_to_i2 = {}
-            _i2_old = None
-            for _i1, _i2 in reversed(alignment):
-                if _i2:
-                    _i2_old = _i2
-                if _i1 and _i2_old:
-                    _i_to_i2.setdefault(_i[_i1 + start_i1], []).append(_i2_old)
-
-            # to translate the comsumed tokens to the index for the paper index
-            i2_to_i1 = []
-            _i1_old, _i2_old = None, None
-            for _i1, _i2 in reversed(alignment):
-                if _i1:
-                    _i1_old = _i1
-                if _i2:
-                    _i2_old = _i2
-
-                if _i1_old and _i2_old:
-                    i2_to_i1.append(
-                        (_i2 if _i2 is not None else _i2_old,
-                         _i1 if _i1 is not None else _i1_old)
-                    )
-
-            i2_to_i1 = dict(list(reversed(i2_to_i1)))
             print(window)
 
-            yield window, {
-                "_i_to_i2":
-                    _i_to_i2,
-                "i2_to_i1":
-                    i2_to_i1,
-                "alignment":
-                    alignment,
-                "original_text":
-                    window_tokens
-            }
+            yield window, {}

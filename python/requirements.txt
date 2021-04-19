@@ -39,3 +39,4 @@ tk
 scispacy
 beautifultable
 texttable
+pylcs

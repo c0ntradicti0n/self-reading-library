@@ -3,6 +3,8 @@ from collections import defaultdict
 
 from python.layouteagle.pathant.Converter import converter
 from python.layouteagle.pathant.PathSpec import PathSpec
+from python.nlp.NlpUtils.listalign.fuzzyalign import fuzzyalign
+from python.nlp.NlpUtils.listalign.helpers import alignment_table
 
 
 @converter("wordi.page.*", 'wordi.*')
@@ -21,14 +23,11 @@ class UnPager(PathSpec):
                 yield whole_annotation, whole_meta
                 whole_annotation = []
                 whole_meta = None
+
             if not whole_meta:
                 whole_meta = copy.deepcopy(meta)
-                whole_meta['_i_to_i2'] = {}
                 consumed_until_now = 0
 
-            whole_meta['_i_to_i2'].update(
-                {_i: [_i2 + consumed_until_now for _i2 in _i2s] for _i, _i2s in meta['_i_to_i2'].items()}
-            )
 
             consumed_until_now += meta['consumed_i2']
             whole_annotation.extend(annotation[:meta['consumed_i2']])
@@ -38,6 +37,10 @@ class UnPager(PathSpec):
             except Exception as e:
                 self.logger.error("No doc_id_given")
                 whole_doc_id = "?"
+
+        alignment = fuzzyalign([w for i, w in meta["i_word"]], [w for t, w in whole_annotation])
+        print(alignment_table(alignment, [w for i, w in meta["i_word"]], [w for t, w in whole_annotation]))
+        whole_meta["_i_to_i2"] = {meta["i_word"][_i1][0]: _i2 for _i1, _i2 in alignment}
         yield whole_annotation, whole_meta
 
     default_values = {

@@ -1,4 +1,5 @@
 import os
+from collections import defaultdict
 
 from python.layouteagle import config
 from python.layouteagle.pathant.Converter import converter
@@ -36,29 +37,32 @@ class Wordi2Css(PathSpec):
             tags, words = list(zip(*annotation))
 
             i_to_tag = {}
-            for _i, _i2s in meta["_i_to_i2"].items():
-                for _i2 in _i2s:
-                    if _i not in i_to_tag or i_to_tag[_i] == "O":
-                        if _i2 < len(tags):
-                            i_to_tag[_i] = annotation[_i2]
+            for _i, _i2 in meta["_i_to_i2"].items():
+                if _i not in i_to_tag or i_to_tag[_i] == "O":
+                    if _i2 < len(tags):
+                        i_to_tag[_i] = annotation[_i2]
 
             css = self.parse_to_css(i_to_tag, meta)
 
             nested_dict_list = []
-            i_word = dict(meta['i_word'])
-            for _i, _i2s in meta["_i_to_i2"].items():
-                nested_dict_list.append(
-                    {
-                        '_i': _i,
-                        'hex id': f""".z{hex(_i)[2:]}""",
-                        '_i2': _i2s,
-                        'tags': i_to_tag[_i][0] if _i in i_to_tag else "no _i in _i_to_tag",
-                        #'__tags': [annotation[x] for x in _i2s],
+            i_word = meta['i_word']
+            for _i, _i2 in meta["_i_to_i2"].items():
+                try:
+                    nested_dict_list.append(
+                        {
+                            '_i': _i,
+                            'hex id': f""".z{hex(_i)[2:]}""",
+                            '_i2': _i2,
+                            'tags': i_to_tag[_i][0] if _i in i_to_tag else "no _i in _i_to_tag",
+                            #'__tags': [annotation[x] for x in _i2s],
 
-                        'i_word': i_word[_i],
+                            'i_word': i_word[_i],
 
-                        'text': i_to_tag[_i][1] if _i in i_to_tag else "no _i in _i_to_tag"}
-                )
+                            'text': i_to_tag[_i][1] if _i in i_to_tag else "no _i in _i_to_tag"}
+                    )
+                except:
+                    self.logger.warn("did not find all original indices from all indices")
+                    break
             df = pd.DataFrame(nested_dict_list).sort_values(by='_i')
 
             with open(

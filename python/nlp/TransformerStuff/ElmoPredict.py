@@ -56,19 +56,18 @@ class ElmoPredict(PathSpec):
                 try:
                     consumed_tokens = next(i for i, (tag, word) in list(enumerate(annotation))[::-1] if tag != 'O')
                 except StopIteration as e:
-                    consumed_tokens = len(words) - 1
+                    consumed_tokens = len(words)
 
                 yield annotation, {
                     **meta,
                     'CSS': self.CSS,
-                    "consumed_i1": meta["i2_to_i1"][consumed_tokens],
                     "consumed_i2": consumed_tokens,
                 }
 
             except Exception as e:
                 self.logger.error(e.__repr__())
                 self.logger.error("Could not process " + str(words))
-                pass
+                raise
 
     def info(self, annotation):
         table = Texttable()

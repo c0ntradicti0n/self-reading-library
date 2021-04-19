@@ -320,7 +320,8 @@ if __name__ == "__main__":
                'modest', 'and', 'diligent', ',', 'from', 'his', 'earliest', 'grammar', 'classes', 'he', 's', 'kept',
                'a', 'lit']
     alignment = list(zip(*needle(fruits1, fruits2)))
-    print(alignment_table(alignment, fruits1, fruits2))
+    print(a    print(alignment_table(alignment, fruits1, fruits2))
+lignment_table(alignment, fruits1, fruits2))
     print(f"len 1 {len(fruits1)}  len 2 {len(fruits2)}")
 
     fruits1 = ["con", "sump", "t", "ion", "orange", "pear", "apple", "x,y,z", "pear", "orange", "consumption"]
