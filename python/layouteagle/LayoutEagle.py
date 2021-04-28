@@ -24,9 +24,6 @@ class LayoutEagle:
 
     from python.layout.LayoutReader.PDF2HTML import PDF2HTML
 
-    from python.TestArchitecture.publisher import NLPPublisher, TopicPublisher
-    from python.TestArchitecture.NLP.nlp_blub import NLPBlub
-    from python.TestArchitecture.NLP.topicape import TopicApe
     from python.layouteagle.StandardConverter.Dict2Graph import Dict2Graph
 
 
@@ -64,6 +61,6 @@ if __name__=="__main__":
     le = LayoutEagle()
     le.ant.info()
     #print(list(AntPublisher([123])))
-    le.test_topics()
+    #le.test_topics()
     #le.make_model()
-    #le.test_prediction()
+    le.test_prediction()

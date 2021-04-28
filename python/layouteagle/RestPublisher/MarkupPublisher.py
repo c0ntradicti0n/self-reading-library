@@ -1,12 +1,8 @@
 import json
-from pprint import pprint
-
-import falcon
 
 from python.layouteagle import config
 from python.layouteagle.RestPublisher.Resource import Resource
 from python.layouteagle.RestPublisher.RestPublisher import RestPublisher
-from python.layouteagle.RestPublisher.react import react
 from python.helpers.cache_tools import uri_with_cache
 from python.layouteagle.pathant.Converter import converter
 
@@ -16,8 +12,9 @@ from python.nlp.TransformerStuff.ElmoDifference import ElmoDifference
 from python.nlp.TransformerStuff.Pager import Pager
 from python.nlp.TransformerStuff.UnPager import UnPager
 
+
 @converter("html", "rest_markup")
-class MarkupPublisher(RestPublisher) :
+class MarkupPublisher(RestPublisher):
     from python.layout.LayoutReader.PDF2ETC import PDF2ETC
     from python.layouteagle.StandardConverter.Wordi2Css import Wordi2Css
     from python.nlp.TransformerStuff.ElmoDifference import ElmoDifference
@@ -29,12 +26,11 @@ class MarkupPublisher(RestPublisher) :
                  **kwargs):
         super().__init__(*args, **kwargs, resource=Resource(
             title="Markup",
-            type = "html",
+            type="html",
             path="markup",
             route="markup",
-            access={"fetch": True, "read": True, "upload":True, "correct":True, "delete":True}))
+            access={"fetch": True, "read": True, "upload": True, "correct": True, "delete": True}))
         self.dir = config.markup_dir
-
 
         # pdf -> wordi
         #     -> wordi.page
@@ -42,7 +38,6 @@ class MarkupPublisher(RestPublisher) :
         #     -> wordi.page.difference
         #     -> wordi.difference
         #     -> css.difference
-
 
     @uri_with_cache
     def on_post(self, req, resp):
@@ -57,7 +52,7 @@ class MarkupPublisher(RestPublisher) :
             self.logger.warning(f"analysing {pdf_s}")
             html_path, html_meta = self(self.html_pipeline, pdf_s)
             css_value, css_meta = self(self.css_pipeline, pdf_s)
-            print (html_path)
+            print(html_path)
 
             with open(html_path[0], "r") as f:
                 html = "".join(f.readlines())
@@ -68,7 +63,7 @@ class MarkupPublisher(RestPublisher) :
                 }
 
         except Exception as e:
-            print (html_path)
+            print(html_path)
 
             self.logger.error("markup backend is called badly")
             raise e

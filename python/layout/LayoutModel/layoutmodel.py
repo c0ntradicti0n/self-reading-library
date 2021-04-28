@@ -17,6 +17,7 @@ import pprint
 
 
 from python.helpers.list_tools import Lookup, sorted_by_zipped
+from python.layouteagle import config
 from python.layouteagle.pathant.PathSpec import PathSpec
 
 
@@ -61,12 +62,18 @@ class LayoutModeler(PathSpec):
     def __init__(self,
                  *args,
                  override_train_kwargs: Dict= {},
-                 lookup_path = "./layouteagle/.layouteagle/lookup.pickle",
+                 model_path = config.layout_model_path,
                  debug: bool = True, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.lookup_path = lookup_path
+        if not model_path:
+            raise ValueError("Please specify a path for saving and loading the model")
+
+        self.model_path = model_path
+        self.lookup_path = self.model_path + ".lookup.pickle"
+
         self.train_kwargs.update(override_train_kwargs)
+
         self.debug = debug
 
     def load_pandas_file(self, feature_path):
@@ -276,7 +283,7 @@ class LayoutModeler(PathSpec):
     def load(self):
         try:
             if not hasattr(self, "model"):
-                self.model = tf.keras.models.load_model (self.model_path + ".kerasmodel")
+                self.model = tf.keras.models.load_model (self.model_path)
 
             if not hasattr(self, "label_lookup"):
                 with open(self.lookup_path, "rb") as f:

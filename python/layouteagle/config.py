@@ -5,6 +5,7 @@ sys.path.append(os.getcwd())
 
 logging_config = '/home/finn/PycharmProjects/LayoutEagle/python/logging.yaml'
 model_config = "elmo_lstm3_feedforward4_crf_straight.config"
+
 #"elmo_multi_head_self_attention_crf_straight_fitter.config"
 parse_pdf2htmlEX = True
 max_windows_per_text = 100
@@ -73,3 +74,6 @@ difference_model_train_output = hidden_folder + f"/over_{model_config}/"
 difference_model_config = hidden_folder + f"/over_{model_config}/config.json"
 
 wordninjalanguagemodel = "nlp/english.txt.gz"
+
+
+layout_model_path = hidden_folder + "/layout_model"

@@ -45,3 +45,21 @@ def get_path_filename_extension(adress):
     filename = os.path.basename(adress)
     filename_without_extension = filename[:-len(extension)]
     return PathInfo(path, filename, extension, filename_without_extension)
+
+class cwd_of:
+    def __init__(self, fpath):
+        self.path, self.filename, self.extension, self.filename_without_extension = get_path_filename_extension(fpath)
+
+    def __enter__(self):
+        self.cwd = os.getcwd()
+        os.chdir(self.path)
+        return self.filename
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        os.chdir(self.cwd)
+        return self.filename
+
+
+
+
+

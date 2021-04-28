@@ -71,7 +71,11 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
         soup = self.make_soup(html_read_from)
         # create data and features for clustering
         self.css_dict = self.get_css(soup)
-        self.features = self.extract_features(soup=soup)
+
+        try:
+            self.features = self.extract_features(soup=soup)
+        except:
+            raise
         self.pdf_obj.columns = self.number_columns
         self.pdf_obj.features = self.features
         return self.features, soup
@@ -133,7 +137,7 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
 
         i = itertools.count()
         features["index"], features["page_number"], features["divs"] = \
-            zip(*[(next(i), pn, div) for pn, divs in page_to_divs for div in divs])
+            list( list(x) for x in zip(*[(next(i), pn, div) for pn, divs in page_to_divs for div in divs]))
         features["len"] = features.divs.apply(lambda div:len(div.text))
 
         # Generate positional features

@@ -7,7 +7,7 @@ from python.helpers.cache_tools import file_persistent_cached_generator
 from python.layouteagle.pathant.Converter import converter
 
 outputs = {
-    'html': 'layout.html',  # same looking html
+    'html': 'html',  # same looking html
     'wordi': 'wordi',  # numbered word list
     'feat': 'feat'  # json with indexed single words as they can be reapplied via css to the html-document
 }

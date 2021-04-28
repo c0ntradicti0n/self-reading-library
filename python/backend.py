@@ -1,3 +1,4 @@
+from pprint import pprint
 from time import sleep
 
 import falcon
@@ -8,19 +9,13 @@ logging.basicConfig()
 
 logging.getLogger().setLevel(logging.INFO)
 
-if __name__ ==  "__main__":
+if __name__ == "__main__":
     import subprocess
     import sys
 
     loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
     for logger in loggers:
         logger.setLevel(logging.INFO)
-
-    # start react app and proceed
-    #os.chdir("../react/layout_viewer_made")
-    #os.popen("yarn dev")
-    #os.chdir("../../python")
-
 
     while True:
         try:
@@ -34,22 +29,35 @@ if __name__ ==  "__main__":
             sleep(10)
 
 else:
+    def get_all_routes(api):
+        routes_list = []
+
+        def get_children(node):
+            if len(node.children):
+                for child_node in node.children:
+                    get_children(child_node)
+            else:
+                routes_list.append((node.uri_template, node.resource))
+
+        [get_children(node) for node in api._router._roots]
+        return routes_list
 
     from python.layouteagle.RestPublisher.MarkupPublisher import MarkupPublisher
     from python.layouteagle.pathant.AntPublisher import AntPublisher
-    #from python.nlp.Topics.TopicsPublisher import TopicsPublisher
+    # from python.nlp.Topics.TopicsPublisher import TopicsPublisher
+    from python.controlflow import CachePublisher
+
     from python.layouteagle.LayoutEagle import LayoutEagle
 
     publishing = {
         '/markup': MarkupPublisher,
-        #'/topics': TopicsPublisher,
-        '/ant': AntPublisher
-        # 'commands':  RestPublisher("commands")
+        # '/topics': TopicsPublisher,
+        '/ant': AntPublisher,
+        '/cache': CachePublisher,
     }
 
     le = LayoutEagle()
     le.test_info()
-
 
     from falcon_cors import CORS
 
@@ -63,4 +71,7 @@ else:
 
     for route, module in publishing.items():
         api.add_route(route, module)
+
+    pprint(get_all_routes(api))
+
 

@@ -17,8 +17,8 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
             print(doc_id, labeled_html_path)
             try:
                 feature_df, soup = self.generate_data_for_file(labeled_html_path)
-            except FileNotFoundError:
-                logging.error("output of pdf2htmlEX looks damaged")
+            except FileNotFoundError as e:
+                logging.error("output of pdf2htmlEX looks damaged or was not found")
                 continue
             except IndexError:
                 logging.error("output of pdf2htmlEX looks damaged, no CSS in there?")

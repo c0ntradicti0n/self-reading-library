@@ -14,7 +14,8 @@ bp = Blueprint('blueprint', __name__, template_folder='templates')
 class RestPublisher(PathSpec, react) :
     """
 
-    publishes path-ant-path on a Representational State Transfer api with autocreated jsvascript class for reading.... to CRUPD class
+    publishes path-ant-path on a Representational State Transfer api with autocreated
+    javascript class for reading.... to CRUPD class
     """
 
     def __call__(self, pipeline, arg):
@@ -31,9 +32,8 @@ class RestPublisher(PathSpec, react) :
 
         source_node, what_to_put_first = self.answer_or_ask_neighbors(None)
         self.ant(source_node, self, what_to_put_first)
-        #return jsonify(meta=self.meta), 200
 
-        return jsonify({"BANANA": "YEAH"}), 200
+        self.logger.error ("rest call on abstract publisher!")
         return jsonify(meta=self.meta), 200
 
 
@@ -42,21 +42,27 @@ class RestPublisher(PathSpec, react) :
 
         source_node, what_to_put_first = self.answer_or_ask_neighbors(None)
         self.ant(source_node, self, what_to_put_first)
-        #return jsonify(meta=self.meta), 200
 
+        self.logger.error ("rest call on abstract publisher!")
         return jsonify({"BANANA": "YEAH"}), 200
 
     # get html
     def on_post(self, i):
+
+        self.logger.error ("rest call on abstract publisher!")
         return jsonify(page=self.data[i]), 200
 
     # upload
     def on_put(self, file, meta_data):
+
+        self.logger.error ("rest call on abstract publisher!")
         with open(self.upload_docs + self.new_path(), "w") as f:
             f.write(file)
 
     # correction
     def on_patch(self, text, location, annotation):
+
+        self.logger.error ("rest call on abstract publisher!")
         with open(self.upload_docs + self.new_annotation(), "w") as f:
             raise NotImplementedError()
 
@@ -64,6 +70,8 @@ class RestPublisher(PathSpec, react) :
     def on_delete(self, i):
         self.data.pop(i)
         self.meta.pop(i)
+        self.logger.error ("rest call on abstract publisher!")
+
 
 
     def __init__(self,

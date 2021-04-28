@@ -22,7 +22,9 @@ logging.basicConfig(level = logging.INFO)
 class ScienceTexScraper(PathSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if not os.path.isdir(config.tex_data):
+        self.cwd = os.getcwd() + '/'
+        self.save_dir = config.tex_data
+        if not os.path.isdir(self.save_dir):
             os.system(f"mkdir {config.tex_data}")
 
     @file_persistent_cached_generator(config.cache + 'scraped_tex_paths.json', if_cache_then_finished=True)
@@ -34,6 +36,10 @@ class ScienceTexScraper(PathSpec):
         yield from self.surf_random(url)
 
     headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36'}
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.logger.info("navigating backt to " + self.cwd)
+        os.chdir(self.cwd)
 
     def surf_random(self, url):
         logging.info(f"trying {url}")
@@ -72,15 +78,15 @@ class ScienceTexScraper(PathSpec):
             if "e-print" in href:
                 logging.warning(f"getting {href}")
                 name = hashlib.md5(href.encode('utf-8')).hexdigest()
-                tar_gz_path = config.tex_data + name + ".tar.gz"
-                path  =  config.tex_data + name
+                tar_gz_path = self.cwd + config.tex_data + name + ".tar.gz"
+                path  = self.cwd + config.tex_data + name
                 os.system(
                     f'wget '
                     f'--user-agent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36" '
                     f'{href} '
                     f'-O {tar_gz_path}')
 
-                unpack_path = config.tex_data + name
+                unpack_path = self.cwd + config.tex_data + name
                 os.system(f"mkdir -p {unpack_path} & "
                           f"tar -zxvf {tar_gz_path} -C {unpack_path}/")
                 tex_files = glob.glob(path + "/*" + self.path_spec._to)

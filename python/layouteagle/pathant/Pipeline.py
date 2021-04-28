@@ -13,12 +13,15 @@ class Pipeline:
         intermediate_result = arg
         for functional_object in self.pipeline:
             print(intermediate_result)
-            if functional_object in self.extra_paths:
-                others = self.extra_paths[functional_object]
-                others = [other(self.dummy_generator) for other in others ]
-                intermediate_result = functional_object(intermediate_result, *others)
-            elif intermediate_result:
-                intermediate_result = functional_object(intermediate_result)
-            else:
-                intermediate_result = functional_object()
+            try:
+                if functional_object in self.extra_paths:
+                    others = self.extra_paths[functional_object]
+                    others = [other(self.dummy_generator) for other in others ]
+                    intermediate_result = functional_object(intermediate_result, *others)
+                elif intermediate_result:
+                    intermediate_result = functional_object(intermediate_result)
+                else:
+                    intermediate_result = functional_object()
+            except:
+                raise
         return intermediate_result

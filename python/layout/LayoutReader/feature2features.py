@@ -14,7 +14,7 @@ class Feature2Features(PathSpec):
         self.pandas_path = pandas_path
         self.n = n
 
-    @file_persistent_cached_generator(config.cache + 'collected_features.json')
+    #@file_persistent_cached_generator(config.cache + 'collected_features.json')
     def __call__(self, feature_dfs_meta,  *args, **kwargs):
         df_paths, meta = zip(*list(itertools.islice(feature_dfs_meta, self.n)))
         try:

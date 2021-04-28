@@ -13,6 +13,7 @@ class SoupReplacer(PathSpec):
     def replace_node(self, node, how):
         try:
             self.make_replacement(node.expr, how)
+
         except:
             raise
 
@@ -29,7 +30,7 @@ class SoupReplacer(PathSpec):
                             nodes = [soup]
                         else:
                             nodes = []
-                    except TypeError:
+                    except AttributeError:
                         nodes = []
 
                 if not nodes:

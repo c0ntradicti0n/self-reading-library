@@ -11,9 +11,7 @@ class LayoutTrainer(LayoutModeler):
                  *args,
                  model_path: str = '.layouteagle/layoutmodel',
                  debug: bool = True, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.model_path = model_path + self.path_spec._to
-
+        super().__init__(*args, **kwargs, model_path=model_path)
         self.debug = debug
 
     def __call__(self, feature_path):

@@ -3,6 +3,63 @@
 
 % Preamble
 \documentclass[11pt]{article}
+\usepackage[colaction]{multicol}
+\usepackage{etoolbox}
+
+\makeatletter
+\newcounter{nexprex@col@count}
+\newcounter{nexprex@current@column@call}
+\def\nexprex@patch@last
+  {%
+    \stepcounter{nexprex@col@count}%
+    \protected@write\@auxout{}
+      {%
+        \string\def\string\nexprex@cur@col{\arabic{nexprex@col@count}}%
+      }%
+  }
+\def\nexprex@patch@else
+  {%
+    \ifmc@firstcol
+      \setcounter{nexprex@col@count}{0}%
+    \fi
+    \nexprex@patch@last
+  }
+\def\nexprex@patch@error
+  {%
+    \GenericError{}
+      {Patching of \string\mc@col@status@write\space failed}
+      {%
+        Make sure `colaction` was set as an option for `multicol`.%
+        \MessageBreak
+        Else you're screwed, don't use the code provided here.\MessageBreak%
+      }
+      {No further help available.}%
+  }
+\pretocmd\mc@lastcol@status@write{\nexprex@patch@last}{}{\nexprex@patch@error}
+\pretocmd\mc@col@status@write{\nexprex@patch@else}{}{\nexprex@patch@error}
+\newcommand\currentcolumn
+  {%
+    \stepcounter{nexprex@current@column@call}%
+    \protected@write\@auxout{}
+      {%
+        \string\expandafter
+        \string\global
+        \string\expandafter
+        \string\let
+          \string\csname\space
+            nexprex@current@column@\arabic{nexprex@current@column@call}%
+          \string\endcsname
+          \string\nexprex@cur@col
+      }%
+    \ifcsname
+      nexprex@current@column@\arabic{nexprex@current@column@call}\endcsname
+      \csname
+        nexprex@current@column@\arabic{nexprex@current@column@call}\endcsname
+    \fi
+  }
+
+\makeatother
+
 
 \usepackage{amsthm}
 \usepackage{bm}
@@ -27,9 +84,9 @@
 \renewcommand{\Im}{\mathrm{Im}}
 \newcommand{\nn}{\nonumber}
 \newcommand{\edu}[1]{{\color{magenta} #1}}
-\newcommand{\educ}[1]{\textbf{{\color{magenta}[EDU: #1]}}}
+\newcommand{\educ}[1]{\textbf{{\color{magenta} [EDU: #1]}}}
 \newcommand{\pipo}[1]{{\color{red} #1}}
-\newcommand{\pipoc}[1]{\textbf{{\color{red}[Pipito: #1]}}}
+\newcommand{\pipoc}[1]{\textbf{{\color{red} [Pipito: #1]}}}
 
 \newtheorem{defi}{Definition}
 \newtheorem{teor}{Theorem}
@@ -48,13 +105,13 @@
 % Document
 \begin{document}
 
- cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1
+ cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1 \\  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1
 \begin{align}
-\hat{H}&=\hat{H}_{\textsc{s}}+\hat{H}_{\textsc{E}}+\hat{H}_{\textsc{se}},
+\hat{H} cc 1\hat{H} cc 1{\textsc{s}} cc 1\hat{H} cc 1{\textsc{E}} cc 1\hat{H} cc 1{\textsc{se}} cc 1
 \end{align}
  cc 1$\hat{H}_{\textsc{E}}$ cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1$\hat{H}_{\textsc{s}}=\Omega \mathbf{h}\cdot \bm{\hat{\sigma}}$ cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1
 \begin{equation}
-    \hat{H}_{\textsc{se}}= \chi(t) \bm{\alpha}\cdot \bm{\hat{\sigma}} \otimes \hat{{O}}.
+    \hat{H}_{\textsc{se}}= \chi(t) \bm{\alpha}\cdot\bm{\hat{\sigma}} \otimes\hat{{O}}.
 \end{equation}
  cc 1$\mathbf{h}\cdot \bm{\hat{\sigma}}$ cc 1$\bm{\alpha}\cdot \bm{\hat{\sigma}}$ cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1$\mathbf{h}$ cc 1$\bm{\alpha}$ cc 1  cc 1  cc 1$\hat{{O}}$ cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1  cc 1
 
