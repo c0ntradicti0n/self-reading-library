@@ -16,15 +16,12 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
         for doc_id, (labeled_html_path, meta) in enumerate(labeled_paths):
             print(doc_id, labeled_html_path)
             try:
-                feature_df, soup = self.generate_data_for_file(labeled_html_path)
+                feature_df = self.read_positional_data(meta['filename'] + ".feat")#  self.generate_data_for_file(labeled_html_path)
             except FileNotFoundError as e:
-                logging.error("output of pdf2htmlEX looks damaged or was not found")
+                logging.error("output of pdf2htmlEX was not found")
                 continue
-            except IndexError:
-                logging.error("output of pdf2htmlEX looks damaged, no CSS in there?")
-                continue
-            except ValueError:
-                logging.error("probably error on counting columns")
+            except Exception as e:
+                self.logger.error("could not compute features, proceeding")
                 continue
 
             feature_df["doc_id"] = doc_id
@@ -39,7 +36,7 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
             #feature_df['nums'] = feature_df.divs.apply(lambda div: sum(div.text.count(c) for c in string.digits))
             #feature_df['signs'] = feature_df.divs.apply(lambda div: sum(div.text.count(c) for c in string.punctuation))
 
-            meta['soup'] = soup
+            #meta['soup'] = soup
 
             yield feature_df, meta
 

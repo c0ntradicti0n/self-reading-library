@@ -62,5 +62,5 @@ if __name__=="__main__":
     le.ant.info()
     #print(list(AntPublisher([123])))
     #le.test_topics()
-    #le.make_model()
+    le.make_model()
     le.test_prediction()

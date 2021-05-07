@@ -38,6 +38,15 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
             pdf_obj = self.generate_css_tagging_document()
             yield pdf_obj
 
+    feat_regex = regex.compile(r".+? (?<word_num>\d+) (?<page_number>\d+) (?<width>-?\d+(?:\.\d+)?) (?<acsent>-?\d+(?:\.\d+)?) (?<descent>-?\d+(?:\.\d+)?) (?<x2>-?\d+(?:\.\d+)?) (?<y2>-?\d+(?:\.\d+)?)$")
+
+    def read_positional_data(self, path):
+        with open(path, 'r', errors='ignore') as f:
+            matches = [regex.match(self.feat_regex, line).groupdict() for line in f.readlines()]
+        if not matches:
+            raise IndexError
+        return pandas.DataFrame(matches)
+
 
     def generate_css_tagging_document(self, html_read_from="", html_write_to="", parameterizing=False, premade_features=None, premade_soup=None):
         """

@@ -55,8 +55,8 @@ class LayoutModeler(PathSpec):
         'batch_size': 320,
         'patience': 3,
         'labels': 'layoutlabel',
-        'cols_to_use': ['x', 'y', 'height', 'font-size', 'len', "spans_no",
-                        'fine_grained_pdf', 'coarse_grained_pdf','line-height']
+        'cols_to_use': ['width', 'ascent', 'descent', 'x1', 'x2']#['x', 'y', 'height', 'font-size', 'len', "spans_no",
+                       # 'fine_grained_pdf', 'coarse_grained_pdf','line-height']
     }
 
     def __init__(self,
@@ -84,8 +84,9 @@ class LayoutModeler(PathSpec):
             self.label_set = list(set(feature_df['layoutlabel'].tolist()))
             self.label_lookup = Lookup([self.label_set])
 
-        feature_df.layoutlabel = self.label_lookup(token_s=feature_df.layoutlabel.tolist())
+            feature_df['layoutlabel'] = self.label_lookup(token_s=feature_df.layoutlabel.tolist())
 
+        """
         feature_df = self.prepare_df(feature_df, training=training)
 
         norm_cols = [col for col in self.cols_to_use if col != self.train_kwargs['labels']]
@@ -105,6 +106,7 @@ class LayoutModeler(PathSpec):
                 feature_df[col] = feature_df[col] / feature_df[col].max()
 
         feature_df = feature_df.fillna(0)
+        """
 
         if training:
             train, test = train_test_split(feature_df, test_size=0.2)
@@ -122,22 +124,26 @@ class LayoutModeler(PathSpec):
         feature_columns = []
 
         # remove the labels, that were put in the df temporarily
-        self.cols_to_use = [col for col in self.cols_to_use if col != self.train_kwargs['labels']]
+        #self.cols_to_use = [col for col in self.cols_to_use if col != self.train_kwargs['labels']]
 
         # all are numeric cols
-        for header in self.cols_to_use:
-            feature_columns.append(tf.feature_column.numeric_column(header))
+        #for header in self.cols_to_use:
+        #    feature_columns.append(tf.feature_column.numeric_column(header))
 
-        as_numpy = feature_df[self.cols_to_use].to_numpy()
-        return feature_columns, as_numpy
+        #as_numpy = feature_df[self.cols_to_use].to_numpy()
+        return feature_df, feature_df.to_numpy()
 
     # A utility method to create a tf.data dataset from a Pandas Dataframe
     def df_to_dataset(self, dataframe, shuffle=True, batch_size=None, training=True):
         dataframe = dataframe.copy()
         dataframe = dataframe.reset_index(drop=True)
 
-        labels = dataframe[self.train_kwargs['labels']].tolist()
-        dataframe.pop(self.train_kwargs['labels'])
+        if training:
+            labels = dataframe[self.train_kwargs['labels']].tolist()
+            dataframe.pop(self.train_kwargs['labels'])
+        else:
+            labels = [0] * len(dataframe)
+
         categorical_labels = to_categorical(labels)
 
 

@@ -23,8 +23,8 @@ class MarkupDocument(TrueFormatUpmarkerPDF2HTMLEX):
         super().__init__(*args, **kwargs)
         pass
 
-    @file_persistent_cached_generator(config.cache + 'markup_finished.json',
-                                      if_cache_then_finished=True)
+    #@file_persistent_cached_generator(config.cache + 'markup_finished.json',
+    #                                  if_cache_then_finished=True)
     def __call__(self, feature_meta, *args, **kwargs):
         for feature_df, meta in feature_meta:
             soup = meta['soup']
