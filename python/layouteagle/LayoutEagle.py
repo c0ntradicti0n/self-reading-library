@@ -2,6 +2,8 @@ import glob
 import os
 from pprint import pprint
 
+import ray
+
 from python.layouteagle import config
 from python.layouteagle.pathant.PathAnt import PathAnt
 import sys
@@ -58,6 +60,7 @@ class LayoutEagle:
 
 
 if __name__=="__main__":
+
     le = LayoutEagle()
     le.ant.info()
     #print(list(AntPublisher([123])))

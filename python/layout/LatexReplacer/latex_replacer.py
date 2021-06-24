@@ -7,17 +7,19 @@ from itertools import cycle
 from random import randint
 from threading import Timer
 
+import ray
 from TexSoup import TexSoup, TexNode
 from TexSoup.data import TexEnv, TexCmd, TexText, BracketGroup, BraceGroup
 from TexSoup.utils import Token
 
+from python.helpers.cache_tools import file_persistent_cached_generator
 from python.layout.LatexReplacer import multicol_defs
 from python.layout.LatexReplacer.replacer import SoupReplacer
 from python.helpers.os_tools import get_path_filename_extension
 from regex import regex
 
 from python.layouteagle.pathant.Converter import converter
-
+from python.layouteagle.pathant.parallel import paraloop
 
 @converter("tex", "labeled.pdf")
 class LatexReplacer(SoupReplacer):
@@ -132,7 +134,8 @@ class LatexReplacer(SoupReplacer):
             logging.info("No multi column instruction found, so its single col")
             return r"cc 1"
 
-    # @file_persistent_cached_generator(config.cache + 'replaced_tex_paths.json')
+    #@file_persistent_cached_generator(config.cache + 'replaced_tex_paths.json')
+    @paraloop
     def __call__(self, paths, compile=True, *args, **kwargs):
         """
         :param path_to_read_from:

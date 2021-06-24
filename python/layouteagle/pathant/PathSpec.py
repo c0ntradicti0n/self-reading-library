@@ -2,6 +2,8 @@ import logging
 import sys
 from enum import Enum
 
+import ray
+
 from python.layouteagle import config
 
 

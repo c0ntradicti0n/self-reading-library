@@ -68,7 +68,7 @@ topics_dump = "./topics.pickle"
 markup_dir = pdf_dir
 markup_suffix = "pdflayout.html"
 
-pdf2htmlEX = "/home/finn/CLionProjects/pdf2htmlEX-1/pdf2htmlEX/build/pdf2htmlEX"
+pdf2htmlEX = "pdf2htmlEX"
 
 difference_model_train_output = hidden_folder + f"/over_{model_config}/"
 difference_model_config = hidden_folder + f"/over_{model_config}/config.json"

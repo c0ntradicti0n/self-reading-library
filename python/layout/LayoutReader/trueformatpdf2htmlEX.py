@@ -1,6 +1,8 @@
 import logging
 import os
 import pathlib
+from typing import Dict
+
 import bs4
 
 from collections import Counter, defaultdict, namedtuple
@@ -25,10 +27,12 @@ from python.layout.LayoutReader.trueformatupmarker import TrueFormatUpmarker
 
 logging.getLogger().setLevel(logging.WARNING)
 
-class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
+
+class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
     replacement_mapping_tag2tag = {
         "div": "z"
     }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, replacements=self.replacement_mapping_tag2tag, **kwargs)
 
@@ -38,17 +42,29 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
             pdf_obj = self.generate_css_tagging_document()
             yield pdf_obj
 
-    feat_regex = regex.compile(r".+? (?<word_num>\d+) (?<page_number>\d+) (?<width>-?\d+(?:\.\d+)?) (?<acsent>-?\d+(?:\.\d+)?) (?<descent>-?\d+(?:\.\d+)?) (?<x2>-?\d+(?:\.\d+)?) (?<y2>-?\d+(?:\.\d+)?)$")
+    feat_regex = regex.compile(
+        r"(?<text>.*?) ?(?<word_num>\d+) (?<page_number>\d+) (?<width>-?\d+(?:\.\d+)?) (?<acsent>-?\d+(?:\.\d+)?) (?<descent>-?\d+(?:\.\d+)?) (?<x>-?\d+(?:\.\d+)?) (?<y>-?\d+(?:\.\d+)?)$")
 
     def read_positional_data(self, path):
         with open(path, 'r', errors='ignore') as f:
-            matches = [regex.match(self.feat_regex, line).groupdict() for line in f.readlines()]
+            lines = f.readlines()
+            matches = [self.add_layoutlabel_from_text(regex.match(self.feat_regex, line.strip()).groupdict() )for line in
+                       lines]
         if not matches:
             raise IndexError
         return pandas.DataFrame(matches)
 
+    def add_layoutlabel_from_text(self, match_dict: Dict):
+        return  {
+                **{k: float(v) for k, v in match_dict.items() if k is not "text"},
+                "text": match_dict['text'],
+                "layoutlabel": next(
+                (label for label in self.label_strings[0:-1] if label in match_dict['text'].replace(" ", "")),
+                self.label_strings[-1])}
 
-    def generate_css_tagging_document(self, html_read_from="", html_write_to="", parameterizing=False, premade_features=None, premade_soup=None):
+
+    def generate_css_tagging_document(self, html_read_from="", html_write_to="", parameterizing=False,
+                                      premade_features=None, premade_soup=None):
         """
         This manipulates an html-file from the result of pdf2htmlEX, that inserts word for word tags with css ids
         to apply markup to these words only with a css-file, without changing this document again.
@@ -108,7 +124,7 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
                           for cluster, cluster_content in page_content}
             for page_number, page_content in page_cluster_lr_groups.items()
 
-            }
+        }
 
     def make_reading_sequence(self, feature_df):
         page_cluster_lr_groups = defaultdict(list)
@@ -129,7 +145,7 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
 
             page_cluster_lr_groups[page] = \
                 sorted(page_cluster_up_bottom_groups, key=lambda c: c[1].x.mean())
-        #feature_df["reading_sequence"] = list(more_itertools.flatten([cluster_content["index"].tolist()
+        # feature_df["reading_sequence"] = list(more_itertools.flatten([cluster_content["index"].tolist()
         #                                                              for page_number, page_content in
         #                                                              page_cluster_lr_groups.items()
         #                                                              for cluster, cluster_content in page_content
@@ -137,6 +153,7 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
         return page_cluster_lr_groups
 
     FeatureStuff = namedtuple("FeatureStuff", ["divs", "coords", "data", "density_field", "labels"])
+
     def extract_features(self, soup) -> FeatureStuff:
         features = pandas.DataFrame()
 
@@ -146,8 +163,8 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
 
         i = itertools.count()
         features["index"], features["page_number"], features["divs"] = \
-            list( list(x) for x in zip(*[(next(i), pn, div) for pn, divs in page_to_divs for div in divs]))
-        features["len"] = features.divs.apply(lambda div:len(div.text))
+            list(list(x) for x in zip(*[(next(i), pn, div) for pn, divs in page_to_divs for div in divs]))
+        features["len"] = features.divs.apply(lambda div: len(div.text))
 
         # Generate positional features
         self.set_css_attributes(features)
@@ -155,6 +172,7 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
         return features
 
     div_selector = 'div[class*=x]'
+
     def collect_pages_dict(self, pages):
         page_to_divs = [(page_number, page.select(self.div_selector)) for page_number, page in enumerate(pages)]
         return page_to_divs
@@ -189,39 +207,37 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
         'left': "x",
         'bottom': "y"
     }
+
     def css_class_of_tag(self, tag):
         for lookup_attribute, attr_start, in self.assinging_features_to_css_class_startswith.items():
             yield next(filter(lambda x: x.startswith(attr_start), tag.attrs['class']), None), lookup_attribute
 
     def set_css_attributes(self, features):
-        features["tag_attributes"]  = features.divs.apply(self.css_class_of_tag).apply(list)
+        features["tag_attributes"] = features.divs.apply(self.css_class_of_tag).apply(list)
         concrete_features = pandas.DataFrame(features.tag_attributes.tolist(),
-                        columns=list(self.assinging_features_to_css_class_startswith.keys()))
+                                             columns=list(self.assinging_features_to_css_class_startswith.keys()))
 
         for feature_name in concrete_features.columns:
             try:
                 features[feature_name] = concrete_features[feature_name].apply(
-                        lambda class_and_attribute: self.css_dict_lookup(class_and_attribute))
+                    lambda class_and_attribute: self.css_dict_lookup(class_and_attribute))
             except KeyError:
                 raise
 
-
-        features.rename(columns={"bottom":"y", "left":"x"}, inplace=True)
+        features.rename(columns={"bottom": "y", "left": "x"}, inplace=True)
 
     def css_dict_lookup(self, css_class_and_attribute):
         if css_class_and_attribute[0] == None:
             return -1
         return self.get_declaration_value(self.css_dict[css_class_and_attribute[0]], css_class_and_attribute[1])
 
-
-
-    def point_density_frequence_per_page (self, features, **kwargs):
+    def point_density_frequence_per_page(self, features, **kwargs):
         # map computation to pageclusters
         page_groups = features.groupby(by="page_number").apply(
             lambda page_group: self.analyse_point_density_frequence(
-                        page_group,
-                        **kwargs)
-             ).tolist()
+                page_group,
+                **kwargs)
+        ).tolist()
         other_feature_kinds_stacked = self.FeatureKinds(*list(zip(*page_groups)))
 
         self.number_columns = self.most_common_value(other_feature_kinds_stacked.number_of_columns)
@@ -231,17 +247,20 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
         features["coarse_grained_pdf"] = numpy.hstack(other_feature_kinds_stacked.coarse_grained_pdfs)
         features["fine_grained_pdf"] = numpy.hstack(other_feature_kinds_stacked.fine_grained_pdfs)
 
-        features["distance_vector"] =  [distance_vector for distance_matrix in other_feature_kinds_stacked.distances for distance_vector in distance_matrix]
-        features["angle"] =  [angle_vector for angle_matrix in other_feature_kinds_stacked.angles for angle_vector in angle_matrix]
+        features["distance_vector"] = [distance_vector for distance_matrix in other_feature_kinds_stacked.distances for
+                                       distance_vector in distance_matrix]
+        features["angle"] = [angle_vector for angle_matrix in other_feature_kinds_stacked.angles for angle_vector in
+                             angle_matrix]
         features["x_profile"] = [x_profile_vector
                                  for x_profile_vector, angle_matrix in zip(other_feature_kinds_stacked.x_profile,
-                                                             other_feature_kinds_stacked.angles) for _ in angle_matrix]
+                                                                           other_feature_kinds_stacked.angles) for _ in
+                                 angle_matrix]
 
         features["y_profile"] = [y_profile_vector
                                  for y_profile_vector, angle_matrix in zip(other_feature_kinds_stacked.y_profile,
-                                                             other_feature_kinds_stacked.angles) for _ in angle_matrix]
+                                                                           other_feature_kinds_stacked.angles) for _ in
+                                 angle_matrix]
         self.overwrite_by_labeled_document(features)
-
 
         return coarse_grained_field
 
@@ -249,7 +268,7 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
         [[0, 0], [0, config.reader_height], [config.reader_width, 0], [config.reader_width, config.reader_height]])
 
     def normalized(self, a):
-        return a/[a_line.max()-a_line.min() for a_line in a.T]
+        return a / [a_line.max() - a_line.min() for a_line in a.T]
 
     FeatureKinds = namedtuple(
         "FeatureKinds",
@@ -262,38 +281,38 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
         edges_and_points = numpy.vstack((points2d, self.edges))
         edges_and_points = self.normalized(edges_and_points)
         edges_and_points = edges_and_points[:-4]
-        indices = (edges_and_points * [axe_len_X-1, axe_len_Y-1]).astype(int)
+        indices = (edges_and_points * [axe_len_X - 1, axe_len_Y - 1]).astype(int)
 
-        dotted = numpy.zeros((100,100))
+        dotted = numpy.zeros((100, 100))
 
         try:
-            dotted [indices[:,0], indices[:,1]] = 1
+            dotted[indices[:, 0], indices[:, 1]] = 1
         except IndexError:
             logging.error("indexes wrong after index nomralisation ")
 
+        coarse_grained_field = gaussian_filter(dotted, sigma=3)
+        coarse_grained_pdfs = coarse_grained_field[indices[:, 0], indices[:, 1]]
 
-
-        coarse_grained_field =  gaussian_filter(dotted, sigma=3)
-        coarse_grained_pdfs = coarse_grained_field [indices[:,0], indices[:,1]]
-
-        fine_grained_field =  gaussian_filter(dotted, sigma=2)
-        fine_grained_pdfs = fine_grained_field [indices[:,0], indices[:,1]]
+        fine_grained_field = gaussian_filter(dotted, sigma=2)
+        fine_grained_pdfs = fine_grained_field[indices[:, 0], indices[:, 1]]
 
         distances = distance_matrix(points2d, points2d)
-        angles = angles = numpy.array([[numpy.arctan2(p2[1]-p1[1], p2[0]-p1[0]) for p1 in points2d] for p2 in points2d] )
+        angles = angles = numpy.array(
+            [[numpy.arctan2(p2[1] - p1[1], p2[0] - p1[0]) for p1 in points2d] for p2 in points2d])
 
         number_of_columns = self.number_of_columns(density2D=fine_grained_field.T)
 
         x_profile = numpy.sum(dotted, axis=0)
         y_profile = numpy.sum(dotted, axis=1)
 
-        return self.FeatureKinds(coarse_grained_pdfs, fine_grained_pdfs, coarse_grained_field, number_of_columns, distances, angles, x_profile, y_profile)
+        return self.FeatureKinds(coarse_grained_pdfs, fine_grained_pdfs, coarse_grained_field, number_of_columns,
+                                 distances, angles, x_profile, y_profile)
 
     def most_common_value(self, values, constraint=None):
         if constraint:
             test_values = [v for v in values if constraint(v)]
         else:
-            test_values =  values
+            test_values = values
         counts = Counter(test_values)
         return max(counts, key=counts.get)
 
@@ -327,24 +346,26 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
         indices = numpy.array(range(len(points)))
         # raw column sorting
 
-        left_border = min(points[:,0][points[:,0]>0.05])
-        x_sorted_points = [(int(((indexed_point[1][0] - left_border + 0.9)/(1-2*left_border) * number_of_culumns)), indexed_point)
+        left_border = min(points[:, 0][points[:, 0] > 0.05])
+        x_sorted_points = [(
+                           int(((indexed_point[1][0] - left_border + 0.9) / (1 - 2 * left_border) * number_of_culumns)),
+                           indexed_point)
                            for indexed_point in indexed_points]
 
         if not (len({t[0] for t in x_sorted_points}) == number_of_culumns):
-            logging.info ("other number of columns detexted, than sorted to")
+            logging.info("other number of columns detexted, than sorted to")
         # raw top down sorting
-        xy_sorted_points = sorted(x_sorted_points, key=lambda x:x[0]*1000 - x[1][1][1])
+        xy_sorted_points = sorted(x_sorted_points, key=lambda x: x[0] * 1000 - x[1][1][1])
 
-        y_sorted_indexed_points = [(len(points)+1,0)] + \
+        y_sorted_indexed_points = [(len(points) + 1, 0)] + \
                                   [(column_index_point_tuple[1][0], column_index_point_tuple[1][1][1])
-                                      for column_index_point_tuple
-                                      in xy_sorted_points] + \
-                                  [(len(points)+2,1)]
+                                   for column_index_point_tuple
+                                   in xy_sorted_points] + \
+                                  [(len(points) + 2, 1)]
 
         indexed_distances = [(i2, list((numpy.abs(b - a), numpy.abs(c - b))))
-                            for (i1, a), (i2, b), (i3, c)
-                            in threewise(y_sorted_indexed_points)]
+                             for (i1, a), (i2, b), (i3, c)
+                             in threewise(y_sorted_indexed_points)]
         dY = list(id[1] for id in indexed_distances)
         dI = numpy.array(list(id[0] for id in indexed_distances))
 
@@ -352,16 +373,16 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
         # replace them with the value for the textbox in the same line
         threshold = 0.3
         to_sanitize = list(enumerate(dY))
-        self.sanitize_line_distances(dY, threshold, to_sanitize, direction = 1)
-        self.sanitize_line_distances(dY, threshold, to_sanitize, direction = -1)
-
+        self.sanitize_line_distances(dY, threshold, to_sanitize, direction=1)
+        self.sanitize_line_distances(dY, threshold, to_sanitize, direction=-1)
 
         norm_distance = numpy.median(list(more_itertools.flatten(dY)))
         distance_std = norm_distance * 0.1
 
         logging.debug(f"median {norm_distance} std {distance_std}")
 
-        valid_points_at = numpy.logical_and(dY > norm_distance - distance_std, dY < norm_distance + distance_std).any(axis=1)
+        valid_points_at = numpy.logical_and(dY > norm_distance - distance_std, dY < norm_distance + distance_std).any(
+            axis=1)
         good = indices[dI[valid_points_at]]
         mask[good] = True
         column_indices = numpy.full_like(divs, 0)
@@ -373,7 +394,7 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
         dd_overwrite = 0
         if direction == 1:
             tindex = 1
-        elif direction ==-1:
+        elif direction == -1:
             tindex = 0
         for i, dyy in to_sanitize[::direction]:
             if dyy[tindex] < threshold:
@@ -393,6 +414,7 @@ class TrueFormatUpmarkerPDF2HTMLEX (TrueFormatUpmarker):
 
 
 import unittest
+
 
 class TestPaperReader(unittest.TestCase):
 
@@ -424,7 +446,7 @@ class TestPaperReader(unittest.TestCase):
             path = str(path)
             kwargs = {}
             kwargs['html_read_from'] = path
-            kwargs['html_write_to']  = path + ".computed.htm"
+            kwargs['html_write_to'] = path + ".computed.htm"
             columns = int(regex.search(r"\d", path).group(0))
 
             pdf_obj = TrueFormatUpmarkerPDF2HTMLEX(**kwargs)
@@ -457,8 +479,6 @@ class TestPaperReader(unittest.TestCase):
              'cols': 1
              },
 
-
-
             {
                 'html_read_from': 'Filipe Mesquita - KnowledgeNet: A Benchmark Dataset for Knowledge Base Population.pdf.html',
                 'html_write_to': 'Filipe Mesquita - KnowledgeNet: A Benchmark Dataset for Knowledge Base Population.pdf.pdf2htmlEX.test.html',
@@ -488,10 +508,11 @@ class TestPaperReader(unittest.TestCase):
             kwargs['html_read_from'] = config.appcorpuscook_docs_document_dir + kwargs['html_read_from']
             kwargs['html_write_to'] = config.appcorpuscook_docs_document_dir + kwargs['html_write_to']
             self.tfu_pdf.convert_and_index(**kwargs)
-            print (self.tfu_pdf.number_columns, columns)
+            print(self.tfu_pdf.number_columns, columns)
             assert self.tfu_pdf.number_columns == columns
             assert self.tfu_pdf.indexed_words
             assert os.path.exists(kwargs['html_write_to'])
+
 
 if __name__ == '__main__':
 
@@ -504,7 +525,7 @@ if __name__ == '__main__':
         kwargs = {}
         kwargs['html_read_from'] = path
         kwargs['html_write_to'] = path + ".computed.htm"
-        try :
+        try:
             columns = int(regex.search(r"\d", path).group(0))
         except:
             continue
@@ -517,4 +538,4 @@ if __name__ == '__main__':
     df.divs = df.divs.astype(str)
     df.to_pickle("data.pckl")
 
-    #unittest.main()
+    # unittest.main()
