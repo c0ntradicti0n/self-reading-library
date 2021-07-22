@@ -1,7 +1,7 @@
-from python.layouteagle.StandardConverter.Wordi2Css import Wordi2Css
-from python.layouteagle.pathant.PathAnt import PathAnt
-from python.nlp.TransformerStuff.ElmoDifference import ElmoDifference
-from python.nlp.TransformerStuff.UnPager import UnPager
+from layouteagle.StandardConverter.Wordi2Css import Wordi2Css
+from layouteagle.pathant.PathAnt import PathAnt
+from nlp.TransformerStuff.ElmoDifference import ElmoDifference
+from nlp.TransformerStuff.UnPager import UnPager
 
 a = Wordi2Css
 b = ElmoDifference

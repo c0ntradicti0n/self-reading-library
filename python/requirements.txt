@@ -39,3 +39,7 @@ scispacy
 beautifultable
 texttable
 pylcs
+git+https://github.com/c0ntradicti0n/listalign.git@master#listalign
+
+
+

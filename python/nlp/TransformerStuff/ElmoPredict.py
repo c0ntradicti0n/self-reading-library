@@ -2,12 +2,12 @@ from allennlp.common import Params
 from allennlp.predictors import Predictor
 from texttable import Texttable
 
-from python.layouteagle.pathant.PathSpec import PathSpec
+from layouteagle.pathant.PathSpec import PathSpec
 
 from allennlp.models.model import Model
 
-from python.nlp.TransformerStuff.difference_predictor.difference_predictor import DifferenceTaggerPredictor
-import python.nlp.TransformerStuff.attentivecrftagger.attentivecrftagger
+from nlp.TransformerStuff.difference_predictor.difference_predictor import DifferenceTaggerPredictor
+import nlp.TransformerStuff.attentivecrftagger.attentivecrftagger
 
 
 

@@ -4,7 +4,7 @@ from typing import List
 
 import numpy
 
-from python.helpers.nested_dict_tools import recursive_map, flatten
+from helpers.nested_dict_tools import recursive_map, flatten
 
 
 def partition_iterable(to_split, indices):

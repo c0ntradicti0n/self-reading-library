@@ -4,59 +4,42 @@ import pickle
 from typing import Dict
 
 import joblib
-import more_itertools
 import pandas
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler, Normalizer
+from sklearn.preprocessing import Normalizer
 from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
-from tensorflow.python.keras.layers import BatchNormalization, Dropout
 from tensorflow.python.keras.utils.np_utils import to_categorical
 import logging
 import pprint
 
 
-from python.helpers.list_tools import Lookup, sorted_by_zipped
-from python.layouteagle import config
-from python.layouteagle.pathant.PathSpec import PathSpec
+from helpers.list_tools import Lookup, sorted_by_zipped
+from layouteagle import config
+from layouteagle.pathant.PathSpec import PathSpec
 
 
 
 class LayoutModeler(PathSpec):
     train_kwargs = {
-        'dropout': {'rate': 0.01,
+        'dropout': {'rate': 0.3,
                     'dtype': 'float64'},
-        'dense0': {'units': 44,
+        **{f'dense_{i}': {'units': 50,
                    'trainable': True,
                    'activation': 'swish',
-                   'dtype': 'float64'},
-        'dense1': {'units': 27,
-                   'trainable': True,
-                   'activation': 'swish',
-                   'dtype': 'float64'},
-        'dense2': {'units': 17,
-                   'trainable': True,
-                   'activation': 'swish',
-                   'dtype': 'float64'},
-        'dense3': {'units': 10,
-                   'trainable': True,
-                   'activation': 'swish',
-                   'dtype': 'float64'},
-        'dense4': {'units': 7,
-                   'trainable': True,
-                   'activation': 'swish',
-                   'dtype': 'float64'},
+                   'dtype': 'float64'} for i in range(0, 10)},
         'denseE': { # 'units' are set by us self to the necessary value
                    'trainable': True,
                    'activation': 'softmax',
                    'dtype': 'float64'},
         'adam': {'lr': 0.0005},
-        'epochs': 200,
-        'batch_size': 320,
-        'patience': 3,
+        'epochs': 1000,
+        'batch_size': 3000,
+        'patience': 30,
         'labels': 'layoutlabel',
-        'cols_to_use': ['width', 'ascent', 'descent', 'x1', 'x2']#['x', 'y', 'height', 'font-size', 'len', "spans_no",
-                       # 'fine_grained_pdf', 'coarse_grained_pdf','line-height']
+        'cols_to_use': ['width', 'ascent', 'descent', 'x1', 'y1', 'x2', 'y2', 'dxy1', 'dxy2',
+       'dxy3', 'dxy4', 'sin1', 'sin2', 'sin3', 'sin4', 'probsin1', 'probsin2',
+       'probsin3', 'probsin4', 'probascent', 'probdescent']
     }
 
     def __init__(self,
@@ -86,7 +69,7 @@ class LayoutModeler(PathSpec):
 
             feature_df['layoutlabel'] = self.label_lookup(token_s=feature_df.layoutlabel.tolist())
 
-        """
+
         feature_df = self.prepare_df(feature_df, training=training)
 
         norm_cols = [col for col in self.cols_to_use if col != self.train_kwargs['labels']]
@@ -106,7 +89,7 @@ class LayoutModeler(PathSpec):
                 feature_df[col] = feature_df[col] / feature_df[col].max()
 
         feature_df = feature_df.fillna(0)
-        """
+
 
         if training:
             train, test = train_test_split(feature_df, test_size=0.2)
@@ -124,14 +107,14 @@ class LayoutModeler(PathSpec):
         feature_columns = []
 
         # remove the labels, that were put in the df temporarily
-        #self.cols_to_use = [col for col in self.cols_to_use if col != self.train_kwargs['labels']]
+        self.cols_to_use = [col for col in self.cols_to_use if col != self.train_kwargs['labels']]
 
         # all are numeric cols
-        #for header in self.cols_to_use:
-        #    feature_columns.append(tf.feature_column.numeric_column(header))
+        for header in self.cols_to_use:
+            feature_columns.append(tf.feature_column.numeric_column(header))
 
-        #as_numpy = feature_df[self.cols_to_use].to_numpy()
-        return feature_df, feature_df.to_numpy()
+        as_numpy = feature_df[self.cols_to_use].to_numpy()
+        return feature_columns, feature_df.to_numpy()
 
     # A utility method to create a tf.data dataset from a Pandas Dataframe
     def df_to_dataset(self, dataframe, shuffle=True, batch_size=None, training=True):
@@ -161,8 +144,10 @@ class LayoutModeler(PathSpec):
 
     def prepare_df(self, feature_df, training=True):
         self.cols_to_use = self.train_kwargs['cols_to_use'] + [self.train_kwargs['labels']] #([self.train_kwargs['labels']] if training else [])
+
         feature_df = feature_df.reset_index(drop=True)
 
+        """
         N = 7
 
         distance_col_prefix = 'd_'
@@ -191,7 +176,7 @@ class LayoutModeler(PathSpec):
 
         self.cols_to_use = self.cols_to_use + [col for col in feature_df.columns if
                              any(col.startswith(prefix) for prefix in [distance_col_prefix, angle_col_prefix, x_profile_col_prefix, y_profile_col_prefix])]
-
+"""
 
         if training:
             feature_df = feature_df.sample(frac=1).reset_index(drop=True)
@@ -223,15 +208,8 @@ class LayoutModeler(PathSpec):
 
         self.model = tf.keras.Sequential([
             feature_layer,
-
-            tf.keras.layers.Dense(**self.train_kwargs['dense0']),
-            tf.keras.layers.Dense(**self.train_kwargs['dense1']),
-            tf.keras.layers.Dense(**self.train_kwargs['dense2']),
-            tf.keras.layers.Dense(**self.train_kwargs['dense3']),
-            tf.keras.layers.Dense(**self.train_kwargs['dense4']),
-
+            *[tf.keras.layers.Dense(**v) for k, v in self.train_kwargs.items() if "dense_" in k],
             tf.keras.layers.Dense(units=len(self.label_set), **self.train_kwargs['denseE']),
-            #tf.keras.layers.Dropout(**self.train_kwargs['dropout']),
 
         ])
 
@@ -274,13 +252,10 @@ class LayoutModeler(PathSpec):
     def predict(self, feature_df):
         self.prepare_features(feature_df, training=False)
         pred = self.model.predict(self.predict_ds)
-        #indices = [i for i, v in enumerate(pred) if pred[i] != y_test[i]]
-        #subset_of_wrongly_predicted = [x_test[i] for i in indices]
         pred = tf.argmax(pred, axis=-1)
-        return pred #self.model.predict_classes(self.predict_ds, batch_size=len(feature_df), verbose=100)
+        return pred
 
     def save(self):
-        #self.model.load_weights(self.model_path)
         self.model.save(self.model_path + ".kerasmodel")
         with open(self.lookup_path, "wb") as f:
             pickle.dump(self.label_lookup,f)
@@ -292,9 +267,11 @@ class LayoutModeler(PathSpec):
                 self.model = tf.keras.models.load_model (self.model_path)
 
             if not hasattr(self, "label_lookup"):
+                print (os.getcwd() + "->" + self.lookup_path)
                 with open(self.lookup_path, "rb") as f:
                     self.label_lookup = pickle.load(f)
-            else:
+
+            if not hasattr(self, "label_lookup") and not hasattr(self, "lookup_path") :
                 raise ValueError(f"No lookup table could be loaded from {self.lookup_path} (cwd= {os.getcwd()}")
 
         except OSError as e:

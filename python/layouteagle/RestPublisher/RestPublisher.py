@@ -1,10 +1,10 @@
 
 import os
 
-from python.layouteagle.RestPublisher.Resource import Resource
-from python.layouteagle.RestPublisher.react import react
-from python.layouteagle.pathant.PathAnt import PathAnt
-from python.layouteagle.pathant.PathSpec import PathSpec
+from layouteagle.RestPublisher.Resource import Resource
+from layouteagle.RestPublisher.react import react
+from layouteagle.pathant.PathAnt import PathAnt
+from layouteagle.pathant.PathSpec import PathSpec
 
 from flask import jsonify, Blueprint
 

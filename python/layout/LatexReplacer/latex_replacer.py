@@ -6,20 +6,20 @@ from collections import defaultdict, OrderedDict
 from itertools import cycle
 from random import randint
 from threading import Timer
-
-import ray
 from TexSoup import TexSoup, TexNode
 from TexSoup.data import TexEnv, TexCmd, TexText, BracketGroup, BraceGroup
 from TexSoup.utils import Token
 
-from python.helpers.cache_tools import file_persistent_cached_generator
-from python.layout.LatexReplacer import multicol_defs
-from python.layout.LatexReplacer.replacer import SoupReplacer
-from python.helpers.os_tools import get_path_filename_extension
+from helpers.cache_tools import file_persistent_cached_generator
+from layout.LatexReplacer import multicol_defs
+from layout.LatexReplacer.replacer import SoupReplacer
+from helpers.os_tools import get_path_filename_extension
 from regex import regex
 
-from python.layouteagle.pathant.Converter import converter
-from python.layouteagle.pathant.parallel import paraloop
+from layouteagle import config
+from layouteagle.pathant.Converter import converter
+from layouteagle.pathant.parallel import paraloop
+
 
 @converter("tex", "labeled.pdf")
 class LatexReplacer(SoupReplacer):
@@ -52,7 +52,7 @@ class LatexReplacer(SoupReplacer):
         self.allowed_oargs = ['title', 'author', 'section', 'item']
         self.forbidden_nargs = ['@sanitize', '@', "baselineskip", 'pdfoutput', 'vskip', 'topmargin', 'oddsidemargin',
                                 'binoppenalty', 'def', 'href', 'providecommand', 'csname', "parindent", "parskip",
-                                "font", 'textsl'
+                                "font", 'textsl', 'headheight', 'headsep', 'textwidth', 'textheight'
                                 "pdfminorversion"]
         self.skip_commands = self.forbidden_nargs
         self.forbidden_envs = ["$", "tikzpicture", "eqnarray", "equation", "tabular", 'eqsplit', 'subequations', 'picture']
@@ -76,27 +76,10 @@ class LatexReplacer(SoupReplacer):
         else:
             insert_index = 7
 
-        """if any(arg in file_content for arg in ["spconf", "lrec", "ieeeconf", "IEEEtran", "acmart", "twocolumn", "acl2020", "ansmath"]):
-            soup.insert(insert_index, twocolumn_defs.defs)
-            # TODO put multicol begin after first section(!) of doc and the rest to the end
-
-            document_environment = soup.document.expr._contents
-            document_environment.insert(0, twocolumn_defs.multicol_begin)
-            document_environment.append(twocolumn_defs.multicol_end)
-
-            return r"cc \currentcolumn{}"
-        elif "multicol{" in file_content:"""
-
-        orig_twocolumn = any(arg in file_content for arg in
-                             ["lrec", "ieeeconf", "IEEEtran", "acmart", "twocolumn", "acl2020", "ansmath", 'svjour',
-                              'revtex4'])
-
         if col_num > 1:
             # start in document environment
-            if orig_twocolumn:
-                insert_definitions = "\n\onecolumn\n" + multicol_defs.defs
-            else:
-                insert_definitions = multicol_defs.defs
+
+            insert_definitions = multicol_defs.defs
             soup.insert(insert_index, insert_definitions)
 
             # make title should be before
@@ -114,41 +97,43 @@ class LatexReplacer(SoupReplacer):
             else:
                 maketitle_index = 0
 
-            # when its twocolumn layout
-            if orig_twocolumn:
-                col_num = 2
-
             # begin and end multicol environment
             document_environment.insert(maketitle_index, multicol_defs.multicol_begin % str(col_num))
             document_environment.append(multicol_defs.multicol_end)
 
-            return r"cc \currentcolumn{}"
+            return r"\currentcolumn{}c"
         else:
-            # normal fill text
-            if orig_twocolumn:
-                insert_definitions = "\n\onecolumn\n"
-            else:
-                insert_definitions = multicol_defs.defs
-            soup.insert(insert_index, insert_definitions)
+            return r"1c{}"
 
-            logging.info("No multi column instruction found, so its single col")
-            return r"cc 1"
-
-    #@file_persistent_cached_generator(config.cache + 'replaced_tex_paths.json')
-    @paraloop
+    @file_persistent_cached_generator(
+        config.cache + 'replaced_tex_paths.json',
+        if_cache_then_finished=True#,
+        #"""load_via_glob=[
+        #    config.tex_data + "**/*.tex1.labeled.pdf",
+        #
+        #    config.tex_data + "**/*.tex2.labeled.pdf",
+        #    config.tex_data + "**/*.tex3.labeled.pdf",
+        #]"""
+)
+    #@paraloop
     def __call__(self, paths, compile=True, *args, **kwargs):
         """
         :param path_to_read_from:
         """
-        with open(".layouteagle/log/unreplace.list", "w") as ur:
 
-            for path_to_read_from, meta in paths:
-                new_pdf_paths = self.work(path_to_read_from)
+        for path_to_read_from, meta in paths:
+            if any(stuff in path_to_read_from for stuff in ["labeled"]):
+                continue
+            new_pdf_paths = self.work(path_to_read_from)
+
+            with open(".layouteagle/log/unreplace.list", "a") as ur:
                 if new_pdf_paths and len(new_pdf_paths):
                     if new_pdf_paths:
                         yield from [(new_pdf_path, meta) for new_pdf_path in new_pdf_paths]
                     else:
-                        ur.write(path_to_read_from + "\n")
+                        ur.write("all replacements were not a list of replacements: " + path_to_read_from + "\n")
+                else:
+                    ur.write("no replacement could be compiled: " + path_to_read_from + "\n")
 
     def append_expression(self, possible_part_string, replaced_contents):
         replaced_contents.append(possible_part_string)
@@ -361,7 +346,6 @@ class LatexReplacer(SoupReplacer):
 
     def work(self, path_to_read_from, compiling=True, inputing=False):
         cwd = os.getcwd()
-        path, filename, extension, filename_without_extension = get_path_filename_extension(path_to_read_from)
 
         try:
             path_to_read_from = path_to_read_from.replace(" ", "")

@@ -12,9 +12,9 @@ import more_itertools
 import numpy
 from regex import regex
 
-from python.layouteagle import config
-from python.layout.LatexReplacer.replacer import SoupReplacer
-from python.layout.LayoutReader.pdf import Pdf
+from layouteagle import config
+from layout.LatexReplacer.replacer import SoupReplacer
+from layout.LayoutReader.pdf import Pdf
 
 
 class TrueFormatUpmarker(SoupReplacer):
@@ -152,7 +152,7 @@ class TrueFormatUpmarker(SoupReplacer):
         return self.IndexedWordTag(self.id, word, tag)
 
     label_strings = \
-        ["cc1", "cc2", "cc3", "NONE"]
+        ["c1", "c2", "c3", "NONE"]
     def check_for_label_in_string(self, text):
         contained_labels = [s for s in self.label_strings if s in text.lower().replace(" ", "")]
         if contained_labels:

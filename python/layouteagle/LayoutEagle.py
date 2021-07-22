@@ -1,40 +1,43 @@
 import glob
 import os
 from pprint import pprint
-
-import ray
-
-from python.layouteagle import config
-from python.layouteagle.pathant.PathAnt import PathAnt
 import sys
+sys.path.append(".")
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+print(sys.path)
+import layouteagle.config
+from layouteagle.pathant.PathAnt import PathAnt
 
 class LayoutEagle:
 
-    from python.layout.ScienceTexScraper.scrape import ScienceTexScraper
-    from python.layout.LatexReplacer.latex_replacer import LatexReplacer
-    from python.layout.LayoutReader.labeled_feature_maker import TrueFormatUpmarkerPDF2HTMLEX
-    from python.layout.LayoutReader.feature_label_assigner import TrueFormatUpmarkerPDF2HTMLEX
-    from python.layout.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
-    from python.layout.LayoutReader.feature_prediction import LayoutPrediction
-    from python.layout.LayoutReader.MarkupDocument import MarkupDocument
-    from python.layout.LayoutReader.feature2features import Feature2Features
-    from python.layout.LayoutModel.layouttrain import LayoutTrainer
-    from python.layout.LayoutModel.layoutpredict import LayouPredictor
+    from layout.ScienceTexScraper.scrape import ScienceTexScraper
+    from layout.LatexReplacer.latex_replacer import LatexReplacer
+    from layout.LayoutReader.labeled_feature_maker import TrueFormatUpmarkerPDF2HTMLEX
+    from layout.LayoutReader.feature_label_assigner import TrueFormatUpmarkerPDF2HTMLEX
+    from layout.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
+    from layout.LayoutReader.feature_prediction import LayoutPrediction
+    from layout.LayoutReader.MarkupDocument import MarkupDocument
+    from layout.LayoutReader.feature2features import Feature2Features
+    from layout.LayoutModel.layouttrain import LayoutTrainer
+    from layout.LayoutModel.layoutpredict import LayouPredictor
 
-    from python.layout.LayoutReader.HTML2PDF import HTML2PDF
-    from python.layout.LayoutReader.PDF2ETC import PDF2ETC
+    from layout.LayoutReader.HTML2PDF import HTML2PDF
+    from layout.LayoutReader.PDF2ETC import PDF2ETC
 
-    from python.layout.LayoutReader.PDF2HTML import PDF2HTML
+    from layout.LayoutReader.PDF2HTML import PDF2HTML
 
-    from python.layouteagle.StandardConverter.Dict2Graph import Dict2Graph
-
-
+    from layouteagle.StandardConverter.Dict2Graph import Dict2Graph
+    from layouteagle.StandardConverter.Wordi2Css import Wordi2Css
+    from layouteagle.pathant.PathAnt import PathAnt
+    from nlp.TransformerStuff.ElmoDifference import ElmoDifference
+    from nlp.TransformerStuff.Pager import Pager
+    from nlp.TransformerStuff.UnPager import UnPager
 
     def __init__(self):
         self.ant = PathAnt()
         print (self.ant.graph())
         self.model_pipe = self.ant("arxiv.org", "keras")
-        self.prediction_pipe = self.ant("pdf", "layout.html")
+        self.prediction_pipe = self.ant("pdf", "css.layout")
 
     def test_topics(self):
         pdfs = [file for file in glob.glob(config.pdf_dir + "*.pdf")]
@@ -66,4 +69,5 @@ if __name__=="__main__":
     #print(list(AntPublisher([123])))
     #le.test_topics()
     le.make_model()
+    os.system(f'cp -r {config.hidden_folder + "/layoutmodel.kerasmodel"} {config.hidden_folder + "/layout_model"}')
     le.test_prediction()

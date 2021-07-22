@@ -1,8 +1,4 @@
 import itertools
-import ray
-
-ray.shutdown()
-
 
 class Pipeline:
     def __init__(self, pipeline, source, target, extra_paths):

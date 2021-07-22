@@ -13,4 +13,3 @@ addict
 tensorflow==1.14
 ordered_set
 guppy3
-

@@ -4,8 +4,8 @@ from pprint import pprint
 from Levenshtein._levenshtein import distance
 from diff_match_patch import diff_match_patch
 
-from python.listalign.helpers import alignment_table
-from python.listalign.suffixtreealign import suffix_align
+from listalign.helpers import alignment_table
+from listalign.suffixtreealign import suffix_align
 
 def equalize_seqs(seq_a, seq_b, s, moves):
     print(seq_a)

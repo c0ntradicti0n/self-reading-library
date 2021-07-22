@@ -1,22 +1,32 @@
 import functools
 import json
 import logging
-import os
-from pprint import pprint
-
+from glob import glob
 import falcon
+import os
 
 
-def file_persistent_cached_generator(filename, if_cache_then_finished=False, if_cached_then_forever=False):
-
+def file_persistent_cached_generator(
+        filename,
+        load_via_glob=None,
+        if_cache_then_finished=False,
+        if_cached_then_forever=False):
     def decorator(original_func):
 
-        def new_func(*param):
+        def new_func(*param, load_via_glob=load_via_glob):
             cwd = os.getcwd()
 
             try:
                 with open(filename, 'r') as f:
                     cache = list(f.readlines())
+
+                if load_via_glob:
+                    if isinstance(load_via_glob, str):
+                        load_via_glob = [load_via_glob]
+
+                    cache = [f'["{fp}", {"{}"} ]' for path in load_via_glob for fp in glob(path)]
+
+                    print(cache)
 
                 cache = [tuple(json.loads(line)) for line in cache]
                 cache = [(a if not isinstance(a, list) else tuple(a), b) for a, b in cache]
@@ -161,5 +171,3 @@ def uri_with_cache(fun):
         resp.body = json.dumps({"response": memory_caches[(fun, req)], "status": resp.status})
 
     return replacement_fun
-
-

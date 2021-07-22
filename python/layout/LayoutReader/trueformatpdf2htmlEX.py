@@ -20,10 +20,10 @@ import seaborn as sns
 import regex
 from scipy.spatial import distance_matrix
 
-from python.layouteagle import config
-from python.helpers.list_tools import threewise
+from layouteagle import config
+from helpers.list_tools import threewise
 
-from python.layout.LayoutReader.trueformatupmarker import TrueFormatUpmarker
+from layout.LayoutReader.trueformatupmarker import TrueFormatUpmarker
 
 logging.getLogger().setLevel(logging.WARNING)
 
@@ -43,25 +43,32 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
             yield pdf_obj
 
     feat_regex = regex.compile(
-        r"(?<text>.*?) ?(?<word_num>\d+) (?<page_number>\d+) (?<width>-?\d+(?:\.\d+)?) (?<acsent>-?\d+(?:\.\d+)?) (?<descent>-?\d+(?:\.\d+)?) (?<x>-?\d+(?:\.\d+)?) (?<y>-?\d+(?:\.\d+)?)$")
+        r"(?<text>.*?) ?(?<word_num>\d+) (?<page_number>\d+) (?<width>-?\d+(?:\.\d+)?) (?<ascent>-?\d+(?:\.\d+)?) (?<descent>-?\d+(?:\.\d+)?) (?<x>-?\d+(?:\.\d+)?) (?<y>-?\d+(?:\.\d+)?)$")
 
     def read_positional_data(self, path):
         with open(path, 'r', errors='ignore') as f:
             lines = f.readlines()
-            matches = [self.add_layoutlabel_from_text(regex.match(self.feat_regex, line.strip()).groupdict() )for line in
-                       lines]
+            matches = [match for match in self.add_layoutlabel_from_text(lines)]
         if not matches:
             raise IndexError
         return pandas.DataFrame(matches)
 
-    def add_layoutlabel_from_text(self, match_dict: Dict):
-        return  {
-                **{k: float(v) for k, v in match_dict.items() if k is not "text"},
-                "text": match_dict['text'],
-                "layoutlabel": next(
-                (label for label in self.label_strings[0:-1] if label in match_dict['text'].replace(" ", "")),
-                self.label_strings[-1])}
+    def add_layoutlabel_from_text(self, lines):
+        for line in lines:
+            match = regex.match(self.feat_regex, line)
+            if match:
+                match_dict = match.groupdict()
 
+                try:
+                    yield {
+                        **{k: float(v) for k, v in match_dict.items() if k != "text"},
+                        "text": match_dict['text'],
+                        "layoutlabel": next(
+                            (label for label in self.label_strings[0:-1] if
+                             label in match_dict['text'].replace(" ", "")),
+                            self.label_strings[-1])}
+                except Exception as e:
+                    raise e
 
     def generate_css_tagging_document(self, html_read_from="", html_write_to="", parameterizing=False,
                                       premade_features=None, premade_soup=None):
@@ -120,7 +127,7 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
 
     def make_text_per_page(self, page_cluster_lr_groups):
         self.pdf_obj.pages_to_column_to_text = {
-            page_number: {cluster: " ".join([div.text for div in cluster_content["divs"].tolist()])
+            page_number: {cluster: cluster_content["text"]
                           for cluster, cluster_content in page_content}
             for page_number, page_content in page_cluster_lr_groups.items()
 
@@ -348,9 +355,9 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
 
         left_border = min(points[:, 0][points[:, 0] > 0.05])
         x_sorted_points = [(
-                           int(((indexed_point[1][0] - left_border + 0.9) / (1 - 2 * left_border) * number_of_culumns)),
-                           indexed_point)
-                           for indexed_point in indexed_points]
+            int(((indexed_point[1][0] - left_border + 0.9) / (1 - 2 * left_border) * number_of_culumns)),
+            indexed_point)
+            for indexed_point in indexed_points]
 
         if not (len({t[0] for t in x_sorted_points}) == number_of_culumns):
             logging.info("other number of columns detexted, than sorted to")

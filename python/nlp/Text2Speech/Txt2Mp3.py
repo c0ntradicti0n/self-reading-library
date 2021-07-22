@@ -1,10 +1,10 @@
 import os
 from pprint import pprint
 
-from python.ant import Ant
-from python.layouteagle.pathant.Converter import converter
-from python.layouteagle.pathant.PathAnt import PathAnt
-from python.layouteagle.pathant.PathSpec import cache_flow
+from ant import Ant
+from layouteagle.pathant.Converter import converter
+from layouteagle.pathant.PathAnt import PathAnt
+from layouteagle.pathant.PathSpec import cache_flow
 
 
 @converter('txt', 'mp3')

@@ -3,9 +3,9 @@ import json
 
 from diff_match_patch import diff_match_patch
 
-from python.nlp.NlpUtils.listalign.helpers import preprocess, alignment_table, str_in_list_at, find_pos_at, AlignmentException
-from python.nlp.NlpUtils.listalign.join_astar import lcs
-from python.nlp.NlpUtils.listalign.suffixtreealign import suffix_align
+from nlp.NlpUtils.listalign.helpers import preprocess, alignment_table, str_in_list_at, find_pos_at, AlignmentException
+from nlp.NlpUtils.listalign.join_astar import lcs
+from nlp.NlpUtils.listalign.suffixtreealign import suffix_align
 
 
 def fuzzyalign(seq_a, seq_b):

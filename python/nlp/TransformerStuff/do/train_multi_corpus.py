@@ -6,9 +6,9 @@ import torch
 from _jsonnet import evaluate_file
 from allennlp.common.file_utils import cached_path
 from allennlp.common.params import parse_overrides, _environment_variables, with_fallback
-from python.nlp.TransformerStuff.attentivecrftagger.attentivecrftagger import AttentiveCrfTagger
+from nlp.TransformerStuff.attentivecrftagger.attentivecrftagger import AttentiveCrfTagger
 
-from python.layouteagle import config
+from layouteagle import config
 models = ['over'] #, 'over']
 
 import os

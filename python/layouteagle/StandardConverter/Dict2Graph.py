@@ -2,11 +2,11 @@ from pprint import pprint
 
 from numpy.core.multiarray import ndarray
 
-from python.ant import Ant
-from python.layouteagle import config
-from python.helpers.nested_dict_tools import type_spec
-from python.layouteagle.pathant.Converter import converter
-from python.layouteagle.pathant.PathSpec import cache_flow
+from ant import Ant
+from layouteagle import config
+from helpers.nested_dict_tools import type_spec
+from layouteagle.pathant.Converter import converter
+from layouteagle.pathant.PathSpec import cache_flow
 import networkx as nx
 
 

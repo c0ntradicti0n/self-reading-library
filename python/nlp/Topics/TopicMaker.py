@@ -6,7 +6,7 @@ import nltk
 from nltk.corpus import stopwords
 from sklearn import mixture, decomposition
 
-from python.layouteagle import config
+from layouteagle import config
 
 from nltk.corpus import wordnet as wn
 import numpy as np
@@ -15,8 +15,8 @@ import spacy
 
 from allennlp.modules.elmo import Elmo, batch_to_ids
 
-from python.layouteagle.StandardConverter.Dict2Graph import Dict2Graph
-from python.nlp.Topics.TextRank4Keywords import TextRank4Keyword
+from layouteagle.StandardConverter.Dict2Graph import Dict2Graph
+from nlp.Topics.TextRank4Keywords import TextRank4Keyword
 
 
 class TopicMaker:

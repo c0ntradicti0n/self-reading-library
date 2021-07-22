@@ -6,7 +6,7 @@ import more_itertools
 from collections import Counter
 from typing import Dict, List, Any
 
-from python.helpers.nested_dict_tools import flatten
+from helpers.nested_dict_tools import flatten
 
 conll_line = re.compile(r"([^\s]+)  ([^\s]+)  ([^\s]+)  ([^\s]+)")
 only_abc = re.compile('[^a-zA-Z0-9]|_')

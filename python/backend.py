@@ -1,12 +1,11 @@
 from pprint import pprint
 from time import sleep
-
 import falcon
-
 import logging
 
-logging.basicConfig()
+from layouteagle.RestPublisher.LayoutPublisher import LayoutPublisher
 
+logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 
 if __name__ == "__main__":
@@ -42,15 +41,16 @@ else:
         [get_children(node) for node in api._router._roots]
         return routes_list
 
-    from python.layouteagle.RestPublisher.MarkupPublisher import MarkupPublisher
-    from python.layouteagle.pathant.AntPublisher import AntPublisher
-    # from python.nlp.Topics.TopicsPublisher import TopicsPublisher
-    from python.controlflow import CachePublisher
+    from layouteagle.RestPublisher.DifferencePublisher import DifferencePublisher
+    from layouteagle.pathant.AntPublisher import AntPublisher
+    # from nlp.Topics.TopicsPublisher import TopicsPublisher
+    from controlflow import CachePublisher
 
-    from python.layouteagle.LayoutEagle import LayoutEagle
+    from layouteagle.LayoutEagle import LayoutEagle
 
     publishing = {
-        '/markup': MarkupPublisher,
+        '/layout': LayoutPublisher,
+        '/difference': DifferencePublisher,
         # '/topics': TopicsPublisher,
         '/ant': AntPublisher,
         '/cache': CachePublisher,

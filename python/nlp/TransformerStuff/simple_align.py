@@ -4,7 +4,7 @@ import logging
 
 from fastDamerauLevenshtein import damerauLevenshtein
 
-from python.layouteagle.pathant.logger import setup_logging
+from layouteagle.pathant.logger import setup_logging
 
 setup_logging(default_level=logging.DEBUG)
 logger = logging.getLogger(__name__)

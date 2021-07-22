@@ -1,8 +1,8 @@
-from python.helpers.os_tools import cwd_of
-from python.layouteagle import config
-from python.layout.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
-from python.helpers.cache_tools import file_persistent_cached_generator
-from python.layouteagle.pathant.Converter import converter
+from helpers.os_tools import cwd_of
+from layouteagle import config
+from layout.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
+from helpers.cache_tools import file_persistent_cached_generator
+from layouteagle.pathant.Converter import converter
 
 
 @converter(["labeled.pdf", "pdf"], "htm")
@@ -12,7 +12,7 @@ class PDF2HTML(TrueFormatUpmarkerPDF2HTMLEX):
         self.n = n
         self.debug = debug
 
-    @file_persistent_cached_generator(config.cache + 'pdf2html.json', )
+    @file_persistent_cached_generator(config.cache + 'pdf2html.json' )
     def __call__(self, labeled_paths, *args, **kwargs):
         print("PDF2HTML" + str(labeled_paths))
         for doc_id, (pdf_path, meta) in enumerate(labeled_paths):

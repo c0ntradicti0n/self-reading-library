@@ -1,36 +1,36 @@
 import json
 
-from python.layouteagle import config
-from python.layouteagle.RestPublisher.Resource import Resource
-from python.layouteagle.RestPublisher.RestPublisher import RestPublisher
-from python.helpers.cache_tools import uri_with_cache
-from python.layouteagle.pathant.Converter import converter
+from layouteagle import config
+from layouteagle.RestPublisher.Resource import Resource
+from layouteagle.RestPublisher.RestPublisher import RestPublisher
+from helpers.cache_tools import uri_with_cache
+from layouteagle.pathant.Converter import converter
 
-from python.layouteagle.StandardConverter.Wordi2Css import Wordi2Css
-from python.layouteagle.pathant.PathAnt import PathAnt
-from python.nlp.TransformerStuff.ElmoDifference import ElmoDifference
-from python.nlp.TransformerStuff.Pager import Pager
-from python.nlp.TransformerStuff.UnPager import UnPager
+from layouteagle.StandardConverter.Wordi2Css import Wordi2Css
+from layouteagle.pathant.PathAnt import PathAnt
+from nlp.TransformerStuff.ElmoDifference import ElmoDifference
+from nlp.TransformerStuff.Pager import Pager
+from nlp.TransformerStuff.UnPager import UnPager
 
 
-@converter("html", "rest_markup")
-class MarkupPublisher(RestPublisher):
-    from python.layout.LayoutReader.PDF2ETC import PDF2ETC
-    from python.layouteagle.StandardConverter.Wordi2Css import Wordi2Css
-    from python.nlp.TransformerStuff.ElmoDifference import ElmoDifference
-    from python.nlp.TransformerStuff.Pager import Pager
-    from python.nlp.TransformerStuff.UnPager import UnPager
+class PdfCssPublisher(RestPublisher):
+    from layout.LayoutReader.PDF2ETC import PDF2ETC
+    from layouteagle.StandardConverter.Wordi2Css import Wordi2Css
+    from nlp.TransformerStuff.ElmoDifference import ElmoDifference
+    from nlp.TransformerStuff.Pager import Pager
+    from nlp.TransformerStuff.UnPager import UnPager
 
     def __init__(self,
-                 *args,
-                 **kwargs):
+                 *args, kind= None,
+                 **kwargs ):
         super().__init__(*args, **kwargs, resource=Resource(
-            title="Markup",
+            title=kind,
             type="html",
-            path="markup",
-            route="markup",
+            path=kind,
+            route=kind,
             access={"fetch": True, "read": True, "upload": True, "correct": True, "delete": True}))
         self.dir = config.markup_dir
+        self.kind = kind
 
         # pdf -> wordi
         #     -> wordi.page
@@ -41,9 +41,10 @@ class MarkupPublisher(RestPublisher):
 
     @uri_with_cache
     def on_post(self, req, resp):
+        print (f"KIN{self.kind}")
 
         self.html_pipeline = self.ant("pdf", "htm")
-        self.css_pipeline = self.ant("pdf", "css.difference")
+        self.css_pipeline = self.ant("pdf", f"css.{self.kind}")
 
         try:
             id = json.loads(req.stream.read())

@@ -1,8 +1,8 @@
 import os
 
-from python.layout.LayoutModel.layoutmodel import LayoutModeler
+from layout.LayoutModel.layoutmodel import LayoutModeler
 import logging
-from python.layouteagle.pathant.Converter import converter
+from layouteagle.pathant.Converter import converter
 
 
 @converter("features", "keras")

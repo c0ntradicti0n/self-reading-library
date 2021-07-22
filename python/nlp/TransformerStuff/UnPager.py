@@ -1,10 +1,8 @@
 import copy
-from collections import defaultdict
-
-from python.layouteagle.pathant.Converter import converter
-from python.layouteagle.pathant.PathSpec import PathSpec
-from python.nlp.NlpUtils.listalign.fuzzyalign import fuzzyalign
-from python.nlp.NlpUtils.listalign.helpers import alignment_table
+from layouteagle.pathant.Converter import converter
+from layouteagle.pathant.PathSpec import PathSpec
+from nlp.NlpUtils.listalign.fuzzyalign import fuzzyalign
+from nlp.NlpUtils.listalign.helpers import alignment_table
 
 
 @converter("wordi.page.*", 'wordi.*')

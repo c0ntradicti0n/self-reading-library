@@ -6,15 +6,15 @@ from pprint import pprint
 import wordninja
 from regex import regex
 
-from python.layouteagle.RestPublisher.Resource import Resource
-from python.layouteagle.RestPublisher.RestPublisher import RestPublisher
-from python.layouteagle.RestPublisher.react import react
-from python.layouteagle.StandardConverter.Dict2Graph import Dict2Graph
-from python.nlp.Topics.TopicMaker import TopicMaker
-from python.layouteagle import config
-from python.helpers.cache_tools import file_persistent_cached_generator, uri_with_cache
-from python.helpers.nested_dict_tools import type_spec_iterable
-from python.layouteagle.pathant.Converter import converter
+from layouteagle.RestPublisher.Resource import Resource
+from layouteagle.RestPublisher.RestPublisher import RestPublisher
+from layouteagle.RestPublisher.react import react
+from layouteagle.StandardConverter.Dict2Graph import Dict2Graph
+from nlp.Topics.TopicMaker import TopicMaker
+from layouteagle import config
+from helpers.cache_tools import file_persistent_cached_generator, uri_with_cache
+from helpers.nested_dict_tools import type_spec_iterable
+from layouteagle.pathant.Converter import converter
 
 
 @converter("wordi", "topics.dict")

@@ -5,9 +5,10 @@ sys.path.append(os.getcwd())
 
 logging_config = '/home/finn/PycharmProjects/LayoutEagle/python/logging.yaml'
 model_config = "elmo_lstm3_feedforward4_crf_straight.config"
-
+jobs = 16
 #"elmo_multi_head_self_attention_crf_straight_fitter.config"
 parse_pdf2htmlEX = True
+n_layout_training_documents = 500
 max_windows_per_text = 100
 recursive = True
 max_len = 200

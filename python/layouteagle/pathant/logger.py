@@ -4,7 +4,7 @@ import logging.config
 import logging
 import coloredlogs
 
-from python.layouteagle.config import logging_config
+from layouteagle.config import logging_config
 
 
 def setup_logging(default_path=logging_config, default_level=logging.INFO, env_key='LOG_CFG'):

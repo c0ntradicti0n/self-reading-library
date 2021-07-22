@@ -1,11 +1,11 @@
 import os
 from typing import List
 
-from python.helpers.cache_tools import uri_with_cache
-from python.layouteagle import config
-from python.layouteagle.RestPublisher.Resource import Resource
-from python.layouteagle.RestPublisher.RestPublisher import RestPublisher
-from python.layouteagle.pathant.Converter import converter
+from helpers.cache_tools import uri_with_cache
+from layouteagle import config
+from layouteagle.RestPublisher.Resource import Resource
+from layouteagle.RestPublisher.RestPublisher import RestPublisher
+from layouteagle.pathant.Converter import converter
 
 
 def fs_tree_to_dict(path_):

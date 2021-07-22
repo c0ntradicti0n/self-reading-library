@@ -5,13 +5,13 @@ sys.path.append(os.getcwd() + "/../")
 
 from pprint import pprint
 
-from python.layout.LayoutReader.PDF2ETC import PDF2ETC
-from python.layouteagle.StandardConverter.Wordi2Css import Wordi2Css
-from python.nlp.TransformerStuff.ElmoDifference import ElmoDifference
-from python.nlp.TransformerStuff.Pager import Pager
-from python.nlp.TransformerStuff.UnPager import UnPager
+from layout.LayoutReader.PDF2ETC import PDF2ETC
+from layouteagle.StandardConverter.Wordi2Css import Wordi2Css
+from nlp.TransformerStuff.ElmoDifference import ElmoDifference
+from nlp.TransformerStuff.Pager import Pager
+from nlp.TransformerStuff.UnPager import UnPager
 
-from python.layouteagle.pathant.PathAnt import PathAnt
+from layouteagle.pathant.PathAnt import PathAnt
 
 
 

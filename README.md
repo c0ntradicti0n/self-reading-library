@@ -1,3 +1,10 @@
+# TODO
+
+- cache from glob
+- think about useful features (dpi, angle, pic?)
+- check prediction
+
+
 # Layout Eagle
 
 This contains some NLP-Pipeline for Layout recognition, semantic analysis, text to speech tool. 

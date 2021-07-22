@@ -4,11 +4,11 @@ import textwrap
 import chardet
 from pdfminer.high_level import extract_text
 
-from python.layouteagle import config
-from python.layouteagle.pathant.Converter import converter
-from python.layouteagle.pathant.PathSpec import PathSpec
-from python.nlp.NlpUtils.Regexes import SENTENCE_END_REGEX
-from python.nlp.NlpUtils.split_interpunction import split_punctuation
+from layouteagle import config
+from layouteagle.pathant.Converter import converter
+from layouteagle.pathant.PathSpec import PathSpec
+from nlp.NlpUtils.Regexes import SENTENCE_END_REGEX
+from nlp.NlpUtils.split_interpunction import split_punctuation
 
 
 @converter("wordi", 'wordi.page')

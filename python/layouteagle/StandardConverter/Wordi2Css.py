@@ -1,9 +1,9 @@
 import os
 from collections import defaultdict
 
-from python.layouteagle import config
-from python.layouteagle.pathant.Converter import converter
-from python.layouteagle.pathant.PathSpec import PathSpec
+from layouteagle import config
+from layouteagle.pathant.Converter import converter
+from layouteagle.pathant.PathSpec import PathSpec
 import pandas as pd
 
 @converter("wordi.*", 'css.*')
@@ -51,32 +51,35 @@ class Wordi2Css(PathSpec):
                     nested_dict_list.append(
                         {
                             '_i': _i,
-                            'hex id': f""".z{hex(_i)[2:]}""",
                             '_i2': _i2,
+                            'hex id': f""".z{hex(_i)[2:]}""",
                             'tags': i_to_tag[_i][0] if _i in i_to_tag else "no _i in _i_to_tag",
-                            #'__tags': [annotation[x] for x in _i2s],
-
-                            'i_word': i_word[_i],
-
+                            #'i_word': i_word[_i],
                             'text': i_to_tag[_i][1] if _i in i_to_tag else "no _i in _i_to_tag"}
                     )
-                except:
-                    self.logger.warn("did not find all original indices from all indices")
+                except Exception as e:
+                    self.logger.error(f"did not find all original indices from all indice {e}")
                     break
             df = pd.DataFrame(nested_dict_list).sort_values(by='_i')
 
-            with open(
-                    os.path.join(
-                        config.hidden_folder + "log/",
-                        meta['doc_id'].replace("/", "").replace(".", "") + ".txt")
-                    , 'w') as f:
-                df.to_string(f, index=False)
+            try:
+                with open(
+                        os.path.join(
+                            config.hidden_folder + "log/",
+                            meta['doc_id'].replace("/", "").replace(".", "") + ".txt")
+                        , 'w') as f:
+                    df.to_string(f, index=False)
+            except KeyError:
+                self.logger.warning("set meta['doc_id'] for logs")
 
             yield css, meta
 
     def parse_to_css(self, css_obj, meta):
+        try:
             return "\n".join([
 f""".z{hex(i)[2:]} {{
     {meta["CSS"][annotation[0]]}
     }}
 """ for i, annotation in css_obj.items()])
+        except KeyError:
+            raise

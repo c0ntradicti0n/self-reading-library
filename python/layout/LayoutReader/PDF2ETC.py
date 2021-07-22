@@ -1,11 +1,11 @@
 import os
 import logging
 
-from python.layouteagle import config
-from python.layout.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
-from python.helpers.cache_tools import file_persistent_cached_generator
-from python.layouteagle.pathant.Converter import converter
-from python.layouteagle.pathant.parallel import paraloop
+from layouteagle import config
+from layout.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
+from helpers.cache_tools import file_persistent_cached_generator
+from layouteagle.pathant.Converter import converter
+from layouteagle.pathant.parallel import paraloop
 
 outputs = {
     'html': 'html',  # same looking html
@@ -22,7 +22,6 @@ class PDF2ETC(TrueFormatUpmarkerPDF2HTMLEX):
         self.debug = debug
 
     @file_persistent_cached_generator(config.cache + os.path.basename(__file__) + '.json', if_cache_then_finished=True)
-    @paraloop
     def __call__(self, labeled_paths, *args, **kwargs):
         for doc_id, (pdf_path, meta) in enumerate(labeled_paths):
             html_path = pdf_path + outputs['html']

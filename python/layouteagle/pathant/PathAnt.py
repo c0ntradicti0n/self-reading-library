@@ -8,12 +8,12 @@ import networkx as nx
 import pylab
 from more_itertools import pairwise
 
-from python.helpers.list_tools import flatten_optional_list_pair, flatten_optional_list_triple
-from python.layouteagle.StandardConverter.Dict2Graph import Dict2Graph
-from python.helpers.os_tools import make_dirs_recursive
-from python.layouteagle.pathant.MatchDescription import match, list_or_values
-from python.layouteagle.pathant.Pipeline import Pipeline
-from python.layouteagle.pathant.converters import converters
+from helpers.list_tools import flatten_optional_list_pair, flatten_optional_list_triple
+from layouteagle.StandardConverter.Dict2Graph import Dict2Graph
+from helpers.os_tools import make_dirs_recursive
+from layouteagle.pathant.MatchDescription import match, list_or_values
+from layouteagle.pathant.Pipeline import Pipeline
+from layouteagle.pathant.converters import converters
 from regex import regex, Regex
 
 
@@ -193,21 +193,21 @@ import unittest
 
 class TestPathAnt(unittest.TestCase):
     """
-    from python.layout.ScienceTexScraper.scrape import ScienceTexScraper
-    from python.layout.LatexReplacer.latex_replacer import LatexReplacer
-    from python.layout.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
-    from python.layout.LayoutReader.feature_prediction import LayoutPrediction
-    from python.layout.LayoutReader.MarkupDocument import MarkupDocument
-    from python.layout.LayoutReader.feature2features import Feature2Features
-    from python.layout.LayoutModel.layouttrain import LayoutTrainer
-    from python.layout.LayoutModel.layoutpredict import LayouPredictor
+    from layout.ScienceTexScraper.scrape import ScienceTexScraper
+    from layout.LatexReplacer.latex_replacer import LatexReplacer
+    from layout.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
+    from layout.LayoutReader.feature_prediction import LayoutPrediction
+    from layout.LayoutReader.MarkupDocument import MarkupDocument
+    from layout.LayoutReader.feature2features import Feature2Features
+    from layout.LayoutModel.layouttrain import LayoutTrainer
+    from layout.LayoutModel.layoutpredict import LayouPredictor
 
-    from python.layout.LayoutReader.HTML2PDF import HTML2PDF
-    from python.layout.LayoutReader.PDF2HTML import PDF2HTML
+    from layout.LayoutReader.HTML2PDF import HTML2PDF
+    from layout.LayoutReader.PDF2HTML import PDF2HTML
 
-    from python.TestArchitecture.publisher import NLPPublisher, TopicPublisher
-    from python.TestArchitecture.NLP.nlp_blub import NLPBlub
-    from python.TestArchitecture.NLP.topicape import TopicApe
+    from TestArchitecture.publisher import NLPPublisher, TopicPublisher
+    from TestArchitecture.NLP.nlp_blub import NLPBlub
+    from TestArchitecture.NLP.topicape import TopicApe
     """
     def setUp(self):
         self.ant = PathAnt()

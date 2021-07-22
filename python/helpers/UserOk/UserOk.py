@@ -2,10 +2,10 @@ import itertools
 import os
 import tkinter
 
-from python.layouteagle import config
-from python.helpers.cache_tools import file_persistent_cached_generator
-from python.layouteagle.pathant.Converter import converter
-from python.layouteagle.pathant.PathSpec import PathSpec
+from layouteagle import config
+from helpers.cache_tools import file_persistent_cached_generator
+from layouteagle.pathant.Converter import converter
+from layouteagle.pathant.PathSpec import PathSpec
 
 
 @converter('replaced.pdf', 'labeled.pdf')

@@ -8,13 +8,13 @@ import requests
 import time
 from bs4 import BeautifulSoup
 
-from python.layouteagle import config
-from python.helpers.cache_tools import file_persistent_cached_generator
+from layouteagle import config
+from helpers.cache_tools import file_persistent_cached_generator
 
 import logging
 
-from python.layouteagle.pathant.Converter import converter
-from python.layouteagle.pathant.PathSpec import PathSpec
+from layouteagle.pathant.Converter import converter
+from layouteagle.pathant.PathSpec import PathSpec
 
 logging.basicConfig(level = logging.INFO)
 
@@ -27,7 +27,11 @@ class ScienceTexScraper(PathSpec):
         if not os.path.isdir(self.save_dir):
             os.system(f"mkdir {config.tex_data}")
 
-    @file_persistent_cached_generator(config.cache + 'scraped_tex_paths.json', if_cache_then_finished=True)
+    @file_persistent_cached_generator(
+        config.cache + 'scraped_tex_paths.json',
+        if_cache_then_finished=True,
+        load_via_glob=config.tex_data + "**/*.tex"
+    )
     def __call__(self, url):
         self.scrape_count = count()
         self.i = 0

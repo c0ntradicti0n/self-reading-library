@@ -1,6 +1,6 @@
-from python.layouteagle.pathant.Converter import converter
-from python.nlp.TransformerStuff.ElmoPredict import ElmoPredict
-from python.layouteagle import config
+from layouteagle.pathant.Converter import converter
+from nlp.TransformerStuff.ElmoPredict import ElmoPredict
+from layouteagle import config
 
 @converter("wordi.page", 'wordi.page.difference')
 class ElmoDifference(ElmoPredict):

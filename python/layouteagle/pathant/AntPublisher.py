@@ -1,8 +1,8 @@
-from python.layouteagle.RestPublisher.Resource import Resource
-from python.layouteagle.RestPublisher.RestPublisher import RestPublisher
-from python.layouteagle.RestPublisher.react import react
-from python.helpers.cache_tools import uri_with_cache
-from python.layouteagle.pathant.Converter import converter
+from layouteagle.RestPublisher.Resource import Resource
+from layouteagle.RestPublisher.RestPublisher import RestPublisher
+from layouteagle.RestPublisher.react import react
+from helpers.cache_tools import uri_with_cache
+from layouteagle.pathant.Converter import converter
 
 @converter("The One",'The One')
 class AntPublisher(RestPublisher, react):

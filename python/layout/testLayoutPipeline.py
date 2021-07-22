@@ -1,11 +1,11 @@
 import os
 import sys
 
-from python.layouteagle.LayoutEagle import LayoutEagle
+from layouteagle.LayoutEagle import LayoutEagle
 
 sys.path.append(os.getcwd() + "/../")
 
-from python.layouteagle.pathant.PathAnt import PathAnt
+from layouteagle.pathant.PathAnt import PathAnt
 
 
 ant = PathAnt()

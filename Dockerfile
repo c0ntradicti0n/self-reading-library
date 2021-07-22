@@ -19,12 +19,18 @@ RUN cd pdf2htmlEX-1 &&  ./buildScripts/buildPoppler
 RUN cd pdf2htmlEX-1 && git checkout zwordi
 RUN cd pdf2htmlEX-1 && ls && ./buildScripts/buildPdf2htmlEX
 
-
 RUN apt --yes  install texlive-full
 RUN apt-get --yes install python3-venv
 RUN apt  --yes install python3-pip
+RUN  apt --yes install graphviz-dev
+RUN apt --yes install screen
+
 RUN git clone https://github.com/c0ntradicti0n/LayoutEagle.git
-RUN python3 -m venv venv
-RUN . venv/bin/activate
 
 RUN cd LayoutEagle/python && pip install -r requirements.txt
+RUN cd LayoutEagle/python && apt install --yes npm && npm install yarn -g && yarn install
+RUN screen -S frontend  -dm bash -c \
+        "cd react/layout_viewer_made; yarn dev"
+CMD cd LayoutEagle/ && git pull && \
+    cd python && python3 backend.py && \
+    echo "started backend and frontend in screen sessions; open one of then using 'screen -xS ...end'"
