@@ -71,10 +71,10 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
         sub_df['center_y'] = [(y1 + y1) / 2 for y1, y2 in zip(sub_df.y1, sub_df.y2)]
 
         points = list(zip(sub_df.center_x, sub_df.center_y))
-        kdTree = spatial.KDTree(points)
+        kd_tree = spatial.KDTree(points)
         for k in range(config.layout_model_next_text_boxes):
             sub_df[f'nearest_{k}_center_x'], sub_df[f'nearest_{k}_center_y'] = \
-                list(zip([points[kdTree.query(p, k=k)][1] for p in zip(sub_df.center_x, sub_df.center_y)]))
+                list(zip([points[kd_tree.query(p, k=k)][1] for p in zip(sub_df.center_x, sub_df.center_y)]))
 
         sub_df['dxy1'] = self.distances(sub_df, 'x1', 'y1', 'x2', 'y2')
         sub_df['dxy2'] = self.distances(sub_df, 'x2', 'y2', 'x1', 'y1')
@@ -84,7 +84,7 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
         sub_df['sin2'] = self.sinuses(sub_df, 'x2', 'y2', 'x1', 'y1')
         sub_df['sin3'] = self.sinuses(sub_df, 'x1', 'y2', 'x2', 'y1')
         sub_df['sin4'] = self.sinuses(sub_df, 'x2', 'y1', 'x1', 'y2')
-        # frequence of values in this table, the more often a value is there,
+        # frequency of values in this table, the more often a value is there,
         # the more probable to be floeating text
         sub_df['probsin1'] = sub_df.sin1.map(sub_df.sin1.value_counts(normalize=True))
 
