@@ -84,14 +84,12 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
         sub_df['sin2'] = self.sinuses(sub_df, 'x2', 'y2', 'x1', 'y1')
         sub_df['sin3'] = self.sinuses(sub_df, 'x1', 'y2', 'x2', 'y1')
         sub_df['sin4'] = self.sinuses(sub_df, 'x2', 'y1', 'x1', 'y2')
+
         # frequency of values in this table, the more often a value is there,
         # the more probable to be floeating text
         sub_df['probsin1'] = sub_df.sin1.map(sub_df.sin1.value_counts(normalize=True))
-
         sub_df['probsin2'] = sub_df.sin2.map(sub_df.sin2.value_counts(normalize=True))
-
         sub_df['probsin3'] = sub_df.sin3.map(sub_df.sin3.value_counts(normalize=True))
-
         sub_df['probsin4'] = sub_df.sin4.map(sub_df.sin4.value_counts(normalize=True))
         # some max and min of text size to recognize a title page with abstract
         sub_df['probascent'] = sub_df.ascent.map(sub_df.ascent.value_counts(normalize=True))
