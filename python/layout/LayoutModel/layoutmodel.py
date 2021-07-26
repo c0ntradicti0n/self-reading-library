@@ -18,6 +18,7 @@ from helpers.list_tools import Lookup, sorted_by_zipped
 from layouteagle import config
 from layouteagle.pathant.PathSpec import PathSpec
 
+from python.helpers.nested_dict_tools import flatten
 
 
 class LayoutModeler(PathSpec):
@@ -37,9 +38,16 @@ class LayoutModeler(PathSpec):
         'batch_size': 3000,
         'patience': 30,
         'labels': 'layoutlabel',
-        'cols_to_use': ['width', 'ascent', 'descent', 'x1', 'y1', 'x2', 'y2', 'dxy1', 'dxy2',
-       'dxy3', 'dxy4', 'sin1', 'sin2', 'sin3', 'sin4', 'probsin1', 'probsin2',
-       'probsin3', 'probsin4', 'probascent', 'probdescent']
+        'cols_to_use': [
+            'width', 'ascent', 'descent',
+            'x1', 'y1', 'x2', 'y2',
+            'dxy1', 'dxy2', 'dxy3', 'dxy4',
+            'sin1', 'sin2', 'sin3', 'sin4',
+            'probsin1', 'probsin2', 'probsin3', 'probsin4',
+            'probascent', 'probdescent',
+            *list(flatten([[f'nearest_{k}_center_x', f'nearest_{k}_center_y']
+                           for k in config.layout_model_next_text_boxes]))
+        ]
     }
 
     def __init__(self,
