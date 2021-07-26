@@ -13,7 +13,6 @@ from tensorflow.python.keras.utils.np_utils import to_categorical
 import logging
 import pprint
 
-
 from helpers.list_tools import Lookup, sorted_by_zipped
 from layouteagle import config
 from layouteagle.pathant.PathSpec import PathSpec
@@ -26,13 +25,13 @@ class LayoutModeler(PathSpec):
         'dropout': {'rate': 0.3,
                     'dtype': 'float64'},
         **{f'dense_{i}': {'units': 50,
-                   'trainable': True,
-                   'activation': 'swish',
-                   'dtype': 'float64'} for i in range(0, 10)},
-        'denseE': { # 'units' are set by us self to the necessary value
-                   'trainable': True,
-                   'activation': 'softmax',
-                   'dtype': 'float64'},
+                          'trainable': True,
+                          'activation': 'swish',
+                          'dtype': 'float64'} for i in range(0, 10)},
+        'denseE': {  # 'units' are set by us self to the necessary value
+            'trainable': True,
+            'activation': 'softmax',
+            'dtype': 'float64'},
         'adam': {'lr': 0.0005},
         'epochs': 1000,
         'batch_size': 3000,
@@ -52,8 +51,8 @@ class LayoutModeler(PathSpec):
 
     def __init__(self,
                  *args,
-                 override_train_kwargs: Dict= {},
-                 model_path = config.layout_model_path,
+                 override_train_kwargs: Dict = {},
+                 model_path=config.layout_model_path,
                  debug: bool = True, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -77,7 +76,6 @@ class LayoutModeler(PathSpec):
 
             feature_df['layoutlabel'] = self.label_lookup(token_s=feature_df.layoutlabel.tolist())
 
-
         feature_df = self.prepare_df(feature_df, training=training)
 
         norm_cols = [col for col in self.cols_to_use if col != self.train_kwargs['labels']]
@@ -98,7 +96,6 @@ class LayoutModeler(PathSpec):
 
         feature_df = feature_df.fillna(0)
 
-
         if training:
             train, test = train_test_split(feature_df, test_size=0.2)
             train, val = train_test_split(train, test_size=0.2)
@@ -106,11 +103,14 @@ class LayoutModeler(PathSpec):
             logging.info(f'{len(val)} validation samples')
             logging.info(f'{len(test)} test samples')
 
-            self.train_ds = self.df_to_dataset(train, shuffle=False, batch_size=self.train_kwargs['batch_size'], training=training)
-            self.val_ds = self.df_to_dataset(val, shuffle=False, batch_size=self.train_kwargs['batch_size'], training=training)
-            self.test_ds = self.df_to_dataset(test, shuffle=False, batch_size=self.train_kwargs['batch_size'], training=training)
+            self.train_ds = self.df_to_dataset(train, shuffle=False, batch_size=self.train_kwargs['batch_size'],
+                                               training=training)
+            self.val_ds = self.df_to_dataset(val, shuffle=False, batch_size=self.train_kwargs['batch_size'],
+                                             training=training)
+            self.test_ds = self.df_to_dataset(test, shuffle=False, batch_size=self.train_kwargs['batch_size'],
+                                              training=training)
         else:
-            self.predict_ds =  self.df_to_dataset(feature_df, shuffle=False, batch_size=len(feature_df), training=False)
+            self.predict_ds = self.df_to_dataset(feature_df, shuffle=False, batch_size=len(feature_df), training=False)
 
         feature_columns = []
 
@@ -137,7 +137,6 @@ class LayoutModeler(PathSpec):
 
         categorical_labels = to_categorical(labels)
 
-
         try:
             ds = tf.data.Dataset.from_tensor_slices((dict(dataframe), categorical_labels))
         except:
@@ -149,9 +148,9 @@ class LayoutModeler(PathSpec):
 
         return ds
 
-
     def prepare_df(self, feature_df, training=True):
-        self.cols_to_use = self.train_kwargs['cols_to_use'] + [self.train_kwargs['labels']] #([self.train_kwargs['labels']] if training else [])
+        self.cols_to_use = self.train_kwargs['cols_to_use'] + [
+            self.train_kwargs['labels']]  # ([self.train_kwargs['labels']] if training else [])
 
         feature_df = feature_df.reset_index(drop=True)
 
@@ -191,12 +190,11 @@ class LayoutModeler(PathSpec):
 
         feature_df = feature_df[self.cols_to_use]
 
-
-        #shift1 = feature_df.shift(periods=1, fill_value = 0)
-        #shift_1 = feature_df.shift(periods=-1, fill_value = 0)
-        #names =['bef', '', 'aft']
-        #dfs = [feature_df, shift1, shift_1]
-        #feature_df = pandas.concat([df.add_prefix(name) for name, df in zip(names, dfs)], axis=1).dropna()
+        # shift1 = feature_df.shift(periods=1, fill_value = 0)
+        # shift_1 = feature_df.shift(periods=-1, fill_value = 0)
+        # names =['bef', '', 'aft']
+        # dfs = [feature_df, shift1, shift_1]
+        # feature_df = pandas.concat([df.add_prefix(name) for name, df in zip(names, dfs)], axis=1).dropna()
 
         return feature_df
 
@@ -223,12 +221,12 @@ class LayoutModeler(PathSpec):
 
         optimizer = tf.optimizers.Adam(**self.train_kwargs['adam'])
         self.model.compile(optimizer=optimizer,
-                      loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
-                      metrics=['accuracy'])#, 'mse'])
+                           loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
+                           metrics=['accuracy'])  # , 'mse'])
 
         history = self.model.fit(self.train_ds,
-                            validation_data=self.val_ds,
-                            epochs=self.train_kwargs['epochs'], callbacks=[es, mc])
+                                 validation_data=self.val_ds,
+                                 epochs=self.train_kwargs['epochs'], callbacks=[es, mc])
         return history
 
     def plot(self, history):
@@ -252,7 +250,7 @@ class LayoutModeler(PathSpec):
 
         xy_new = self.model.predict_classes(self.val_ds, batch_size=None)
         logging.info('Validation')
-        for x_y_pred, y_true in itertools.islice(zip(self.val_ds.unbatch(), xy_new),20):
+        for x_y_pred, y_true in itertools.islice(zip(self.val_ds.unbatch(), xy_new), 20):
             y_pred = tf.keras.backend.argmax(x_y_pred[1])
             print(f'{y_pred} --->>> {y_true}')
         print(f'Legend {pprint.pformat(self.label_lookup.id_to_token, indent=4)}')
@@ -266,25 +264,25 @@ class LayoutModeler(PathSpec):
     def save(self):
         self.model.save(self.model_path + ".kerasmodel")
         with open(self.lookup_path, "wb") as f:
-            pickle.dump(self.label_lookup,f)
-
+            pickle.dump(self.label_lookup, f)
 
     def load(self):
         try:
             if not hasattr(self, "model"):
-                self.model = tf.keras.models.load_model (self.model_path)
+                self.model = tf.keras.models.load_model(self.model_path)
 
             if not hasattr(self, "label_lookup"):
-                print (os.getcwd() + "->" + self.lookup_path)
+                print(os.getcwd() + "->" + self.lookup_path)
                 with open(self.lookup_path, "rb") as f:
                     self.label_lookup = pickle.load(f)
 
-            if not hasattr(self, "label_lookup") and not hasattr(self, "lookup_path") :
+            if not hasattr(self, "label_lookup") and not hasattr(self, "lookup_path"):
                 raise ValueError(f"No lookup table could be loaded from {self.lookup_path} (cwd= {os.getcwd()}")
 
         except OSError as e:
             e.args = (str(e.args[0]) + f"\n Please train model first and it should be written to {self.model_path}",)
             raise
+
 
 if __name__ == '__main__':
     modeler = LayoutModeler(debug=True)
