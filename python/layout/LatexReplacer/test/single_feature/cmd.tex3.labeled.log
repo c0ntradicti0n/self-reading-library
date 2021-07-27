@@ -1,88 +1,109 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.4.2)  24 APR 2020 15:42
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.4.19)  25 JUL 2021 15:05
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
 **cmd.tex3.labeled.tex
 (./cmd.tex3.labeled.tex
-LaTeX2e <2017-04-15>
-Babel <3.18> and hyphenation patterns for 84 language(s) loaded.
+LaTeX2e <2020-02-02> patch level 2
+L3 programming layer <2020-02-14>
 (/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
-Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
+Document Class: article 2019/12/20 v1.4l Standard LaTeX document class
 (/usr/share/texlive/texmf-dist/tex/latex/base/size11.clo
-File: size11.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
+File: size11.clo 2019/12/20 v1.4l Standard LaTeX file (size option)
 )
-\c@part=\count79
-\c@section=\count80
-\c@subsection=\count81
-\c@subsubsection=\count82
-\c@paragraph=\count83
-\c@subparagraph=\count84
-\c@figure=\count85
-\c@table=\count86
-\abovecaptionskip=\skip41
-\belowcaptionskip=\skip42
-\bibindent=\dimen102
+\c@part=\count167
+\c@section=\count168
+\c@subsection=\count169
+\c@subsubsection=\count170
+\c@paragraph=\count171
+\c@subparagraph=\count172
+\c@figure=\count173
+\c@table=\count174
+\abovecaptionskip=\skip47
+\belowcaptionskip=\skip48
+\bibindent=\dimen134
 )
 (/usr/share/texlive/texmf-dist/tex/latex/tools/multicol.sty
-Package: multicol 2017/04/11 v1.8q multicolumn formatting (FMi)
-\c@tracingmulticols=\count87
-\mult@box=\box26
-\multicol@leftmargin=\dimen103
-\c@unbalance=\count88
-\c@collectmore=\count89
-\doublecol@number=\count90
-\multicoltolerance=\count91
-\multicolpretolerance=\count92
-\full@width=\dimen104
-\page@free=\dimen105
-\premulticols=\dimen106
-\postmulticols=\dimen107
-\multicolsep=\skip43
-\multicolbaselineskip=\skip44
-\partial@page=\box27
-\last@line=\box28
-\maxbalancingoverflow=\dimen108
-\mult@rightbox=\box29
-\mult@grightbox=\box30
-\mult@gfirstbox=\box31
-\mult@firstbox=\box32
-\@tempa=\box33
-\@tempa=\box34
-\@tempa=\box35
-\@tempa=\box36
-\@tempa=\box37
-\@tempa=\box38
-\@tempa=\box39
-\@tempa=\box40
-\@tempa=\box41
-\@tempa=\box42
-\@tempa=\box43
-\@tempa=\box44
-\@tempa=\box45
-\@tempa=\box46
-\@tempa=\box47
-\@tempa=\box48
-\@tempa=\box49
-\c@columnbadness=\count93
-\c@finalcolumnbadness=\count94
-\last@try=\dimen109
-\multicolovershoot=\dimen110
-\multicolundershoot=\dimen111
-\mult@nat@firstbox=\box50
-\colbreak@box=\box51
-\mc@col@check@num=\count95
+Package: multicol 2019/12/09 v1.8y multicolumn formatting (FMi)
+\c@tracingmulticols=\count175
+\mult@box=\box45
+\multicol@leftmargin=\dimen135
+\c@unbalance=\count176
+\c@collectmore=\count177
+\doublecol@number=\count178
+\multicoltolerance=\count179
+\multicolpretolerance=\count180
+\full@width=\dimen136
+\page@free=\dimen137
+\premulticols=\dimen138
+\postmulticols=\dimen139
+\multicolsep=\skip49
+\multicolbaselineskip=\skip50
+\partial@page=\box46
+\last@line=\box47
+\maxbalancingoverflow=\dimen140
+\mult@rightbox=\box48
+\mult@grightbox=\box49
+\mult@gfirstbox=\box50
+\mult@firstbox=\box51
+\@tempa=\box52
+\@tempa=\box53
+\@tempa=\box54
+\@tempa=\box55
+\@tempa=\box56
+\@tempa=\box57
+\@tempa=\box58
+\@tempa=\box59
+\@tempa=\box60
+\@tempa=\box61
+\@tempa=\box62
+\@tempa=\box63
+\@tempa=\box64
+\@tempa=\box65
+\@tempa=\box66
+\@tempa=\box67
+\@tempa=\box68
+\@tempa=\box69
+\@tempa=\box70
+\@tempa=\box71
+\@tempa=\box72
+\@tempa=\box73
+\@tempa=\box74
+\@tempa=\box75
+\@tempa=\box76
+\@tempa=\box77
+\@tempa=\box78
+\@tempa=\box79
+\@tempa=\box80
+\@tempa=\box81
+\@tempa=\box82
+\@tempa=\box83
+\@tempa=\box84
+\@tempa=\box85
+\@tempa=\box86
+\@tempa=\box87
+\@tempa=\box88
+\c@minrows=\count181
+\c@columnbadness=\count182
+\c@finalcolumnbadness=\count183
+\last@try=\dimen141
+\multicolovershoot=\dimen142
+\multicolundershoot=\dimen143
+\mult@nat@firstbox=\box89
+\colbreak@box=\box90
+\mc@col@check@num=\count184
 )
 (/usr/share/texlive/texmf-dist/tex/latex/etoolbox/etoolbox.sty
-Package: etoolbox 2018/02/11 v2.5e e-TeX tools for LaTeX (JAW)
-\etb@tempcnta=\count96
+Package: etoolbox 2019/09/21 v2.5h e-TeX tools for LaTeX (JAW)
+\etb@tempcnta=\count185
 )
-\c@nexprex@col@count=\count97
-\c@nexprex@current@column@call=\count98
+\c@nexprex@col@count=\count186
+\c@nexprex@current@column@call=\count187
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
-Package: amsmath 2017/09/02 v2.17a AMS math features
-\@mathmargin=\skip45
+Package: amsmath 2020/01/20 v2.17e AMS math features
+\@mathmargin=\skip51
 
 For additional information on amsmath, use the `?' option.
 (/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
@@ -91,84 +112,90 @@ Package: amstext 2000/06/29 v2.01 AMS text
 (/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty
 File: amsgen.sty 1999/11/30 v2.0 generic functions
 \@emptytoks=\toks14
-\ex@=\dimen112
+\ex@=\dimen144
 ))
 (/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty
 Package: amsbsy 1999/11/29 v1.2d Bold Symbols
-\pmbraise@=\dimen113
+\pmbraise@=\dimen145
 )
 (/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty
 Package: amsopn 2016/03/08 v2.02 operator names
 )
-\inf@bad=\count99
-LaTeX Info: Redefining \frac on input line 213.
-\uproot@=\count100
-\leftroot@=\count101
-LaTeX Info: Redefining \overline on input line 375.
-\classnum@=\count102
-\DOTSCASE@=\count103
-LaTeX Info: Redefining \ldots on input line 472.
-LaTeX Info: Redefining \dots on input line 475.
-LaTeX Info: Redefining \cdots on input line 596.
-\Mathstrutbox@=\box52
-\strutbox@=\box53
-\big@size=\dimen114
-LaTeX Font Info:    Redeclaring font encoding OML on input line 712.
-LaTeX Font Info:    Redeclaring font encoding OMS on input line 713.
-\macc@depth=\count104
-\c@MaxMatrixCols=\count105
-\dotsspace@=\muskip10
-\c@parentequation=\count106
-\dspbrk@lvl=\count107
+\inf@bad=\count188
+LaTeX Info: Redefining \frac on input line 227.
+\uproot@=\count189
+\leftroot@=\count190
+LaTeX Info: Redefining \overline on input line 389.
+\classnum@=\count191
+\DOTSCASE@=\count192
+LaTeX Info: Redefining \ldots on input line 486.
+LaTeX Info: Redefining \dots on input line 489.
+LaTeX Info: Redefining \cdots on input line 610.
+\Mathstrutbox@=\box91
+\strutbox@=\box92
+\big@size=\dimen146
+LaTeX Font Info:    Redeclaring font encoding OML on input line 733.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 734.
+\macc@depth=\count193
+\c@MaxMatrixCols=\count194
+\dotsspace@=\muskip16
+\c@parentequation=\count195
+\dspbrk@lvl=\count196
 \tag@help=\toks15
-\row@=\count108
-\column@=\count109
-\maxfields@=\count110
+\row@=\count197
+\column@=\count198
+\maxfields@=\count199
 \andhelp@=\toks16
-\eqnshift@=\dimen115
-\alignsep@=\dimen116
-\tagshift@=\dimen117
-\tagwidth@=\dimen118
-\totwidth@=\dimen119
-\lineht@=\dimen120
+\eqnshift@=\dimen147
+\alignsep@=\dimen148
+\tagshift@=\dimen149
+\tagwidth@=\dimen150
+\totwidth@=\dimen151
+\lineht@=\dimen152
 \@envbody=\toks17
-\multlinegap=\skip46
-\multlinetaggap=\skip47
+\multlinegap=\skip52
+\multlinetaggap=\skip53
 \mathdisplay@stack=\toks18
-LaTeX Info: Redefining \[ on input line 2817.
-LaTeX Info: Redefining \] on input line 2818.
+LaTeX Info: Redefining \[ on input line 2859.
+LaTeX Info: Redefining \] on input line 2860.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdfmode.def
+File: l3backend-pdfmode.def 2020-02-03 L3 backend support: PDF mode
+\l__kernel_color_stack_int=\count266
+\l__pdf_internal_box=\box93
 )
 (./cmd.tex3.labeled.aux)
 \openout1 = `cmd.tex3.labeled.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 70.
-LaTeX Font Info:    ... okay on input line 70.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 70.
-LaTeX Font Info:    ... okay on input line 70.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 70.
-LaTeX Font Info:    ... okay on input line 70.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 70.
-LaTeX Font Info:    ... okay on input line 70.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 70.
-LaTeX Font Info:    ... okay on input line 70.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 70.
-LaTeX Font Info:    ... okay on input line 70.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 68.
+LaTeX Font Info:    ... okay on input line 68.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 68.
+LaTeX Font Info:    ... okay on input line 68.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 68.
+LaTeX Font Info:    ... okay on input line 68.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 68.
+LaTeX Font Info:    ... okay on input line 68.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 68.
+LaTeX Font Info:    ... okay on input line 68.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 68.
+LaTeX Font Info:    ... okay on input line 68.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 68.
+LaTeX Font Info:    ... okay on input line 68.
  [1
-
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (./cmd.tex3.labeled.aux) )
  
 Here is how much of TeX's memory you used:
- 1257 strings out of 492982
- 14912 string characters out of 6134897
- 75477 words of memory out of 5000000
- 4883 multiletter control sequences out of 15000+600000
- 4286 words of font info for 16 fonts, out of 8000000 for 9000
+ 1440 strings out of 481239
+ 19200 string characters out of 5920377
+ 258366 words of memory out of 5000000
+ 16764 multiletter control sequences out of 15000+600000
+ 532984 words of font info for 26 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 27i,4n,20p,781b,148s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 30i,4n,25p,781b,150s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/s
 hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb>
-Output written on cmd.tex3.labeled.pdf (1 page, 15592 bytes).
+Output written on cmd.tex3.labeled.pdf (1 page, 15588 bytes).
 PDF statistics:
  16 PDF objects out of 1000 (max. 8388607)
  10 compressed objects within 1 object stream

@@ -38,7 +38,7 @@ def file_persistent_cached_generator(
                 cache = {}
 
             if isinstance(param[1], list) and (not if_cache_then_finished and cache):
-                yield from apply_iterating_and_caching(cache, cwd, param, no_cache=True)
+                yield from apply_and_cache(cache, cwd, param, no_cache=True)
             else:
                 if not if_cached_then_forever:
                     yield from yield_cache(cache, cwd)
@@ -48,7 +48,7 @@ def file_persistent_cached_generator(
                         yield res, meta
 
                 if (not cache or not if_cache_then_finished):
-                    yield from apply_iterating_and_caching(cache, cwd, param)
+                    yield from apply_and_cache(cache, cwd, param)
 
             os.chdir(cwd)
 
@@ -59,7 +59,7 @@ def file_persistent_cached_generator(
                 yield result
 
 
-        def apply_iterating_and_caching(cache, cwd, param, no_cache=False):
+        def apply_and_cache(cache, cwd, param, no_cache=False):
             generator = original_func(*param)#, cache=cache)
 
 

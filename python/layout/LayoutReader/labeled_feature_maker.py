@@ -19,7 +19,7 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
         for doc_id, (labeled_html_path, meta) in enumerate(labeled_paths):
             print(doc_id, labeled_html_path)
             try:
-                feature_df = self.read_positional_data(meta['filename'] + ".feat")#  self.generate_data_for_file(labeled_html_path)
+                feature_df = self.read_positional_data(meta['filename'] + ".feat")
 
             except FileNotFoundError as e:
                 logging.error("output of pdf2htmlEX was not found")

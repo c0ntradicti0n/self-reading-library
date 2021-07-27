@@ -1,23 +1,93 @@
- %! Author = stefan
-%! Date = 22.04.20
+\documentclass{scrbook}
+\usepackage[colaction]{multicol}
+\usepackage{etoolbox}
 
-% Preamble
-\documentclass[11pt]{article}
+\makeatletter
+\newcounter{nexprex@col@count}
+\newcounter{nexprex@current@column@call}
+\def\nexprex@patch@last
+  {%
+    \stepcounter{nexprex@col@count}%
+    \protected@write\@auxout{}
+      {%
+        \string\def\string\nexprex@cur@col{\arabic{nexprex@col@count}}%
+      }%
+  }
+\def\nexprex@patch@else
+  {%
+    \ifmc@firstcol
+      \setcounter{nexprex@col@count}{0}%
+    \fi
+    \nexprex@patch@last
+  }
+\def\nexprex@patch@error
+  {%
+    \GenericError{}
+      {Patching of \string\mc@col@status@write\space failed}
+      {%
+        Make sure `colaction` was set as an option for `multicol`.%
+        \MessageBreak
+        Else you're screwed, don't use the code provided here.\MessageBreak%
+      }
+      {No further help available.}%
+  }
+\pretocmd\mc@lastcol@status@write{\nexprex@patch@last}{}{\nexprex@patch@error}
+\pretocmd\mc@col@status@write{\nexprex@patch@else}{}{\nexprex@patch@error}
+\newcommand\currentcolumn
+  {%
+    \stepcounter{nexprex@current@column@call}%
+    \protected@write\@auxout{}
+      {%
+        \string\expandafter
+        \string\global
+        \string\expandafter
+        \string\let
+          \string\csname\space
+            nexprex@current@column@\arabic{nexprex@current@column@call}%
+          \string\endcsname
+          \string\nexprex@cur@col
+      }%
+    \ifcsname
+      nexprex@current@column@\arabic{nexprex@current@column@call}\endcsname
+      \csname
+        nexprex@current@column@\arabic{nexprex@current@column@call}\endcsname
+    \fi
+  }
 
-% Packages
-\usepackage{amsmath}
+\makeatother
 
-% Document
-\begin{document}  
-    \author{ 
-  s \currentcolumn{} $^a$
-  w \currentcolumn{} \normalsize{$^a$ Facultad de Ciencias, Universidad de Colima}
-  x \currentcolumn{} \vspace{0.3cm}
-\normalsize{Bernal D\'iaz del Castillo 340, Colima C.P. 28045, Mexico} 
-  a \currentcolumn{} }
+\usepackage[ngerman]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
 
-    \title{schwups}
+\begin{document}
 
-    \maketitle
- 
-\end{document} 
+\title{Titel des Dokumentes}
+\author{Max Muster}
+\date{01.01.0001}
+\maketitle
+\begin{multicols}{3}
+
+ c \currentcolumn{}  c \currentcolumn{}
+ c \currentcolumn{}  c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}  c \currentcolumn{}
+
+ c \currentcolumn{}  c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+
+\end{multicols}
+\end{document}

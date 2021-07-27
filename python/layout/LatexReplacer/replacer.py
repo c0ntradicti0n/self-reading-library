@@ -12,9 +12,8 @@ class SoupReplacer(PathSpec):
     def replace_node(self, node, how):
         try:
             self.make_replacement(node.expr, how)
-
-        except:
-            raise
+        except Exception as e:
+            self.logger.error("SyntaxError after replacing text in Latex-File" + str(e))
 
     def __call__(self, soup):
         for tag, tex_strings in self.replacements.items():
@@ -24,13 +23,7 @@ class SoupReplacer(PathSpec):
                         nodes = list(self.find_all(soup, tex_string))
                         nodes = [soup]
                 else:
-                    try:
-                        if not soup.find("document"):
-                            nodes = [soup]
-                        else:
-                            nodes = []
-                    except AttributeError:
-                        nodes = []
+                    nodes = [soup]
 
                 if not nodes:
                     continue

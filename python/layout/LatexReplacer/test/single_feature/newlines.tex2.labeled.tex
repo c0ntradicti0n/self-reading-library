@@ -1,10 +1,4 @@
- %! Author = stefan
-%! Date = 22.04.20
-
-% Preamble
-\documentclass[11pt]{article}
-\onecolumn
-
+\documentclass{scrbook}
 \usepackage[colaction]{multicol}
 \usepackage{etoolbox}
 
@@ -62,28 +56,38 @@
 
 \makeatother
 
+\usepackage[ngerman]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
 
-% Packages
-\usepackage{amsmath}
+\begin{document}
 
-% Document
-\begin{document}  
-    \author{ 
-  cc \currentcolumn{} $^a$ 
-  cc \currentcolumn{} \normalsize{$^a$ Facultad de Ciencias, Universidad de Colima} 
-  cc \currentcolumn{} \vspace{0.3cm}
-\normalsize{Bernal D\'iaz del Castillo 340, Colima C.P. 28045, Mexico} 
-  cc \currentcolumn{} }
-
-    \title{schwups}
-
-    \maketitle
+\title{Titel des Dokumentes}
+\author{Max Muster}
+\date{01.01.0001}
+\maketitle
 \begin{multicols}{2}
 
+ c \currentcolumn{}  c \currentcolumn{}
+ c \currentcolumn{}  c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}  c \currentcolumn{}
 
-
+ c \currentcolumn{}  c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
+ c \currentcolumn{}
 
 \end{multicols}
- 
- 
-\end{document} 
+\end{document}

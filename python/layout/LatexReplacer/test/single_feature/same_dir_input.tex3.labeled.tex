@@ -3,8 +3,6 @@
 
 % Preamble
 \documentclass[11pt]{article}
-\onecolumn
-
 \usepackage[colaction]{multicol}
 \usepackage{etoolbox}
 
@@ -70,23 +68,14 @@
 \begin{document}
 \begin{multicols}{3}
 
-    
     \section{same dir}
-    
     \input{same_dir.tex1.labeled.tex}
-    
     \section{same dir tex}
-    
     \input{same_dir.tex1.labeled.tex}
-    
     \section{sub dir}
-    
     \input{sub_dir/sub_dir_input.tex1.labeled.tex}
-    
     \section{sub dir tex}
-    
     \input{sub_dir/sub_dir_input.tex1.labeled.tex}
-
 
 \end{multicols}
 \end{document}

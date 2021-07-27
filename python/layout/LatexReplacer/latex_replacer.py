@@ -7,7 +7,7 @@ from itertools import cycle
 from random import randint
 from threading import Timer
 from TexSoup import TexSoup, TexNode
-from TexSoup.data import TexEnv, TexCmd, TexText, BracketGroup, BraceGroup
+from TexSoup.data import TexEnv, TexCmd, TexText, BracketGroup, BraceGroup, TexNamedEnv
 from TexSoup.utils import Token
 
 from helpers.cache_tools import file_persistent_cached_generator
@@ -52,8 +52,9 @@ class LatexReplacer(SoupReplacer):
         self.allowed_oargs = ['title', 'author', 'section', 'item']
         self.forbidden_nargs = ['@sanitize', '@', "baselineskip", 'pdfoutput', 'vskip', 'topmargin', 'oddsidemargin',
                                 'binoppenalty', 'def', 'href', 'providecommand', 'csname', "parindent", "parskip",
-                                "font", 'textsl', 'headheight', 'headsep', 'textwidth', 'textheight'
-                                "pdfminorversion"]
+                                "font", 'textsl', 'headheight', 'headsep', 'textwidth', 'textheight', 'hoffset', 'jot',
+
+                                "pdfminorversion", 'evensidemargin', 'providecommand', 'interfootnotelinepenalty', ]
         self.skip_commands = self.forbidden_nargs
         self.forbidden_envs = ["$", "tikzpicture", "eqnarray", "equation", "tabular", 'eqsplit', 'subequations', 'picture']
         self.forbidden_envs = self.forbidden_envs + [env + "*" for env in self.forbidden_envs]
@@ -72,14 +73,35 @@ class LatexReplacer(SoupReplacer):
     def insert_functionality(self, soup, file_content, col_num):
         document_class_element = soup.documentclass
         if document_class_element:
-            insert_index = soup.expr._contents.index(document_class_element.expr) + 1
+            try:
+                insert_index = soup.expr._contents.index(document_class_element.expr) + 1
+            except Exception as e:
+                self.logger.error("no documentcalss in the documentclass expression")
+                insert_index = 7
         else:
             insert_index = 7
 
+        """if any(arg in file_content for arg in ["spconf", "lrec", "ieeeconf", "IEEEtran", "acmart", "twocolumn", "acl2020", "ansmath"]):
+            soup.insert(insert_index, twocolumn_defs.defs)
+            # TODO put multicol begin after first section(!) of doc and the rest to the end
+
+            document_environment = soup.document.expr._contents
+            document_environment.insert(0, twocolumn_defs.multicol_begin)
+            document_environment.append(twocolumn_defs.multicol_end)
+
+            return r"c \currentcolumn{}"
+        elif "multicol{" in file_content:"""
+
+        orig_twocolumn = any(arg in file_content for arg in
+                             ["lrec", "ieeeconf", "IEEEtran", "acmart", "twocolumn", "acl2020", "ansmath", 'svjour',
+                              'revtex4'])
+
         if col_num > 1:
             # start in document environment
-
-            insert_definitions = multicol_defs.defs
+            if orig_twocolumn:
+                insert_definitions =  multicol_defs.defs
+            else:
+                insert_definitions = multicol_defs.defs
             soup.insert(insert_index, insert_definitions)
 
             # make title should be before
@@ -97,13 +119,25 @@ class LatexReplacer(SoupReplacer):
             else:
                 maketitle_index = 0
 
+            # when its twocolumn layout
+            if orig_twocolumn:
+                col_num = 2
+
             # begin and end multicol environment
             document_environment.insert(maketitle_index, multicol_defs.multicol_begin % str(col_num))
             document_environment.append(multicol_defs.multicol_end)
 
-            return r"\currentcolumn{}c"
+            return r" c \currentcolumn{} "
         else:
-            return r"1c{}"
+            # normal fill text
+            if orig_twocolumn:
+                insert_definitions = ""#\n\onecolumn\n"
+            else:
+                insert_definitions = multicol_defs.defs
+            soup.insert(insert_index, insert_definitions)
+
+            logging.info("No multi column instruction found, so its single col")
+            return r" c 1 "
 
     @file_persistent_cached_generator(
         config.cache + 'replaced_tex_paths.json',
@@ -210,13 +244,6 @@ class LatexReplacer(SoupReplacer):
 
                 back = _
 
-        elif isinstance(where, (TexEnv, TexNode)):
-            forth = where._contents
-
-            def _(x, **kwargs):
-                where._contents = x
-
-            back = _
 
         elif isinstance(where, (BraceGroup, BracketGroup)):
             forth = where._contents
@@ -225,6 +252,15 @@ class LatexReplacer(SoupReplacer):
                 where._contents = x
 
             back = _
+
+        elif isinstance(where, (TexEnv, TexNode, TexNamedEnv)):
+            forth = where._contents
+
+            def _(x, **kwargs):
+                where._contents = x
+
+            back = _
+
 
         else:
             logging.error("visited node not to visit")
@@ -241,13 +277,6 @@ class LatexReplacer(SoupReplacer):
                 if hasattr(where, "args") and where.args and node_to_replace == where.args[
                     -1] and where.name not in self.forbidden_nargs:
                     node_to_replace = self.make_replacement(node_to_replace, replacement_string)
-
-            elif isinstance(node_to_replace, (Token, str)):
-
-                if hasattr(where, 'name') and where.name == "item":
-                    self.replace_this_text(node_to_replace, replaced_contents,
-                                           replacement_string)
-                    continue
 
 
 
@@ -376,11 +405,11 @@ class LatexReplacer(SoupReplacer):
                     # Texsoup fails with escaped chars
                     f_content = regex.sub(r"(?<!\\)\\ ", " ", f_content)
 
-                    soup = TexSoup(f_content)
+                    soup = TexSoup(f_content, tolerance=1)
                     if not soup:
                         raise ValueError("Parse of texfile was None")
-                except (TypeError, EOFError) as e:
-                    self.path_spec.logger.error(f"Error in Tex-file {path_to_read_from}:\n {e}")
+                except (TypeError, EOFError, AssertionError, RecursionError) as e:
+                    self.path_spec.logger.error(f"Tex-Soup-Error in Tex-file {path_to_read_from}:\n {e}")
                     return
 
                 try:

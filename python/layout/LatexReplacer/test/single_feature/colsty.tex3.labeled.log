@@ -1,29 +1,28 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.4.2)  27 APR 2020 13:45
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.4.19)  25 JUL 2021 15:06
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
 **colsty.tex3.labeled.tex
 (./colsty.tex3.labeled.tex
-LaTeX2e <2017-04-15>
-Babel <3.18> and hyphenation patterns for 84 language(s) loaded.
-(./ieeeconf.cls
+LaTeX2e <2020-02-02> patch level 2
+L3 programming layer <2020-02-14> (./ieeeconf.cls
 Document Class: ieeeconf 2016/4/23 revision V1.6b by Pradeep Misra
-\@IEEEtrantmpdimenA=\dimen102
-\@IEEEtrantmpdimenB=\dimen103
-\@IEEEtrantmpcountA=\count79
-\@IEEEtrantmpcountB=\count80
+\@IEEEtrantmpdimenA=\dimen134
+\@IEEEtrantmpdimenB=\dimen135
+\@IEEEtrantmpcountA=\count167
+\@IEEEtrantmpcountB=\count168
 \@IEEEtrantmptoksA=\toks14
-LaTeX Font Info:    Try loading font information for OT1+ptm on input line 794.
-
+LaTeX Font Info:    Trying to load font information for OT1+ptm on input line 7
+94.
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
-\@IEEEnormalsizefontbaselineskip=\skip41
+\@IEEEnormalsizefontbaselineskip=\skip47
 
 -- This is a 10 point document.
-\normalsizebaselineskip=\skip42
-\normaljot=\skip43
+\normalsizebaselineskip=\skip48
+\normaljot=\skip49
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <5> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 1113.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/it' in size <5> not available
@@ -74,88 +73,109 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <24> not available
 LaTeX Font Info:    Font shape `OT1/ptm/bx/it' in size <24> not available
 (Font)              Font shape `OT1/ptm/b/it' tried instead on input line 1113.
 
-\IEEEilabelindentA=\dimen104
-\IEEEilabelindentB=\dimen105
-\IEEEilabelindent=\dimen106
-\IEEEelabelindent=\dimen107
-\IEEEdlabelindent=\dimen108
-\labelindent=\dimen109
-\IEEEiednormlabelsep=\dimen110
-\IEEEiedmathlabelsep=\dimen111
-\IEEEiedtopsep=\skip44
-\c@section=\count81
-\c@subsection=\count82
-\c@subsubsection=\count83
-\c@paragraph=\count84
-\c@IEEEsubequation=\count85
-\abovecaptionskip=\skip45
-\belowcaptionskip=\skip46
-\c@figure=\count86
-\c@table=\count87
-\@IEEEeqnnumcols=\count88
-\@IEEEeqncolcnt=\count89
-\@IEEEtmpitemindent=\dimen112
-\c@biography=\count90
-\@IEEEtranrubishbin=\box26
+\IEEEilabelindentA=\dimen136
+\IEEEilabelindentB=\dimen137
+\IEEEilabelindent=\dimen138
+\IEEEelabelindent=\dimen139
+\IEEEdlabelindent=\dimen140
+\labelindent=\dimen141
+\IEEEiednormlabelsep=\dimen142
+\IEEEiedmathlabelsep=\dimen143
+\IEEEiedtopsep=\skip50
+\c@section=\count169
+\c@subsection=\count170
+\c@subsubsection=\count171
+\c@paragraph=\count172
+\c@IEEEsubequation=\count173
+\abovecaptionskip=\skip51
+\belowcaptionskip=\skip52
+\c@figure=\count174
+\c@table=\count175
+\@IEEEeqnnumcols=\count176
+\@IEEEeqncolcnt=\count177
+\@IEEEtmpitemindent=\dimen144
+\c@biography=\count178
+\@IEEEtranrubishbin=\box45
 ) (/usr/share/texlive/texmf-dist/tex/latex/tools/multicol.sty
-Package: multicol 2017/04/11 v1.8q multicolumn formatting (FMi)
-\c@tracingmulticols=\count91
-\mult@box=\box27
-\multicol@leftmargin=\dimen113
-\c@unbalance=\count92
-\c@collectmore=\count93
-\doublecol@number=\count94
-\multicoltolerance=\count95
-\multicolpretolerance=\count96
-\full@width=\dimen114
-\page@free=\dimen115
-\premulticols=\dimen116
-\postmulticols=\dimen117
-\multicolsep=\skip47
-\multicolbaselineskip=\skip48
-\partial@page=\box28
-\last@line=\box29
-\maxbalancingoverflow=\dimen118
-\mult@rightbox=\box30
-\mult@grightbox=\box31
-\mult@gfirstbox=\box32
-\mult@firstbox=\box33
-\@tempa=\box34
-\@tempa=\box35
-\@tempa=\box36
-\@tempa=\box37
-\@tempa=\box38
-\@tempa=\box39
-\@tempa=\box40
-\@tempa=\box41
-\@tempa=\box42
-\@tempa=\box43
-\@tempa=\box44
-\@tempa=\box45
-\@tempa=\box46
-\@tempa=\box47
-\@tempa=\box48
-\@tempa=\box49
-\@tempa=\box50
-\c@columnbadness=\count97
-\c@finalcolumnbadness=\count98
-\last@try=\dimen119
-\multicolovershoot=\dimen120
-\multicolundershoot=\dimen121
-\mult@nat@firstbox=\box51
-\colbreak@box=\box52
-\mc@col@check@num=\count99
+Package: multicol 2019/12/09 v1.8y multicolumn formatting (FMi)
+\c@tracingmulticols=\count179
+\mult@box=\box46
+\multicol@leftmargin=\dimen145
+\c@unbalance=\count180
+\c@collectmore=\count181
+\doublecol@number=\count182
+\multicoltolerance=\count183
+\multicolpretolerance=\count184
+\full@width=\dimen146
+\page@free=\dimen147
+\premulticols=\dimen148
+\postmulticols=\dimen149
+\multicolsep=\skip53
+\multicolbaselineskip=\skip54
+\partial@page=\box47
+\last@line=\box48
+\maxbalancingoverflow=\dimen150
+\mult@rightbox=\box49
+\mult@grightbox=\box50
+\mult@gfirstbox=\box51
+\mult@firstbox=\box52
+\@tempa=\box53
+\@tempa=\box54
+\@tempa=\box55
+\@tempa=\box56
+\@tempa=\box57
+\@tempa=\box58
+\@tempa=\box59
+\@tempa=\box60
+\@tempa=\box61
+\@tempa=\box62
+\@tempa=\box63
+\@tempa=\box64
+\@tempa=\box65
+\@tempa=\box66
+\@tempa=\box67
+\@tempa=\box68
+\@tempa=\box69
+\@tempa=\box70
+\@tempa=\box71
+\@tempa=\box72
+\@tempa=\box73
+\@tempa=\box74
+\@tempa=\box75
+\@tempa=\box76
+\@tempa=\box77
+\@tempa=\box78
+\@tempa=\box79
+\@tempa=\box80
+\@tempa=\box81
+\@tempa=\box82
+\@tempa=\box83
+\@tempa=\box84
+\@tempa=\box85
+\@tempa=\box86
+\@tempa=\box87
+\@tempa=\box88
+\@tempa=\box89
+\c@minrows=\count185
+\c@columnbadness=\count186
+\c@finalcolumnbadness=\count187
+\last@try=\dimen151
+\multicolovershoot=\dimen152
+\multicolundershoot=\dimen153
+\mult@nat@firstbox=\box90
+\colbreak@box=\box91
+\mc@col@check@num=\count188
 )
 (/usr/share/texlive/texmf-dist/tex/latex/etoolbox/etoolbox.sty
-Package: etoolbox 2018/02/11 v2.5e e-TeX tools for LaTeX (JAW)
-\etb@tempcnta=\count100
+Package: etoolbox 2019/09/21 v2.5h e-TeX tools for LaTeX (JAW)
+\etb@tempcnta=\count189
 )
-\c@nexprex@col@count=\count101
-\c@nexprex@current@column@call=\count102
+\c@nexprex@col@count=\count190
+\c@nexprex@current@column@call=\count191
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
-Package: amsmath 2017/09/02 v2.17a AMS math features
-\@mathmargin=\skip49
+Package: amsmath 2020/01/20 v2.17e AMS math features
+\@mathmargin=\skip55
 
 For additional information on amsmath, use the `?' option.
 (/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
@@ -164,63 +184,70 @@ Package: amstext 2000/06/29 v2.01 AMS text
 (/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty
 File: amsgen.sty 1999/11/30 v2.0 generic functions
 \@emptytoks=\toks15
-\ex@=\dimen122
+\ex@=\dimen154
 ))
 (/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty
 Package: amsbsy 1999/11/29 v1.2d Bold Symbols
-\pmbraise@=\dimen123
+\pmbraise@=\dimen155
 )
 (/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty
 Package: amsopn 2016/03/08 v2.02 operator names
 )
-\inf@bad=\count103
-LaTeX Info: Redefining \frac on input line 213.
-\uproot@=\count104
-\leftroot@=\count105
-LaTeX Info: Redefining \overline on input line 375.
-\classnum@=\count106
-\DOTSCASE@=\count107
-LaTeX Info: Redefining \ldots on input line 472.
-LaTeX Info: Redefining \dots on input line 475.
-LaTeX Info: Redefining \cdots on input line 596.
-\Mathstrutbox@=\box53
-\strutbox@=\box54
-\big@size=\dimen124
-LaTeX Font Info:    Redeclaring font encoding OML on input line 712.
-LaTeX Font Info:    Redeclaring font encoding OMS on input line 713.
-\macc@depth=\count108
-\c@MaxMatrixCols=\count109
-\dotsspace@=\muskip10
-\c@parentequation=\count110
-\dspbrk@lvl=\count111
+\inf@bad=\count192
+LaTeX Info: Redefining \frac on input line 227.
+\uproot@=\count193
+\leftroot@=\count194
+LaTeX Info: Redefining \overline on input line 389.
+\classnum@=\count195
+\DOTSCASE@=\count196
+LaTeX Info: Redefining \ldots on input line 486.
+LaTeX Info: Redefining \dots on input line 489.
+LaTeX Info: Redefining \cdots on input line 610.
+\Mathstrutbox@=\box92
+\strutbox@=\box93
+\big@size=\dimen156
+LaTeX Font Info:    Redeclaring font encoding OML on input line 733.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 734.
+\macc@depth=\count197
+\c@MaxMatrixCols=\count198
+\dotsspace@=\muskip16
+\c@parentequation=\count199
+\dspbrk@lvl=\count266
 \tag@help=\toks16
-\row@=\count112
-\column@=\count113
-\maxfields@=\count114
+\row@=\count267
+\column@=\count268
+\maxfields@=\count269
 \andhelp@=\toks17
-\eqnshift@=\dimen125
-\alignsep@=\dimen126
-\tagshift@=\dimen127
-\tagwidth@=\dimen128
-\totwidth@=\dimen129
-\lineht@=\dimen130
+\eqnshift@=\dimen157
+\alignsep@=\dimen158
+\tagshift@=\dimen159
+\tagwidth@=\dimen160
+\totwidth@=\dimen161
+\lineht@=\dimen162
 \@envbody=\toks18
-\multlinegap=\skip50
-\multlinetaggap=\skip51
+\multlinegap=\skip56
+\multlinetaggap=\skip57
 \mathdisplay@stack=\toks19
-LaTeX Info: Redefining \[ on input line 2817.
-LaTeX Info: Redefining \] on input line 2818.
+LaTeX Info: Redefining \[ on input line 2859.
+LaTeX Info: Redefining \] on input line 2860.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdfmode.def
+File: l3backend-pdfmode.def 2020-02-03 L3 backend support: PDF mode
+\l__kernel_color_stack_int=\count270
+\l__pdf_internal_box=\box94
 )
 (./colsty.tex3.labeled.aux)
 \openout1 = `colsty.tex3.labeled.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 86.
 LaTeX Font Info:    ... okay on input line 86.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 86.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 86.
 LaTeX Font Info:    ... okay on input line 86.
 LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 86.
 LaTeX Font Info:    ... okay on input line 86.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 86.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 86.
+LaTeX Font Info:    ... okay on input line 86.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 86.
 LaTeX Font Info:    ... okay on input line 86.
 LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 86.
 LaTeX Font Info:    ... okay on input line 86.
@@ -270,20 +297,20 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 2207 strings out of 492982
- 34895 string characters out of 6134897
- 126993 words of memory out of 5000000
- 5813 multiletter control sequences out of 15000+600000
- 36854 words of font info for 73 fonts, out of 8000000 for 9000
+ 2425 strings out of 481239
+ 40379 string characters out of 5920377
+ 315828 words of memory out of 5000000
+ 17729 multiletter control sequences out of 15000+600000
+ 565552 words of font info for 83 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 27i,5n,20p,3316b,367s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 30i,5n,25p,3621b,419s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf
 -dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/f
 onts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/
 times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.p
 fb>
-Output written on colsty.tex3.labeled.pdf (1 page, 45435 bytes).
+Output written on colsty.tex3.labeled.pdf (1 page, 45387 bytes).
 PDF statistics:
  29 PDF objects out of 1000 (max. 8388607)
  20 compressed objects within 1 object stream
