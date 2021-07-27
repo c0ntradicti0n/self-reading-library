@@ -1,6 +1,21 @@
 import os
 import sys
-from python.helpers.nested_dict_tools import flatten
+import logging
+from helpers.nested_dict_tools import flatten
+import sys
+sys.path.append(".")
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+import logging
+import tensorflow as tf
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+tf.get_logger().setLevel(3)
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+
+logging.getLogger('allennlp').setLevel(logging.ERROR)
+logging.getLogger('pdfminer').setLevel(logging.ERROR)
+
+logging.basicConfig(format="""%(asctime)s-%(levelname)s:
+ -> ... %(message)s""", datefmt="%H:%M:%S")
 
 
 sys.path.append(os.getcwd())
@@ -78,6 +93,7 @@ difference_model_train_output = hidden_folder + f"/over_{model_config}/"
 difference_model_config = hidden_folder + f"/over_{model_config}/config.json"
 
 wordninjalanguagemodel = "nlp/english.txt.gz"
+logging_level = logging.INFO
 
 
 layout_model_path = hidden_folder + "/layout_model/"

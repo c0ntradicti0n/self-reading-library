@@ -5,16 +5,10 @@ import logging
 
 from layouteagle.RestPublisher.LayoutPublisher import LayoutPublisher
 
-logging.basicConfig()
-logging.getLogger().setLevel(logging.INFO)
 
 if __name__ == "__main__":
     import subprocess
     import sys
-
-    loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
-    for logger in loggers:
-        logger.setLevel(logging.INFO)
 
     while True:
         try:

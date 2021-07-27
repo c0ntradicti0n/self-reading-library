@@ -1,5 +1,5 @@
 import os
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 from layouteagle import config
 from layouteagle.pathant.Converter import converter
@@ -36,6 +36,7 @@ class Wordi2Css(PathSpec):
         for annotation, meta in feature_meta:
             tags, words = list(zip(*annotation))
 
+            self.logger.warn(f"tag counts {Counter(list(tags))}")
             i_to_tag = {}
             for _i, _i2 in meta["_i_to_i2"].items():
                 if _i not in i_to_tag or i_to_tag[_i] == "O":
@@ -80,6 +81,7 @@ class Wordi2Css(PathSpec):
 f""".z{hex(i)[2:]} {{
     {meta["CSS"][annotation[0]]}
     }}
+    
 """ for i, annotation in css_obj.items()])
         except KeyError:
             raise

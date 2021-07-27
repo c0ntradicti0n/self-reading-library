@@ -52,7 +52,7 @@ class TrueFormatUpmarker(SoupReplacer):
         self.splitter = '|'.join(map(regex.escape, delimiters))
 
     def convert_and_index(self, html_read_from="", html_write_to="") -> Pdf:
-        logging.warning(f"working on {html_read_from}")
+        self.logger.warning(f"working on {html_read_from}")
 
         self.generate_css_tagging_document(html_read_from, html_write_to)
         self.pdf_obj.indexed_words = self.word_index
@@ -97,7 +97,7 @@ class TrueFormatUpmarker(SoupReplacer):
         try:
             style_dict = OrderedDict(self.css_rule2entry(rule) for rule in style_rules)
         except IndexError:
-            logging.error("could not get CSS style from soup")
+            self.logger.error("could not get CSS style from soup")
             raise
         if None in style_dict:
             del style_dict[None]
@@ -108,7 +108,7 @@ class TrueFormatUpmarker(SoupReplacer):
             decla = rule.declarations
             ident = [sel for sel in rule.selector if sel.type == 'IDENT'][0].value
             if not isinstance(ident, str):
-                logging.info("multi value css found, ignoring")
+                self.logger.info("multi value css found, ignoring")
                 return None, None
             return ident, decla
         return None, None
@@ -157,7 +157,7 @@ class TrueFormatUpmarker(SoupReplacer):
         contained_labels = [s for s in self.label_strings if s in text.lower().replace(" ", "")]
         if contained_labels:
             if len(contained_labels) > 1:
-                logging.warning("More labels in div text found than wanted")
+                self.logger.warning("More labels in div text found than wanted")
             return contained_labels[0]
         else:
             return self.label_strings[-1]

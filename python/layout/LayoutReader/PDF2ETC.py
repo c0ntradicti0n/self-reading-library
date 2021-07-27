@@ -1,5 +1,4 @@
 import os
-import logging
 
 from layouteagle import config
 from layout.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
@@ -28,7 +27,7 @@ class PDF2ETC(TrueFormatUpmarkerPDF2HTMLEX):
             wordi_path = pdf_path + "." + outputs['wordi']
             feat_path = pdf_path + "." + outputs['feat']
 
-            logging.warning(f"working on {pdf_path}")
+            self.logger.warning(f"working on {pdf_path}")
             self.pdf2htmlEX(pdf_path, html_path)
 
             meta['pdf2htmlEX.html'] = html_path

@@ -8,7 +8,7 @@ min_max_scaler = MinMaxScaler()
 
 import scipy.spatial as spatial
 
-from python.layouteagle import config
+from layouteagle import config
 
 
 sys.path.append(".")
@@ -32,7 +32,7 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
                 feature_df = self.read_positional_data(
                     meta['filename'] + ".feat")  # self.generate_data_for_file(labeled_html_path)
             except FileNotFoundError as e:
-                logging.error("output of pdf2htmlEX was not found")
+                self.logger.error("output of pdf2htmlEX was not found")
                 continue
             except Exception as e:
                 self.logger.error(f"could not compute features, proceeding ... error was {e}")

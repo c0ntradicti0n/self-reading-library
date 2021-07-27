@@ -5,6 +5,9 @@ from overrides import overrides
 import torch
 from torch.nn.modules.linear import Linear
 
+import logging
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 from allennlp.common.checks import check_dimensions_match, ConfigurationError
 from allennlp.data import Vocabulary
 from allennlp.modules import Seq2SeqEncoder, TimeDistributed, TextFieldEmbedder, MatrixAttention

@@ -2,7 +2,12 @@ from pprint import pprint
 
 from listalign.suffixtreealign import suffix_align
 from more_itertools import pairwise
+
+
 from pdfminer.high_level import extract_text
+import logging
+logging.getLogger('pdfminer').setLevel(logging.ERROR)
+
 
 from layout.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
 from layouteagle.pathant.Converter import converter
@@ -21,10 +26,10 @@ class MarkupDocument(TrueFormatUpmarkerPDF2HTMLEX):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.css = {
-            0: 'color: #123',
-            1: 'background-color: #FFDC00 ',
-            2: 'background-color: #A012BE ',
-            3: 'background-color: #0152BE '
+            0: 'background-color: #ccc !important',
+            1: 'background-color: #1ff !important',
+            2: 'background-color: #f1f !important',
+            3: 'background-color: #ff1 !important'
         }
         pass
 

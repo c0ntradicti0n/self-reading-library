@@ -5,6 +5,8 @@ from typing import Dict
 import joblib
 import pandas
 import tensorflow as tf
+tf.get_logger().setLevel('ERROR')
+
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import Normalizer
 from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
@@ -17,8 +19,7 @@ from helpers.list_tools import Lookup, sorted_by_zipped
 from helpers.pandas_tools import unpack_list_column
 from layouteagle import config
 from layouteagle.pathant.PathSpec import PathSpec
-
-from python.helpers.nested_dict_tools import flatten
+from helpers.nested_dict_tools import flatten
 
 
 class LayoutModeler(PathSpec):
@@ -41,7 +42,7 @@ class LayoutModeler(PathSpec):
                    'trainable': True,
                    'activation': 'softmax',
                    'dtype': 'float64'},
-        'adam': {'lr': 0.003},
+        'adam': {'lr': 0.0003},
         'epochs': 300,
         'batch_size': 10000,
         'patience': 10,
@@ -102,9 +103,9 @@ class LayoutModeler(PathSpec):
         if training:
             train, test = train_test_split(feature_df, test_size=0.2)
             train, val = train_test_split(train, test_size=0.2)
-            logging.info(f'{len(train)} train samples')
-            logging.info(f'{len(val)} validation samples')
-            logging.info(f'{len(test)} test samples')
+            self.logger.info(f'{len(train)} train samples')
+            self.logger.info(f'{len(val)} validation samples')
+            self.logger.info(f'{len(test)} test samples')
 
             self.train_ds = self.df_to_dataset(train, shuffle=False, batch_size=self.train_kwargs['batch_size'],
                                                training=training)
@@ -175,7 +176,7 @@ class LayoutModeler(PathSpec):
 
         feature_df = feature_df.fillna(1)
         with pandas.option_context('display.max_rows', None, 'display.max_columns', None):
-            logging.info(str(feature_df.head()))
+            self.logger.debug(str(feature_df.head()))
 
         new_xp_cols = unpack_list_column("x_profile", feature_df, prefix='xp_')
         new_yp__cols = unpack_list_column("y_profile", feature_df, prefix='yp_')
@@ -187,7 +188,7 @@ class LayoutModeler(PathSpec):
         return feature_df
 
     def train(self, feature_columns, override_kwargs={}):
-        logging.info(f"Model will go to {self.model_path}")
+        self.logger.info(f"Model will go to {self.model_path}")
         os.system(f"rm {self.model_path}")
 
         self.train_kwargs.update(override_kwargs)
@@ -234,10 +235,10 @@ class LayoutModeler(PathSpec):
         try:
             _, train_acc = self.model.evaluate(self.train_ds, verbose=0)
             _, test_acc = self.model.evaluate(self.test_ds, verbose=0)
-            logging.info('Train: %.3f, Test: %.3f' % (train_acc, test_acc))
+            self.logger.info('Train: %.3f, Test: %.3f' % (train_acc, test_acc))
 
         except ValueError:
-            logging.error("Bad distribution of training data, shapes did'nt match, no extra evaluation")
+            self.logger.error("Bad distribution of training data, shapes did'nt match, no extra evaluation")
 
         xy_new = self.model.predict_classes(self.val_ds, batch_size=None)
         logging.info('Validation')

@@ -68,7 +68,7 @@ class PathAnt:
                for edge, intermediate_targets in converters_implications.items()
                       }
 
-        logging.warning(f"found path: {converters_path}")
+        logging.debug(f"Found path: {'⇾'.join(converters_path)}")
         pipeline = [self.lookup(*_from_to) for _from_to in pairwise(converters_path)]
         return Pipeline(pipeline, source, target, extra_paths)
 
@@ -78,8 +78,8 @@ class PathAnt:
 
         dG = self.G.copy()
 
-        nx.set_edge_attributes(dG, 0, 'color')
-        nx.set_edge_attributes(dG, " ", 'label')
+        nx.set_edge_attributes(dG, "#CCCCFF", 'color')
+        nx.set_edge_attributes(dG, "", 'label')
 
         if pipelines_to_highlight:
             for  color, pipeline in enumerate(pipelines_to_highlight):

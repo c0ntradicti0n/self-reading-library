@@ -3,9 +3,10 @@ import os
 import sys
 sys.path.append(".")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-print(sys.path)
 from layouteagle import config
 from layouteagle.pathant.PathAnt import PathAnt
+
+
 
 class LayoutEagle:
 
@@ -60,9 +61,7 @@ class LayoutEagle:
     def test_prediction(self):
         self.prediction_pipe = self.ant("pdf", "css.layout")
         pdfs = [file for file in glob.glob(config.pdf_dir + "*.pdf")]
-
         css = list(self.prediction_pipe([(pdfs[0], {})]))
-        print (css)
         assert(css)
 
 
@@ -73,8 +72,6 @@ class LayoutEagle:
 
         for pdf in pdfs:
             html, css = list(self.html_pipeline([(pdf,{})])), list(self.layout_pipe([(pdf, {})]))
-            print(html, css)
-
             html_path = html[0][0]
             with open(html_path, "r") as f:
                 contents = f.readlines()
@@ -92,7 +89,6 @@ class LayoutEagle:
 
         pdfs = [file for file in glob.glob(config.pdf_dir + "*.pdf")]
         result_paths = list(self.difference_pipe([(pdf, {}) for pdf in pdfs]))
-        print(result_paths)
         for (html_path, json_path, txt_path), meta in result_paths:
             #os.system(f'google-chrome {html_path}')
             pass

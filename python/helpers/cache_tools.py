@@ -63,15 +63,13 @@ def file_persistent_cached_generator(
 
             name = param[0].__class__.__name__
             start_message = f"Pipeline object '{name}' is started"
-            if hasattr(param[0], "logger"):
-                param[0].logger.warning(start_message)
-            else:
-                print(start_message)
+            logger = param[0].logger.info if hasattr(param[0], 'logger') else print
+            logger(start_message)
 
             for result in generator:
 
                 msg = f"Pipeline step {name} running on result: '''{str(result)[:100]}...'''"
-                with timeit_context(msg):
+                with timeit_context(msg, logger = logger):
 
                     try:
                         result_string = json.dumps(result) + "\n"
@@ -90,7 +88,7 @@ def file_persistent_cached_generator(
                             os.chdir(cwd)
                         yield content, meta
                     except Exception as e:
-                        logging.error(f"ERROR {str(e)} while computing on \n {str(result)}\n in {str(original_func)}\n being in {os.getcwd()}")
+                        logging.error(f"{str(e)} while computing on \n {str(result)}\n in {str(original_func)}\n being in {os.getcwd()}")
                         raise e
 
         functools.update_wrapper(new_func, original_func)
@@ -143,7 +141,7 @@ def persist_to_file(file_name):
                 cache[hash] = return_val
 
                 json.dump(cache, open(file_name, 'w'))
-                logging.info(f"Dumping {hash} to cache file {file_name}" )
+                logging.warning(f"Dumping {hash} to cache file {file_name}" )
 
             return cache[hash]
 

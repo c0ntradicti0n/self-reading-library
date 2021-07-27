@@ -25,7 +25,7 @@ class LayoutTrainer(LayoutModeler):
                 self.plot(history)
             self.validate()
             self.save()
-            logging.info(f'made model, saved to {self.model_path}')
+            self.logger.info(f'made model, saved to {self.model_path}')
             yield self.model_path, meta
         else:
             self.logger.warning("skippped training, because model exists")

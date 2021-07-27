@@ -16,8 +16,6 @@ import logging
 from layouteagle.pathant.Converter import converter
 from layouteagle.pathant.PathSpec import PathSpec
 
-logging.basicConfig(level = logging.INFO)
-
 @converter("arxiv.org", "tex")
 class ScienceTexScraper(PathSpec):
     def __init__(self, *args, **kwargs):

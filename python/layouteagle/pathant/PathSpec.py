@@ -1,8 +1,10 @@
 import logging
+import coloredlogs
 import sys
 from enum import Enum
 from layouteagle import config
-
+import logging
+import layouteagle.config
 
 class cache_flow(Enum):
     iterate = 1
@@ -13,7 +15,12 @@ class cache_flow(Enum):
 class PathSpec:
     def __init__(self, *args, path_spec=None, cached: cache_flow = None, **kwargs):
         self.path_spec = path_spec
-        self.logger = logging.getLogger(sys.modules[self.__class__.__module__].__file__)
+        logger = logging.getLogger(sys.modules[self.__class__.__module__].__file__)
+
+
+        coloredlogs.install(level=config.logging_level, logger=logger)
+        self.logger = logger
+
         self.temporary = config.hidden_folder
 
         self.meta_storage = []

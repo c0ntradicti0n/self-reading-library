@@ -14,7 +14,6 @@ import pandas
 
 from scipy.ndimage import gaussian_filter
 from scipy.signal import find_peaks
-
 import matplotlib.pyplot as plt
 import seaborn as sns
 import regex
@@ -22,10 +21,7 @@ from scipy.spatial import distance_matrix
 
 from layouteagle import config
 from helpers.list_tools import threewise
-
 from layout.LayoutReader.trueformatupmarker import TrueFormatUpmarker
-
-logging.getLogger().setLevel(logging.WARNING)
 
 
 class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
@@ -202,7 +198,7 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
         try:
             return [decla.value[0].value for decla in declaration if decla.name == key][0]
         except:
-            logging.error(f"{key} not in {str(declaration)}")
+            self.logger.error(f"{key} not in {str(declaration)}")
             return 0
 
     point_before = (0, 0)
@@ -293,7 +289,7 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
         try:
             dotted[indices[:, 0], indices[:, 1]] = 1
         except IndexError:
-            logging.error("indexes wrong after index nomralisation ")
+            self.logger.error("indexes wrong after index nomralisation ")
 
         coarse_grained_field = gaussian_filter(dotted, sigma=3)
         coarse_grained_pdfs = coarse_grained_field[indices[:, 0], indices[:, 1]]
@@ -358,7 +354,7 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
             for indexed_point in indexed_points]
 
         if not (len({t[0] for t in x_sorted_points}) == number_of_culumns):
-            logging.info("other number of columns detexted, than sorted to")
+            self.logger.info("other number of columns detexted, than sorted to")
         # raw top down sorting
         xy_sorted_points = sorted(x_sorted_points, key=lambda x: x[0] * 1000 - x[1][1][1])
 
@@ -384,7 +380,7 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
         norm_distance = numpy.median(list(more_itertools.flatten(dY)))
         distance_std = norm_distance * 0.1
 
-        logging.debug(f"median {norm_distance} std {distance_std}")
+        self.logger.debug(f"median {norm_distance} std {distance_std}")
 
         valid_points_at = numpy.logical_and(dY > norm_distance - distance_std, dY < norm_distance + distance_std).any(
             axis=1)
@@ -409,7 +405,7 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
 
     def pdf2htmlEX(self, pdf_path, html):
         assert (pdf_path.endswith(".pdf"))
-        logging.info(f"converting pdf {pdf_path} to html ")
+        self.logger.debug(f"converting pdf {pdf_path} to html ")
         os.system(f"{config.pdf2htmlEX} "
                   f"--space-as-offset 1 "
                   f"--decompose-ligature 1 "
@@ -428,7 +424,7 @@ class TestPaperReader(unittest.TestCase):
         dfs = []
         for doc_id, path in enumerate(files):
             score = self.extract(path)
-            logging.info(f"collected {path} with {score}")
+            self.logger.debug(f"collected {path} with {score}")
             self.tfu_pdf.features["doc_id"] = doc_id
             dfs.append(self.tfu_pdf.features)
         df = pandas.concat(dfs)
@@ -457,7 +453,7 @@ class TestPaperReader(unittest.TestCase):
             pdf_obj = TrueFormatUpmarkerPDF2HTMLEX(**kwargs)
 
             score = pdf_obj.verify(serious=True, test_document=True)
-            logging.info(f"PDF extraction score: {score}")
+            self.logger.info(f"PDF extraction score: {score}")
 
             assert pdf_obj.columns == columns
             assert os.path.exists(kwargs['html_write_to'])
@@ -507,7 +503,7 @@ class TestPaperReader(unittest.TestCase):
         ]
 
         for kwargs in docs:
-            logging.error(kwargs)
+            self.logger.error(kwargs)
             columns = kwargs['cols']
             del kwargs['cols']
             kwargs['html_read_from'] = config.appcorpuscook_docs_document_dir + kwargs['html_read_from']
@@ -536,7 +532,7 @@ if __name__ == '__main__':
             continue
         pdf_obj = tfu_pdf.convert_and_index(**kwargs)
         score = pdf_obj.verify(columns=columns, serious=True, test_document=True)
-        logging.info(f"collected {path} with {score}")
+        self.logger.info(f"collected {path} with {score}")
         tfu_pdf.features["doc_id"] = doc_id
         dfs.append(tfu_pdf.features)
     df = pandas.concat(dfs)

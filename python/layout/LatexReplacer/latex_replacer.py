@@ -67,7 +67,7 @@ class LatexReplacer(SoupReplacer):
             try:
                 texpr = list(soup.find_all(tex_string))
             except Exception:
-                logging.error(f'no {tex_string} in document')
+                self.logger.error(f'no {tex_string} in document')
             yield from _return
 
     def insert_functionality(self, soup, file_content, col_num):
@@ -108,7 +108,7 @@ class LatexReplacer(SoupReplacer):
             try:
                 document_environment = soup.document.expr._contents
             except AttributeError:
-                logging.warning("document without document environment")
+                self.logger.warning("document without document environment")
                 return "nix"
 
             if soup.find('maketitle'):
@@ -136,7 +136,7 @@ class LatexReplacer(SoupReplacer):
                 insert_definitions = multicol_defs.defs
             soup.insert(insert_index, insert_definitions)
 
-            logging.info("No multi column instruction found, so its single col")
+            self.logger.info("No multi column instruction found, so its single col")
             return r" c 1 "
 
     @file_persistent_cached_generator(
@@ -263,7 +263,7 @@ class LatexReplacer(SoupReplacer):
 
 
         else:
-            logging.error("visited node not to visit")
+            self.logger.error("visited node not to visit")
 
         for i, node_to_replace in enumerate(forth):
             if isinstance(node_to_replace, BracketGroup):
@@ -381,14 +381,14 @@ class LatexReplacer(SoupReplacer):
             if compiling:
                 try:
                     if not self.compiles(path_to_read_from, clean=True) and compiling:
-                        self.path_spec.logger.error(f"Latex file '{path_to_read_from}' could not be compiled")
+                        self.logger.error(f"Latex file '{path_to_read_from}' could not be compiled")
                         return
                 except FileNotFoundError:
-                    logging.error(f"Input {path_to_read_from} not found! ")
+                    self.logger.error(f"Input {path_to_read_from} not found! ")
                     return None
 
             results = []
-            logging.info(f"Working on {path_to_read_from}")
+
             for col_num in range(1, self.max_cols + 1):
                 try:
                     with open(path_to_read_from, 'r') as f:
@@ -449,7 +449,7 @@ class LatexReplacer(SoupReplacer):
                         try:
                             input_file.args.all[-1].contents = [(new_path[0])]
                         except TypeError as e:
-                            logging.error(f"Input Tag bad: Failed to replace input tag {str(input_file)}")
+                            self.logger.error(f"Input Tag bad: Failed to replace input tag {str(input_file)}")
                             return
 
                     self.path_spec.logger.info(f"Replacing included input from {path_to_read_from}: {input_files}")
@@ -462,7 +462,7 @@ class LatexReplacer(SoupReplacer):
                 try:
                     result = soup.__str__()
                 except TypeError:
-                    logging.error("Soup damaged, continue")
+                    self.logger.error("Soup damaged, continue")
                     return
 
                 out_path = self.labeled_tex_path(path_to_read_from + str(col_num))
@@ -471,7 +471,7 @@ class LatexReplacer(SoupReplacer):
 
                 if compiling and not self.check_result(result):
                     self.path_spec.logger.error(f"There was not much text replaced {path_to_read_from}, skip")
-                    logging.error("Gave not enough text")
+                    self.logger.error("Gave not enough text")
                     return
 
                 if compiling:

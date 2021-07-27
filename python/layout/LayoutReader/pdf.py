@@ -30,7 +30,7 @@ class Pdf:
 
         for attr, value in attributes.items():
             if not value:
-                logging.error(f"{attr} is not set")
+                self.logger.error(f"{attr} is not set")
                 if serious:
                     assert value
 
