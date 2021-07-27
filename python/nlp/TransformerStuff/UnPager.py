@@ -37,7 +37,6 @@ class UnPager(PathSpec):
                 whole_doc_id = "?"
 
         alignment = fuzzyalign([w for i, w in meta["i_word"]], [w for t, w in whole_annotation])
-        print(alignment_table(alignment, [w for i, w in meta["i_word"]], [w for t, w in whole_annotation]))
         whole_meta["_i_to_i2"] = {meta["i_word"][_i1][0]: _i2 for _i1, _i2 in alignment}
         yield whole_annotation, whole_meta
 

@@ -15,9 +15,6 @@ class Ant(PathSpec):
                             f"\n by adding kwarg 'cached: [cache_flow] = ...' ")
 
     def __call__(self, args):
-        #print ("Input was: ", type_spec(args), args)
-        print (self.cached)
-
         if self.cached == cache_flow.iterate:
 
             for arg in args:

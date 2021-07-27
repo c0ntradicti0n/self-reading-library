@@ -2,10 +2,14 @@ import logging
 import os
 import sys
 import unittest
+import pandas
+from sklearn.preprocessing import MinMaxScaler
+min_max_scaler = MinMaxScaler()
 
-import spatial as spatial
+import scipy.spatial as spatial
 
 from python.layouteagle import config
+
 
 sys.path.append(".")
 
@@ -21,11 +25,12 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
 
     def __call__(self, labeled_paths, *args, **kwargs):
         for doc_id, (labeled_html_path, meta) in enumerate(labeled_paths):
-            print(doc_id, labeled_html_path)
+            if self.path_spec.flags == "training" and not "tex1" in labeled_html_path:
+                continue
+
             try:
                 feature_df = self.read_positional_data(
                     meta['filename'] + ".feat")  # self.generate_data_for_file(labeled_html_path)
-
             except FileNotFoundError as e:
                 logging.error("output of pdf2htmlEX was not found")
                 continue
@@ -72,15 +77,29 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
 
         points = list(zip(sub_df.center_x, sub_df.center_y))
         kd_tree = spatial.KDTree(points)
-        for k in range(config.layout_model_next_text_boxes):
-            sub_df[f'nearest_{k}_center_x'], sub_df[f'nearest_{k}_center_y'] = \
-                list(zip([points[kd_tree.query(p, k=k)][1] for p in zip(sub_df.center_x, sub_df.center_y)]))
+
+
+        try:
+            all_nearest_points = \
+                [(p, [points[k] for k in kd_tree.query(p, k=config.layout_model_next_text_boxes)[1]])
+                 for p in zip(sub_df.center_x, sub_df.center_y)]
+
+            for k in range(config.layout_model_next_text_boxes):
+                sub_df[f'nearest_{k}_center_x'], sub_df[f'nearest_{k}_center_y'] = list(zip(*
+                    [nearest_points[k] for p1, nearest_points in all_nearest_points]
+                ))
+        except Exception as e:
+            print (points)
+            self.logger.warning(f"not enough points in page to find {config.layout_model_next_text_boxes} nearest points, faking with 0.5")
+            for k in range(config.layout_model_next_text_boxes):
+                sub_df[f'nearest_{k}_center_x'] = [0.5] * len(sub_df)
+                sub_df[f'nearest_{k}_center_y'] = [0.5] * len(sub_df)
 
         sub_df['dxy1'] = self.distances(sub_df, 'x1', 'y1', 'x2', 'y2')
         sub_df['dxy2'] = self.distances(sub_df, 'x2', 'y2', 'x1', 'y1')
         sub_df['dxy3'] = self.distances(sub_df, 'x1', 'y2', 'x2', 'y1')
         sub_df['dxy4'] = self.distances(sub_df, 'x2', 'y1', 'x1', 'y2')
-        sub_df['sin1'] = self.sinuses(sub_df, 'x1', 'y1', 'x2', 'y2')
+        """sub_df['sin1'] = self.sinuses(sub_df, 'x1', 'y1', 'x2', 'y2')
         sub_df['sin2'] = self.sinuses(sub_df, 'x2', 'y2', 'x1', 'y1')
         sub_df['sin3'] = self.sinuses(sub_df, 'x1', 'y2', 'x2', 'y1')
         sub_df['sin4'] = self.sinuses(sub_df, 'x2', 'y1', 'x1', 'y2')
@@ -92,8 +111,15 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
         sub_df['probsin3'] = sub_df.sin3.map(sub_df.sin3.value_counts(normalize=True))
         sub_df['probsin4'] = sub_df.sin4.map(sub_df.sin4.value_counts(normalize=True))
         # some max and min of text size to recognize a title page with abstract
+        """
         sub_df['probascent'] = sub_df.ascent.map(sub_df.ascent.value_counts(normalize=True))
         sub_df['probdescent'] = sub_df.descent.map(sub_df.descent.value_counts(normalize=True))
+        self.point_density_frequence_per_page(sub_df)
+
+        x = sub_df[config.cols_to_use].values
+        x_scaled = min_max_scaler.fit_transform(x)
+        df_temp = pandas.DataFrame(x_scaled, columns=config.cols_to_use, index=sub_df.index)
+        sub_df[config.cols_to_use] = df_temp
 
         return sub_df
 

@@ -35,11 +35,11 @@ class Pager(PathSpec):
             # errors: f"{index}:{string}"
             with open(wordi_path, 'rb') as f:
                 content = f.read()
-            print(chardet.detect(content))
+
             encoding = chardet.detect(content)['encoding']
             lines = content.decode(encoding).split()
             i_word = [self.match_wordi_line(line) for line in lines if len(line) > 2]
-            print(lines[:3])
+
 
             # read pure text with better tokenization with pdfminer.six
             text = extract_text(meta['pdf_path']).replace('', "")

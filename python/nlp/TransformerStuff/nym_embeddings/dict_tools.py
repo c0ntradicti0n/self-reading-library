@@ -58,10 +58,7 @@ def update(d, u):
 
 import unittest
 class TestDicTools(unittest.TestCase):
-
-
     def test_balance_complex_tuple_dict(self):
-        import pprint
         d = {
             ('differ'):['equal'],
             ('have','*','in', 'common'):[('differ','in'), 'differ', 'derive']

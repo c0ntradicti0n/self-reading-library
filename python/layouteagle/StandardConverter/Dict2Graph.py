@@ -1,5 +1,3 @@
-from pprint import pprint
-
 from numpy.core.multiarray import ndarray
 
 from ant import Ant
@@ -29,21 +27,8 @@ class Dict2Graph(Ant):
 
 
     def to_graph_dict(self, topics, fun=None):
-        """try:
-            import textwrap
-            edge_list = list(self.rec_items(topics))
-            print(textwrap.fill(str(edge_list), 80))
-            dig = nx.from_dict_of_dicts(topics)
-        except nx.NetworkXError as e:
-            pprint (type_spec(topics))
-            raise e
-            """
-
         from collections import Mapping
-        #graph_data = {"root": {"level-0.A": 0,
-        #                       "level-0.B": {"level-1.B.1": 2,
-        #                                     "level-1.B.2": {"level-2.B.2.1": 3, "level-2.B.2.2": 1}}}}
-        # Empty directed graph
+
         dig = nx.DiGraph()
 
         # Iterate through the layers
@@ -63,7 +48,6 @@ class Dict2Graph(Ant):
                     q.append((nv, nd))
 
         ddic = nx.to_dict_of_dicts(dig)
-        pprint(ddic)
         levels = 3
         nodes = [{'id': k,
                   'name': dig.nodes[k]['attr'] if 'attr' in dig.nodes[k]  else k,
@@ -82,10 +66,6 @@ class Dict2Graph(Ant):
                 + center_links
 
         d = {'nodes': nodes, 'links': links}
-        pprint(nodes)
-        pprint(links)
-
-
         return d
 
 
@@ -96,5 +76,3 @@ if __name__ == "__main__":
         topics = pickle.load(f)
 
     d2g = Dict2Graph
-    #pprint(topics)
-    print (list(d2g([topics])))

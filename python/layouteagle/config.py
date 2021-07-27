@@ -1,5 +1,7 @@
 import os
 import sys
+from python.helpers.nested_dict_tools import flatten
+
 
 sys.path.append(os.getcwd())
 
@@ -78,4 +80,19 @@ difference_model_config = hidden_folder + f"/over_{model_config}/config.json"
 wordninjalanguagemodel = "nlp/english.txt.gz"
 
 
-layout_model_path = hidden_folder + "/layout_model"
+layout_model_path = hidden_folder + "/layout_model/"
+saved_layout_model_dir = hidden_folder + "/layout_model_saved/"
+
+
+collected_features_path = ".layouteagle/labeled_features.pickle"
+
+cols_to_use = [
+            'width', 'ascent', 'descent',
+            'x1', 'y1', 'x2', 'y2',
+            'dxy1', 'dxy2', 'dxy3', 'dxy4',
+            #'sin1', 'sin2', 'sin3', 'sin4',
+            #'probsin1', 'probsin2', 'probsin3', 'probsin4',
+            'probascent', 'probdescent',
+            *list(flatten([[f'nearest_{k}_center_x', f'nearest_{k}_center_y']
+                           for k in range(layout_model_next_text_boxes)]))
+        ]

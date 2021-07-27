@@ -43,8 +43,6 @@ def correlate_argmax_label (sheet, embeddings1, embeddings2, label, score_sheet)
     peak_threshold = max (c[0,:,0]) * 0.93
     rpeak_threshold = max (rc[0,:,0]) * 0.93
 
-    if embeddings2.shape[1] > 1:
-        print ('hallo')
     padded_c = pad_right(c[0,:,0], len (sheet))
     rpadded_c = pad_right(rc[0,:,0], len (sheet))
 

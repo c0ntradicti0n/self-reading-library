@@ -19,17 +19,25 @@ class PathSpec:
         self.meta_storage = []
         self.value_storage = []
         self.cached = cached
+        self.flags = None
+
+    def __enter__(self):
+        print (self.__class__.__name__ + " enter")
+        pass
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        print (self.__class__.__name__ + " exit")
+
+        pass
 
     def answer_or_ask_neighbors(self, meta_match):
 
 
         answer = list(self.match(meta_match))
-        print (answer)
+
         if answer:
             return answer
 
-        print(list(self.ant.G.nodes(data=True)))
-        print (self.path_spec._to)
         neighbors = self.ant.G.in_edges(self.path_spec._from[1:])
         print ("NEIBORS", neighbors)
         for edge in neighbors:

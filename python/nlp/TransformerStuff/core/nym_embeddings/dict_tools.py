@@ -68,8 +68,6 @@ class TestDicTools(unittest.TestCase):
         }
         balanced = balance_complex_tuple_dict(dict(d))
 
-        print (balanced)
-
 
 if __name__ == '__main__':
     unittest.main()

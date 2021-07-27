@@ -2,7 +2,6 @@ import itertools
 import os
 import pickle
 from typing import Dict
-
 import joblib
 import pandas
 import tensorflow as tf
@@ -12,8 +11,10 @@ from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.python.keras.utils.np_utils import to_categorical
 import logging
 import pprint
+import more_itertools
 
 from helpers.list_tools import Lookup, sorted_by_zipped
+from helpers.pandas_tools import unpack_list_column
 from layouteagle import config
 from layouteagle.pathant.PathSpec import PathSpec
 
@@ -24,33 +25,28 @@ class LayoutModeler(PathSpec):
     train_kwargs = {
         'dropout': {'rate': 0.3,
                     'dtype': 'float64'},
-        **{f'dense_{i}': {'units': 50,
+        **{f'dense1_{i}': {'units': 256,
                    'trainable': True,
-                   'activation': 'swish',
-                   'dtype': 'float64'} for i in range(0, 20)},
+                   'activation': 'relu',
+                   'dtype': 'float64'} for i in range(0, 2)},
+        **{f'dense2_{i}': {'units': 256,
+                          'trainable': True,
+                          'activation': 'relu',
+                          'dtype': 'float64'} for i in range(0, 2)},
         'dense_1000': {'units': 4,
                        'trainable': True,
-                       'activation': 'swish',
+                       'activation': 'relu',
                        'dtype': 'float64'},
         'denseE': { # 'units' are set by us self to the necessary value
                    'trainable': True,
                    'activation': 'softmax',
                    'dtype': 'float64'},
-        'adam': {'lr': 0.0009},
-        'epochs': 3000,
-        'batch_size': 3000,
-        'patience': 300,
+        'adam': {'lr': 0.003},
+        'epochs': 300,
+        'batch_size': 10000,
+        'patience': 10,
         'labels': 'layoutlabel',
-        'cols_to_use': [
-            'width', 'ascent', 'descent',
-            'x1', 'y1', 'x2', 'y2',
-            'dxy1', 'dxy2', 'dxy3', 'dxy4',
-            'sin1', 'sin2', 'sin3', 'sin4',
-            'probsin1', 'probsin2', 'probsin3', 'probsin4',
-            'probascent', 'probdescent',
-            *list(flatten([[f'nearest_{k}_center_x', f'nearest_{k}_center_y']
-                           for k in config.layout_model_next_text_boxes]))
-        ]
+        'cols_to_use': config.cols_to_use
     }
 
     def __init__(self,
@@ -64,6 +60,9 @@ class LayoutModeler(PathSpec):
             raise ValueError("Please specify a path for saving and loading the model")
 
         self.model_path = model_path
+        if not os.path.isdir(self.model_path):
+            os.mkdir(self.model_path)
+
         self.lookup_path = self.model_path + ".lookup.pickle"
 
         self.train_kwargs.update(override_train_kwargs)
@@ -158,47 +157,32 @@ class LayoutModeler(PathSpec):
 
         feature_df = feature_df.reset_index(drop=True)
 
-        """
         N = 7
 
-        distance_col_prefix = 'd_'
         max_distance = max([max(x) for x in feature_df['distance_vector']])
         feature_df.distance_vector = feature_df.distance_vector.apply(lambda x: x / max_distance)
         feature_df.distance_vector = feature_df.distance_vector.apply(lambda x: list(more_itertools.padded(list(sorted(x))[:N], 0, 8)))
-        feature_df = feature_df.assign(
-            **feature_df.distance_vector.apply(pandas.Series).add_prefix(distance_col_prefix))
+
+        new_d_cols = unpack_list_column("distance_vector", feature_df, prefix='d_')
+
         feature_df = feature_df.fillna(1)
 
-        angle_col_prefix = 'a_'
         feature_df.angle = feature_df.angle.apply(lambda x: list(x))
         feature_df['da'] = list(zip(feature_df['angle'], feature_df['distance_vector']))
         feature_df.angle = feature_df['da'].apply(lambda x: list(more_itertools.padded(list(sorted_by_zipped(x))[:N], 0, N)))
-        feature_df = feature_df.assign(**feature_df.angle.apply(pandas.Series).add_prefix(angle_col_prefix))
+
+        new_a_cols = unpack_list_column("angle", feature_df, prefix='a_')
+
         feature_df = feature_df.fillna(1)
         with pandas.option_context('display.max_rows', None, 'display.max_columns', None):
             logging.info(str(feature_df.head()))
 
-        x_profile_col_prefix = 'xp_'
-        y_profile_col_prefix = 'yp_'
+        new_xp_cols = unpack_list_column("x_profile", feature_df, prefix='xp_')
+        new_yp__cols = unpack_list_column("y_profile", feature_df, prefix='yp_')
 
-        feature_df = feature_df.assign(**feature_df.x_profile.apply(pandas.Series).add_prefix(x_profile_col_prefix))
-        feature_df = feature_df.assign(**feature_df.y_profile.apply(pandas.Series).add_prefix(y_profile_col_prefix))
-
-
-        self.cols_to_use = self.cols_to_use + [col for col in feature_df.columns if
-                             any(col.startswith(prefix) for prefix in [distance_col_prefix, angle_col_prefix, x_profile_col_prefix, y_profile_col_prefix])]
-"""
-
-        if training:
-            feature_df = feature_df.sample(frac=1).reset_index(drop=True)
+        self.cols_to_use = self.cols_to_use + new_d_cols + new_a_cols + new_xp_cols + new_yp__cols
 
         feature_df = feature_df[self.cols_to_use]
-
-        # shift1 = feature_df.shift(periods=1, fill_value = 0)
-        # shift_1 = feature_df.shift(periods=-1, fill_value = 0)
-        # names =['bef', '', 'aft']
-        # dfs = [feature_df, shift1, shift_1]
-        # feature_df = pandas.concat([df.add_prefix(name) for name, df in zip(names, dfs)], axis=1).dropna()
 
         return feature_df
 
@@ -209,16 +193,19 @@ class LayoutModeler(PathSpec):
         self.train_kwargs.update(override_kwargs)
         feature_layer = tf.keras.layers.DenseFeatures(feature_columns=feature_columns, dtype='float64')
 
-        es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=self.train_kwargs['patience'])
+        es = EarlyStopping(monitor='val_mse', mode='min', verbose=1, patience=self.train_kwargs['patience'])
         mc = ModelCheckpoint(self.model_path,
-                             monitor='val_accuracy',
+                             monitor='val_mse',
                              save_best_only=True,
                              save_weights_only=True,
                              verbose=1)
 
         self.model = tf.keras.Sequential([
             feature_layer,
-            *[tf.keras.layers.Dense(**v) for k, v in self.train_kwargs.items() if "dense_" in k],
+            *[tf.keras.layers.Dense(**v, use_bias=True) for k, v in self.train_kwargs.items() if "dense1_" in k],
+            tf.keras.layers.experimental.EinsumDense("...x,xy->...y", output_shape=256, bias_axes="y"),
+            *[tf.keras.layers.Dense(**v, use_bias=True) for k, v in self.train_kwargs.items() if "dense2_" in k],
+
             tf.keras.layers.Dense(units=len(self.label_set), **self.train_kwargs['denseE']),
 
         ])
@@ -226,7 +213,7 @@ class LayoutModeler(PathSpec):
         optimizer = tf.optimizers.Adam(**self.train_kwargs['adam'])
         self.model.compile(optimizer=optimizer,
                            loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
-                           metrics=['accuracy'])  # , 'mse'])
+                           metrics=[ 'mse', 'accuracy'])
 
         history = self.model.fit(self.train_ds,
                                  validation_data=self.val_ds,
@@ -273,12 +260,11 @@ class LayoutModeler(PathSpec):
     def load(self):
         try:
             if not hasattr(self, "model"):
-                self.model = tf.keras.models.load_model(self.model_path)
+                self.model = tf.keras.models.load_model(self.model_path + "/.kerasmodel/")
 
-            if not hasattr(self, "label_lookup"):
-                print(os.getcwd() + "->" + self.lookup_path)
-                with open(self.lookup_path, "rb") as f:
-                    self.label_lookup = pickle.load(f)
+            print(os.getcwd() + "->" + self.lookup_path)
+            with open(self.lookup_path, "rb") as f:
+                self.label_lookup = pickle.load(f)
 
             if not hasattr(self, "label_lookup") and not hasattr(self, "lookup_path"):
                 raise ValueError(f"No lookup table could be loaded from {self.lookup_path} (cwd= {os.getcwd()}")

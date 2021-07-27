@@ -63,9 +63,6 @@ if not os.path.isfile(ke_wnkeys_path) or not os.path.isfile(ke_model_path):
     known_rels = OrderedSet([str(rel) for rel in whole_wn_graph])
     whole_wn_graph = [rel for rel in whole_wn_graph if str(rel) in known_rels]
 
-    import pprint
-    pprint.pprint (whole_wn_graph[:60])
-
     import random
     random.shuffle(whole_wn_graph)
 

@@ -267,8 +267,6 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
                                  for y_profile_vector, angle_matrix in zip(other_feature_kinds_stacked.y_profile,
                                                                            other_feature_kinds_stacked.angles) for _ in
                                  angle_matrix]
-        self.overwrite_by_labeled_document(features)
-
         return coarse_grained_field
 
     edges = numpy.array(

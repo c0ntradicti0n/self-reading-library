@@ -8,8 +8,6 @@ def match(s1:str , s2: str, delimiter='.'):
     parts2 = [s2[:i] for i, c in enumerate(s2+'.') if c == delimiter]
     same_elements = [p1 for p1, p2 in
                      itertools.product(parts1, parts2) if p1==p2]
-    print (parts1, parts2, same_elements)
-
     return bool(same_elements)
 
 def list_or_value(arg):

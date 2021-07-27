@@ -10,4 +10,4 @@ def timeit_context(name):
     startTime = time.time()
     yield
     elapsedTime = time.time() - startTime
-    print ('[{}] finished in {} ms'.format(name, int(elapsedTime * 1000)))
+    print (f"['{name}' finished in {int(elapsedTime * 1000)} ms]'")

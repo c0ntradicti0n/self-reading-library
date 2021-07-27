@@ -1,7 +1,6 @@
 import itertools
 import logging
 import os
-from pprint import pprint
 from typing import List, Tuple
 
 import networkx as nx
@@ -158,7 +157,7 @@ class PathAnt:
 
     def graph(self):
         d2g = Dict2Graph
-        pprint(nx.to_dict_of_dicts(self.G))
+
 
         return list(d2g([nx.to_dict_of_dicts(self.G, edge_data=[])]))[0]
 
@@ -217,7 +216,7 @@ class TestPathAnt(unittest.TestCase):
 
     def test_make_model(self):
         model_pipe = self.ant("arxiv.org", "keras")
-        print (list(model_pipe("https://arxiv.org")))
+        list(model_pipe("https://arxiv.org"))
 
     def test_info(self):
         self.ant.info(pipelines_to_highlight=[self.model_pipe, self.prediction_pipe])

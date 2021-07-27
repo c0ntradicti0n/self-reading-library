@@ -39,7 +39,7 @@ class MarkupDocument(TrueFormatUpmarkerPDF2HTMLEX):
             feature_df.word_num = feature_df.word_num.astype(int)
             ranges = [list(range(*r))
                       for r in list(pairwise([0] + list(feature_df.word_num)))]
-            pprint((text.split(' '), list(feature_df.text), ranges))
+
             meta["_i_to_i2"] = {i: i for i in range(0, max(list(feature_df.word_num)))}
 
             annotation = [(self.label_lookup.token_to_id[l], feature_df.text[i]) for i, l in

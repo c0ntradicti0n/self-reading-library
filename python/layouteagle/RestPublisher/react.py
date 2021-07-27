@@ -27,7 +27,6 @@ class react:
 
         if installing:
             parts = ["yarn", "create", "next-app", npm_project,  "--example", "with-three-js"]
-            print (" ".join(parts))
             subprocess.check_call(parts, stdout=sys.stdout,
                                       stderr=subprocess.STDOUT)
 

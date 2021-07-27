@@ -5,6 +5,9 @@ from glob import glob
 import falcon
 import os
 
+from helpers.time_tools import timeit_context
+
+
 
 def file_persistent_cached_generator(
         filename,
@@ -23,10 +26,7 @@ def file_persistent_cached_generator(
                 if load_via_glob:
                     if isinstance(load_via_glob, str):
                         load_via_glob = [load_via_glob]
-
                     cache = [f'["{fp}", {"{}"} ]' for path in load_via_glob for fp in glob(path)]
-
-                    print(cache)
 
                 cache = [tuple(json.loads(line)) for line in cache]
                 cache = [(a if not isinstance(a, list) else tuple(a), b) for a, b in cache]
@@ -44,7 +44,6 @@ def file_persistent_cached_generator(
                     yield from yield_cache(cache, cwd)
                 else:
                     for res, meta in cache:
-                        print ("yielding")
                         yield res, meta
 
                 if (not cache or not if_cache_then_finished):
@@ -62,27 +61,37 @@ def file_persistent_cached_generator(
         def apply_and_cache(cache, cwd, param, no_cache=False):
             generator = original_func(*param)#, cache=cache)
 
+            name = param[0].__class__.__name__
+            start_message = f"Pipeline object '{name}' is started"
+            if hasattr(param[0], "logger"):
+                param[0].logger.warning(start_message)
+            else:
+                print(start_message)
 
             for result in generator:
-                try:
-                    result_string = json.dumps(result) + "\n"
-                    if no_cache or result_string not in cache:
-                        content, meta = result
 
-                        os.chdir(cwd)
+                msg = f"Pipeline step {name} running on result: '''{str(result)[:100]}...'''"
+                with timeit_context(msg):
 
-                        if os.path.exists(filename):
-                            append_write = 'a'  # append if already exists
-                        else:
-                            append_write = 'w'  # make a new file if not
+                    try:
+                        result_string = json.dumps(result) + "\n"
+                        if no_cache or result_string not in cache:
+                            content, meta = result
 
-                        with open(filename, append_write) as f:
-                            f.write(result_string)
-                        os.chdir(cwd)
-                    yield content, meta
-                except Exception as e:
-                    logging.error(f"ERROR {str(e)} while computing on \n {str(result)}\n in {str(original_func)}\n being in {os.getcwd()}")
-                    raise e
+                            os.chdir(cwd)
+
+                            if os.path.exists(filename):
+                                append_write = 'a'  # append if already exists
+                            else:
+                                append_write = 'w'  # make a new file if not
+
+                            with open(filename, append_write) as f:
+                                f.write(result_string)
+                            os.chdir(cwd)
+                        yield content, meta
+                    except Exception as e:
+                        logging.error(f"ERROR {str(e)} while computing on \n {str(result)}\n in {str(original_func)}\n being in {os.getcwd()}")
+                        raise e
 
         functools.update_wrapper(new_func, original_func)
 
@@ -158,7 +167,6 @@ def uri_with_cache(fun):
 
         if not (fun, req) in memory_caches:
             print (req, resp, *args, **kwargs)
-            print (memory_caches)
             memory_caches[fun] = "working..."
             res = fun(self, req, resp)
             memory_caches[(fun, req)] = res

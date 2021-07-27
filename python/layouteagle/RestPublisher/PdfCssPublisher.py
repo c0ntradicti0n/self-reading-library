@@ -48,12 +48,10 @@ class PdfCssPublisher(RestPublisher):
 
         try:
             id = json.loads(req.stream.read())
-            print(str(type(id)))
             pdf_s = [f"{config.pdf_dir}/{id}.pdf"]
             self.logger.warning(f"analysing {pdf_s}")
             html_path, html_meta = self(self.html_pipeline, pdf_s)
             css_value, css_meta = self(self.css_pipeline, pdf_s)
-            print(html_path)
 
             with open(html_path[0], "r") as f:
                 html = "".join(f.readlines())
@@ -65,6 +63,5 @@ class PdfCssPublisher(RestPublisher):
 
         except Exception as e:
             print(html_path)
-
-            self.logger.error("markup backend is called badly")
+            self.logger.error("PDF and CSS combination failed with: " + str(e))
             raise e
