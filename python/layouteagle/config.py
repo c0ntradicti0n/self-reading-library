@@ -14,6 +14,7 @@ recursive = True
 max_len = 200
 NORMAL_HEIGHT = 100
 page_array_model = 100
+layout_model_next_text_boxes = 5
 
 doc_port        = 5180
 app_port        = 5181
