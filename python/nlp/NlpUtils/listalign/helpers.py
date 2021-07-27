@@ -22,14 +22,6 @@ class AlignmentException(Exception):
         return str(self.message) # __str__() obviously expects a string to be returned, so make sure not to send any other data types
 
 
-@contextmanager
-def timeit_context(name):
-    startTime = time.time()
-    yield
-    elapsedTime = time.time() - startTime
-    print('[{}] finished in {} ms'.format(name, int(elapsedTime * 1000)))
-
-
 def alignment_table(alignment, a, b):
     table = Texttable()
     table.set_deco(Texttable.HEADER)

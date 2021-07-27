@@ -80,14 +80,6 @@ if __name__ == "__main__":
     words_b = text.replace("m", "m ").split(" ")
 
 
-    @contextmanager
-    def timeit_context(name):
-        startTime = time.time()
-        yield
-        elapsedTime = time.time() - startTime
-        print('[{}] finished in {} ms'.format(name, int(elapsedTime * 1000)))
-
-
     seq_1 = 'jumpedoverthelazydogThequickbrownfox'.replace('o', 'o ').split(' ')
     seq_2 = 'The quick brown fox jumped over the lazy dog '.replace('e', 'e ').split(' ')
 

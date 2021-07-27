@@ -7,9 +7,7 @@ from layouteagle import config
 from layouteagle.pathant.PathAnt import PathAnt
 
 
-
 class LayoutEagle:
-
     from layout.ScienceTexScraper.scrape import ScienceTexScraper
     from layout.LatexReplacer.latex_replacer import LatexReplacer
     from layout.LayoutReader.labeled_feature_maker import TrueFormatUpmarkerPDF2HTMLEX

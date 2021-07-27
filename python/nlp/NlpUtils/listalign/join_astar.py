@@ -25,14 +25,6 @@ words_b = text.replace("m", "m ").split(" ")
 m = numpy.zeros((len(words_b), len(words_a)))
 
 
-@contextmanager
-def timeit_context(name):
-    startTime = time.time()
-    yield
-    elapsedTime = time.time() - startTime
-    print('[{}] finished in {} ms'.format(name, int(elapsedTime * 1000)))
-
-
 def lcs(S: str, T: str) -> Set[Tuple[int, int, str]]:
     """
     finds a common substring, returning both indices of findings
