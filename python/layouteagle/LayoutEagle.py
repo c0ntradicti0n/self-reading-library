@@ -49,7 +49,7 @@ class LayoutEagle:
 
     def make_model(self):
         model_pipe = self.ant("arxiv.org", "keras" )
-        print (list(model_pipe("https://arxiv.org", mode = 'training')))
+        print (list(model_pipe("https://arxiv.org", training = True)))
         os.system(
             f'cp -r {config.hidden_folder + config.layout_model_path} {config.hidden_folder + config.saved_layout_model_dir}')
 
@@ -101,5 +101,5 @@ if __name__=="__main__":
     le.make_model()
     le.test_prediction()
     le.test_layout()
-    le.test_prediction()
+    #le.test_prediction()
     #le.test_topics()

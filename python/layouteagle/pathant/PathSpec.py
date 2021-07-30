@@ -16,9 +16,10 @@ class PathSpec:
     def __init__(self, *args, path_spec=None, cached: cache_flow = None, **kwargs):
         self.path_spec = path_spec
         logger = logging.getLogger(sys.modules[self.__class__.__module__].__file__)
-
-
-        coloredlogs.install(level=config.logging_level, logger=logger)
+        coloredlogs.install(
+            fmt=">>>\t%(asctime)s-"
+                "%(levelname)s-%(name)s:\n\t%(message)s",
+            level=config.logging_level, logger=logger)
         self.logger = logger
 
         self.temporary = config.hidden_folder
@@ -26,7 +27,6 @@ class PathSpec:
         self.meta_storage = []
         self.value_storage = []
         self.cached = cached
-        self.flags = None
 
     def __enter__(self):
         print (self.__class__.__name__ + " enter")

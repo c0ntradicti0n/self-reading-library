@@ -24,28 +24,22 @@ from helpers.nested_dict_tools import flatten
 
 class LayoutModeler(PathSpec):
     train_kwargs = {
-        'dropout': {'rate': 0.3,
-                    'dtype': 'float64'},
         **{f'dense1_{i}': {'units': 256,
                    'trainable': True,
                    'activation': 'relu',
-                   'dtype': 'float64'} for i in range(0, 2)},
+                   'dtype': 'float64'} for i in range(0, 4)},
         **{f'dense2_{i}': {'units': 256,
                           'trainable': True,
                           'activation': 'relu',
-                          'dtype': 'float64'} for i in range(0, 2)},
-        'dense_1000': {'units': 4,
-                       'trainable': True,
-                       'activation': 'relu',
-                       'dtype': 'float64'},
+                          'dtype': 'float64'} for i in range(0, 4)},
         'denseE': { # 'units' are set by us self to the necessary value
                    'trainable': True,
                    'activation': 'softmax',
                    'dtype': 'float64'},
         'adam': {'lr': 0.0003},
-        'epochs': 300,
-        'batch_size': 10000,
-        'patience': 10,
+        'epochs': 100,
+        'batch_size': 3200,
+        'patience': 3,
         'labels': 'layoutlabel',
         'cols_to_use': config.cols_to_use
     }
@@ -64,7 +58,7 @@ class LayoutModeler(PathSpec):
         if not os.path.isdir(self.model_path):
             os.mkdir(self.model_path)
 
-        self.lookup_path = self.model_path + ".lookup.pickle"
+        self.lookup_path = config.hidden_folder + ".lookup.pickle"
 
         self.train_kwargs.update(override_train_kwargs)
 
@@ -88,6 +82,9 @@ class LayoutModeler(PathSpec):
             scaler = Normalizer()
             scaler.fit(feature_df[norm_cols].to_numpy())
             joblib.dump(scaler, self.model_path + ".scaler")
+
+            with open(self.lookup_path, "wb") as f:
+                pickle.dump(self.label_lookup, f)
         else:
             scaler = joblib.load(self.model_path + ".scaler")
 
@@ -126,7 +123,7 @@ class LayoutModeler(PathSpec):
             feature_columns.append(tf.feature_column.numeric_column(header))
 
         as_numpy = feature_df[self.cols_to_use].to_numpy()
-        return feature_columns, feature_df.to_numpy()
+        return feature_columns, as_numpy
 
     # A utility method to create a tf.data dataset from a Pandas Dataframe
     def df_to_dataset(self, dataframe, shuffle=True, batch_size=None, training=True):
@@ -189,32 +186,40 @@ class LayoutModeler(PathSpec):
 
     def train(self, feature_columns, override_kwargs={}):
         self.logger.info(f"Model will go to {self.model_path}")
-        os.system(f"rm {self.model_path}")
 
         self.train_kwargs.update(override_kwargs)
         feature_layer = tf.keras.layers.DenseFeatures(feature_columns=feature_columns, dtype='float64')
 
-        es = EarlyStopping(monitor='val_mse', mode='min', verbose=1, patience=self.train_kwargs['patience'])
+        es = EarlyStopping(
+            monitor='val_loss',
+            mode='min', verbose=1,
+            patience=self.train_kwargs['patience']
+        )
         mc = ModelCheckpoint(self.model_path,
-                             monitor='val_mse',
+                             monitor='val_accuracy',
                              save_best_only=True,
-                             save_weights_only=True,
+                             save_weights_only=False,
                              verbose=1)
 
         self.model = tf.keras.Sequential([
             feature_layer,
+
             *[tf.keras.layers.Dense(**v, use_bias=True) for k, v in self.train_kwargs.items() if "dense1_" in k],
-            tf.keras.layers.experimental.EinsumDense("...x,xy->...y", output_shape=256, bias_axes="y"),
+            #tf.keras.layers.experimental.EinsumDense("...x,xy->...y", output_shape=256, bias_axes="y"),
             *[tf.keras.layers.Dense(**v, use_bias=True) for k, v in self.train_kwargs.items() if "dense2_" in k],
 
             tf.keras.layers.Dense(units=len(self.label_set), **self.train_kwargs['denseE']),
+            #tf.keras.layers.Dropout(**self.train_kwargs['dropout']),
 
         ])
 
         optimizer = tf.optimizers.Adam(**self.train_kwargs['adam'])
         self.model.compile(optimizer=optimizer,
-                           loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
+                           loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
                            metrics=[ 'mse', 'accuracy'])
+
+        #self.model.build()
+        #self.model.summary()
 
         history = self.model.fit(self.train_ds,
                                  validation_data=self.val_ds,
@@ -223,7 +228,7 @@ class LayoutModeler(PathSpec):
 
     def plot(self, history):
         from matplotlib import pyplot
-        # plot training history
+        # plot training histortest/tapetumn-vs-nucullus.pdf.labeled.htmy
         pyplot.plot(history.history['accuracy'], label='train')
         pyplot.plot(history.history['val_accuracy'], label='validation')
         pyplot.legend()
@@ -240,30 +245,36 @@ class LayoutModeler(PathSpec):
         except ValueError:
             self.logger.error("Bad distribution of training data, shapes did'nt match, no extra evaluation")
 
-        xy_new = self.model.predict_classes(self.val_ds, batch_size=None)
         logging.info('Validation')
-        for x_y_pred, y_true in itertools.islice(zip(self.val_ds.unbatch(), xy_new), 20):
+        xy_new = self.model.predict_classes(self.val_ds, batch_size=None)
+        for x_y_pred, y_true in itertools.islice(zip(self.val_ds.unbatch(), xy_new), 40):
+            y_pred = tf.keras.backend.argmax(x_y_pred[1])
+            print(f'{y_pred} --->>> {y_true}')
+
+        logging.info('Test')
+        xy_new = self.model.predict_classes(self.test_ds, batch_size=None)
+        for x_y_pred, y_true in itertools.islice(zip(self.test_ds.unbatch(), xy_new), 40):
             y_pred = tf.keras.backend.argmax(x_y_pred[1])
             print(f'{y_pred} --->>> {y_true}')
         print(f'Legend {pprint.pformat(self.label_lookup.id_to_token, indent=4)}')
 
     def predict(self, feature_df):
         self.prepare_features(feature_df, training=False)
-        pred = self.model.predict(self.predict_ds)
-        pred = tf.argmax(pred, axis=-1)
-        return pred
-
-    def save(self):
-        self.model.save(self.model_path + ".kerasmodel")
-        with open(self.lookup_path, "wb") as f:
-            pickle.dump(self.label_lookup, f)
+        pred_classes = self.model.predict(self.predict_ds)
+        pred = tf.keras.backend.argmax(pred_classes)
+        return list(pred.numpy())
 
     def load(self):
         try:
             if not hasattr(self, "model"):
-                self.model = tf.keras.models.load_model(self.model_path + "/.kerasmodel/")
+                self.model = tf.keras.models.load_model(self.model_path)
+                optimizer = tf.optimizers.Adam(**self.train_kwargs['adam'])
+                self.model.compile(optimizer=optimizer,
+                                   loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
+                                   metrics=['mse', 'accuracy'])
 
             print(os.getcwd() + "->" + self.lookup_path)
+
             with open(self.lookup_path, "rb") as f:
                 self.label_lookup = pickle.load(f)
 

@@ -4,8 +4,7 @@ import logging
 from glob import glob
 import falcon
 import os
-
-from helpers.time_tools import timeit_context
+import unittest
 
 
 
@@ -61,16 +60,7 @@ def file_persistent_cached_generator(
         def apply_and_cache(cache, cwd, param, no_cache=False):
             generator = original_func(*param)#, cache=cache)
 
-            name = param[0].__class__.__name__
-            start_message = f"Pipeline object '{name}' is started"
-            logger = param[0].logger.info if hasattr(param[0], 'logger') else print
-            logger(start_message)
-
             for result in generator:
-
-                msg = f"Pipeline step {name} running on result: '''{str(result)[:100]}...'''"
-                with timeit_context(msg, logger = logger):
-
                     try:
                         result_string = json.dumps(result) + "\n"
                         if no_cache or result_string not in cache:
@@ -97,26 +87,90 @@ def file_persistent_cached_generator(
 
     return decorator
 
-@file_persistent_cached_generator("test.cache")
-def test(l):
-    for i in l:
-        yield i+1
 
-if __name__ == "__main__":
-    import os
-    os.system("rm test*.cache")
+def yield_cache(cache, cwd):
+    for result in cache.items():
+        os.chdir(cwd)
+        yield result
 
-    # first dummy run
-    gen = test(range(10, 20, +1))
-    [n for n in gen]
 
-    # new run, returning old results also
-    gen = test(range(30, 20, -1))
+def apply(cache, cwd, param, no_cache=False):
+    generator = original_func(*param)  # , cache=cache)
 
-    result = [next(gen)  for i in range(20)]
-    print (result)
-    assert result == [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22]
+    for result in generator:
+        try:
+            result_string = json.dumps(result) + "\n"
+            content, meta = result
 
+            os.chdir(cwd)
+
+            if os.path.exists(filename):
+                append_write = 'a'  # append if already exists
+            else:
+                append_write = 'w'  # make a new file if not
+
+            with open(filename, append_write) as f:
+                f.write(result_string)
+            os.chdir(cwd)
+            yield content, meta
+        except Exception as e:
+            logging.error(
+                f"{str(e)} while computing on \n {str(result)}\n in {str(original_func)}\n being in {os.getcwd()}")
+            raise e
+
+
+def configurable_cache(
+        filename,
+        load_via_glob=None,
+        cache_only=False,
+        dont_add_to_cache = False,
+        dont_use_more_then_cache = False,
+        apply_only = False,
+        cycle_cache_or_compute=False
+):
+    def decorator(original_func):
+        def new_func(*param, load_via_glob=load_via_glob):
+            cwd = os.getcwd()
+
+            # GETTING CACHE
+            try:
+                with open(filename, 'r') as f:
+                    cache = list(f.readlines())
+            except FileNotFoundError:
+                logging.warning(f"no cache found for {filename}, creating new one")
+                cache = {}
+
+            if load_via_glob:
+                if isinstance(load_via_glob, str):
+                    load_via_glob = [load_via_glob]
+                cache = [f'["{fp}", {"{}"} ]' for path in load_via_glob for fp in glob(path)]
+                if len(cache) == 0:
+                    logging.info(f"Found nothing via glob {load_via_glob} from {cwd}")
+
+            cache = [tuple(json.loads(line)) for line in cache]
+            cache = [(a if not isinstance(a, list) else tuple(a), b) for a, b in cache]
+            try:
+                cache = dict(cache)
+            except:
+                pass
+
+            if len(param) <= 1:
+                logging.warning(f"Second attribute 'meta' was not given for {original_func}")
+
+            # GIVING CACHE CONTENT
+            yield from yield_cache(cache, cwd)
+
+            # APPLY AND ADD TO CACHE
+            if not cache_only:
+                apply(cache, cwd, param, no_cache=False)
+
+            os.chdir(cwd)
+
+        functools.update_wrapper(new_func, original_func)
+
+        return new_func
+
+    return decorator
 
 def persist_to_file(file_name):
 
@@ -177,3 +231,58 @@ def uri_with_cache(fun):
         resp.body = json.dumps({"response": memory_caches[(fun, req)], "status": resp.status})
 
     return replacement_fun
+
+
+
+class TestCache (unittest.TestCase):
+
+    def check_cache(self, gen_list, *args, gen_extra_args=[], gen_extra_kwargs = {},  **kwargs):
+        @configurable_cache("test.cache", *args, **kwargs)
+        def test(l, m):
+            for i in l:
+                yield i + 1, m
+
+        res = list(test(gen_list, *gen_extra_args, **gen_extra_kwargs))
+        return res
+
+    def test_cache1(self):
+        assert (self.check_cache([1,2,3],
+            load_via_glob='../test/*.pdf',
+        )) > 3
+
+
+    def test_cache1(self):
+        assert len(list(self.check_cache(
+            [(1, {}),(2, {}),(3, {})],
+            load_via_glob='../../test/*.pdf',
+        ))) > 3
+
+    def test_common(self):
+        @configurable_cache("test.cache")
+        def test(l, m):
+            for i in l:
+                yield i + 1
+
+        import os
+        os.system("rm test*.cache")
+
+        # first dummy run
+        gen = test(range(10, 20, +1))
+        [n for n in gen]
+
+        # new run, returning old results also
+        gen = test(range(30, 20, -1))
+
+        result = [next(gen) for i in range(20)]
+        print(result)
+        assert result == [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22]
+
+    load_via_glob=None,
+    cache_only=False,
+    dont_add_to_cache = False,
+    dont_use_more_then_cache = False,
+    apply_only = False,
+    cycle_cache_or_compute=False
+
+if __name__ == "__main__":
+    unittest.main()

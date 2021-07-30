@@ -38,15 +38,14 @@ class Wordi2Css(PathSpec):
 
             self.logger.warn(f"tag counts {Counter(list(tags))}")
             i_to_tag = {}
-            for _i, _i2 in meta["_i_to_i2"].items():
-                if _i not in i_to_tag or i_to_tag[_i] == "O":
+            for _i1, _i2 in meta["_i_to_i2"].items():
+                if _i1 not in i_to_tag or i_to_tag[_i1] == "O":
                     if _i2 < len(tags):
-                        i_to_tag[_i] = annotation[_i2]
+                        i_to_tag[_i1] = annotation[_i2]
 
             css = self.parse_to_css(i_to_tag, meta)
 
             nested_dict_list = []
-            i_word = meta['i_word']
             for _i, _i2 in meta["_i_to_i2"].items():
                 try:
                     nested_dict_list.append(
@@ -55,7 +54,6 @@ class Wordi2Css(PathSpec):
                             '_i2': _i2,
                             'hex id': f""".z{hex(_i)[2:]}""",
                             'tags': i_to_tag[_i][0] if _i in i_to_tag else "no _i in _i_to_tag",
-                            #'i_word': i_word[_i],
                             'text': i_to_tag[_i][1] if _i in i_to_tag else "no _i in _i_to_tag"}
                     )
                 except Exception as e:

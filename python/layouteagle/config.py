@@ -14,8 +14,7 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 logging.getLogger('allennlp').setLevel(logging.ERROR)
 logging.getLogger('pdfminer').setLevel(logging.ERROR)
 
-logging.basicConfig(format="""%(asctime)s-%(levelname)s:
- -> ... %(message)s""", datefmt="%H:%M:%S")
+logging.basicConfig(format="""%(asctime)s-%(levelname)s: %(message)s""", datefmt="%H:%M:%S")
 
 
 sys.path.append(os.getcwd())
@@ -102,13 +101,19 @@ saved_layout_model_dir = hidden_folder + "/layout_model_saved/"
 
 collected_features_path = ".layouteagle/labeled_features.pickle"
 
+use_pdf2htmlex_features = False
+
 cols_to_use = [
-            'width', 'ascent', 'descent',
+
+            *(['width','ascent', 'descent',
             'x1', 'y1', 'x2', 'y2',
             'dxy1', 'dxy2', 'dxy3', 'dxy4',
             #'sin1', 'sin2', 'sin3', 'sin4',
             #'probsin1', 'probsin2', 'probsin3', 'probsin4',
             'probascent', 'probdescent',
             *list(flatten([[f'nearest_{k}_center_x', f'nearest_{k}_center_y']
-                           for k in range(layout_model_next_text_boxes)]))
+                           for k in range(layout_model_next_text_boxes)]))]
+              if use_pdf2htmlex_features else [
+                'len', 'height', 'font-size', 'line-height', 'x', 'y', 'coarse_grained_pdf', 'fine_grained_pdf'
+            ])
         ]

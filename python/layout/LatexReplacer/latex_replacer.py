@@ -54,7 +54,8 @@ class LatexReplacer(SoupReplacer):
                                 'binoppenalty', 'def', 'href', 'providecommand', 'csname', "parindent", "parskip",
                                 "font", 'textsl', 'headheight', 'headsep', 'textwidth', 'textheight', 'hoffset', 'jot',
 
-                                "pdfminorversion", 'evensidemargin', 'providecommand', 'interfootnotelinepenalty', ]
+                                "pdfminorversion", 'evensidemargin', 'providecommand', 'interfootnotelinepenalty',
+                                'relpenalty']
         self.skip_commands = self.forbidden_nargs
         self.forbidden_envs = ["$", "tikzpicture", "eqnarray", "equation", "tabular", 'eqsplit', 'subequations', 'picture']
         self.forbidden_envs = self.forbidden_envs + [env + "*" for env in self.forbidden_envs]
@@ -80,17 +81,6 @@ class LatexReplacer(SoupReplacer):
                 insert_index = 7
         else:
             insert_index = 7
-
-        """if any(arg in file_content for arg in ["spconf", "lrec", "ieeeconf", "IEEEtran", "acmart", "twocolumn", "acl2020", "ansmath"]):
-            soup.insert(insert_index, twocolumn_defs.defs)
-            # TODO put multicol begin after first section(!) of doc and the rest to the end
-
-            document_environment = soup.document.expr._contents
-            document_environment.insert(0, twocolumn_defs.multicol_begin)
-            document_environment.append(twocolumn_defs.multicol_end)
-
-            return r"c \currentcolumn{}"
-        elif "multicol{" in file_content:"""
 
         orig_twocolumn = any(arg in file_content for arg in
                              ["lrec", "ieeeconf", "IEEEtran", "acmart", "twocolumn", "acl2020", "ansmath", 'svjour',
@@ -141,15 +131,14 @@ class LatexReplacer(SoupReplacer):
 
     @file_persistent_cached_generator(
         config.cache + 'replaced_tex_paths.json',
-        if_cache_then_finished=True#,
-        #"""load_via_glob=[
-        #    config.tex_data + "**/*.tex1.labeled.pdf",
-        #
-        #    config.tex_data + "**/*.tex2.labeled.pdf",
-        #    config.tex_data + "**/*.tex3.labeled.pdf",
-        #]"""
+        if_cache_then_finished=True,
+        load_via_glob=[
+            config.tex_data + "**/*.tex1.labeled.pdf",
+            config.tex_data + "**/*.tex2.labeled.pdf",
+            config.tex_data + "**/*.tex3.labeled.pdf",
+        ]
 )
-    #@paraloop
+    @paraloop
     def __call__(self, paths, compile=True, *args, **kwargs):
         """
         :param path_to_read_from:

@@ -16,6 +16,7 @@ sys.path.append(".")
 from layout.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
 from layouteagle.pathant.Converter import converter
 
+FEATURES_FROM_PDF2HTMLEX = "features_from_pdf2htmlex"
 
 @converter("htm", "feature")
 class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
@@ -25,29 +26,25 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
 
     def __call__(self, labeled_paths, *args, **kwargs):
         for doc_id, (labeled_html_path, meta) in enumerate(labeled_paths):
-            if self.path_spec.flags == "training" and not "tex1" in labeled_html_path:
+
+            if "training" in self.flags and not any([tex in labeled_html_path for tex in ["tex1", 'tex2', 'tex3']]):
                 continue
 
-            try:
-                feature_df = self.read_positional_data(
-                    meta['filename'] + ".feat")  # self.generate_data_for_file(labeled_html_path)
-            except FileNotFoundError as e:
-                self.logger.error("output of pdf2htmlEX was not found")
-                continue
-            except Exception as e:
-                self.logger.error(f"could not compute features, proceeding ... error was {e}")
-                raise e
-                continue
+            if FEATURES_FROM_PDF2HTMLEX in self.flags:
+                try:
+                    feature_df = self.use_pdf2htmlEX_features(meta['html_path'] + ".feat")
+                except FileNotFoundError as e:
+                    self.logger.error("output of pdf2htmlEX was not found")
+                    raise e
+                except Exception as e:
+                    self.logger.error(f"could not compute features, proceeding ... error was {e}")
+                    raise e
+            else:
+                feature_df, soup = self.compute_html_soup_features(labeled_html_path)
 
             feature_df = self.compute_complex_coordination_data(feature_df)
 
             feature_df["doc_id"] = doc_id
-            if False and self.debug:
-                debug_html_path = labeled_html_path + ".debug.html"
-                self.tfu = TrueFormatUpmarkerPDF2HTMLEX(debug=True)
-                self.tfu.label_lookup = Lookup(self.tfu.label_strings)
-                self.tfu.generate_css_tagging_document(html_read_from=labeled_html_path, html_write_to=debug_html_path)
-                os.system(f"google-chrome {debug_html_path}")
 
             yield feature_df, meta
 
@@ -68,58 +65,61 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
                 for xb, yb in list(zip(sub_df[bx], sub_df[by]))]
 
     def page_web(self, sub_df):
-        sub_df['x1'] = sub_df.x
-        sub_df['y1'] = sub_df.y
-        sub_df['x2'] = sub_df.x + sub_df.ascent
-        sub_df['y2'] = sub_df.y + sub_df.descent
-        sub_df['center_x'] = [(x1 + x1) / 2 for x1, x2 in zip(sub_df.x1, sub_df.x2)]
-        sub_df['center_y'] = [(y1 + y1) / 2 for y1, y2 in zip(sub_df.y1, sub_df.y2)]
 
-        points = list(zip(sub_df.center_x, sub_df.center_y))
-        kd_tree = spatial.KDTree(points)
-
-
-        try:
-            all_nearest_points = \
-                [(p, [points[k] for k in kd_tree.query(p, k=config.layout_model_next_text_boxes)[1]])
-                 for p in zip(sub_df.center_x, sub_df.center_y)]
-
-            for k in range(config.layout_model_next_text_boxes):
-                sub_df[f'nearest_{k}_center_x'], sub_df[f'nearest_{k}_center_y'] = list(zip(*
-                    [nearest_points[k] for p1, nearest_points in all_nearest_points]
-                ))
-        except Exception as e:
-            print (points)
-            self.logger.warning(f"not enough points in page to find {config.layout_model_next_text_boxes} nearest points, faking with 0.5")
-            for k in range(config.layout_model_next_text_boxes):
-                sub_df[f'nearest_{k}_center_x'] = [0.5] * len(sub_df)
-                sub_df[f'nearest_{k}_center_y'] = [0.5] * len(sub_df)
-
-        sub_df['dxy1'] = self.distances(sub_df, 'x1', 'y1', 'x2', 'y2')
-        sub_df['dxy2'] = self.distances(sub_df, 'x2', 'y2', 'x1', 'y1')
-        sub_df['dxy3'] = self.distances(sub_df, 'x1', 'y2', 'x2', 'y1')
-        sub_df['dxy4'] = self.distances(sub_df, 'x2', 'y1', 'x1', 'y2')
-        """sub_df['sin1'] = self.sinuses(sub_df, 'x1', 'y1', 'x2', 'y2')
-        sub_df['sin2'] = self.sinuses(sub_df, 'x2', 'y2', 'x1', 'y1')
-        sub_df['sin3'] = self.sinuses(sub_df, 'x1', 'y2', 'x2', 'y1')
-        sub_df['sin4'] = self.sinuses(sub_df, 'x2', 'y1', 'x1', 'y2')
-
-        # frequency of values in this table, the more often a value is there,
-        # the more probable to be floeating text
-        sub_df['probsin1'] = sub_df.sin1.map(sub_df.sin1.value_counts(normalize=True))
-        sub_df['probsin2'] = sub_df.sin2.map(sub_df.sin2.value_counts(normalize=True))
-        sub_df['probsin3'] = sub_df.sin3.map(sub_df.sin3.value_counts(normalize=True))
-        sub_df['probsin4'] = sub_df.sin4.map(sub_df.sin4.value_counts(normalize=True))
-        # some max and min of text size to recognize a title page with abstract
-        """
-        sub_df['probascent'] = sub_df.ascent.map(sub_df.ascent.value_counts(normalize=True))
-        sub_df['probdescent'] = sub_df.descent.map(sub_df.descent.value_counts(normalize=True))
         self.point_density_frequence_per_page(sub_df)
 
-        x = sub_df[config.cols_to_use].values
-        x_scaled = min_max_scaler.fit_transform(x)
-        df_temp = pandas.DataFrame(x_scaled, columns=config.cols_to_use, index=sub_df.index)
-        sub_df[config.cols_to_use] = df_temp
+        if FEATURES_FROM_PDF2HTMLEX in self.flags:
+            sub_df['x1'] = sub_df.x
+            sub_df['y1'] = sub_df.y
+            sub_df['x2'] = sub_df.x + sub_df.ascent
+            sub_df['y2'] = sub_df.y + sub_df.descent
+            sub_df['center_x'] = [(x1 + x1) / 2 for x1, x2 in zip(sub_df.x1, sub_df.x2)]
+            sub_df['center_y'] = [(y1 + y1) / 2 for y1, y2 in zip(sub_df.y1, sub_df.y2)]
+
+            points = list(zip(sub_df.center_x, sub_df.center_y))
+            kd_tree = spatial.KDTree(points)
+
+            try:
+                all_nearest_points = \
+                    [(p, [points[k] for k in kd_tree.query(p, k=config.layout_model_next_text_boxes)[1]])
+                     for p in zip(sub_df.center_x, sub_df.center_y)]
+
+                for k in range(config.layout_model_next_text_boxes):
+                    sub_df[f'nearest_{k}_center_x'], sub_df[f'nearest_{k}_center_y'] = list(zip(*
+                        [nearest_points[k] for p1, nearest_points in all_nearest_points]
+                    ))
+            except Exception as e:
+                print (points)
+                self.logger.warning(f"not enough points in page to find {config.layout_model_next_text_boxes} nearest points, faking with 0.5")
+                for k in range(config.layout_model_next_text_boxes):
+                    sub_df[f'nearest_{k}_center_x'] = [0.5] * len(sub_df)
+                    sub_df[f'nearest_{k}_center_y'] = [0.5] * len(sub_df)
+
+            sub_df['dxy1'] = self.distances(sub_df, 'x1', 'y1', 'x2', 'y2')
+            sub_df['dxy2'] = self.distances(sub_df, 'x2', 'y2', 'x1', 'y1')
+            sub_df['dxy3'] = self.distances(sub_df, 'x1', 'y2', 'x2', 'y1')
+            sub_df['dxy4'] = self.distances(sub_df, 'x2', 'y1', 'x1', 'y2')
+            """sub_df['sin1'] = self.sinuses(sub_df, 'x1', 'y1', 'x2', 'y2')
+            sub_df['sin2'] = self.sinuses(sub_df, 'x2', 'y2', 'x1', 'y1')
+            sub_df['sin3'] = self.sinuses(sub_df, 'x1', 'y2', 'x2', 'y1')
+            sub_df['sin4'] = self.sinuses(sub_df, 'x2', 'y1', 'x1', 'y2')
+    
+            # frequency of values in this table, the more often a value is there,
+            # the more probable to be floeating text
+            sub_df['probsin1'] = sub_df.sin1.map(sub_df.sin1.value_counts(normalize=True))
+            sub_df['probsin2'] = sub_df.sin2.map(sub_df.sin2.value_counts(normalize=True))
+            sub_df['probsin3'] = sub_df.sin3.map(sub_df.sin3.value_counts(normalize=True))
+            sub_df['probsin4'] = sub_df.sin4.map(sub_df.sin4.value_counts(normalize=True))
+            # some max and min of text size to recognize a title page with abstract
+            """
+            sub_df['probascent'] = sub_df.ascent.map(sub_df.ascent.value_counts(normalize=True))
+            sub_df['probdescent'] = sub_df.descent.map(sub_df.descent.value_counts(normalize=True))
+
+            x = sub_df[config.cols_to_use].values
+            x_scaled = min_max_scaler.fit_transform(x)
+            df_temp = pandas.DataFrame(x_scaled, columns=config.cols_to_use, index=sub_df.index)
+            sub_df[config.cols_to_use] = df_temp
+
 
         return sub_df
 

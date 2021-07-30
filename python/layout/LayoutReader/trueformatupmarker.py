@@ -1,6 +1,7 @@
 import bs4
 import pandas
 import tinycss
+from helpers.list_tools import flatten
 
 
 import json
@@ -92,13 +93,14 @@ class TrueFormatUpmarker(SoupReplacer):
 
     def get_css(self, soup):
         css_parts = [tag for tag in soup.select('style[type="text/css"]') if isinstance(tag, bs4.Tag)]
-        big_css = max(css_parts, key=lambda x: len(x.text))
-        style_rules = tinycss.make_parser().parse_stylesheet(big_css.string, encoding="utf8").rules
-        try:
-            style_dict = OrderedDict(self.css_rule2entry(rule) for rule in style_rules)
-        except IndexError:
-            self.logger.error("could not get CSS style from soup")
-            raise
+        style_rules = flatten([tinycss.make_parser().parse_stylesheet(css.string, encoding="utf8").rules for css in css_parts])
+        style_dict = {}
+        for rule in style_rules:
+            try:
+                style_dict.update(self.css_rule2entry(rule) )
+            except IndexError as e:
+                self.logger.error(f"Could not get css styles out of soup from rule {rule}" + str(e))
+                continue
         if None in style_dict:
             del style_dict[None]
         return style_dict
@@ -106,12 +108,12 @@ class TrueFormatUpmarker(SoupReplacer):
     def css_rule2entry(self, rule):
         if isinstance(rule, tinycss.css21.RuleSet):
             decla = rule.declarations
-            ident = [sel for sel in rule.selector if sel.type == 'IDENT'][0].value
+            ident = [sel for sel in rule.selector if sel.type in ['IDENT', 'HASH']][0].value
             if not isinstance(ident, str):
                 self.logger.info("multi value css found, ignoring")
-                return None, None
-            return ident, decla
-        return None, None
+                return {}
+            return {ident: decla}
+        return {}
 
     keep_delims = r""",;.:'()[]{}&!?`/"""
 
