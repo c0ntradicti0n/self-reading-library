@@ -33,7 +33,7 @@ class LayoutEagle:
 
     def __init__(self):
         self.ant = PathAnt()
-        self.html_pipeline = self.ant("pdf", "htm")
+        self.html_pipeline = self.ant("pdf", "htm", dont_use_cache=True)
 
 
 
@@ -47,7 +47,7 @@ class LayoutEagle:
         value, meta = list(zip(*list(pipeline([(pdf, {}) for pdf in pdfs]))))
 
 
-    def make_model(self):
+    def make_layout_model(self):
         model_pipe = self.ant("arxiv.org", "keras" )
         print (list(model_pipe("https://arxiv.org", training = True)))
         os.system(
@@ -69,8 +69,8 @@ class LayoutEagle:
         pdfs = [file for file in glob.glob(config.pdf_dir + "*.pdf")]
 
         for pdf in pdfs:
-            html, css = list(self.html_pipeline([(pdf,{})])), list(self.layout_pipe([(pdf, {})]))
-            html_path = html[0][0]
+            css = list(self.layout_pipe([(pdf, {})]))
+            html_path = css[0][1]['html_path']
             with open(html_path, "r") as f:
                 contents = f.readlines()
 
@@ -94,12 +94,8 @@ class LayoutEagle:
 
 
 if __name__=="__main__":
-
     le = LayoutEagle()
     le.ant.info()
-
-    le.make_model()
-    le.test_prediction()
+    le.make_layout_model()
     le.test_layout()
-    #le.test_prediction()
     #le.test_topics()

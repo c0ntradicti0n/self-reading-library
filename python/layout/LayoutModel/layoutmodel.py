@@ -37,7 +37,7 @@ class LayoutModeler(PathSpec):
                    'activation': 'softmax',
                    'dtype': 'float64'},
         'adam': {'lr': 0.0003},
-        'epochs': 100,
+        'epochs':7,
         'batch_size': 3200,
         'patience': 3,
         'labels': 'layoutlabel',
@@ -78,7 +78,7 @@ class LayoutModeler(PathSpec):
 
         norm_cols = [col for col in self.cols_to_use if col != self.train_kwargs['labels']]
 
-        if training:
+        """if training:
             scaler = Normalizer()
             scaler.fit(feature_df[norm_cols].to_numpy())
             joblib.dump(scaler, self.model_path + ".scaler")
@@ -88,12 +88,7 @@ class LayoutModeler(PathSpec):
         else:
             scaler = joblib.load(self.model_path + ".scaler")
 
-        feature_df[norm_cols] = scaler.transform(feature_df[norm_cols])
-
-        for col in self.cols_to_use:
-            if col != self.train_kwargs['labels']:
-                feature_df[col] = feature_df[col] + abs(feature_df[col].min())
-                feature_df[col] = feature_df[col] / feature_df[col].max()
+        feature_df[norm_cols] = scaler.transform(feature_df[norm_cols])"""
 
         feature_df = feature_df.fillna(0)
 
@@ -195,12 +190,16 @@ class LayoutModeler(PathSpec):
             mode='min', verbose=1,
             patience=self.train_kwargs['patience']
         )
-        mc = ModelCheckpoint(self.model_path,
+        mcweights = ModelCheckpoint(self.model_path + "/model.h5",
                              monitor='val_accuracy',
                              save_best_only=True,
                              save_weights_only=False,
                              verbose=1)
-
+        mcwhole = ModelCheckpoint(self.model_path,
+                             monitor='val_accuracy',
+                             save_best_only=True,
+                             save_weights_only=False,
+                             verbose=1)
         self.model = tf.keras.Sequential([
             feature_layer,
 
@@ -223,7 +222,10 @@ class LayoutModeler(PathSpec):
 
         history = self.model.fit(self.train_ds,
                                  validation_data=self.val_ds,
-                                 epochs=self.train_kwargs['epochs'], callbacks=[es, mc])
+                                 epochs=self.train_kwargs['epochs'], callbacks=[es, mcwhole, mcweights])
+
+
+        LayoutModeler.model = self.model
         return history
 
     def plot(self, history):
@@ -267,11 +269,14 @@ class LayoutModeler(PathSpec):
     def load(self):
         try:
             if not hasattr(self, "model"):
-                self.model = tf.keras.models.load_model(self.model_path)
+                self.model = LayoutModeler.model if hasattr(LayoutModeler, "model") else tf.keras.models.load_model(self.model_path)
                 optimizer = tf.optimizers.Adam(**self.train_kwargs['adam'])
                 self.model.compile(optimizer=optimizer,
                                    loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
                                    metrics=['mse', 'accuracy'])
+                self.model.built = True
+                self.model.load_weights(self.model_path + "variables/vair")
+
 
             print(os.getcwd() + "->" + self.lookup_path)
 

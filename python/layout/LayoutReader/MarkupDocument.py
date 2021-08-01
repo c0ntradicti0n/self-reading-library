@@ -23,7 +23,7 @@ class MarkupDocument(TrueFormatUpmarkerPDF2HTMLEX):
     def __call__(self, feature_meta, *args, **kwargs):
         for feature_df, meta in feature_meta:
 
-            self.assign_labels_from_div_content(feature_df)
+            #self.assign_labels_from_div_content(feature_df)
 
             feature_df.word_num = feature_df.word_num.astype(int)
             ranges = [list(range(*r))

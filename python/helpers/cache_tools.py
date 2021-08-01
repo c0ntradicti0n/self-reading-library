@@ -10,31 +10,40 @@ import unittest
 
 def file_persistent_cached_generator(
         filename,
-        load_via_glob=None,
-        if_cache_then_finished=False,
-        if_cached_then_forever=False):
+        **kwargs):
     def decorator(original_func):
+        standard_flags = kwargs
 
-        def new_func(*param, load_via_glob=load_via_glob):
+        def new_func(*param):
             cwd = os.getcwd()
 
-            try:
-                with open(filename, 'r') as f:
-                    cache = list(f.readlines())
+            flags = standard_flags.copy()
+            flags.update(param[0].flags)
+            load_via_glob = flags['load_via_glob'] if 'load_via_glob' in flags else None
+            if_cache_then_finished = flags['if_cache_then_finished'] if 'if_cache_then_finished' in flags else False
+            if_cached_then_forever = flags['if_cached_then_forever'] if 'if_cached_then_forever' in flags else False
+            dont_use_cache = flags['dont_use_cache'] if 'dont_use_cache' in flags else False
 
-                if load_via_glob:
-                    if isinstance(load_via_glob, str):
-                        load_via_glob = [load_via_glob]
-                    cache = [f'["{fp}", {"{}"} ]' for path in load_via_glob for fp in glob(path)]
-
-                cache = [tuple(json.loads(line)) for line in cache]
-                cache = [(a if not isinstance(a, list) else tuple(a), b) for a, b in cache]
-                try:
-                    cache = dict(cache)
-                except:
-                    pass
-            except (IOError, ValueError):
+            if dont_use_cache:
                 cache = {}
+            else:
+                try:
+                    with open(filename, 'r') as f:
+                        cache = list(f.readlines())
+
+                    if load_via_glob:
+                        if isinstance(load_via_glob, str):
+                            load_via_glob = [load_via_glob]
+                        cache = [f'["{fp}", {"{}"} ]' for path in load_via_glob for fp in glob(path)]
+
+                    cache = [tuple(json.loads(line)) for line in cache]
+                    cache = [(a if not isinstance(a, list) else tuple(a), b) for a, b in cache]
+                    try:
+                        cache = dict(cache)
+                    except:
+                        pass
+                except (IOError, ValueError):
+                    cache = {}
 
             if isinstance(param[1], list) and (not if_cache_then_finished and cache):
                 yield from apply_and_cache(cache, cwd, param, no_cache=True)
@@ -46,7 +55,7 @@ def file_persistent_cached_generator(
                         yield res, meta
 
                 if (not cache or not if_cache_then_finished):
-                    yield from apply_and_cache(cache, cwd, param)
+                    yield from apply_and_cache(cache, cwd, param, no_cache=dont_use_cache)
 
             os.chdir(cwd)
 
@@ -58,7 +67,7 @@ def file_persistent_cached_generator(
 
 
         def apply_and_cache(cache, cwd, param, no_cache=False):
-            generator = original_func(*param)#, cache=cache)
+            generator = original_func(*param)
 
             for result in generator:
                     try:
@@ -121,6 +130,7 @@ def apply(cache, cwd, param, no_cache=False):
 
 def configurable_cache(
         filename,
+        overwrite_cache: None,
         load_via_glob=None,
         cache_only=False,
         dont_add_to_cache = False,

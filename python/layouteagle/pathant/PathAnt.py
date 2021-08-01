@@ -52,10 +52,10 @@ class PathAnt:
             self.info()
             raise
 
-    def __call__(self, source, target, *args, over=None, **kwargs):
-        if over:
-            if isinstance(over, str):
-                return self.__call__(source, over, *args) + self.__call__(over, target, **kwargs)
+    def __call__(self, source, target, *args, via=None, **kwargs):
+        if via:
+            if isinstance(via, str):
+                return self.__call__(source, via, *args) + self.__call__(via, target, **kwargs)
 
 
         converters_path = self.make_path(self.G, source, target)
@@ -68,9 +68,9 @@ class PathAnt:
                for edge, intermediate_targets in converters_implications.items()
                       }
 
-        logging.debug(f"Found path: {'⇾'.join(converters_path)}")
+        logging.info(f"Found path: {'⇾'.join(converters_path)}")
         pipeline = [self.lookup(*_from_to) for _from_to in pairwise(converters_path)]
-        return Pipeline(pipeline, source, target, extra_paths)
+        return Pipeline(pipeline, source, target, extra_paths, **kwargs)
 
     def info(self, path="pathant.png", pipelines_to_highlight=None):
         import pylab as plt

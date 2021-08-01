@@ -24,7 +24,6 @@ class LayoutTrainer(LayoutModeler):
             if self.debug:
                 self.plot(history)
             self.validate()
-            self.save()
             self.logger.info(f'made model, saved to {self.model_path}')
             yield self.model_path, meta
         else:
