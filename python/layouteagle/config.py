@@ -16,7 +16,7 @@ logging.getLogger('pdfminer').setLevel(logging.ERROR)
 
 logging.basicConfig(format="""%(asctime)s-%(levelname)s: %(message)s""", datefmt="%H:%M:%S")
 
-
+feature_fuzz_ranges = (-0.03, 0.03, 0.02), (-0.03, 0.03, 0.02), (-0.03, 0.03, 0.02)
 sys.path.append(os.getcwd())
 
 logging_config = '/home/finn/PycharmProjects/LayoutEagle/python/logging.yaml'

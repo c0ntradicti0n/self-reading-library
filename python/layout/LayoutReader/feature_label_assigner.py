@@ -20,7 +20,7 @@ class FeatureAssigner(TrueFormatUpmarkerPDF2HTMLEX):
         for feature_df, meta in feature_meta:
             self.assign_labels_from_div_content(feature_df=feature_df)
             feature_df.text = feature_df.text.astype(str)
-            feature_df_path = meta['html_path'] + self.path_spec._to
+            feature_df_path = meta['html_path'] + meta['doc_id'] + self.path_spec._to
             feature_df.to_pickle(feature_df_path)
             yield feature_df_path, meta
 

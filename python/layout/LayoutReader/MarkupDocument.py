@@ -27,7 +27,7 @@ class MarkupDocument(TrueFormatUpmarkerPDF2HTMLEX):
 
             feature_df.word_num = feature_df.word_num.astype(int)
             ranges = [list(range(*r))
-                      for r in list(pairwise([0] + list(feature_df.word_num)))]
+                      for r in list(pairwise( list(feature_df.word_num)))]
             meta["_i_to_i2"] = {i2: i1 for i1, r in enumerate(ranges) for i2 in r}
 
             annotation = [(

@@ -3,8 +3,8 @@ import os
 import sys
 import unittest
 import pandas
+import numpy
 from sklearn.preprocessing import MinMaxScaler
-min_max_scaler = MinMaxScaler()
 
 import scipy.spatial as spatial
 
@@ -26,7 +26,6 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
 
     def __call__(self, labeled_paths, *args, **kwargs):
         for doc_id, (labeled_html_path, meta) in enumerate(labeled_paths):
-
             if "training" in self.flags and not any([tex in labeled_html_path for tex in ["tex1", 'tex2', 'tex3']]):
                 continue
 
@@ -42,11 +41,20 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
             else:
                 feature_df, soup = self.compute_html_soup_features(labeled_html_path)
 
-            feature_df = self.compute_complex_coordination_data(feature_df)
 
-            feature_df["doc_id"] = doc_id
+            for random_i, final_feature_df in enumerate(self.feature_fuzz(feature_df)):
+                feature_df = self.compute_complex_coordination_data(final_feature_df)
 
-            yield feature_df, meta
+                final_feature_df["doc_id"] = str(doc_id) + ".random" + str(random_i)
+                meta["doc_id"] = str(doc_id) + ".random" + str(random_i)
+
+                min_max_scaler = MinMaxScaler()
+                x = final_feature_df[config.cols_to_use].values
+                x_scaled = min_max_scaler.fit_transform(x)
+                df_temp = pandas.DataFrame(x_scaled, columns=config.cols_to_use, index=final_feature_df.index)
+                final_feature_df[config.cols_to_use] = df_temp
+
+                yield final_feature_df, meta
 
     def compute_complex_coordination_data(self, feature_df):
         feature_df = feature_df.groupby(['page_number']).apply(self.page_web)
@@ -115,13 +123,24 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
             sub_df['probascent'] = sub_df.ascent.map(sub_df.ascent.value_counts(normalize=True))
             sub_df['probdescent'] = sub_df.descent.map(sub_df.descent.value_counts(normalize=True))
 
-            x = sub_df[config.cols_to_use].values
-            x_scaled = min_max_scaler.fit_transform(x)
-            df_temp = pandas.DataFrame(x_scaled, columns=config.cols_to_use, index=sub_df.index)
-            sub_df[config.cols_to_use] = df_temp
-
-
         return sub_df
+
+    def feature_fuzz(self, feature_df):
+        yield feature_df
+
+        if  "training" in self.flags:
+            def compute_fuzz(series, value):
+                    return value + fuzz_percent * max(series)
+
+            def iter_col(series):
+                if isinstance(series[0], float):
+                    return series.apply(lambda x: compute_fuzz(series, x))
+                else:
+                    return series
+
+            for feature_fuzz_range in config.feature_fuzz_ranges:
+                for fuzz_percent in numpy.arange(*feature_fuzz_range):
+                    yield feature_df.copy().apply(iter_col)
 
 
 class TestComputedFeatureTable(unittest.TestCase):

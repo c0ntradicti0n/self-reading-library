@@ -37,7 +37,7 @@ class LayoutModeler(PathSpec):
                    'activation': 'softmax',
                    'dtype': 'float64'},
         'adam': {'lr': 0.0003},
-        'epochs':7,
+        'epochs':300,
         'batch_size': 3200,
         'patience': 3,
         'labels': 'layoutlabel',
@@ -190,12 +190,8 @@ class LayoutModeler(PathSpec):
             mode='min', verbose=1,
             patience=self.train_kwargs['patience']
         )
-        mcweights = ModelCheckpoint(self.model_path + "/model.h5",
-                             monitor='val_accuracy',
-                             save_best_only=True,
-                             save_weights_only=False,
-                             verbose=1)
-        mcwhole = ModelCheckpoint(self.model_path,
+
+        mc = ModelCheckpoint(self.model_path,
                              monitor='val_accuracy',
                              save_best_only=True,
                              save_weights_only=False,
@@ -222,7 +218,7 @@ class LayoutModeler(PathSpec):
 
         history = self.model.fit(self.train_ds,
                                  validation_data=self.val_ds,
-                                 epochs=self.train_kwargs['epochs'], callbacks=[es, mcwhole, mcweights])
+                                 epochs=self.train_kwargs['epochs'], callbacks=[es, mc])
 
 
         LayoutModeler.model = self.model
@@ -275,7 +271,7 @@ class LayoutModeler(PathSpec):
                                    loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
                                    metrics=['mse', 'accuracy'])
                 self.model.built = True
-                self.model.load_weights(self.model_path + "variables/vair")
+                #self.model.load_weights(self.model_path + "variables/vair")
 
 
             print(os.getcwd() + "->" + self.lookup_path)
