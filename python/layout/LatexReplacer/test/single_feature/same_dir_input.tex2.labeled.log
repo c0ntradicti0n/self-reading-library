@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.4.19)  25 JUL 2021 15:05
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.4.19)  5 AUG 2021 14:32
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -188,10 +188,10 @@ LaTeX Font Info:    ... okay on input line 68.
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (./same_dir_input.tex2.lab
 eled.aux) ) 
 Here is how much of TeX's memory you used:
- 1476 strings out of 481239
- 20173 string characters out of 5920377
+ 1490 strings out of 481239
+ 20523 string characters out of 5920377
  260388 words of memory out of 5000000
- 16786 multiletter control sequences out of 15000+600000
+ 16800 multiletter control sequences out of 15000+600000
  533897 words of font info for 29 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  30i,4n,25p,792b,174s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -199,7 +199,7 @@ Here is how much of TeX's memory you used:
 .pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><
 /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/sh
 are/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb>
-Output written on same_dir_input.tex2.labeled.pdf (1 page, 32784 bytes).
+Output written on same_dir_input.tex2.labeled.pdf (1 page, 32798 bytes).
 PDF statistics:
  24 PDF objects out of 1000 (max. 8388607)
  16 compressed objects within 1 object stream

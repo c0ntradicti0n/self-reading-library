@@ -4,6 +4,7 @@ import sys
 import unittest
 import pandas
 import numpy
+import random
 from sklearn.preprocessing import MinMaxScaler
 
 import scipy.spatial as spatial
@@ -39,15 +40,18 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
                     self.logger.error(f"could not compute features, proceeding ... error was {e}")
                     raise e
             else:
-                feature_df, soup = self.compute_html_soup_features(labeled_html_path)
-
+                try:
+                    feature_df, soup = self.compute_html_soup_features(labeled_html_path)
+                except Exception as e:
+                    self.logger.error("Could not compute features for this document, empty document?")
+                    continue
 
             for random_i, final_feature_df in enumerate(self.feature_fuzz(feature_df)):
-                feature_df = self.compute_complex_coordination_data(final_feature_df)
+                final_feature_df = self.compute_complex_coordination_data(final_feature_df)
 
                 final_feature_df["doc_id"] = str(doc_id) + ".random" + str(random_i)
                 meta["doc_id"] = str(doc_id) + ".random" + str(random_i)
-
+                meta['html_path'] = labeled_html_path
                 min_max_scaler = MinMaxScaler()
                 x = final_feature_df[config.cols_to_use].values
                 x_scaled = min_max_scaler.fit_transform(x)
@@ -96,6 +100,7 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
                     sub_df[f'nearest_{k}_center_x'], sub_df[f'nearest_{k}_center_y'] = list(zip(*
                         [nearest_points[k] for p1, nearest_points in all_nearest_points]
                     ))
+
             except Exception as e:
                 print (points)
                 self.logger.warning(f"not enough points in page to find {config.layout_model_next_text_boxes} nearest points, faking with 0.5")
@@ -107,19 +112,7 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
             sub_df['dxy2'] = self.distances(sub_df, 'x2', 'y2', 'x1', 'y1')
             sub_df['dxy3'] = self.distances(sub_df, 'x1', 'y2', 'x2', 'y1')
             sub_df['dxy4'] = self.distances(sub_df, 'x2', 'y1', 'x1', 'y2')
-            """sub_df['sin1'] = self.sinuses(sub_df, 'x1', 'y1', 'x2', 'y2')
-            sub_df['sin2'] = self.sinuses(sub_df, 'x2', 'y2', 'x1', 'y1')
-            sub_df['sin3'] = self.sinuses(sub_df, 'x1', 'y2', 'x2', 'y1')
-            sub_df['sin4'] = self.sinuses(sub_df, 'x2', 'y1', 'x1', 'y2')
-    
-            # frequency of values in this table, the more often a value is there,
-            # the more probable to be floeating text
-            sub_df['probsin1'] = sub_df.sin1.map(sub_df.sin1.value_counts(normalize=True))
-            sub_df['probsin2'] = sub_df.sin2.map(sub_df.sin2.value_counts(normalize=True))
-            sub_df['probsin3'] = sub_df.sin3.map(sub_df.sin3.value_counts(normalize=True))
-            sub_df['probsin4'] = sub_df.sin4.map(sub_df.sin4.value_counts(normalize=True))
-            # some max and min of text size to recognize a title page with abstract
-            """
+
             sub_df['probascent'] = sub_df.ascent.map(sub_df.ascent.value_counts(normalize=True))
             sub_df['probdescent'] = sub_df.descent.map(sub_df.descent.value_counts(normalize=True))
 
@@ -128,9 +121,9 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
     def feature_fuzz(self, feature_df):
         yield feature_df
 
-        if  "training" in self.flags:
+        if False and "training" in self.flags:
             def compute_fuzz(series, value):
-                    return value + fuzz_percent * max(series)
+                return value + round(random.uniform(-fuzz_percent, +fuzz_percent), 2) * max(series)
 
             def iter_col(series):
                 if isinstance(series[0], float):
