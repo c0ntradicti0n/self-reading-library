@@ -14,16 +14,42 @@ import numpy
 numpy.set_printoptions(threshold=sys.maxsize)
 
 logging.getLogger('allennlp').setLevel(logging.ERROR)
+
+logging.getLogger('pytorch_pretrained_bert').setLevel(logging.ERROR)
+logging.getLogger('pytorch_transformers').setLevel(logging.ERROR)
+
 logging.getLogger('pdfminer').setLevel(logging.ERROR)
 
 logging.basicConfig(format="""%(asctime)s-%(levelname)s: %(message)s""", datefmt="%H:%M:%S")
+
+
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-s', '--skip_on_timeout',
+                    action='store_true',
+                    dest='skip_on_timeout',
+                    help='When beeing stuck in a pipeline for more than the defined timeout, then it will not give up, but skip these values'
+                    )
+parser.add_argument('-q', '--quiet',
+                    action='store_true',
+                    dest='quiet',
+                    help='Suppress Output'
+                    )
+parser.add_argument('-v', '--verbose',
+                    action='store_true',
+                    help='Verbose Output'
+                    )
+ARGS = parser.parse_args()
+
 
 feature_fuzz_ranges = (-0.02, 0.04, 0.02),
 sys.path.append(os.getcwd())
 
 logging_config = '/home/finn/PycharmProjects/LayoutEagle/python/logging.yaml'
 model_config = "elmo_lstm3_feedforward4_crf_straight.config"
-jobs = 16
+jobs = 32
+max_time_per_call = 30
 #"elmo_multi_head_self_attention_crf_straight_fitter.config"
 parse_pdf2htmlEX = True
 n_layout_training_documents = 500

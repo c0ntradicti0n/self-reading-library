@@ -1,7 +1,7 @@
 import itertools
 
 from helpers.time_tools import timeit_context
-
+from layouteagle.pathant.parallel import paraloop
 
 class Pipeline:
     def __init__(self, pipeline, source, target, extra_paths, **flags):
