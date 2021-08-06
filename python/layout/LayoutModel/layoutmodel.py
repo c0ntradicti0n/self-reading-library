@@ -4,6 +4,7 @@ import pickle
 from typing import Dict
 import joblib
 import pandas
+import numpy as np
 import tensorflow as tf
 tf.get_logger().setLevel('ERROR')
 
@@ -36,12 +37,14 @@ class LayoutModeler(PathSpec):
                    'trainable': True,
                    'activation': 'softmax',
                    'dtype': 'float64'},
-        'adam': {'lr': 0.0003},
-        'epochs':300,
+        'adam': {'lr': 0.0005},
+        'epochs':600,
+        'num_layout_labels':4,
         'batch_size': 3200,
-        'patience': 3,
+        'patience': 10,
         'labels': 'layoutlabel',
-        'cols_to_use': config.cols_to_use
+        'cols_to_use': config.cols_to_use,
+        'array_cols_to_use': config.array_cols_to_use
     }
 
     def __init__(self,
@@ -68,29 +71,17 @@ class LayoutModeler(PathSpec):
         return pandas.read_pickle(feature_path)
 
     def prepare_features(self, feature_df, training=True):
+        feature_df = feature_df.fillna(0)
+
         if training:
             self.label_set = list(set(feature_df['layoutlabel'].tolist()))
             self.label_lookup = Lookup([self.label_set])
 
             feature_df['layoutlabel'] = self.label_lookup(token_s=feature_df.layoutlabel.tolist())
 
-        feature_df = self.prepare_df(feature_df, training=training)
+        # feature_df = self.prepare_df(feature_df, training=training)
 
-        norm_cols = [col for col in self.cols_to_use if col != self.train_kwargs['labels']]
-
-        """if training:
-            scaler = Normalizer()
-            scaler.fit(feature_df[norm_cols].to_numpy())
-            joblib.dump(scaler, self.model_path + ".scaler")
-
-            with open(self.lookup_path, "wb") as f:
-                pickle.dump(self.label_lookup, f)
-        else:
-            scaler = joblib.load(self.model_path + ".scaler")
-
-        feature_df[norm_cols] = scaler.transform(feature_df[norm_cols])"""
-
-        feature_df = feature_df.fillna(0)
+        # norm_cols = [col for col in self.cols_to_use if col != self.train_kwargs['labels']]
 
         if training:
             train, test = train_test_split(feature_df, test_size=0.2)
@@ -99,134 +90,106 @@ class LayoutModeler(PathSpec):
             self.logger.info(f'{len(val)} validation samples')
             self.logger.info(f'{len(test)} test samples')
 
-            self.train_ds = self.df_to_dataset(train, shuffle=False, batch_size=self.train_kwargs['batch_size'],
+            self.train_ds, self.feature_columns = self.df_to_dataset(train, shuffle=False, batch_size=self.train_kwargs['batch_size'],
                                                training=training)
-            self.val_ds = self.df_to_dataset(val, shuffle=False, batch_size=self.train_kwargs['batch_size'],
+            self.val_ds, _ = self.df_to_dataset(val, shuffle=False, batch_size=self.train_kwargs['batch_size'],
                                              training=training)
-            self.test_ds = self.df_to_dataset(test, shuffle=False, batch_size=self.train_kwargs['batch_size'],
+            self.test_ds, _ = self.df_to_dataset(test, shuffle=False, batch_size=self.train_kwargs['batch_size'],
                                               training=training)
         else:
-            self.predict_ds = self.df_to_dataset(feature_df, shuffle=False, batch_size=len(feature_df), training=False)
+            self.predict_ds, self.feature_columns = self.df_to_dataset(feature_df, shuffle=False, batch_size=len(feature_df), training=False)
 
-        feature_columns = []
 
-        # remove the labels, that were put in the df temporarily
-        self.cols_to_use = [col for col in self.cols_to_use if col != self.train_kwargs['labels']]
-
-        # all are numeric cols
-        for header in self.cols_to_use:
-            feature_columns.append(tf.feature_column.numeric_column(header))
-
-        as_numpy = feature_df[self.cols_to_use].to_numpy()
-        return feature_columns, as_numpy
 
     # A utility method to create a tf.data dataset from a Pandas Dataframe
     def df_to_dataset(self, dataframe, shuffle=True, batch_size=None, training=True):
-        dataframe = dataframe.copy()
-        dataframe = dataframe.reset_index(drop=True)
 
-        if training:
-            labels = dataframe[self.train_kwargs['labels']].tolist()
-            dataframe.pop(self.train_kwargs['labels'])
-        else:
-            labels = [0] * len(dataframe)
 
-        categorical_labels = to_categorical(labels)
+        def feature_generator():
+
+
+            if training:
+                labels = dataframe[self.train_kwargs['labels']].tolist()
+            else:
+                labels = [0] * len(dataframe)
+
+            categorical_labels = to_categorical(labels, num_classes=self.train_kwargs['num_layout_labels'])
+
+            for ((idx, row), label) in zip(dataframe.iterrows(), categorical_labels):
+                unpacked_row = self.prepare_df(row)
+
+                res = tf.constant(unpacked_row, dtype=tf.float64), tf.constant(label, dtype=tf.float64)
+                yield res
 
         try:
-            ds = tf.data.Dataset.from_tensor_slices((dict(dataframe), categorical_labels))
+            ds = tf.data.Dataset.from_generator(
+                feature_generator,
+                output_signature=(
+                    tf.TensorSpec(shape=(2622,), dtype=tf.float64),
+                    tf.TensorSpec(shape=(self.train_kwargs['num_layout_labels'],), dtype=tf.float64))
+            )
         except:
             raise
         if shuffle:
             ds = ds.shuffle(buffer_size=len(dataframe))
 
+        gen = feature_generator()
+        x_y = next(gen)
+        feature_columns = [tf.feature_column.numeric_column(str(i)) for i in range(0, len(x_y[0]))]
+
         ds = ds.batch(batch_size)
 
-        return ds
+        return ds, feature_columns
 
     def prepare_df(self, feature_df, training=True):
-        self.cols_to_use = self.train_kwargs['cols_to_use'] + [
-            self.train_kwargs['labels']]  # ([self.train_kwargs['labels']] if training else [])
 
-        feature_df = feature_df.reset_index(drop=True)
+        max_distance = max(feature_df['distance_vector'])
+        feature_df.distance_vector = feature_df.distance_vector / max_distance
 
-        N = 7
+        feature_df['distance_vector'] = list(more_itertools.padded(list(sorted(
+            feature_df.distance_vector))[:config.N], 0, 8))
 
-        max_distance = max([max(x) for x in feature_df['distance_vector']])
-        feature_df.distance_vector = feature_df.distance_vector.apply(lambda x: x / max_distance)
-        feature_df.distance_vector = feature_df.distance_vector.apply(lambda x: list(more_itertools.padded(list(sorted(x))[:N], 0, 8)))
+        feature_df['angle'] = list(more_itertools.padded(list(sorted(
+            feature_df.angle))[:config.N], 0, 8))
 
-        new_d_cols = unpack_list_column("distance_vector", feature_df, prefix='d_')
+        scalar_values = np.array(feature_df[self.train_kwargs['cols_to_use']], dtype=np.float64)
+        array_values = np.hstack(feature_df[self.train_kwargs['array_cols_to_use']])
 
-        feature_df = feature_df.fillna(1)
+        return np.hstack([scalar_values, array_values])
 
-        feature_df.angle = feature_df.angle.apply(lambda x: list(x))
-        feature_df['da'] = list(zip(feature_df['angle'], feature_df['distance_vector']))
-        feature_df.angle = feature_df['da'].apply(lambda x: list(more_itertools.padded(list(sorted_by_zipped(x))[:N], 0, N)))
-
-        new_a_cols = unpack_list_column("angle", feature_df, prefix='a_')
-
-        feature_df = feature_df.fillna(1)
-        with pandas.option_context('display.max_rows', None, 'display.max_columns', None):
-            self.logger.debug(str(feature_df.head()))
-
-        new_xp_cols = unpack_list_column("x_profile", feature_df, prefix='xp_')
-        new_yp__cols = unpack_list_column("y_profile", feature_df, prefix='yp_')
-
-        self.cols_to_use = self.cols_to_use + new_d_cols + new_a_cols + new_xp_cols + new_yp__cols
-
-        feature_df = feature_df[self.cols_to_use]
-
-        return feature_df
-
-    def train(self, feature_columns, override_kwargs={}):
+    def train(self, override_kwargs={}):
         self.logger.info(f"Model will go to {self.model_path}")
 
         self.train_kwargs.update(override_kwargs)
-        feature_layer = tf.keras.layers.DenseFeatures(feature_columns=feature_columns, dtype='float64')
 
         es = EarlyStopping(
             monitor='val_loss',
             mode='min', verbose=1,
             patience=self.train_kwargs['patience']
         )
-
         mc = ModelCheckpoint(self.model_path,
                              monitor='val_accuracy',
                              save_best_only=True,
                              save_weights_only=False,
                              verbose=1)
         self.model = tf.keras.Sequential([
-            feature_layer,
-
             *[tf.keras.layers.Dense(**v, use_bias=True) for k, v in self.train_kwargs.items() if "dense1_" in k],
             #tf.keras.layers.experimental.EinsumDense("...x,xy->...y", output_shape=256, bias_axes="y"),
             *[tf.keras.layers.Dense(**v, use_bias=True) for k, v in self.train_kwargs.items() if "dense2_" in k],
-
             tf.keras.layers.Dense(units=len(self.label_set), **self.train_kwargs['denseE']),
-            #tf.keras.layers.Dropout(**self.train_kwargs['dropout']),
-
         ])
-
         optimizer = tf.optimizers.Adam(**self.train_kwargs['adam'])
         self.model.compile(optimizer=optimizer,
                            loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
                            metrics=[ 'mse', 'accuracy'])
-
-        #self.model.build()
-        #self.model.summary()
-
-        history = self.model.fit(self.train_ds,
+        history = self.model.fit_generator(self.train_ds,
                                  validation_data=self.val_ds,
                                  epochs=self.train_kwargs['epochs'], callbacks=[es, mc])
-
-
         LayoutModeler.model = self.model
         return history
 
     def plot(self, history):
         from matplotlib import pyplot
-        # plot training histortest/tapetumn-vs-nucullus.pdf.labeled.htmy
         pyplot.plot(history.history['accuracy'], label='train')
         pyplot.plot(history.history['val_accuracy'], label='validation')
         pyplot.legend()
@@ -234,7 +197,6 @@ class LayoutModeler(PathSpec):
         pyplot.savefig("accuracy_epochs2.png")
 
     def validate(self):
-        # evaluate the model
         try:
             _, train_acc = self.model.evaluate(self.train_ds, verbose=0)
             _, test_acc = self.model.evaluate(self.test_ds, verbose=0)
@@ -271,8 +233,6 @@ class LayoutModeler(PathSpec):
                                    loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
                                    metrics=['mse', 'accuracy'])
                 self.model.built = True
-                #self.model.load_weights(self.model_path + "variables/vair")
-
 
             print(os.getcwd() + "->" + self.lookup_path)
 

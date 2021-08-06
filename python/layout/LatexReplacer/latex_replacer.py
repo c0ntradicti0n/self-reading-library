@@ -24,7 +24,9 @@ from layouteagle.pathant.parallel import paraloop
 @converter("tex", "labeled.pdf")
 class LatexReplacer(SoupReplacer):
     replacement_mapping_tag2tex = OrderedDict({
-        None: ["document", "abstract", "keywords", None] + \
+        None: ["document", #"abstract",
+                   # "keywords",
+               None] + \
               ["name", "Author", "email", "corres", "affiliation", "affil", "corresp", "author", "markboth",
                "email", "address", "adress", "emailAdd", "authorrunning", "institute", "ead", "caption",
                "footnote", "tfootnote", "thanks"],
@@ -59,6 +61,8 @@ class LatexReplacer(SoupReplacer):
         self.skip_commands = self.forbidden_nargs
         self.forbidden_envs = ["$", "tikzpicture", "eqnarray", "equation", "tabular", 'eqsplit', 'subequations', 'picture']
         self.forbidden_envs = self.forbidden_envs + [env + "*" for env in self.forbidden_envs]
+        self.replace_envs = ["$", "$*"]
+
 
     def find_all(self, soup, tex_string):
         if tex_string == None:
@@ -138,7 +142,6 @@ class LatexReplacer(SoupReplacer):
             config.tex_data + "**/*.tex3.labeled.pdf",
         ]
 )
-    @paraloop
     def __call__(self, paths, compile=True, *args, **kwargs):
         """
         :param path_to_read_from:
@@ -181,7 +184,7 @@ class LatexReplacer(SoupReplacer):
             new_contents = []
             for line in expr_text.split('\n'):
                 if line.strip():
-                    how_often = max(1, int((len(line) / effective_length)))
+                    how_often = max(1, int((len(line) / effective_length))) * 2
 
                     content_list = list(itertools.islice(content_generator, how_often))
                     if how_often > 60:
@@ -202,7 +205,7 @@ class LatexReplacer(SoupReplacer):
             replacement_string = replacement_string
         else:
             if replacement_string == None:
-                replacement_string = " " + self.column_placeholder
+                replacement_string = " " + self.column_placeholder + " " + self.column_placeholder + " " + self.column_placeholder
 
         replaced_contents = []
 
@@ -274,6 +277,9 @@ class LatexReplacer(SoupReplacer):
                 continue
 
             elif isinstance(node_to_replace, TexEnv):
+                if node_to_replace.name in self.replace_envs:
+                    node_to_replace = self.make_replacement(node_to_replace, replacement_string)
+
                 if not node_to_replace.name in self.forbidden_envs:
                     node_to_replace = self.make_replacement(node_to_replace, replacement_string)
                 else:
@@ -514,8 +520,7 @@ class TestRegexReplacer(unittest.TestCase):
 
     def test_env(self):
         latex_replacer = LatexReplacer
-        assert (
-                latex_replacer.work("layout/LatexReplacer/test/single_feature/env.tex") is not None)
+        assert (latex_replacer.work("layout/LatexReplacer/test/single_feature/env.tex") is not None)
 
     def test_cmd(self):
         latex_replacer = LatexReplacer

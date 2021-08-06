@@ -184,7 +184,7 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
 
         # Generate positional features
         self.set_css_attributes(feature_df)
-        self.point_density_frequence_per_page(feature_df, debug=True)
+
         feature_df['text'], feature_df['layoutlabel'] = list(zip(
             *list(feature_df.divs.apply(
                         lambda x: (x.text, self.determine_layout_label_from_text(x.text))
@@ -293,6 +293,11 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
                                  for y_profile_vector, angle_matrix in zip(other_feature_kinds_stacked.y_profile,
                                                                            other_feature_kinds_stacked.angles) for _ in
                                  angle_matrix]
+
+        features["xy_profile"] = [xy_profile_vector
+                                 for xy_profile_vector, angle_matrix in zip(other_feature_kinds_stacked.xy_profile,
+                                                                           other_feature_kinds_stacked.angles) for _ in
+                                 angle_matrix]
         return coarse_grained_field
 
     edges = numpy.array(
@@ -304,7 +309,7 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
     FeatureKinds = namedtuple(
         "FeatureKinds",
         ["coarse_grained_pdfs", "fine_grained_pdfs", "coarse_grained_field",
-         "distances", "angles", 'x_profile', 'y_profile'])
+         "distances", "angles", 'x_profile', 'y_profile', 'xy_profile'])
 
     def analyse_point_density_frequence(self, page_features, debug=True, axe_len_X=100, axe_len_Y=100) -> FeatureKinds:
         points2d = numpy.column_stack((page_features.x, page_features.y))
@@ -314,18 +319,18 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
         edges_and_points = edges_and_points[:-4]
         indices = (edges_and_points * [axe_len_X - 1, axe_len_Y - 1]).astype(int)
 
-        dotted = numpy.zeros((100, 100))
-
+        dotted = numpy.zeros((50, 50))
+        X = numpy.fix(indices[:, 0]/2).astype(int)
+        Y = numpy.fix(indices[:, 1]/2).astype(int)
         try:
-            dotted[indices[:, 0], indices[:, 1]] = 1
+            dotted[X, Y] = 1
         except IndexError:
-            self.logger.error("indexes wrong after index nomralisation ")
+            self.logger.error("Indexes wrong after index normalization ")
 
-        coarse_grained_field = gaussian_filter(dotted, sigma=3)
-        coarse_grained_pdfs = coarse_grained_field[indices[:, 0], indices[:, 1]]
-
-        fine_grained_field = gaussian_filter(dotted, sigma=2)
-        fine_grained_pdfs = fine_grained_field[indices[:, 0], indices[:, 1]]
+        coarse_grained_field = gaussian_filter(dotted, sigma=2)
+        coarse_grained_pdfs = coarse_grained_field[X,Y]
+        fine_grained_field = gaussian_filter(dotted, sigma=1)
+        fine_grained_pdfs = fine_grained_field[X,Y]
 
         distances = distance_matrix(points2d, points2d)
         angles = angles = numpy.array(
@@ -333,9 +338,10 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
 
         x_profile = numpy.sum(dotted, axis=0)
         y_profile = numpy.sum(dotted, axis=1)
+        xy_profile = numpy.hstack(dotted)
 
         return self.FeatureKinds(coarse_grained_pdfs, fine_grained_pdfs, coarse_grained_field,
-                                 distances, angles, x_profile, y_profile)
+                                 distances, angles, x_profile, y_profile, xy_profile)
 
     def most_common_value(self, values, constraint=None):
         if constraint:

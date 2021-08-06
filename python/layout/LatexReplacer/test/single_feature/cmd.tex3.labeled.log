@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.4.19)  25 JUL 2021 15:05
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.4.19)  5 AUG 2021 14:32
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -186,16 +186,16 @@ LaTeX Font Info:    ... okay on input line 68.
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (./cmd.tex3.labeled.aux) )
  
 Here is how much of TeX's memory you used:
- 1440 strings out of 481239
- 19200 string characters out of 5920377
+ 1441 strings out of 481239
+ 19224 string characters out of 5920377
  258366 words of memory out of 5000000
- 16764 multiletter control sequences out of 15000+600000
+ 16765 multiletter control sequences out of 15000+600000
  532984 words of font info for 26 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 30i,4n,25p,781b,150s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 30i,4n,25p,781b,152s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/s
 hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb>
-Output written on cmd.tex3.labeled.pdf (1 page, 15588 bytes).
+Output written on cmd.tex3.labeled.pdf (1 page, 15595 bytes).
 PDF statistics:
  16 PDF objects out of 1000 (max. 8388607)
  10 compressed objects within 1 object stream

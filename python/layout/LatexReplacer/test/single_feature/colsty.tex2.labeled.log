@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.4.19)  25 JUL 2021 15:06
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.4.19)  5 AUG 2021 14:33
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -239,42 +239,42 @@ File: l3backend-pdfmode.def 2020-02-03 L3 backend support: PDF mode
 (./colsty.tex2.labeled.aux)
 \openout1 = `colsty.tex2.labeled.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 86.
-LaTeX Font Info:    ... okay on input line 86.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 86.
-LaTeX Font Info:    ... okay on input line 86.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 86.
-LaTeX Font Info:    ... okay on input line 86.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 86.
-LaTeX Font Info:    ... okay on input line 86.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 86.
-LaTeX Font Info:    ... okay on input line 86.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 86.
-LaTeX Font Info:    ... okay on input line 86.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 86.
-LaTeX Font Info:    ... okay on input line 86.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 84.
+LaTeX Font Info:    ... okay on input line 84.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 84.
+LaTeX Font Info:    ... okay on input line 84.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 84.
+LaTeX Font Info:    ... okay on input line 84.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 84.
+LaTeX Font Info:    ... okay on input line 84.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 84.
+LaTeX Font Info:    ... okay on input line 84.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 84.
+LaTeX Font Info:    ... okay on input line 84.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 84.
+LaTeX Font Info:    ... okay on input line 84.
 
-** WARNING: \thanks is locked out when in conference mode (line 88).
+** WARNING: \thanks is locked out when in conference mode (line 86).
 
-LaTeX Warning: Citation `Jayaraman2008' on page 1 undefined on input line 115.
-
-
-LaTeX Warning: Citation `Mok2015' on page 1 undefined on input line 115.
+LaTeX Warning: Citation `Jayaraman2008' on page 1 undefined on input line 113.
 
 
-LaTeX Warning: Citation `Karlen2014' on page 1 undefined on input line 118.
+LaTeX Warning: Citation `Mok2015' on page 1 undefined on input line 113.
 
 
-LaTeX Warning: Citation `Karlen2013c' on page 1 undefined on input line 118.
+LaTeX Warning: Citation `Karlen2014' on page 1 undefined on input line 116.
 
 
-LaTeX Warning: Citation `Lazaro2013b' on page 1 undefined on input line 118.
+LaTeX Warning: Citation `Karlen2013c' on page 1 undefined on input line 116.
 
 
-LaTeX Warning: Citation `Addison2016c' on page 1 undefined on input line 118.
+LaTeX Warning: Citation `Lazaro2013b' on page 1 undefined on input line 116.
 
 
-LaTeX Warning: Citation `Karlen2013c' on page 1 undefined on input line 118.
+LaTeX Warning: Citation `Addison2016c' on page 1 undefined on input line 116.
+
+
+LaTeX Warning: Citation `Karlen2013c' on page 1 undefined on input line 116.
 
 
 ** Conference Paper **
@@ -287,33 +287,34 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the US letter (8.5in X 11in) paper size.
 
-[1
+[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+
+]
 (./colsty.tex2.labeled.aux)
 
 LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 2425 strings out of 481239
- 40379 string characters out of 5920377
- 315828 words of memory out of 5000000
- 17729 multiletter control sequences out of 15000+600000
- 565552 words of font info for 83 fonts, out of 8000000 for 9000
+ 2638 strings out of 481239
+ 45918 string characters out of 5920377
+ 351260 words of memory out of 5000000
+ 17942 multiletter control sequences out of 15000+600000
+ 565570 words of font info for 83 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 30i,5n,25p,3621b,419s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 30i,8n,25p,6135b,634s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf
 -dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/f
 onts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/
-times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.p
-fb>
-Output written on colsty.tex2.labeled.pdf (1 page, 45389 bytes).
+times/utmbi8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.p
+fb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on colsty.tex2.labeled.pdf (1 page, 51972 bytes).
 PDF statistics:
- 29 PDF objects out of 1000 (max. 8388607)
- 20 compressed objects within 1 object stream
+ 33 PDF objects out of 1000 (max. 8388607)
+ 23 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

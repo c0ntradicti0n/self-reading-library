@@ -10,13 +10,15 @@ import tensorflow as tf
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 tf.get_logger().setLevel(3)
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+import numpy
+numpy.set_printoptions(threshold=sys.maxsize)
 
 logging.getLogger('allennlp').setLevel(logging.ERROR)
 logging.getLogger('pdfminer').setLevel(logging.ERROR)
 
 logging.basicConfig(format="""%(asctime)s-%(levelname)s: %(message)s""", datefmt="%H:%M:%S")
 
-feature_fuzz_ranges = (-0.03, 0.03, 0.02), (-0.03, 0.03, 0.02), (-0.03, 0.03, 0.02)
+feature_fuzz_ranges = (-0.02, 0.04, 0.02),
 sys.path.append(os.getcwd())
 
 logging_config = '/home/finn/PycharmProjects/LayoutEagle/python/logging.yaml'
@@ -27,7 +29,6 @@ parse_pdf2htmlEX = True
 n_layout_training_documents = 500
 max_windows_per_text = 100
 recursive = True
-max_len = 200
 NORMAL_HEIGHT = 100
 page_array_model = 100
 layout_model_next_text_boxes = 5
@@ -104,16 +105,20 @@ collected_features_path = ".layouteagle/labeled_features.pickle"
 use_pdf2htmlex_features = False
 
 cols_to_use = [
+    *(['width','ascent', 'descent',
+    'x1', 'y1', 'x2', 'y2',
+    'dxy1', 'dxy2', 'dxy3', 'dxy4',
+    #'sin1', 'sin2', 'sin3', 'sin4',
+    #'probsin1', 'probsin2', 'probsin3', 'probsin4',
+    'probascent', 'probdescent',
+    *list(flatten([[f'nearest_{k}_center_x', f'nearest_{k}_center_y']
+                   for k in range(layout_model_next_text_boxes)]))]
+      if use_pdf2htmlex_features else [
+        'len', 'height', 'font-size', 'line-height', 'x', 'y'
+    ])
 
-            *(['width','ascent', 'descent',
-            'x1', 'y1', 'x2', 'y2',
-            'dxy1', 'dxy2', 'dxy3', 'dxy4',
-            #'sin1', 'sin2', 'sin3', 'sin4',
-            #'probsin1', 'probsin2', 'probsin3', 'probsin4',
-            'probascent', 'probdescent',
-            *list(flatten([[f'nearest_{k}_center_x', f'nearest_{k}_center_y']
-                           for k in range(layout_model_next_text_boxes)]))]
-              if use_pdf2htmlex_features else [
-                'len', 'height', 'font-size', 'line-height', 'x', 'y', 'coarse_grained_pdf', 'fine_grained_pdf'
-            ])
-        ]
+]
+
+array_cols_to_use = ['angle', 'distance_vector', 'x_profile', 'y_profile', 'xy_profile']
+
+N = 7

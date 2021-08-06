@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.4.19)  25 JUL 2021 15:05
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.4.19)  5 AUG 2021 14:32
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -330,17 +330,17 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2] (./newlines.tex2.label
 ed.aux) ) 
 Here is how much of TeX's memory you used:
- 4503 strings out of 481239
- 86293 string characters out of 5920377
+ 4522 strings out of 481239
+ 86768 string characters out of 5920377
  451312 words of memory out of 5000000
- 19764 multiletter control sequences out of 15000+600000
+ 19783 multiletter control sequences out of 15000+600000
  561765 words of font info for 42 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  43i,7n,72p,10148b,246s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/lm/lm-ec.enc}</usr/share/texmf/fonts
 /type1/public/lm/lmr10.pfb></usr/share/texmf/fonts/type1/public/lm/lmr12.pfb></
 usr/share/texmf/fonts/type1/public/lm/lmssbx10.pfb>
-Output written on newlines.tex2.labeled.pdf (2 pages, 61217 bytes).
+Output written on newlines.tex2.labeled.pdf (2 pages, 61251 bytes).
 PDF statistics:
  24 PDF objects out of 1000 (max. 8388607)
  16 compressed objects within 1 object stream

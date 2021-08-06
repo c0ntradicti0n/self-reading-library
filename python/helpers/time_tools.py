@@ -9,4 +9,4 @@ def timeit_context(name, logger=print):
     startTime = time.time()
     yield
     elapsedTime = time.time() - startTime
-    logger(f"'{name}' finished in {int(elapsedTime * 1000)} ms'")
+    logger(f"... {int(elapsedTime * 1000)} ms for '{name}'")
