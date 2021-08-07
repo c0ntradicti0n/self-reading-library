@@ -422,10 +422,16 @@ class LatexReplacer(SoupReplacer):
                     for input_file in input_files:
                         ipath, ifilename, iextension, ifilename_without_extension = get_path_filename_extension(
                             path_to_read_from)
-                        options = {  # "with extension":
-                            #         input_file.expr.args[-1].value + iextension,
-                            "LatexInput solo":
-                                input_file.expr.args[-1].string}
+
+                        try:
+                            options = {  # "with extension":
+                                #         input_file.expr.args[-1].value + iextension,
+                                "LatexInput solo":
+                                    input_file.expr.args[-1].string
+                            }
+                        except IndexError as e:
+                            self.logger.error(f"Latex import without argument? {str(input_file.expr)}")
+                            return
 
                         for version, path in options.items():
                             if not path.endswith("tex"):

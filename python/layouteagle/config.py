@@ -31,15 +31,7 @@ parser.add_argument('-s', '--skip_on_timeout',
                     dest='skip_on_timeout',
                     help='When beeing stuck in a pipeline for more than the defined timeout, then it will not give up, but skip these values'
                     )
-parser.add_argument('-q', '--quiet',
-                    action='store_true',
-                    dest='quiet',
-                    help='Suppress Output'
-                    )
-parser.add_argument('-v', '--verbose',
-                    action='store_true',
-                    help='Verbose Output'
-                    )
+
 ARGS = parser.parse_args()
 
 
@@ -145,6 +137,7 @@ cols_to_use = [
 
 ]
 
-array_cols_to_use = ['angle', 'distance_vector', 'x_profile', 'y_profile', 'xy_profile']
+array_cols_to_use = ['angle', 'distance_vector', 'x_profile', 'y_profile', 'xy_profile'
+                     ]
 
 N = 7

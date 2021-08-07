@@ -25,11 +25,11 @@ from helpers.nested_dict_tools import flatten
 
 class LayoutModeler(PathSpec):
     train_kwargs = {
-        **{f'dense1_{i}': {'units': 256,
+        **{f'dense1_{i}': {'units': 512,
                    'trainable': True,
-                   'activation': 'relu',
-                   'dtype': 'float64'} for i in range(0, 4)},
-        **{f'dense2_{i}': {'units': 256,
+                   'activation': 'swish',
+                   'dtype': 'float64'} for i in range(0, 15)},
+        **{f'dense2_{i}': {'units': 512,
                           'trainable': True,
                           'activation': 'relu',
                           'dtype': 'float64'} for i in range(0, 4)},
@@ -37,10 +37,10 @@ class LayoutModeler(PathSpec):
                    'trainable': True,
                    'activation': 'softmax',
                    'dtype': 'float64'},
-        'adam': {'lr': 0.0005},
+        'adam': {'lr': 0.0001},
         'epochs':600,
         'num_layout_labels':4,
-        'batch_size': 3200,
+        'batch_size': 1000,
         'patience': 10,
         'labels': 'layoutlabel',
         'cols_to_use': config.cols_to_use,
@@ -125,7 +125,7 @@ class LayoutModeler(PathSpec):
             ds = tf.data.Dataset.from_generator(
                 feature_generator,
                 output_signature=(
-                    tf.TensorSpec(shape=(2622,), dtype=tf.float64),
+                    tf.TensorSpec(shape=(next(feature_generator())[0].__len__(),), dtype=tf.float64),
                     tf.TensorSpec(shape=(self.train_kwargs['num_layout_labels'],), dtype=tf.float64))
             )
         except:
@@ -143,8 +143,7 @@ class LayoutModeler(PathSpec):
 
     def prepare_df(self, feature_df, training=True):
 
-        max_distance = max(feature_df['distance_vector'])
-        feature_df.distance_vector = feature_df.distance_vector / max_distance
+        feature_df.distance_vector = feature_df.distance_vector
 
         feature_df['distance_vector'] = list(more_itertools.padded(list(sorted(
             feature_df.distance_vector))[:config.N], 0, 8))
@@ -153,7 +152,8 @@ class LayoutModeler(PathSpec):
             feature_df.angle))[:config.N], 0, 8))
 
         scalar_values = np.array(feature_df[self.train_kwargs['cols_to_use']], dtype=np.float64)
-        array_values = np.hstack(feature_df[self.train_kwargs['array_cols_to_use']])
+        array_values = np.hstack(
+            feature_df[self.train_kwargs['array_cols_to_use']])
 
         return np.hstack([scalar_values, array_values])
 

@@ -17,14 +17,15 @@ def paraloop(original_fun):
 
             except KeyboardInterrupt as e:
                  if config.ARGS.skip_on_timeout:
-                     return None
+                     return [None]
                  raise e
 
 
         args = list(param)
 
         fut = Parallel(n_jobs=config.jobs)(delayed(f)(arg) for arg in tqdm(args))
-        fut = [ff for f in fut for ff in f if f]
+
+        fut = [ff for f in fut for ff in f if ff and f]
         print(fut)
         yield from fut
 
