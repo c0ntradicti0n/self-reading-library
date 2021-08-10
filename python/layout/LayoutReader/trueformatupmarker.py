@@ -184,7 +184,7 @@ class TrueFormatUpmarker(SoupReplacer):
 
             features["pcl"][where] = features["shift_down"]
 
-        features["layoutlabel"] = features["pcl"]
+        features["LABEL"] = features["pcl"]
         del features["pcl"]
 
 
@@ -202,7 +202,7 @@ class TrueFormatUpmarker(SoupReplacer):
         self.word_index = {}
         self.count_i = itertools.count()  # counter for next indices for new html-tags
         #features.sort_values(by="reading_sequence", inplace=True)
-        features["debug_color"] = abs(features.layoutlabel.apply(lambda string: self.index_labels(string)))
+        features["debug_color"] = abs(features.LABEL.apply(lambda string: self.index_labels(string)))
         for index, feature_line in features.iterrows():
             div = feature_line.divs
 

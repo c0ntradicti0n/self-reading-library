@@ -42,7 +42,7 @@ class LayoutModeler(PathSpec):
         'num_layout_labels':4,
         'batch_size': 1000,
         'patience': 10,
-        'labels': 'layoutlabel',
+        'labels': 'LABEL',
         'cols_to_use': config.cols_to_use,
         'array_cols_to_use': config.array_cols_to_use
     }
@@ -74,14 +74,9 @@ class LayoutModeler(PathSpec):
         feature_df = feature_df.fillna(0)
 
         if training:
-            self.label_set = list(set(feature_df['layoutlabel'].tolist()))
+            self.label_set = list(set(feature_df['LABEL'].tolist()))
             self.label_lookup = Lookup([self.label_set])
-
-            feature_df['layoutlabel'] = self.label_lookup(token_s=feature_df.layoutlabel.tolist())
-
-        # feature_df = self.prepare_df(feature_df, training=training)
-
-        # norm_cols = [col for col in self.cols_to_use if col != self.train_kwargs['labels']]
+            feature_df['LABEL'] = self.label_lookup(token_s=feature_df.LABEL.tolist())
 
         if training:
             train, test = train_test_split(feature_df, test_size=0.2)
@@ -135,25 +130,20 @@ class LayoutModeler(PathSpec):
 
         gen = feature_generator()
         x_y = next(gen)
-        feature_columns = [tf.feature_column.numeric_column(str(i)) for i in range(0, len(x_y[0]))]
+        feature_columns = \
+            [tf.feature_column.numeric_column(str(i)) for i in range(0, len(config.cols_to_use))] +\
+            [tf.feature_column.numeric_column("cat" + str(i)) for i in range(len(config.cols_to_use), len(x_y[0]))]
+
 
         ds = ds.batch(batch_size)
 
         return ds, feature_columns
 
     def prepare_df(self, feature_df, training=True):
-
-        feature_df.distance_vector = feature_df.distance_vector
-
-        feature_df['distance_vector'] = list(more_itertools.padded(list(sorted(
-            feature_df.distance_vector))[:config.N], 0, 8))
-
-        feature_df['angle'] = list(more_itertools.padded(list(sorted(
-            feature_df.angle))[:config.N], 0, 8))
-
         scalar_values = np.array(feature_df[self.train_kwargs['cols_to_use']], dtype=np.float64)
         array_values = np.hstack(
-            feature_df[self.train_kwargs['array_cols_to_use']])
+            col.flatten() for col in feature_df[self.train_kwargs['array_cols_to_use']]
+        )
 
         return np.hstack([scalar_values, array_values])
 
@@ -175,6 +165,16 @@ class LayoutModeler(PathSpec):
         self.model = tf.keras.Sequential([
             *[tf.keras.layers.Dense(**v, use_bias=True) for k, v in self.train_kwargs.items() if "dense1_" in k],
             #tf.keras.layers.experimental.EinsumDense("...x,xy->...y", output_shape=256, bias_axes="y"),
+            #tf.keras.layers.SimpleRNN(4),
+            #tf.keras.layers.GRU(4),
+            tf.keras.layers.LeakyReLU(
+                alpha=0.5
+            ),
+
+           #"""tf.keras.layers.Reshape((512,1)),
+           #tf.keras.layers.Conv1D(filters=3, kernel_size=(100), activation='softmax'),
+           #tf.keras.layers.Reshape((1239,)),"""
+
             *[tf.keras.layers.Dense(**v, use_bias=True) for k, v in self.train_kwargs.items() if "dense2_" in k],
             tf.keras.layers.Dense(units=len(self.label_set), **self.train_kwargs['denseE']),
         ])

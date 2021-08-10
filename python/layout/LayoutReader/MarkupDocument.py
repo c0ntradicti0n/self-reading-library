@@ -32,7 +32,7 @@ class MarkupDocument(TrueFormatUpmarkerPDF2HTMLEX):
 
             annotation = [(
                 meta['label_lookup'].token_to_id[l], feature_df.text[i]
-            )   for i, l in enumerate(feature_df.layoutlabel)]
+            )   for i, l in enumerate(feature_df.LABEL)]
 
             meta['CSS'] = self.css
             yield annotation, meta

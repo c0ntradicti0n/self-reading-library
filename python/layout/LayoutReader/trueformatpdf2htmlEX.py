@@ -60,7 +60,7 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
                     yield {
                         **{k: float(v) for k, v in match_dict.items() if k != "text"},
                         "text": match_dict['text'],
-                        "layoutlabel": self.determine_layout_label_from_text(match_dict["text"])}
+                        "LABEL": self.determine_layout_label_from_text(match_dict["text"])}
                 except Exception as e:
                     raise e
 
@@ -144,7 +144,7 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
             # TODO right to left and up to down!
             # Assuming, also column labels have bpdf2htmlEX.htmleen sorted yet from left to right
 
-            groups_of_clusters = page_group.groupby(by="layoutlabel")
+            groups_of_clusters = page_group.groupby(by="LABEL")
 
             groups_of_clusters = sorted(groups_of_clusters,
                                         key=lambda cluster_and_cluster_group: cluster_and_cluster_group[1].x.mean())
@@ -185,7 +185,7 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
         # Generate positional features
         self.set_css_attributes(feature_df)
 
-        feature_df['text'], feature_df['layoutlabel'] = list(zip(
+        feature_df['text'], feature_df['LABEL'] = list(zip(
             *list(feature_df.divs.apply(
                         lambda x: (x.text, self.determine_layout_label_from_text(x.text))
                     )
@@ -302,9 +302,6 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
 
     edges = numpy.array(
         [[0, 0], [0, config.reader_height], [config.reader_width, 0], [config.reader_width, config.reader_height]])
-
-    def normalized(self, a):
-        return a / [a_line.max() - a_line.min() for a_line in a.T]
 
     FeatureKinds = namedtuple(
         "FeatureKinds",

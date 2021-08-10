@@ -15,6 +15,6 @@ class LayoutPrediction(TrueFormatUpmarkerPDF2HTMLEX):
         self.debug = True
         for feature_df, meta in feature_meta:
             prediction = model.predict(feature_df)
-            feature_df['layoutlabel'] = model.label_lookup.ids_to_tokens(prediction)
+            feature_df['LABEL'] = model.label_lookup.ids_to_tokens(prediction)
             meta['label_lookup'] = model.label_lookup
             yield feature_df, meta

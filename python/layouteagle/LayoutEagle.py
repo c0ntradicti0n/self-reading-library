@@ -12,6 +12,7 @@ class LayoutEagle:
     from layout.ScienceTexScraper.scrape import ScienceTexScraper
     from layout.LatexReplacer.latex_replacer import LatexReplacer
     from layout.LayoutReader.labeled_feature_maker import TrueFormatUpmarkerPDF2HTMLEX
+    from layout.LayoutReader.box_feature_maker import BoxFeatureMaker
     from layout.LayoutReader.feature_label_assigner import TrueFormatUpmarkerPDF2HTMLEX
     from layout.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
     from layout.LayoutReader.feature_prediction import LayoutPrediction
@@ -19,12 +20,9 @@ class LayoutEagle:
     from layout.LayoutReader.feature2features import Feature2Features
     from layout.LayoutModel.layouttrain import LayoutTrainer
     from layout.LayoutModel.layoutpredict import LayouPredictor
-
     from layout.LayoutReader.HTML2PDF import HTML2PDF
     from layout.LayoutReader.PDF2ETC import PDF2ETC
-
     from layout.LayoutReader.PDF2HTML import PDF2HTML
-
     from layouteagle.StandardConverter.Dict2Graph import Dict2Graph
     from layouteagle.StandardConverter.Wordi2Css import Wordi2Css
     from layouteagle.pathant.PathAnt import PathAnt
@@ -49,6 +47,12 @@ class LayoutEagle:
 
 
     def make_layout_model(self):
+        model_pipe = self.ant("arxiv.org", "keras" )
+        print (list(model_pipe("https://arxiv.org", training = True)))
+        os.system(
+            f'cp -r {config.hidden_folder + config.layout_model_path} {config.hidden_folder + config.saved_layout_model_dir}')
+
+    def make_box_layout_model(self):
         model_pipe = self.ant("arxiv.org", "keras" )
         print (list(model_pipe("https://arxiv.org", training = True)))
         os.system(
@@ -97,6 +101,9 @@ class LayoutEagle:
 if __name__=="__main__":
     le = LayoutEagle()
     le.ant.info()
-    le.make_layout_model()
+    le.make_box_layout_model()
+    #le.make_layout_model()
+
+    #le.make_layout_model()
     le.test_layout()
     #le.test_topics()

@@ -97,7 +97,7 @@ class PathAnt:
         for (u, v, d) in dG.edges(data=True):
             d["functional_object"] = d['functional_object'].__class__.__name__
 
-        pos = nx.nx_agraph.graphviz_layout(dG)
+        pos = nx.nx_agraph.graphviz_layout(dG, prog= "dot")
 
         edge_labels = {(u,v):
                            f"{a['functional_object']} " +

@@ -122,6 +122,7 @@ collected_features_path = ".layouteagle/labeled_features.pickle"
 
 use_pdf2htmlex_features = False
 
+"""
 cols_to_use = [
     *(['width','ascent', 'descent',
     'x1', 'y1', 'x2', 'y2',
@@ -135,9 +136,11 @@ cols_to_use = [
         'len', 'height', 'font-size', 'line-height', 'x', 'y'
     ])
 
-]
+]"""
+cols_to_use = ["page_number","x","y", "x0", "x1", "y0", "y1", "height", "width"]
 
-array_cols_to_use = ['angle', 'distance_vector', 'x_profile', 'y_profile', 'xy_profile'
-                     ]
+#array_cols_to_use = ['angle', 'distance_vector', 'x_profile', 'y_profile', 'xy_profile'
+#                     ]
 
+array_cols_to_use = ["box_schema"]
 N = 7
