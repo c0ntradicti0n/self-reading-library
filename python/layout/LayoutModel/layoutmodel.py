@@ -37,11 +37,14 @@ class LayoutModeler(PathSpec):
                    'trainable': True,
                    'activation': 'softmax',
                    'dtype': 'float64'},
-        'adam': {'lr': 0.0001},
+        'optimizer': {'lr': 0.0001,
+                      #'momentum':0.95,
+                      #'nesterov':True
+                      },
         'epochs':600,
         'num_layout_labels':4,
         'batch_size': 1000,
-        'patience': 10,
+        'patience': 20,
         'labels': 'LABEL',
         'cols_to_use': config.cols_to_use,
         'array_cols_to_use': config.array_cols_to_use
@@ -119,9 +122,16 @@ class LayoutModeler(PathSpec):
         try:
             ds = tf.data.Dataset.from_generator(
                 feature_generator,
-                output_signature=(
-                    tf.TensorSpec(shape=(next(feature_generator())[0].__len__(),), dtype=tf.float64),
-                    tf.TensorSpec(shape=(self.train_kwargs['num_layout_labels'],), dtype=tf.float64))
+                # tf 2.3.0
+                output_types=(tf.float64, tf.float64),
+                output_shapes=(
+                    (next(feature_generator())[0].__len__(),),
+                    (self.train_kwargs['num_layout_labels'],)
+                )
+                # tf 2.5.0
+                #output_signature=(
+                #    tf.TensorSpec(shape=(next(feature_generator())[0].__len__(),), dtype=tf.float64),
+                #    tf.TensorSpec(shape=(self.train_kwargs['num_layout_labels'],), dtype=tf.float64))
             )
         except:
             raise
@@ -142,7 +152,7 @@ class LayoutModeler(PathSpec):
     def prepare_df(self, feature_df, training=True):
         scalar_values = np.array(feature_df[self.train_kwargs['cols_to_use']], dtype=np.float64)
         array_values = np.hstack(
-            col.flatten() for col in feature_df[self.train_kwargs['array_cols_to_use']]
+            [col.flatten() for col in feature_df[self.train_kwargs['array_cols_to_use']]]
         )
 
         return np.hstack([scalar_values, array_values])
@@ -153,24 +163,26 @@ class LayoutModeler(PathSpec):
         self.train_kwargs.update(override_kwargs)
 
         es = EarlyStopping(
-            monitor='val_loss',
-            mode='min', verbose=1,
+            monitor='val_accuracy',
+            mode='min',
+            verbose=1,
             patience=self.train_kwargs['patience']
         )
-        mc = ModelCheckpoint(self.model_path,
-                             monitor='val_accuracy',
-                             save_best_only=True,
-                             save_weights_only=False,
-                             verbose=1)
+        mc = ModelCheckpoint(
+            self.model_path,
+            monitor='val_accuracy',
+            save_best_only=True,
+            save_weights_only=False,
+            verbose=1
+        )
         self.model = tf.keras.Sequential([
             *[tf.keras.layers.Dense(**v, use_bias=True) for k, v in self.train_kwargs.items() if "dense1_" in k],
             #tf.keras.layers.experimental.EinsumDense("...x,xy->...y", output_shape=256, bias_axes="y"),
             #tf.keras.layers.SimpleRNN(4),
             #tf.keras.layers.GRU(4),
-            tf.keras.layers.LeakyReLU(
-                alpha=0.5
-            ),
-
+            #tf.keras.layers.LeakyReLU(
+            #    alpha=0.5
+            #),
            #"""tf.keras.layers.Reshape((512,1)),
            #tf.keras.layers.Conv1D(filters=3, kernel_size=(100), activation='softmax'),
            #tf.keras.layers.Reshape((1239,)),"""
@@ -178,13 +190,16 @@ class LayoutModeler(PathSpec):
             *[tf.keras.layers.Dense(**v, use_bias=True) for k, v in self.train_kwargs.items() if "dense2_" in k],
             tf.keras.layers.Dense(units=len(self.label_set), **self.train_kwargs['denseE']),
         ])
-        optimizer = tf.optimizers.Adam(**self.train_kwargs['adam'])
+        optimizer = tf.optimizers.Adam(**self.train_kwargs['optimizer'])
         self.model.compile(optimizer=optimizer,
                            loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
                            metrics=[ 'mse', 'accuracy'])
-        history = self.model.fit_generator(self.train_ds,
-                                 validation_data=self.val_ds,
-                                 epochs=self.train_kwargs['epochs'], callbacks=[es, mc])
+        history = self.model.fit_generator(
+            self.train_ds,
+            validation_data=self.val_ds,
+            epochs=self.train_kwargs['epochs'],
+            callbacks=[es, mc]
+        )
         LayoutModeler.model = self.model
         return history
 
@@ -228,7 +243,7 @@ class LayoutModeler(PathSpec):
         try:
             if not hasattr(self, "model"):
                 self.model = LayoutModeler.model if hasattr(LayoutModeler, "model") else tf.keras.models.load_model(self.model_path)
-                optimizer = tf.optimizers.Adam(**self.train_kwargs['adam'])
+                optimizer = tf.optimizers.SGD(**self.train_kwargs['optimizer'])
                 self.model.compile(optimizer=optimizer,
                                    loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
                                    metrics=['mse', 'accuracy'])

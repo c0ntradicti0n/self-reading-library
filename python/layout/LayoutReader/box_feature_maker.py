@@ -17,11 +17,13 @@ sys.path.append(".")
 
 from layout.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
 from layouteagle.pathant.Converter import converter
+from layouteagle.pathant.PathSpec import PathSpec
+from helpers.layout import determine_layout_label_from_text
 
 FEATURES_FROM_PDF2HTMLEX = "features_from_pdf2htmlex"
 
 @converter(["labeled.pdf", 'pdf'], "feature")
-class BoxFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
+class BoxFeatureMaker(PathSpec):
     def __init__(self, debug=True, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.debug = debug
@@ -52,16 +54,24 @@ class BoxFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
 
                 yield final_feature_df, meta
 
-    TextBoxData = namedtuple("TextBoxData", ["page_number","x","y", "x0", "x1", "y0", "y1", "height", "width", "text", "LABEL"])
+    TextBoxData = namedtuple("TextBoxData", [
+        "page_number",
+        "number_of_lines",
+        "x","y", "x0", "x1", "y0", "y1",
+        "height", "width",
+
+        "text", "LABEL"])
 
     def mine_pdf(self, pdf_path):
         for page_number, page_layout in enumerate(extract_pages(pdf_path)):
             for element in page_layout:
                 if isinstance(element, LTTextContainer):
                     text = element.get_text()
-                    label = self.determine_layout_label_from_text(text)
+                    label = determine_layout_label_from_text(text)
+                    number_of_lines = len(element._objs) if hasattr(element, "_objs") else 0
                     feature = BoxFeatureMaker.TextBoxData(
                         page_number,
+                        number_of_lines,
                         element.x0, element.y0,
                         element.x0, element.x0+element.height,
                         element.y0, element.y0+element.width,
@@ -162,6 +172,16 @@ class BoxFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
 
             box_schema = (box_schema) / numpy.amax(box_schema)
 
+            """
+            box_schema = (box_schema) / \
+                         (val if (
+                             val := (numpy.amax(box_schema)
+                                     if numpy.amax(box_schema) >= numpy.amin(box_schema)
+                                     else -numpy.amin(box_schema))
+                                 )
+                             and val > 1
+                          else 1)
+            """
             box_schema_pics.append(box_schema)
 
         return box_schema_pics

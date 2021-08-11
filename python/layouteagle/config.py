@@ -137,7 +137,9 @@ cols_to_use = [
     ])
 
 ]"""
-cols_to_use = ["page_number","x","y", "x0", "x1", "y0", "y1", "height", "width"]
+cols_to_use = ["page_number",
+                       "number_of_lines",
+        "x","y", "x0", "x1", "y0", "y1", "height", "width"]
 
 #array_cols_to_use = ['angle', 'distance_vector', 'x_profile', 'y_profile', 'xy_profile'
 #                     ]
