@@ -25,36 +25,45 @@ from helpers.nested_dict_tools import flatten
 
 class LayoutModeler(PathSpec):
     train_kwargs = {
-        **{f'dense1_{i}': {'units': 512,
-                   'trainable': True,
-                   'activation': 'swish',
-                   'dtype': 'float64'} for i in range(0, 15)},
-        **{f'dense2_{i}': {'units': 512,
-                          'trainable': True,
-                          'activation': 'relu',
-                          'dtype': 'float64'} for i in range(0, 4)},
-        'denseE': { # 'units' are set by us self to the necessary value
-                   'trainable': True,
-                   'activation': 'softmax',
-                   'dtype': 'float64'},
-        'optimizer': {'lr': 0.0001,
-                      #'momentum':0.95,
-                      #'nesterov':True
-                      },
+        **{f'dense1_{i}': {
+            'units': 25120,
+            'trainable': True,
+            'activation': 'swish',
+            'dtype': 'float64'} for i in range(2, 1)
+        },
+        **{f'dense2_{i}': {
+            'units': 5120,
+            'trainable': True,
+            'activation': 'swish',
+            'dtype': 'float64'} for i in range(0, 0)
+        },
+        'denseE': {
+            # 'units' are set by us self to the necessary value
+            'trainable': True,
+            'activation': 'softmax',
+            'dtype': 'float64'},
+        'optimizer': 'SGD',
+        'optimizer_args': {
+            'lr': 0.1,
+            'momentum':0.9,
+            'nesterov':True
+            },
         'epochs':600,
         'num_layout_labels':4,
         'batch_size': 1000,
-        'patience': 20,
+        'patience': 40,
         'labels': 'LABEL',
         'cols_to_use': config.cols_to_use,
         'array_cols_to_use': config.array_cols_to_use
     }
 
-    def __init__(self,
-                 *args,
-                 override_train_kwargs: Dict = {},
-                 model_path=config.layout_model_path,
-                 debug: bool = True, **kwargs):
+    def __init__(
+        self,
+        *args,
+        override_train_kwargs: Dict = {},
+        model_path=config.layout_model_path,
+        debug: bool = True, **kwargs
+    ):
         super().__init__(*args, **kwargs)
 
         if not model_path:
@@ -190,7 +199,7 @@ class LayoutModeler(PathSpec):
             *[tf.keras.layers.Dense(**v, use_bias=True) for k, v in self.train_kwargs.items() if "dense2_" in k],
             tf.keras.layers.Dense(units=len(self.label_set), **self.train_kwargs['denseE']),
         ])
-        optimizer = tf.optimizers.Adam(**self.train_kwargs['optimizer'])
+        optimizer = getattr(tf.optimizers, self.train_kwargs['optimizer'])(**self.train_kwargs['optimizer_args'])
         self.model.compile(optimizer=optimizer,
                            loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
                            metrics=[ 'mse', 'accuracy'])

@@ -146,7 +146,7 @@ class BoxFeatureMaker(PathSpec):
 
     edges = numpy.array(
         [[0, 0, config.reader_width, config.reader_height]])
-    def analyse_point_density_frequence(self, page_features, debug=True, axe_len_X=100, axe_len_Y=100) -> FeatureKinds:
+    def analyse_point_density_frequence(self, page_features, debug=True, axe_len_X=50, axe_len_Y=50) -> FeatureKinds:
         boxes = numpy.column_stack((page_features.x0, page_features.y0, page_features.x1, page_features.y1))
 
         indices = numpy.einsum(
