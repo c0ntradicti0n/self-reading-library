@@ -9,26 +9,6 @@ from layouteagle.pathant.PathAnt import PathAnt
 
 
 class LayoutEagle:
-    from layout.ScienceTexScraper.scrape import ScienceTexScraper
-    from layout.LatexReplacer.latex_replacer import LatexReplacer
-    from layout.LayoutReader.labeled_feature_maker import TrueFormatUpmarkerPDF2HTMLEX
-    from layout.LayoutReader.box_feature_maker import BoxFeatureMaker
-    from layout.LayoutReader.feature_label_assigner import TrueFormatUpmarkerPDF2HTMLEX
-    from layout.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
-    from layout.LayoutReader.feature_prediction import LayoutPrediction
-    from layout.LayoutReader.MarkupDocument import MarkupDocument
-    from layout.LayoutReader.feature2features import Feature2Features
-    from layout.LayoutModel.layouttrain import LayoutTrainer
-    from layout.LayoutModel.layoutpredict import LayouPredictor
-    from layout.LayoutReader.HTML2PDF import HTML2PDF
-    from layout.LayoutReader.PDF2ETC import PDF2ETC
-    from layout.LayoutReader.PDF2HTML import PDF2HTML
-    from layouteagle.StandardConverter.Dict2Graph import Dict2Graph
-    from layouteagle.StandardConverter.Wordi2Css import Wordi2Css
-    from layouteagle.pathant.PathAnt import PathAnt
-    from nlp.TransformerStuff.ElmoDifference import ElmoDifference
-    from nlp.TransformerStuff.Pager import Pager
-    from nlp.TransformerStuff.UnPager import UnPager
 
     def __init__(self):
         self.ant = PathAnt()
