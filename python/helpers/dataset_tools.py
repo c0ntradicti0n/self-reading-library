@@ -1,5 +1,39 @@
 import tensorflow_text as tf_text
 import tensorflow as tf
+import numpy as np
+import typing
+
+def split_dataset(dataset: tf.data.Dataset,
+                  dataset_size: int,
+                  train_ratio: float,
+                  validation_ratio: float) -> typing.Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset]:
+    assert (train_ratio + validation_ratio) < 1
+
+    train_count = int(dataset_size * train_ratio)
+    validation_count = int(dataset_size * validation_ratio)
+    test_count = dataset_size - (train_count + validation_count)
+
+    dataset = dataset.shuffle(dataset_size)
+
+    train_dataset = dataset.take(train_count)
+    validation_dataset = dataset.skip(train_count).take(validation_count)
+    test_dataset = dataset.skip(validation_count + train_count).take(test_count)
+
+    return train_dataset, validation_dataset, test_dataset
+
+def pad(array, shape, offsets, value=0, dtype=np.float):
+  """
+  array: Array to be padded
+  reference: Reference array with the desired shape
+  offsets: list of offsets (number of elements must be equal to the dimension of the array)
+  """
+  # Create an array of zeros with the reference shape
+  result = np.full(shape=shape, fill_value=value, dtype=dtype)
+  # Create a list of slices from offset to offset + shape in each dimension
+  insertHere = [slice(offsets[dim], offsets[dim] + array.shape[dim]) for dim in range(array.ndim)]
+  # Insert the array in the result at the specified offsets
+  result[insertHere] = array
+  return result
 
 
 def translate_symbolic(self,
@@ -41,7 +75,7 @@ def translate_symbolic(self,
     shape_checker(dec_result.attention_weights, ('batch', 't1', 's'))
     attention = attention.write(t, dec_result.attention_weights)
 
-    new_tokens = self.sample(dec_result.logits, temperature)
+    new_tokens = self.sample(dec_result.logits)
     shape_checker(dec_result.logits, ('batch', 't1', 'vocab'))
     shape_checker(new_tokens, ('batch', 't1'))
 

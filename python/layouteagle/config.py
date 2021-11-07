@@ -2,15 +2,33 @@ import os
 import sys
 import logging
 from helpers.nested_dict_tools import flatten
-import sys
 sys.path.append(".")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 import logging
-import  as tf
-import os
 os.environ["LD_LIBRARY_PATH"] ='/usr/local/cuda-11.0/targets/x86_64-linux/lib/'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+from traceback_with_variables import activate_by_import
 
+from traceback_with_variables import Format, ColorSchemes, is_ipython_global
+
+
+fmt = Format(
+    before=5,
+    after=3,
+    max_value_str_len=-1,
+    max_exc_str_len=-1,
+    ellipsis_='...',
+    color_scheme=ColorSchemes.synthwave,
+    skip_files_except=['my_project', 'site-packages'],
+    brief_files_except='my_project',
+    custom_var_printers=[  # first matching is used
+        ('password', lambda v: '...hidden...'),  # by name, print const str
+        (list, lambda v: f'list{v}'),  # by type, print fancy str
+        (lambda name, type_, filename, is_global: is_global, lambda v: None),  # custom filter, skip printing
+        (is_ipython_global, lambda v: None),  # same, handy for Jupyter
+        (['secret', dict, (lambda name, *_: 'asd' in name)], lambda v: '???'),  # by different things, print const str
+    ]
+)
 import tensorflow as tf
 tf.config.list_physical_devices('GPU')
 tf.get_logger().setLevel(3)
@@ -28,16 +46,28 @@ logging.getLogger('pdfminer').setLevel(logging.ERROR)
 logging.basicConfig(format="""%(asctime)s-%(levelname)s: %(message)s""", datefmt="%H:%M:%S")
 
 
-import argparse
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-s', '--skip_on_timeout',
-                    action='store_true',
-                    dest='skip_on_timeout',
-                    help='When beeing stuck in a pipeline for more than the defined timeout, then it will not give up, but skip these values'
-                    )
 
-ARGS = parser.parse_args()
+from GPUtil import showUtilization as gpu_usage
+import torch
+from numba import cuda
+path_prefix = "./"
+
+def free_gpu_cache():
+    print("Initial GPU Usage")
+    gpu_usage()
+
+    torch.cuda.empty_cache()
+
+    cuda.select_device(0)
+    cuda.close()
+    cuda.select_device(0)
+
+    print("GPU Usage after emptying the cache")
+    gpu_usage()
+
+
+free_gpu_cache()
 
 
 feature_fuzz_ranges = (-0.02, 0.04, 0.02),
@@ -149,5 +179,30 @@ cols_to_use = ["page_number",
 #array_cols_to_use = ['angle', 'distance_vector', 'x_profile', 'y_profile', 'xy_profile'
 #                     ]
 
-array_cols_to_use = ["box_schema"]
+array_cols_to_use = [] # ["box_schema"]
 N = 7
+
+DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+MODEL_PATH = hidden_folder + "model/mono__0,9151472650771387_64"
+TEXT_BOX_MODEL_PATH = hidden_folder + "text_box_models"
+
+PREDICTION_PATH = hidden_folder + "prediction"
+NOT_COLLECTED_PATH = hidden_folder + "non_collection/"
+
+COLLECTION_PATH = hidden_folder + "collection/"
+label2id = {'NONE': 0, 'c1': 1, 'c2': 2, 'c3': 3}
+label2color = {'c1': 'blue', 'c2': 'green', 'c3': 'orange', 'NONE': 'violet', 'none': 'violet', 'other': 'yellow'}
+id2label = {v:k for k, v in label2id.items()}
+n_labels = ["NONE", "c1"]
+
+# we need to define custom features
+from datasets import Features, Sequence, ClassLabel, Value, Array2D, Array3D
+
+FEATURES = Features({
+    'image': Array3D(dtype="int64", shape=(3, 224, 224)),
+    'input_ids': Sequence(feature=Value(dtype='int64')),
+    'attention_mask': Sequence(Value(dtype='int64')),
+    'token_type_ids': Sequence(Value(dtype='int64')),
+    'bbox': Array2D(dtype="int64", shape=(512, 4)),
+    'labels': Sequence(ClassLabel(names=n_labels + [4])),
+})

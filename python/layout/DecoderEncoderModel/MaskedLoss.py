@@ -1,12 +1,13 @@
-import tensorflow as tf
+from tf_import import *
 from layout.DecoderEncoderModel.ShapeChecker import ShapeChecker
 
 
 class MaskedLoss(tf.keras.losses.Loss):
-  def __init__(self):
+  def __init__(self, pad_value):
     self.name = 'masked_loss'
     self.loss = tf.keras.losses.SparseCategoricalCrossentropy(
         from_logits=True, reduction='none')
+    self.pad_value = pad_value
 
   def __call__(self, y_true, y_pred):
     shape_checker = ShapeChecker()
@@ -18,7 +19,7 @@ class MaskedLoss(tf.keras.losses.Loss):
     shape_checker(loss, ('batch', 't'))
 
     # Mask off the losses on padding.
-    mask = tf.cast(y_true != 0, tf.float32)
+    mask = tf.cast(y_true != self.pad_value, tf.float32)
     shape_checker(mask, ('batch', 't'))
     loss *= mask
 

@@ -29,16 +29,20 @@ class Pipeline:
             logger = functional_object.logger.info if hasattr(functional_object, 'logger') else print
             logger(start_message)
 
-            if functional_object in self.extra_paths:
-                others = self.extra_paths[functional_object]
-                others = [other(self.dummy_generator) for other in others]
+            try:
+                if functional_object in self.extra_paths:
+                    others = self.extra_paths[functional_object]
+                    others = [other(self.dummy_generator) for other in others]
 
 
-                intermediate_result = functional_object(intermediate_result, *others)
-            elif intermediate_result:
-                intermediate_result = functional_object(intermediate_result)
-            else:
-                intermediate_result = functional_object()
+                    intermediate_result = functional_object(intermediate_result, *others)
+                elif intermediate_result:
+                    intermediate_result = functional_object(intermediate_result)
+                else:
+                    intermediate_result = functional_object()
+            except Exception as e:
+                print(functional_object)
+                raise e
 
             intermediate_result = self.log_progress(
                 intermediate_result,
@@ -47,4 +51,16 @@ class Pipeline:
             )
 
         return intermediate_result
+
+    def __add__(self, other):
+
+        new_pipe = Pipeline(
+            pipeline=self.pipeline + other.pipeline,
+            source=self.source,
+            target=other.target,
+            extra_paths={**self.extra_paths, **other.extra_paths}
+
+        )
+        new_pipe.flags = {**self.flags, **other.flags}
+        return new_pipe
 

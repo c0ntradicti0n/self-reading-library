@@ -1,4 +1,5 @@
 import numpy
+import pandas
 
 def unpack_list_column(column_name, df, prefix='', suffix=''):
     if not prefix and not suffix:
@@ -12,3 +13,8 @@ def unpack_list_column(column_name, df, prefix='', suffix=''):
         df[new_col_name] = df[new_col_name].astype(numpy.float16)
 
     return new_col_names
+
+
+def load_pandas_file(feature_path):
+    return pandas.read_pickle(feature_path)
+

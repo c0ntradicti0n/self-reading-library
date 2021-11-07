@@ -60,6 +60,16 @@ class cwd_of:
         return self.filename
 
 
+import regex
 
+def file_exists_regex(dir, regexp):
+    pattern = regex.compile(regexp)
+    return any( pattern.match(filepath) for  filepath in os.listdir(dir))
 
-
+def rm_r(path):
+    if not os.path.exists(path):
+        return
+    if os.path.isfile(path) or os.path.islink(path):
+        os.unlink(path)
+    else:
+        shutil.rmtree(path)

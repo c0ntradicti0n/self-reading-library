@@ -6,7 +6,7 @@ import pandas
 import numpy
 import random
 from sklearn.preprocessing import MinMaxScaler
-
+from pdf2image import convert_from_path, convert_from_bytes
 import scipy.spatial as spatial
 
 from layouteagle import config
@@ -47,6 +47,10 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
                     continue
 
             for random_i, final_feature_df in enumerate(self.feature_fuzz(feature_df)):
+
+
+
+
                 final_feature_df = self.compute_complex_coordination_data(final_feature_df)
 
                 final_feature_df["doc_id"] = str(doc_id) + ".random" + str(random_i)
@@ -56,7 +60,16 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
                 x = final_feature_df[config.cols_to_use].values
                 x_scaled = min_max_scaler.fit_transform(x)
                 df_temp = pandas.DataFrame(x_scaled, columns=config.cols_to_use, index=final_feature_df.index)
-                final_feature_df[config.cols_to_use] = df_temp
+                final_feature_df[config.cols_to_use] = df_tem
+
+                images = convert_from_path(meta["pdf_path"])
+                for page_number, pil in enumerate(page_number, pil):
+                    image_path = f'{meta["path"]}.{page_number}.jpg'
+                    df['image_path'] = np.where(final_feature_df.page_number == page_number,
+                                                final_feature_df.page_number.map({page_number:image_path}),
+                                                final_feature_df.page_number
+                     )
+                    pil.save(image_path)
 
                 yield final_feature_df, meta
 
@@ -76,47 +89,47 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
                      if ya != yb and xa != xb])
                 for xb, yb in list(zip(sub_df[bx], sub_df[by]))]
 
-    def page_web(self, sub_df):
+    def page_web(self, page_df):
 
-        self.point_density_frequence_per_page(sub_df)
+        self.point_density_frequence_per_page(page_df)
 
         if FEATURES_FROM_PDF2HTMLEX in self.flags:
-            sub_df['x1'] = sub_df.x
-            sub_df['y1'] = sub_df.y
-            sub_df['x2'] = sub_df.x + sub_df.ascent
-            sub_df['y2'] = sub_df.y + sub_df.descent
-            sub_df['center_x'] = [(x1 + x1) / 2 for x1, x2 in zip(sub_df.x1, sub_df.x2)]
-            sub_df['center_y'] = [(y1 + y1) / 2 for y1, y2 in zip(sub_df.y1, sub_df.y2)]
+            page_df['x1'] = page_df.x
+            page_df['y1'] = page_df.y
+            page_df['x2'] = page_df.x + page_df.ascent
+            page_df['y2'] = page_df.y + page_df.descent
+            page_df['center_x'] = [(x1 + x1) / 2 for x1, x2 in zip(page_df.x1, page_df.x2)]
+            page_df['center_y'] = [(y1 + y1) / 2 for y1, y2 in zip(page_df.y1, page_df.y2)]
 
-            points = list(zip(sub_df.center_x, sub_df.center_y))
+            points = list(zip(page_df.center_x, page_df.center_y))
             kd_tree = spatial.KDTree(points)
 
             try:
                 all_nearest_points = \
                     [(p, [points[k] for k in kd_tree.query(p, k=config.layout_model_next_text_boxes)[1]])
-                     for p in zip(sub_df.center_x, sub_df.center_y)]
+                     for p in zip(page_df.center_x, page_df.center_y)]
 
                 for k in range(config.layout_model_next_text_boxes):
-                    sub_df[f'nearest_{k}_center_x'], sub_df[f'nearest_{k}_center_y'] = list(zip(*
+                    page_df[f'nearest_{k}_center_x'], page_df[f'nearest_{k}_center_y'] = list(zip(*
                         [nearest_points[k] for p1, nearest_points in all_nearest_points]
-                    ))
+                                                                                                  ))
 
             except Exception as e:
                 print (points)
                 self.logger.warning(f"not enough points in page to find {config.layout_model_next_text_boxes} nearest points, faking with 0.5")
                 for k in range(config.layout_model_next_text_boxes):
-                    sub_df[f'nearest_{k}_center_x'] = [0.5] * len(sub_df)
-                    sub_df[f'nearest_{k}_center_y'] = [0.5] * len(sub_df)
+                    page_df[f'nearest_{k}_center_x'] = [0.5] * len(page_df)
+                    page_df[f'nearest_{k}_center_y'] = [0.5] * len(page_df)
 
-            sub_df['dxy1'] = self.distances(sub_df, 'x1', 'y1', 'x2', 'y2')
-            sub_df['dxy2'] = self.distances(sub_df, 'x2', 'y2', 'x1', 'y1')
-            sub_df['dxy3'] = self.distances(sub_df, 'x1', 'y2', 'x2', 'y1')
-            sub_df['dxy4'] = self.distances(sub_df, 'x2', 'y1', 'x1', 'y2')
+            page_df['dxy1'] = self.distances(page_df, 'x1', 'y1', 'x2', 'y2')
+            page_df['dxy2'] = self.distances(page_df, 'x2', 'y2', 'x1', 'y1')
+            page_df['dxy3'] = self.distances(page_df, 'x1', 'y2', 'x2', 'y1')
+            page_df['dxy4'] = self.distances(page_df, 'x2', 'y1', 'x1', 'y2')
 
-            sub_df['probascent'] = sub_df.ascent.map(sub_df.ascent.value_counts(normalize=True))
-            sub_df['probdescent'] = sub_df.descent.map(sub_df.descent.value_counts(normalize=True))
+            page_df['probascent'] = page_df.ascent.map(page_df.ascent.value_counts(normalize=True))
+            page_df['probdescent'] = page_df.descent.map(page_df.descent.value_counts(normalize=True))
 
-        return sub_df
+        return page_df
 
     def feature_fuzz(self, feature_df):
         yield feature_df

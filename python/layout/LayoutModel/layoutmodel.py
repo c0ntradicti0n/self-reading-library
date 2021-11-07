@@ -82,7 +82,7 @@ class LayoutModeler(PathSpec):
         if training:
             self.label_set = list(set(feature_df['LABEL'].tolist()))
             self.label_lookup = Lookup([self.label_set])
-            feature_df['LABEL'] = self.label_lookup(token_s=feature_df.LABEL.tolist())
+            feature_df['LABEL'] = label_lookup(token_s=feature_df.LABEL.tolist())
 
         if training:
             train, test = train_test_split(feature_df, test_size=0.2)
@@ -117,7 +117,7 @@ class LayoutModeler(PathSpec):
             categorical_labels = to_categorical(labels, num_classes=self.train_kwargs['num_layout_labels'])
 
             for ((idx, row), label) in zip(dataframe.iterrows(), categorical_labels):
-                unpacked_row = self.prepare_df(row)
+                unpacked_row = self.prepare_row(row)
 
                 res = tf.constant(unpacked_row, dtype=tf.float64), tf.constant(label, dtype=tf.float64)
                 yield res
@@ -152,10 +152,10 @@ class LayoutModeler(PathSpec):
 
         return ds, feature_columns
 
-    def prepare_df(self, feature_df, training=True):
-        scalar_values = np.array(feature_df[self.train_kwargs['cols_to_use']], dtype=np.float64)
+    def prepare_row(self, feature_row, training=True):
+        scalar_values = np.array(feature_row[self.train_kwargs['cols_to_use']], dtype=np.float64)
         array_values = np.hstack(
-            [col.flatten() for col in feature_df[self.train_kwargs['array_cols_to_use']]]
+            [col.flatten() for col in feature_row[self.train_kwargs['array_cols_to_use']]]
         )
 
         return np.hstack([scalar_values, array_values])

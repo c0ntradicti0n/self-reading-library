@@ -14,7 +14,7 @@ from layouteagle.pathant.MatchDescription import match, list_or_values
 from layouteagle.pathant.Pipeline import Pipeline
 from layouteagle.pathant.converters import converters
 from regex import regex, Regex
-
+from python.layouteagle.pathant.Filter import Filter
 
 class PathAnt:
     def __init__(self, necessary_paths={".layouteagle":["tex_data", "cache", "log"]}):
@@ -52,10 +52,11 @@ class PathAnt:
             self.info()
             raise
 
-    def __call__(self, source, target, *args, via=None, **kwargs):
+    def __call__(self, source, target, *args, via=None, filter ={}, **kwargs):
         if via:
             if isinstance(via, str):
-                return self.__call__(source, via, *args) + self.__call__(via, target, **kwargs)
+                return self.__call__(source=source, target=via, filter=filter, *args, **kwargs) \
+                       + self.__call__(source=via, target=target, filter=filter, *args, **kwargs)
 
 
         converters_path = self.make_path(self.G, source, target)
@@ -70,6 +71,15 @@ class PathAnt:
 
         logging.info(f"Found path: {'⇾'.join(converters_path)}")
         pipeline = [self.lookup(*_from_to) for _from_to in pairwise(converters_path)]
+        for i, step in enumerate(pipeline[::-1]):
+            step_key = step.path_spec._to.replace(".", "")
+            if step_key in filter:
+                f_step = filter[step_key]
+                from python.layouteagle.pathant.Converter import converter
+
+                pipeline.insert(len(pipeline)-i,
+                                converter('filter-' + step_key, 'filter-' + step_key, f_step)(
+                                    Filter))
         return Pipeline(pipeline, source, target, extra_paths, **kwargs)
 
     def info(self, path="pathant.png", pipelines_to_highlight=None):
@@ -105,8 +115,15 @@ class PathAnt:
                        for u, v, a in dG.edges(data=True)}
 
 
-        nx.draw_networkx_edge_labels(dG, pos, edge_labels=edge_labels, rotate=False)
-        nx.draw(dG, pos, node_color="blue",
+        nx.draw_networkx_edge_labels(dG, pos, edge_labels=edge_labels, rotate=False)\
+
+        color_map = []
+
+        for node in dG:
+            color_map.append((1, 1, 0))
+
+
+        nx.draw(dG, pos, node_color=color_map,
                 font_weight='bold',
                 edge_color = edge_colors,
                 arrowsize=20, label='Path Ant',

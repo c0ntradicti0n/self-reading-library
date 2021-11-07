@@ -39,8 +39,12 @@ else:
     from layouteagle.pathant.AntPublisher import AntPublisher
     # from nlp.Topics.TopicsPublisher import TopicsPublisher
     from controlflow import CachePublisher
-
+    from dataset_workflow.annotator.annotation import Annotator
+    from helpers.event_binding import AnnotationRest
     from layouteagle.LayoutEagle import LayoutEagle
+    from dataset_workflow.test_workflow import annotate_train_model
+    import threading
+    from traceback_with_variables import activate_by_import
 
     publishing = {
         '/layout': LayoutPublisher,
@@ -48,10 +52,11 @@ else:
         # '/topics': TopicsPublisher,
         '/ant': AntPublisher,
         '/cache': CachePublisher,
+        '/annotation/{id}':  AnnotationRest()
     }
 
     le = LayoutEagle()
-    le.test_info()
+    #le.test_info()
 
     from falcon_cors import CORS
 
@@ -67,5 +72,8 @@ else:
         api.add_route(route, module)
 
     pprint(get_all_routes(api))
+
+    t = threading.Thread(target=annotate_train_model)
+    t.start()
 
 

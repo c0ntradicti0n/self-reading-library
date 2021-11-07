@@ -85,7 +85,18 @@ class LayoutModeler(PathSpec):
             feature_df['LABEL'] = self.label_lookup(token_s=feature_df.LABEL.tolist())
 
         if training:
-            train, test = train_test_split(feature_df, test_size=0.2)
+            train, test = train_tetrain, test = train_test_split(feature_df, test_size=0.2)
+            train, val = train_test_split(train, test_size=0.2)
+            self.logger.info(f'{len(train)} train samples')
+            self.logger.info(f'{len(val)} validation samples')
+            self.logger.info(f'{len(test)} test samples')
+
+            self.train_ds, self.feature_columns = self.df_to_dataset(train, shuffle=False, batch_size=self.train_kwargs['batch_size'],
+                                               training=training)
+            self.val_ds, _ = self.df_to_dataset(val, shuffle=False, batch_size=self.train_kwargs['batch_size'],
+                                             training=training)
+            self.test_ds, _ = self.df_to_dataset(test, shuffle=False, batch_size=self.train_kwargs['batch_size'],
+                                              training=training)st_split(feature_df, test_size=0.2)
             train, val = train_test_split(train, test_size=0.2)
             self.logger.info(f'{len(train)} train samples')
             self.logger.info(f'{len(val)} validation samples')

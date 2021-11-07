@@ -12,7 +12,8 @@ from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextContainer, LTChar
 import pdfminer
 from collections import namedtuple
-
+from pdf2image import convert_from_path, convert_from_bytes
+from PIL import Image
 sys.path.append(".")
 
 from layout.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
@@ -33,7 +34,7 @@ class BoxFeatureMaker(PathSpec):
             if "training" in self.flags and not any([tex in labeled_pdf_path for tex in ["tex1", 'tex2', 'tex3']]):
                 continue
 
-            pdfminer
+
 
             feature_gen = self.mine_pdf(labeled_pdf_path)
             feature_df = pandas.DataFrame(
@@ -42,15 +43,29 @@ class BoxFeatureMaker(PathSpec):
 
             for random_i, final_feature_df in enumerate(self.feature_fuzz(feature_df)):
                 final_feature_df = self.compute_complex_coordination_data(final_feature_df)
+                page_numbers = final_feature_df.page_number
 
                 final_feature_df["doc_id"] = str(doc_id) + ".random" + str(random_i)
                 meta["doc_id"] = str(doc_id) + ".random" + str(random_i)
                 meta['html_path'] = labeled_pdf_path
-                min_max_scaler = MinMaxScaler()
-                x = final_feature_df[config.cols_to_use].values
-                x_scaled = min_max_scaler.fit_transform(x)
-                df_temp = pandas.DataFrame(x_scaled, columns=config.cols_to_use, index=final_feature_df.index)
-                final_feature_df[config.cols_to_use] = df_temp
+
+                final_feature_df['page_number'] = page_numbers
+                print(meta)
+                images = convert_from_path(labeled_pdf_path)
+                image_dict = {}
+                for page_number, pil in enumerate(images):
+                    image_path = f'{labeled_pdf_path}.{page_number}.jpg'
+
+                    image_dict [page_number] = image_path
+
+                    basewidth = 300
+                    wpercent = (basewidth / float(pil.size[0]))
+                    hsize = int((float(pil.size[1]) * float(wpercent)))
+                    pil = pil.resize((basewidth, hsize), Image.ANTIALIAS)
+
+                    pil.save(image_path)
+
+                final_feature_df['image_path'] = final_feature_df.page_number.map(image_dict)
 
                 yield final_feature_df, meta
 
@@ -59,6 +74,7 @@ class BoxFeatureMaker(PathSpec):
         "number_of_lines",
         "x","y", "x0", "x1", "y0", "y1",
         "height", "width",
+        "page_height", "page_width",
 
         "text", "LABEL"])
 
@@ -72,10 +88,11 @@ class BoxFeatureMaker(PathSpec):
                     feature = BoxFeatureMaker.TextBoxData(
                         page_number,
                         number_of_lines,
-                        element.x0, element.y0,
-                        element.x0, element.x0+element.height,
-                        element.y0, element.y0+element.width,
-                        element.height, element.width,
+                        int(element.x0), int(element.y0),
+                        int(element.x0), int(element.x0+element.width),
+                        int(element.y0), int(element.y0+element.height),
+                        int(element.height), int(element.width),
+                        int(page_layout.height), int(page_layout.width),
                         text,
                         label)
                     yield feature._asdict()

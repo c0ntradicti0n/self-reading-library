@@ -27,6 +27,10 @@ def find_repeating(lst, count=2):
                 return ret
 
 
+def add_meta(l):
+    for e in l:
+        yield e, {}
+
 def reverse_dict_of_lists(d):
     reversed_dict = defaultdict(list)
     for key, values in d.items():
