@@ -39,8 +39,7 @@ else:
     from layouteagle.pathant.AntPublisher import AntPublisher
     # from nlp.Topics.TopicsPublisher import TopicsPublisher
     from controlflow import CachePublisher
-    from dataset_workflow.annotator.annotation import Annotator
-    from helpers.event_binding import AnnotationRest
+    from dataset_workflow.annotator.annotation import Annotator, AnnotationRest
     from layouteagle.LayoutEagle import LayoutEagle
     from dataset_workflow.test_workflow import annotate_train_model
     import threading
@@ -52,7 +51,7 @@ else:
         # '/topics': TopicsPublisher,
         '/ant': AntPublisher,
         '/cache': CachePublisher,
-        '/annotation/{id}':  AnnotationRest()
+        '/annotation/{id}':  AnnotationRest
     }
 
     le = LayoutEagle()

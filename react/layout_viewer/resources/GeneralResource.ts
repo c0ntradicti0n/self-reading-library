@@ -1,4 +1,5 @@
 import {AppSettings} from "../config/connection";
+import {getRandomArbitrary} from "../../layout_viewer/src/util/array";
 
 export default class ServerResource <T> {
     fetch_allowed: Boolean
@@ -8,13 +9,16 @@ export default class ServerResource <T> {
     delete_allowed: Boolean
     upload_allowed: Boolean
 
+    id: string = ""
+
     constructor (
          route : string,
          fetch_allowed = true,
          read_allowed = true,
          upload_allowed = true,
          correct_allowed = true,
-         delete_allowed = true) {
+         delete_allowed = true,
+         add_id = false) {
         this.route = route;
         this.fetch_allowed = fetch_allowed
         this.correct_allowed = fetch_allowed
@@ -22,14 +26,26 @@ export default class ServerResource <T> {
         this.correct_allowed = correct_allowed
         this.upload_allowed = upload_allowed
         this.delete_allowed = delete_allowed
+
+        if (add_id) {
+            let id
+
+            if (!localStorage.getItem(route)) {
+                id = getRandomArbitrary(100000, 999999).toString()
+                localStorage.setItem(route, id)
+            } else {
+                id = localStorage.getItem(route)
+            }
+                        console.log(localStorage, route, localStorage.getItem(route))
+
+
+            this.id = "/" + id
+        }
     }
-
-
-
 
     async request (method : String, data = {}, callback: Function) {
       // Default options are marked with *
-        console.log("URL", AppSettings.SAUSSAGEPOINT + this.route, callback)
+        console.log("URL", AppSettings.SAUSSAGEPOINT + this.route + this.id, callback)
 
         var fetch_init = {
             method: method.toUpperCase(),
@@ -48,15 +64,17 @@ export default class ServerResource <T> {
             delete fetch_init.body
         }
         const response = await fetch(
-            AppSettings.SAUSSAGEPOINT + this.route, fetch_init )
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(response.statusText)
-                }
-                return callback(response.json())
-            })
+            AppSettings.SAUSSAGEPOINT + this.route + this.id, fetch_init )
 
-        return 1
+
+        if (!response.ok) {
+            throw new Error(response.statusText)
+        }
+
+        const result = await response.json()
+        console.log({result})
+
+        return callback(result)
     }
 
     async fetch_one(id, callback: Function) {
@@ -68,23 +86,24 @@ export default class ServerResource <T> {
     async fetch_all(callback) {
         console.log("FETCH ALL", this.fetch_allowed, callback)
         if (this.fetch_allowed) {
+            console.log("fetching")
             return this.request("get", undefined, callback)
         }
     }
 
-    /*
 
-    async read(id , url = '', data = {}) {
+
+    async ok(id , url = '', data = {}, callback) {
             if (this.read_allowed) {
-            this.request(method="post", data = id)
+            this.request("post",   id, callback)
         }
     }
-    async upload(url = '', data : T) {
+    async change(json_path, value, callback) {
         if (this.upload_allowed) {
-            this.request(method="put", data = data)
+            this.request("put", [json_path, value], callback)
         }
     }
-
+    /*
     async correct(url = '', data : T, id : String) {
         if (this.correct_allowed) {
             this.request(method="patch", data = data, id=id)

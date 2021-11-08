@@ -106,3 +106,32 @@ def resize(image, basesize):
     img = img.filter(ImageFilter.GaussianBlur(4))
 
     return img
+
+
+def repaint_image_from_labels(data):
+    labels = data['labels']
+    boxes = data['bbox']
+
+    image = Image.open(config.path_prefix + example['image_path'][0][0])
+    image = image.convert("RGB")
+    width, height = image.size
+    draw = ImageDraw.Draw(image, "RGBA")
+
+    for box, label in zip(enc_boxes, box_predictions):
+        actual_label = label
+        fill_color = tuple([*[int(x * 255) for x in colors.to_rgb(config.label2color[actual_label])], 127])
+        draw.rectangle(box, fill=fill_color)
+        draw.text((box[0] + 10, box[1] + 10), actual_label, fill=config.label2color[actual_label], font=font)
+
+    """for box, label in zip(compute_bbox(example)[0], example['LABEL'][0]):
+        actual_label = label
+        box = unnormalize_box(box, width, height)
+        draw.rectangle(box, outline=config.label2color[actual_label], width=2)
+        draw.text((box[0] + 10, box[1] - 10), actual_label, fill=config.label2color[actual_label], font=font)
+    """
+    image.save(f"{config.PREDICTION_PATH}/boxes_{i}.png")
+
+    data['image'] = Image.open(config.path_prefix + example['image_path'][0][0])
+    data['human_image'] = image
+
+    return data

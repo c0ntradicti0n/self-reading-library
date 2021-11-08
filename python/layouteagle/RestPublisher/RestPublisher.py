@@ -124,7 +124,8 @@ export default class ??Title!!Service extends ServerResource {
          ??access[read]!!, 
          ??access[upload]!!,
          ??access[correct]!!,
-         ??access[delete]!!
+         ??access[delete]!!,
+         ??access[add_id]!!
         )
     }
 }
@@ -138,7 +139,7 @@ import Router from 'next/router'
 import { withRouter } from "next/router";
 import ??title!!Service from '../resources/??Title!!Service'
 import HtmlRenderer from './../components/HtmlRenderer.jsx'
-
+import BoxAnnotator from './../components/BoxAnnotator'
 import dynamic from 'next/dynamic'
 const Graph = dynamic(
     () => import('./../components/Graph.js'),
@@ -151,6 +152,7 @@ const Graph = dynamic(
 interface ??Title!!State {
     ??title!!s: any
     meta: any
+    value: any
 }
 
 interface ??Title!!Props {}
@@ -164,6 +166,7 @@ class ??title!! extends React.Component<State, Props> {
             ??title!!: null,
             ??title!!s: null,
             meta: null,
+            value: null
         }
         console.log(this.set_??title!!)
 
@@ -176,12 +179,19 @@ class ??title!! extends React.Component<State, Props> {
     }
     
     set_??title!!s = async (v) => {
-        await v.then(prom => {
-            console.log('VALUES', prom.response)
+        const prom = await v
 
-            this.setState({
-                ??title!!s: prom.response}
-                )})
+        console.log('VALUES', prom.response, prom)
+        
+        
+        const [value, meta] = prom
+        console.log (value, meta)
+        
+        this.setState({
+            ??title!!s: prom.response,
+            value,
+            meta    
+            })
     }
     
     set_??title!! = async (v) => {
@@ -195,6 +205,19 @@ class ??title!! extends React.Component<State, Props> {
     
     render ()  {
         console.log("values?", this, "??type!!" )
+        
+        if ("??type!!" === "annotation")  {
+            console.log("RENDER", this.state.??title!!s)
+            return (<>
+                <BoxAnnotator 
+                    superState={this.state} 
+                    service={this.??title!!Service}
+                    setFullState={this.set_??title!!s}
+                />
+                {JSON.stringify(this.state)} 
+            </>)
+        }
+        
         
         if ("??type!!" === "text")  {
             console.log("RENDER", this.state.??title!!s)

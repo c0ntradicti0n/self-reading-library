@@ -13,6 +13,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from layouteagle import config
 import base64
 import io
+from jsonpath_ng import jsonpath, parse
 
 fmt = Format(
     before=5,
@@ -26,30 +27,60 @@ fmt = Format(
 q = Queue()
 d = Queue()
 w = Queue()
+
+
 def encode_base64(image):
     buffer = io.BytesIO()
     image.save(buffer, format='JPEG', quality=75)
     byte_object = buffer.getbuffer()
     return byte_object
 
+def encode_df(df):
+    return None # df.to_dict()
+
+funs = {"image": lambda x: base64.b64encode(encode_base64(x)).decode('utf-8'),
+        "df": encode_df}
+
+def encode_some(k, v):
+    for s, f in funs.items():
+        if s in k:
+            return f(v)
+    else:
+        return v
+
 def encode(obj_meta):
+
+
     obj, meta = obj_meta
-    obj = {k: base64.b64encode(encode_base64(v)).decode('utf-8')
-    if "image" in k else k for k,v in obj.items()}
+    obj = {k: encode_some(k, v)
+           for k,v in obj.items()}
 
     return (obj, meta)
 
 
-class AnnotationRest ():
+class RestQueue ():
+    def __init__(self, update_data = lambda x: x):
+        self.update_data = update_data
+
     workbook = {}
 
     def get(self, id):
-        self.workbook[id] = q.get()
+        if not id in self.workbook or not self.workbook[id]:
+            self.workbook[id] = q.get()
 
         return self.workbook[id]
 
-    def change(self, id, e):
-        self.workbook[id] = e
+    def change(self, path, value):
+        item = self.workbook[id]
+        self.apply(path, value)
+        self.update_data()
+        self.workbook[id] = item
+
+    def apply(self, item, value):
+        jsonpath_expr = parse(path)
+        jsonpath_expr.find(data)
+        jsonpath_expr.update(data, value)
+
 
     def ok(self, id):
         item = self.workbook.pop(id)
@@ -64,22 +95,22 @@ class AnnotationRest ():
 
     def on_get(self, req, resp, id=None): # get image
         print(req, resp)
-
-        image = self.get(id)
-
+        data = self.get(id)
         pprint(q.queue)
-
-        image = encode(image)
-
-        pprint(image)
-
-
-        resp.body = json.dumps(image, ensure_ascii=False)
-
+        pprint(data)
+        data = encode(data)
+        pprint(data)
+        resp.body = json.dumps(data, ensure_ascii=False)
+        resp.status = falcon.HTTP_OK
 
     def on_put(self, req, resp, id = None):  # edit, update image
+        result = req.media
+        print ("put", result)
+
+        path, value = result
+
         print(req, resp)
-        self.change(id, ("whatever", i))
+        self.change(id, (path, value))
         return annotation
 
     def on_post(self, req, resp, id=None): # ok

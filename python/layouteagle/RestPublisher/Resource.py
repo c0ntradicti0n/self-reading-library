@@ -1,16 +1,26 @@
 from typing import Dict
 
 
+
+
 class Resource(dict):
-    def __init__(self, title, type, path, route, access : Dict=
-             {'fetch':True,
+    def __init__(self, title, type, path, route, access : Dict = {'fetch':True,
               "read": True,
               "correct": True,
               "upload" : True,
-              "delete": True
+              "delete": True,
+              "add_id": False
               }
                  ):
-        self.access = {k:str(v).lower() for k, v in access.items() }
+        _access = {'fetch':True,
+              "read": True,
+              "correct": True,
+              "upload" : True,
+              "delete": True,
+              "add_id": False
+              }
+        _access.update(access)
+        self.access = {k:str(v).lower() for k, v in _access.items() }
         self.route = route
         self.path = path
         self.type = type

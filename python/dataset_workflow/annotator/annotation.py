@@ -9,7 +9,7 @@ import types
 import psutil
 from pprint import pprint
 import threading, queue
-from helpers.event_binding import queue_iter
+from helpers.event_binding import queue_iter, RestQueue
 import itertools
 
 def close_pil_image():
@@ -18,78 +18,31 @@ def close_pil_image():
         if proc.name() == "display":
             proc.kill()
 
+
+
+AnnotationRest = RestQueue(update_data=repaint_image_from_labels)
+
+
+
 @converter("prediction", "annotation")
 class Annotator(RestPublisher, react):
     def __init__(self,
                  *args,
                  **kwargs):
         super().__init__(*args, **kwargs, resource=Resource(
-            title="Annotator",
+            title="Annotation",
             type="annotation",
             path="annotation",
             route="annotation",
-            access={"fetch": True, "read": True, "upload": True, "correct": True, "delete": True}))
+            access={"add_id": True, "fetch": True, "read": True, "upload": True, "correct": True, "delete": True}))
 
 
-    q = queue.Queue()
     in_workshop = {}
-
-    def on_get(self, req):
-        self.item = Annotator.q.get()
-        print(f'Working on {item}')
-        self.in_workshop[req.ip] = item
-        return item
-
-    def on_post(self, req):
-        print(f'Worked on {item}')
-
-        Annotator.q.task_done()
-
-    def on_put(self, req):
-        print(f'Working on {item}')
-        diff = JSON.parse(req.data)
-        self.apply(self.item, diff)
-
-    def apply(self, item, diff):
-        jsonpath_expr = parse(diff["path"])
-        jsonpath_expr.find(item)[0].value['test'] = diff["value"]
-
 
 
     def __call__(self, prediction_metas, *args, **kwargs):
         yield from queue_iter((p_m for p_m in itertools.islice(prediction_metas, 3)))
 
-        """
-        
-            while True:
-
-                prediction['human_image'].show()
-                pprint(
-                    dict(
-                        zip(
-                            list(
-                                enumerate(
-                                    prediction['labels']
-                                )
-                            ),
-                            prediction['bbox']
-                        )
-                    )
-                )
-
-                yn = input("Is this prediction correct?")
-
-                close_pil_image()
-
-                if yn.startswith("y"):
-                    yield prediction, meta
-                    break
-                else:
-                    if yn.startswith("n"):
-                        break
-                    else:
-                        continue
-            """
 
 class TestAnnotator(unittest.TestCase):
     def test_generator(self):
