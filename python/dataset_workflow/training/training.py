@@ -11,7 +11,7 @@ from helpers import os_tools
 @converter("annotation.collection", "model")
 class Training(PathSpec):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, num_labels = 4, **kwargs)
+        super().__init__(*args, num_labels = config.NUM_LABELS, **kwargs)
 
     def __call__(self, x_meta, *args, **kwargs):
         if 'collection_step' not in self.flags:
@@ -88,8 +88,7 @@ class Training(PathSpec):
                 print(k, v.shape)
 
 
-            model = LayoutLMv2ForTokenClassification.from_pretrained('microsoft/layoutlmv2-base-uncased',
-                                                                          num_labels=4)
+            model = model_helpers.MODEL
 
             model.to(config.DEVICE)
             optimizer = AdamW(model.parameters(), lr=5e-6)  # , weight_decay=0.1)

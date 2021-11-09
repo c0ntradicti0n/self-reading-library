@@ -43,7 +43,7 @@ git+https://github.com/c0ntradicti0n/listalign.git@master#listalign
 colorama
 coloredlogs
 pdf2image
-
+jsonpath_ng
 
 git+https://github.com/huggingface/transformers.git
 datasets

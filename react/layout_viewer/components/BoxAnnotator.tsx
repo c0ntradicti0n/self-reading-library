@@ -31,7 +31,7 @@ export default class BoxAnnotator extends Component {
                     {cols.map((row, i) => <tr onClick={() => {
                         console.log("row", i)
                         this.props.service.change(
-                            "value.labels.[" + i + "]", this.LABEL_SWITCH[row[1]],
+                            "[0].labels.[" + i + "]", this.LABEL_SWITCH[row[1]],
                         this.props.setFullState)
                     }}>
                         <td>{JSON.stringify(row[0])}</td>
@@ -42,8 +42,8 @@ export default class BoxAnnotator extends Component {
 
                 {JSON.stringify(cols)}
 
-                <button onClick={this.props.submit}>OK</button>
-                <button onClick={this.props.discard}>Discard</button>
+                <button onClick={() => this.props.service.ok ([this.props.superState.value, this.props.superState.meta])}>OK</button>
+                <button onClick={this.props.service.discard}>Discard</button>
 
 
                 <img src={"data:image/jpeg;charset=utf-8;base64," + this.props.superState?.value?.image}>

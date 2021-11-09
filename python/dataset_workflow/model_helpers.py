@@ -1,6 +1,8 @@
 from dataset_workflow.imports import *
 from layouteagle import config
 import random
+import pickle
+
 
 def compute_bbox(examples):
     bbox = list(list(zip(*b)) for b in zip(examples['x0'], examples['y0'], examples['x1'], examples['y1']))
@@ -62,13 +64,25 @@ def post_process_df(feature_df):
 
     return feature_df
 
+if os.path.isfile(config.PROCESSOR_PICKLE):
+    PROCESSOR = pickle.loads()
+else:
+    PROCESSOR = LayoutLMv2Processor.from_pretrained("microsoft/layoutlmv2-base-uncased", revision="no_ocr")
+    pickle.dumps(PROCESSOR)
 
-PROCESSOR = None
+if os.path.isfile(config.MODEL_PICKLE):
+    MODEL = pickle.loads()
+else:
+    MODEL = LayoutLMv2ForTokenClassification.from_pretrained(
+        'microsoft/layoutlmv2-base-uncased',
+         num_labels=config.NUM_LABELS
+    )
+    pickle.dumps(MODEL)
+
+
 def preprocess_data(training=False):
     def _preprocess(examples, **kwargs):
         global PROCESSOR
-        if not PROCESSOR:
-            PROCESSOR = LayoutLMv2Processor.from_pretrained("microsoft/layoutlmv2-base-uncased", revision="no_ocr")
 
 
         words = [[word[:30].split()[0] for word in text] for text in examples['text']]
@@ -108,16 +122,15 @@ def resize(image, basesize):
     return img
 
 
-def repaint_image_from_labels(data):
+def repaint_image_from_labels(data_meta):
+    data, meta = data_meta
     labels = data['labels']
-    boxes = data['bbox']
-
-    image = Image.open(config.path_prefix + example['image_path'][0][0])
-    image = image.convert("RGB")
-    width, height = image.size
+    bbox = data['bbox']
+    _image = data['image']
+    image = _image.copy()
     draw = ImageDraw.Draw(image, "RGBA")
 
-    for box, label in zip(enc_boxes, box_predictions):
+    for box, label in zip(bbox, labels):
         actual_label = label
         fill_color = tuple([*[int(x * 255) for x in colors.to_rgb(config.label2color[actual_label])], 127])
         draw.rectangle(box, fill=fill_color)
@@ -129,9 +142,6 @@ def repaint_image_from_labels(data):
         draw.rectangle(box, outline=config.label2color[actual_label], width=2)
         draw.text((box[0] + 10, box[1] - 10), actual_label, fill=config.label2color[actual_label], font=font)
     """
-    image.save(f"{config.PREDICTION_PATH}/boxes_{i}.png")
 
-    data['image'] = Image.open(config.path_prefix + example['image_path'][0][0])
     data['human_image'] = image
-
-    return data
+    return (data, meta)

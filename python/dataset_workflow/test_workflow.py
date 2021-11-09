@@ -60,14 +60,14 @@ def annotate_train_model():
         training_rate = ( int(scores.groups()[0]) / n_samples )
 
         sample_pipe = ant("arxiv.org", "annotation.collection",
-                          num_labels=4,
+                          num_labels=config.NUM_LABELS,
                           via='pdf',
                           filter={'tex': unlabeled_not_existent_filter},
                           model_path=model_path,
                           )
 
         model_pipe = ant("annotation.collection", "model",
-                         num_labels=4,
+                         num_labels=config.NUM_LABELS,
                          filter={'tex': unlabeled_not_existent_filter},
                          collection_step=training_rate
 

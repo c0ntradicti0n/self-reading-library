@@ -206,3 +206,7 @@ FEATURES = Features({
     'bbox': Array2D(dtype="int64", shape=(512, 4)),
     'labels': Sequence(ClassLabel(names=n_labels + [4])),
 })
+
+PROCESSOR_PICKLE = "processor_module.pickle"
+MODEL_PICKLE = "model_module.pickle"
+NUM_LABELS = 2

@@ -14,6 +14,9 @@ from layouteagle import config
 import base64
 import io
 from jsonpath_ng import jsonpath, parse
+from pprint import pprint
+import falcon
+
 
 fmt = Format(
     before=5,
@@ -49,12 +52,10 @@ def encode_some(k, v):
         return v
 
 def encode(obj_meta):
-
-
+    pprint(obj_meta)
     obj, meta = obj_meta
     obj = {k: encode_some(k, v)
            for k,v in obj.items()}
-
     return (obj, meta)
 
 
@@ -70,16 +71,16 @@ class RestQueue ():
 
         return self.workbook[id]
 
-    def change(self, path, value):
-        item = self.workbook[id]
-        self.apply(path, value)
-        self.update_data()
+    def change(self, item, path, value):
+        self.apply(item, path, value)
+        item = self.update_data(item)
         self.workbook[id] = item
+        return item
 
-    def apply(self, item, value):
+    def apply(self, item, path, value):
         jsonpath_expr = parse(path)
-        jsonpath_expr.find(data)
-        jsonpath_expr.update(data, value)
+        jsonpath_expr.find(item)
+        jsonpath_expr.update(item, value)
 
 
     def ok(self, id):
@@ -94,24 +95,27 @@ class RestQueue ():
         self.workbook.pop(id)
 
     def on_get(self, req, resp, id=None): # get image
-        print(req, resp)
+        pprint((req, resp, self.workbook))
         data = self.get(id)
         pprint(q.queue)
         pprint(data)
         data = encode(data)
         pprint(data)
+
         resp.body = json.dumps(data, ensure_ascii=False)
         resp.status = falcon.HTTP_OK
 
     def on_put(self, req, resp, id = None):  # edit, update image
         result = req.media
-        print ("put", result)
-
         path, value = result
+        item = self.workbook[id]
 
-        print(req, resp)
-        self.change(id, (path, value))
-        return annotation
+        item = self.change(item, path, value)
+
+        item = encode(item)
+        resp.body = json.dumps(item, ensure_ascii=False)
+        resp.status = falcon.HTTP_OK
+
 
     def on_post(self, req, resp, id=None): # ok
         print(req, resp)
@@ -158,6 +162,8 @@ if __name__ == "__main__":
 
 
 else:
+    pass
+    """
     import falcon
     from pprint import pprint
     def get_all_routes(api):
@@ -204,6 +210,7 @@ else:
 
     #t = threading.Thread(target=worker)
     #t.start()
+    """
 
 
 

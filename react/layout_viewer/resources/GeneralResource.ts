@@ -43,7 +43,7 @@ export default class ServerResource <T> {
         }
     }
 
-    async request (method : String, data = {}, callback: Function) {
+     request = async (method : String, data = {}, callback: Function) => {
       // Default options are marked with *
         console.log("URL", AppSettings.SAUSSAGEPOINT + this.route + this.id, callback)
 
@@ -77,13 +77,13 @@ export default class ServerResource <T> {
         return callback(result)
     }
 
-    async fetch_one(id, callback: Function) {
+     fetch_one = async(id, callback: Function)  =>{
         if (this.fetch_allowed) {
             return this.request("post", id,  callback)
         }
     }
 
-    async fetch_all(callback) {
+     fetch_all= async(callback)  =>{
         console.log("FETCH ALL", this.fetch_allowed, callback)
         if (this.fetch_allowed) {
             console.log("fetching")
@@ -93,12 +93,12 @@ export default class ServerResource <T> {
 
 
 
-    async ok(id , url = '', data = {}, callback) {
+     ok = async (id , url = '', data = {}, callback) => {
             if (this.read_allowed) {
             this.request("post",   id, callback)
         }
     }
-    async change(json_path, value, callback) {
+     change = async (json_path, value, callback) =>{
         if (this.upload_allowed) {
             this.request("put", [json_path, value], callback)
         }
