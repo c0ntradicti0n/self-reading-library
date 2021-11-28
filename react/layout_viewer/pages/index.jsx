@@ -1,9 +1,7 @@
 import React from 'react'
 import Layout from '../components/Layout'
 
-if (typeof window === 'undefined') {
-    global.window = {}
-}
+
 
 export default  class Index extends React.Component  {
     render () {

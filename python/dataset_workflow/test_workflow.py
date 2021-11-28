@@ -27,6 +27,8 @@ from helpers.list_tools import add_meta
 from layouteagle import config
 import subprocess
 import regex
+from dataset_workflow.model_helpers import find_best_model
+from pprint import pprint
 
 def unlabeled_not_existent_filter(x_m):
     hash = x_m[0][:54].replace("/", "-")
@@ -41,29 +43,23 @@ def annotate_train_model():
     ant = PathAnt()
     ant.info("workflow.png")
 
-    model_path = config.TEXT_BOX_MODEL_PATH
-
     if not os.path.isdir(config.TEXT_BOX_MODEL_PATH):
         os.makedirs(config.TEXT_BOX_MODEL_PATH)
 
-    model_regex = r"(?P<shape>\d+)_(?P<f1>0,\d+)_(?P<epoch>\d+)"
 
     while True:
         samples_files = os.listdir(config.COLLECTION_PATH)
         n_samples = len(samples_files)
-        models = os.listdir(config.TEXT_BOX_MODEL_PATH)
-        print (models, os.getcwd(), config.TEXT_BOX_MODEL_PATH)
-        best_model_path, scores = \
-            max([(p, next(m, ["0", "0", "0"])) for p in models if (m:=regex.finditer(model_regex, p))],
-                key=lambda t: t[1] and float(t[1][0].replace(",", ".")))
-        print(scores)
+        best_model_path, scores = find_best_model()
+        full_model_path = best_model_path
+
         training_rate = ( int(scores.groups()[0]) / n_samples )
 
         sample_pipe = ant("arxiv.org", "annotation.collection",
                           num_labels=config.NUM_LABELS,
                           via='pdf',
                           filter={'tex': unlabeled_not_existent_filter},
-                          model_path=model_path,
+                          model_path=full_model_path
                           )
 
         model_pipe = ant("annotation.collection", "model",
@@ -76,17 +72,13 @@ def annotate_train_model():
         if training_rate < 0.8:
             # let's train
 
-            models, model_meta = list(
-                zip(
-                    *list(
+            model_meta = list(
                         model_pipe(add_meta(samples_files),
                                    collection_step=training_rate
                                    )
                     )
-                )
-            )
-
-            model_path = models[0]
+            pprint (model_meta)
+            model_path = model_meta[0][0]
         else:
             # let's make more samples
 
@@ -94,8 +86,9 @@ def annotate_train_model():
                 collection, collection_meta = list(
                     zip(
                         *list(
-                            sample_pipe
-                            ("https://arxiv.org")
+                            sample_pipe(
+                                "https://arxiv.org",
+                            model_path = best_model_path)
                         )
                     )
                 )
@@ -107,6 +100,7 @@ def annotate_train_model():
                     continue
                 else:
                     break
+
 
 if __name__ == "__main__":
     annotate_train_model()

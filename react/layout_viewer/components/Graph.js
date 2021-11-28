@@ -5,9 +5,6 @@ import Router, {withRouter} from 'next/router'
 import window from 'global'
 
 
-if (typeof window === 'undefined') {
-    global.window = {}
-}
 
 
 // Having enourmous problems with these imports: one dynamic as recommended in the internet

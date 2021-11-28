@@ -2,7 +2,7 @@ from dataset_workflow.imports import *
 from layouteagle import config
 import random
 import pickle
-
+from regex import regex
 
 def compute_bbox(examples):
     bbox = list(list(zip(*b)) for b in zip(examples['x0'], examples['y0'], examples['x1'], examples['y1']))
@@ -60,37 +60,42 @@ def post_process_df(feature_df):
     feature_df = page_groups.agg({col: (lambda x: list(x)) for col in feature_df.columns})
     feature_df['len'] = feature_df.LABEL.map(len)
 
-    feature_df.drop(feature_df[feature_df.len > 50].index, inplace=True)
+    feature_df.drop(feature_df[feature_df.len > 190].index, inplace=True)
 
     return feature_df
 
 if os.path.isfile(config.PROCESSOR_PICKLE):
-    PROCESSOR = pickle.loads()
+    with open(config.PROCESSOR_PICKLE, "rb") as f:
+        PROCESSOR = pickle.load(f)
 else:
     PROCESSOR = LayoutLMv2Processor.from_pretrained("microsoft/layoutlmv2-base-uncased", revision="no_ocr")
-    pickle.dumps(PROCESSOR)
+    with open(config.PROCESSOR_PICKLE, "wb") as f:
+        pickle.dump(PROCESSOR, f)
 
 if os.path.isfile(config.MODEL_PICKLE):
-    MODEL = pickle.loads()
+    with open(config.MODEL_PICKLE, "rb") as f:
+        MODEL = pickle.load(f)
 else:
     MODEL = LayoutLMv2ForTokenClassification.from_pretrained(
         'microsoft/layoutlmv2-base-uncased',
          num_labels=config.NUM_LABELS
     )
-    pickle.dumps(MODEL)
+    with open(config.MODEL_PICKLE, "wb") as f:
+        pickle.dump(MODEL, f)
 
 
 def preprocess_data(training=False):
     def _preprocess(examples, **kwargs):
         global PROCESSOR
 
+        words = [[(word[:15] + word[:-15])  for word in text] for text in examples['text']]
 
-        words = [[word[:30].split()[0] for word in text] for text in examples['text']]
-
-        print(f"max length in batch: {len(max(words, key=len))}")
         boxes = compute_bbox(examples)
 
-        word_labels = ([[0] * (len(examples['label'][0]))]) if not training else [[int(l != "NONE") for l in L] for L in examples['LABEL']]
+        word_labels = ([[0] * (len(examples['label'][0]))]) if not training else [[config.label2id[l] for l in L] for L in examples['LABEL']]
+
+        if training:
+            print (f"{word_labels = }")
 
         images = [Image.open(config.path_prefix + path[0]).convert("RGB") for path in examples['image_path']]
 
@@ -101,6 +106,18 @@ def preprocess_data(training=False):
 
         return encoded_inputs
     return _preprocess
+
+
+model_regex = r"(?P<shape>\d+)_(?P<f1>0,\d+)_(?P<epoch>\d+)"
+
+def find_best_model():
+    models = os.listdir(config.TEXT_BOX_MODEL_PATH)
+    best_model_path, scores = \
+        max([(config.TEXT_BOX_MODEL_PATH + p, next(m, ["0", "0", "0"])) for p in models if (m := regex.finditer(model_regex, p))],
+            key=lambda t: t[1] and float(t[1][0].replace(",", ".")))
+    print(scores, f" {best_model_path =}")
+    return best_model_path, scores
+
 
 
 
@@ -135,13 +152,6 @@ def repaint_image_from_labels(data_meta):
         fill_color = tuple([*[int(x * 255) for x in colors.to_rgb(config.label2color[actual_label])], 127])
         draw.rectangle(box, fill=fill_color)
         draw.text((box[0] + 10, box[1] + 10), actual_label, fill=config.label2color[actual_label], font=font)
-
-    """for box, label in zip(compute_bbox(example)[0], example['LABEL'][0]):
-        actual_label = label
-        box = unnormalize_box(box, width, height)
-        draw.rectangle(box, outline=config.label2color[actual_label], width=2)
-        draw.text((box[0] + 10, box[1] - 10), actual_label, fill=config.label2color[actual_label], font=font)
-    """
 
     data['human_image'] = image
     return (data, meta)

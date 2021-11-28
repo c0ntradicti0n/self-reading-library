@@ -12,11 +12,7 @@ import threading, queue
 from helpers.event_binding import queue_iter, RestQueue
 import itertools
 from dataset_workflow.model_helpers import repaint_image_from_labels
-def close_pil_image():
-    # hide image
-    for proc in psutil.process_iter():
-        if proc.name() == "display":
-            proc.kill()
+import logging
 
 
 
@@ -41,8 +37,12 @@ class Annotator(RestPublisher, react):
 
 
     def __call__(self, prediction_metas, *args, **kwargs):
-        for _p_m in queue_iter((p_m for p_m in itertools.islice(prediction_metas, 3))):
-            yield _p_m
+        for prediction_meta, meta in prediction_metas:
+            try:
+                for _p_m in queue_iter((p_m for p_m in prediction_meta)):
+                    yield _p_m
+            except RuntimeError as e:
+                logging.info("annotating next document")
 
 
 class TestAnnotator(unittest.TestCase):

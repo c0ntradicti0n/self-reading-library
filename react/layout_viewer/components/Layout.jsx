@@ -7,7 +7,8 @@ import Graph from "./Graph";
 const layoutStyle = {
     margin: 20,
     padding: 20,
-    border: '1px solid #DDD'
+    border: '1px solid #DDD',
+    display: "flex"
 }
 
 export default class Layout extends React.Component {

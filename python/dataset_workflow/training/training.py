@@ -33,6 +33,8 @@ class Training(PathSpec):
                 p
             ) for p in feature_dfs])
 
+        print("LABEL", feature_df["LABEL"].tolist())
+
 
         #df = model_helpers.post_process_df(feature_df)
 
@@ -42,6 +44,7 @@ class Training(PathSpec):
 
         print(dataset)
 
+        f1_to_new_model_paths = {}
 
         with open(model_path + "/.log", 'w') as log:
             fun = model_helpers.preprocess_data(training=True)
@@ -59,12 +62,9 @@ class Training(PathSpec):
             )
 
             model_helpers.PROCESSOR.tokenizer.decode(train_dataset['input_ids'][0])
-            print(train_dataset['labels'][0])
 
             train_dataset.set_format(type="torch", device=config.DEVICE)
             test_dataset.set_format(type="torch", device=config.DEVICE)
-
-            print(train_dataset.features.keys())
 
             train_dataloader = DataLoader(train_dataset, batch_size=2, shuffle=True)
             test_dataloader = DataLoader(test_dataset, batch_size=1)
@@ -84,24 +84,20 @@ class Training(PathSpec):
 
             batch = next(iter(train_dataloader))
 
-            for k, v in batch.items():
-                print(k, v.shape)
-
-
             model = model_helpers.MODEL
 
             model.to(config.DEVICE)
-            optimizer = AdamW(model.parameters(), lr=5e-6)  # , weight_decay=0.1)
+            optimizer = AdamW(model.parameters(), lr=1e-5, weight_decay=0.1)
 
             global_step = 0
-            num_train_epochs = 140
+            num_train_epochs = config.EPOCHS_LAYOUT
             t_total = len(train_dataloader) * num_train_epochs  # total number of training steps
 
             # put the model in training mode
             model.train()
             for epoch in range(num_train_epochs):
                 print("Epoch:", epoch)
-                with tqdm(train_dataloader, total=train_dataloader.__len__()) as tdqm_train_dataloader:
+                with tqdm(train_dataloader, total=train_dataloader.dataset.num_rows) as tdqm_train_dataloader:
                     for batch in tdqm_train_dataloader:
                         tdqm_train_dataloader.set_description(f"Epoch {epoch}")
                         # zero the parameter gradients
@@ -157,8 +153,15 @@ class Training(PathSpec):
                 {pformat(final_score, indent=10)}
                 """)
 
+                f1 = final_score['overall_f1']
+                n_samples = len(feature_df)
+                print (f"{dataset.shape = }")
+                path = f"{config.TEXT_BOX_MODEL_PATH}_{str(n_samples)}_{str(f1).replace('.', ',')}_{epoch}"
+                f1_to_new_model_paths[f1] = path
+
                 torch.save(model.state_dict(),
-                           f"{config.TEXT_BOX_MODEL_PATH}_{str(len(dataset.shape))}_{str(final_score['overall_f1']).replace('.', ',')}_{epoch}")
+                           path)
 
 
-        yield model
+        best_model_path = max(f1_to_new_model_paths.items(), key=lambda x: x[0])[1]
+        yield best_model_path, df_paths_meta

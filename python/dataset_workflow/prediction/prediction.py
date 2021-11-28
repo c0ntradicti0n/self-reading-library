@@ -6,22 +6,29 @@ from dataset_workflow import model_helpers
 
 @converter("feature", "prediction")
 class Prediction(PathSpec):
-    def __init__(self, *args, num_labels = config.NUM_LABELS, model_path = config.MODEL_PATH, **kwargs):
+    def __init__(self, *args, num_labels = config.NUM_LABELS, **kwargs):
         super().__init__(*args,  **kwargs)
-        self.model_path = model_path
+
         self.model = None
         self.processor = None
         self.num_labels = num_labels
 
     def __call__(self, x_meta, *args, **kwargs):
+        model_path = self.flags['model_path']
+        if not model_path:
+            raise Exception("Model path must be set via pipeline flags, these are the keywords in the call args")
+        self.model_path = model_path
+
+        predictions_metas_per_document = []
+
         for feature_df, meta in x_meta:
 
             df = model_helpers.post_process_df(feature_df)
 
             dataset = Dataset.from_pandas(df)
 
-            for i in range(len(dataset)-1):
-                example = dataset[i:i + 1]
+            for page_number in range(len(dataset)-1):
+                example = dataset[page_number:page_number + 1]
 
                 new_hash = str((example['x0'], example['x1'], example['y0'], example['y1']))
 
@@ -51,13 +58,18 @@ class Prediction(PathSpec):
                 prediction = {}
                 prediction['labels'] = box_predictions
                 prediction['bbox'] = enc_boxes
-                prediction['df'] = df.iloc[i:i+1]
+                prediction['df'] = df.iloc[page_number:page_number+1]
                 prediction['image'] = Image.open(config.path_prefix + example['image_path'][0][0])
+                prediction['page_number'] = page_number
+
+                self.logger.info(f"predicted {page_number =} with labels {box_predictions = }")
 
                 prediction_meta = model_helpers.repaint_image_from_labels ((prediction, meta))
-                prediction_meta[0]['human_image'].save(f"{config.PREDICTION_PATH}/boxes_{i}.png")
+                prediction_meta[0]['human_image'].save(f"{config.PREDICTION_PATH}/boxes_{page_number}.png")
 
-                yield prediction_meta
+                predictions_metas_per_document.append(prediction_meta)
+
+            yield predictions_metas_per_document, meta
 
     def load_model(self):
 

@@ -214,7 +214,6 @@ class ??title!! extends React.Component<State, Props> {
                     service={this.??title!!Service}
                     setFullState={this.set_??title!!s}
                 />
-                {JSON.stringify(this.state)} 
             </>)
         }
         

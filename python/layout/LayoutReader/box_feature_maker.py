@@ -34,8 +34,6 @@ class BoxFeatureMaker(PathSpec):
             if "training" in self.flags and not any([tex in labeled_pdf_path for tex in ["tex1", 'tex2', 'tex3']]):
                 continue
 
-
-
             feature_gen = self.mine_pdf(labeled_pdf_path)
             feature_df = pandas.DataFrame(
                 list(feature_gen),
@@ -50,7 +48,7 @@ class BoxFeatureMaker(PathSpec):
                 meta['html_path'] = labeled_pdf_path
 
                 final_feature_df['page_number'] = page_numbers
-                print(meta)
+
                 images = convert_from_path(labeled_pdf_path)
                 image_dict = {}
                 for page_number, pil in enumerate(images):
@@ -58,7 +56,7 @@ class BoxFeatureMaker(PathSpec):
 
                     image_dict [page_number] = image_path
 
-                    basewidth = 300
+                    basewidth = 1500
                     wpercent = (basewidth / float(pil.size[0]))
                     hsize = int((float(pil.size[1]) * float(wpercent)))
                     pil = pil.resize((basewidth, hsize), Image.ANTIALIAS)
@@ -85,7 +83,7 @@ class BoxFeatureMaker(PathSpec):
                     text = element.get_text()
                     label = determine_layout_label_from_text(text)
                     number_of_lines = len(element._objs) if hasattr(element, "_objs") else 0
-                    feature = BoxFeatureMaker.TextBoxData(
+                    features = BoxFeatureMaker.TextBoxData(
                         page_number,
                         number_of_lines,
                         int(element.x0), int(element.y0),
@@ -95,7 +93,8 @@ class BoxFeatureMaker(PathSpec):
                         int(page_layout.height), int(page_layout.width),
                         text,
                         label)
-                    yield feature._asdict()
+                    print (features)
+                    yield features._asdict()
 
 
     def compute_complex_coordination_data(self, feature_df):

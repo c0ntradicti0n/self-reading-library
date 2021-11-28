@@ -2,15 +2,17 @@ import os
 import sys
 import logging
 from helpers.nested_dict_tools import flatten
+
 sys.path.append(".")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 import logging
-os.environ["LD_LIBRARY_PATH"] ='/usr/local/cuda-11.0/targets/x86_64-linux/lib/'
+
+os.environ["LD_LIBRARY_PATH"] = '/usr/local/cuda-11.0/targets/x86_64-linux/lib/'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TOKENIZERS_PARALLELISM'] = 'true'
 from traceback_with_variables import activate_by_import
 
 from traceback_with_variables import Format, ColorSchemes, is_ipython_global
-
 
 fmt = Format(
     before=5,
@@ -30,10 +32,12 @@ fmt = Format(
     ]
 )
 import tensorflow as tf
+
 tf.config.list_physical_devices('GPU')
 tf.get_logger().setLevel(3)
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 import numpy
+
 numpy.set_printoptions(threshold=sys.maxsize)
 
 logging.getLogger('allennlp').setLevel(logging.ERROR)
@@ -45,13 +49,12 @@ logging.getLogger('pdfminer').setLevel(logging.ERROR)
 
 logging.basicConfig(format="""%(asctime)s-%(levelname)s: %(message)s""", datefmt="%H:%M:%S")
 
-
-
-
 from GPUtil import showUtilization as gpu_usage
 import torch
 from numba import cuda
+
 path_prefix = "./"
+
 
 def free_gpu_cache():
     print("Initial GPU Usage")
@@ -69,7 +72,6 @@ def free_gpu_cache():
 
 free_gpu_cache()
 
-
 feature_fuzz_ranges = (-0.02, 0.04, 0.02),
 sys.path.append(os.getcwd())
 
@@ -77,7 +79,7 @@ logging_config = '/home/finn/PycharmProjects/LayoutEagle/python/logging.yaml'
 model_config = "elmo_lstm3_feedforward4_crf_straight.config"
 jobs = 32
 max_time_per_call = 30
-#"elmo_multi_head_self_attention_crf_straight_fitter.config"
+# "elmo_multi_head_self_attention_crf_straight_fitter.config"
 parse_pdf2htmlEX = True
 n_layout_training_documents = 500
 max_windows_per_text = 100
@@ -86,17 +88,15 @@ NORMAL_HEIGHT = 100
 page_array_model = 100
 layout_model_next_text_boxes = 5
 
-doc_port        = 5180
-app_port        = 5181
+doc_port = 5180
+app_port = 5181
 annotation_port = 5182
-science_port    = 5183
+science_port = 5183
 
 hidden_folder = ".layouteagle/"
 cache = hidden_folder + "cache/"
 tex_data = hidden_folder + "tex_data/"
 models = hidden_folder + "models/"
-
-
 
 tex_source = "http://arxiv.org"
 
@@ -108,21 +108,20 @@ log_files = {
     "dist": "../Distinctiopus4/log.log"
 }
 
-science_map_corpus_path="../ScienceMap/manual_corpus/"
-science_map_working_dir="../ScienceMap/"
-science_map="../ScienceMap/GUI.py"
-science_map_venv="../ScienceMap/venv/bin/activate"
-science_map_csv="../ScienceMap/manual_corpus/relations.csv"
+science_map_corpus_path = "../ScienceMap/manual_corpus/"
+science_map_working_dir = "../ScienceMap/"
+science_map = "../ScienceMap/GUI.py"
+science_map_venv = "../ScienceMap/venv/bin/activate"
+science_map_csv = "../ScienceMap/manual_corpus/relations.csv"
 
-ampligraph_working_dir="../KnowledgeScience/"
-ampligraph_venv="../KnowledgeScience/venv/bin/activate"
-ampligraph="../KnowledgeScience/csv_ampligraph.py"
-ampligraph_coords="CONSTRASTSUBJECT"
+ampligraph_working_dir = "../KnowledgeScience/"
+ampligraph_venv = "../KnowledgeScience/venv/bin/activate"
+ampligraph = "../KnowledgeScience/csv_ampligraph.py"
+ampligraph_coords = "CONSTRASTSUBJECT"
 
-
-all_coordinates="../KnowledgeScience/knowledge_graph_coords/knowledge_graph_3d_choords.csv"
-ke_path=  "../KnowledgeScience/knowledge_graph_coords/tsne_clusters_mean_points.csv"
-ke_colors="../KnowledgeScience/knowledge_graph_coords/kn_clusters_mean_points.csv"
+all_coordinates = "../KnowledgeScience/knowledge_graph_coords/knowledge_graph_3d_choords.csv"
+ke_path = "../KnowledgeScience/knowledge_graph_coords/tsne_clusters_mean_points.csv"
+ke_colors = "../KnowledgeScience/knowledge_graph_coords/kn_clusters_mean_points.csv"
 hal = '"../hal/target/hal-1-jar-with-dependencies.jar"'
 video_dir = '../view_control_web/WebContent/resources/media/'
 
@@ -130,6 +129,7 @@ wordlist = '../pdfetc2txt/wordlist.txt'
 
 reader_width = 700
 import numpy
+
 reader_height = numpy.sqrt(2) * reader_width
 
 page_margin_bottom = 0.06
@@ -148,10 +148,8 @@ difference_model_config = hidden_folder + f"/over_{model_config}/config.json"
 wordninjalanguagemodel = "nlp/english.txt.gz"
 logging_level = logging.INFO
 
-
 layout_model_path = hidden_folder + "/layout_model/"
 saved_layout_model_dir = hidden_folder + "/layout_model_saved/"
-
 
 collected_features_path = ".layouteagle/labeled_features.pickle"
 
@@ -173,40 +171,59 @@ cols_to_use = [
 
 ]"""
 cols_to_use = ["page_number",
-                       "number_of_lines",
-        "x","y", "x0", "x1", "y0", "y1", "height", "width"]
+               "number_of_lines",
+               "x", "y", "x0", "x1", "y0", "y1", "height", "width"]
 
-#array_cols_to_use = ['angle', 'distance_vector', 'x_profile', 'y_profile', 'xy_profile'
+# array_cols_to_use = ['angle', 'distance_vector', 'x_profile', 'y_profile', 'xy_profile'
 #                     ]
 
-array_cols_to_use = [] # ["box_schema"]
+array_cols_to_use = []  # ["box_schema"]
 N = 7
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-MODEL_PATH = hidden_folder + "model/mono__0,9151472650771387_64"
-TEXT_BOX_MODEL_PATH = hidden_folder + "text_box_models"
+TEXT_BOX_MODEL_PATH = hidden_folder + "text_box_models/"
 
-PREDICTION_PATH = hidden_folder + "prediction"
+PREDICTION_PATH = hidden_folder + "prediction/"
 NOT_COLLECTED_PATH = hidden_folder + "non_collection/"
 
 COLLECTION_PATH = hidden_folder + "collection/"
-label2id = {'NONE': 0, 'c1': 1, 'c2': 2, 'c3': 3}
-label2color = {'c1': 'blue', 'c2': 'green', 'c3': 'orange', 'NONE': 'violet', 'none': 'violet', 'other': 'yellow'}
-id2label = {v:k for k, v in label2id.items()}
-n_labels = ["NONE", "c1"]
+# label2id = {'NONE': 0, 'c1': 1, 'c2': 2, 'c3': 3}
+LABELS = ['NONE', 'c1', 'c2', 'c3',   'wh', 'h',  'pn', 'fn', 'fg', 'tb']
+
+TEXT_LABELS = ['c1', 'c2', 'c3', 'wh', 'h']
+
+label2id = {t: i for i, t in enumerate(LABELS)}
+label2color = {'c1': 'blue',
+               'c2': 'green',
+               'c3': 'orange',
+               'NONE': 'violet',
+               'none': 'violet',
+               'None': 'violet',
+               'other': 'yellow',
+               None: 'violet',
+               'pn': 'yellow',
+               'h': 'red',
+               'wh':  'purple',
+               'fg': 'brown',
+               'fn': 'grey',
+               'tb': 'beige'}
+id2label = {v: k for k, v in label2id.items()}
 
 # we need to define custom features
 from datasets import Features, Sequence, ClassLabel, Value, Array2D, Array3D
 
+LABELS = [label2id[L] for L in LABELS]
 FEATURES = Features({
     'image': Array3D(dtype="int64", shape=(3, 224, 224)),
     'input_ids': Sequence(feature=Value(dtype='int64')),
     'attention_mask': Sequence(Value(dtype='int64')),
     'token_type_ids': Sequence(Value(dtype='int64')),
     'bbox': Array2D(dtype="int64", shape=(512, 4)),
-    'labels': Sequence(ClassLabel(names=n_labels + [4])),
+    'labels': Sequence(ClassLabel(names=LABELS + [max(LABELS) + 1]))
 })
 
-PROCESSOR_PICKLE = "processor_module.pickle"
-MODEL_PICKLE = "model_module.pickle"
-NUM_LABELS = 2
+NUM_LABELS = len(LABELS)
+
+PROCESSOR_PICKLE = f"processor_module{NUM_LABELS}.pickle"
+MODEL_PICKLE = f"model_module{NUM_LABELS}.pickle"
+EPOCHS_LAYOUT = 84

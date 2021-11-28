@@ -41,8 +41,12 @@ def encode_base64(image):
 def encode_df(df):
     return None # df.to_dict()
 
+def round_double_list(bbox):
+    return [[round(c, 2 )for c in box] for box in bbox]
+
 funs = {"image": lambda x: base64.b64encode(encode_base64(x)).decode('utf-8'),
-        "df": encode_df}
+        "df": encode_df,
+        "bbox": round_double_list}
 
 def encode_some(k, v):
     for s, f in funs.items():
@@ -84,8 +88,13 @@ class RestQueue ():
 
 
     def ok(self, id):
-        item = self.workbook.pop(id)
-        d.put(item)
+        try:
+            q.task_done()
+            item = self.workbook.pop(id)
+            d.put(item)
+        except Exception as e:
+            logging.error(f"could noit remove ${id} from {self.workbook}")
+            d.put(None)
 
     def discard(self, id):
         item = self.workbook.pop(id)
@@ -138,12 +147,11 @@ def queue_iter (gen):
         for i in range(1):
             q.put(next(gen))
 
-        while True:
-            k = next(gen)
-            q.put(k)
             r = d.get()
-            d.task_done()
-            yield r
+
+            if r:
+                d.task_done()
+                yield r
 
 
     print("ende")

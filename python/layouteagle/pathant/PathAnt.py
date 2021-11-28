@@ -69,7 +69,7 @@ class PathAnt:
                for edge, intermediate_targets in converters_implications.items()
                       }
 
-        logging.info(f"Found path: {'⇾'.join(converters_path)}")
+        logging.info(f"Found path: {' ⇾ '.join(converters_path)}")
         pipeline = [self.lookup(*_from_to) for _from_to in pairwise(converters_path)]
         for i, step in enumerate(pipeline[::-1]):
             step_key = step.path_spec._to.replace(".", "")

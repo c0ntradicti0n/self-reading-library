@@ -30,16 +30,19 @@ export default class ServerResource <T> {
         if (add_id) {
             let id
 
-            if (!localStorage.getItem(route)) {
-                id = getRandomArbitrary(100000, 999999).toString()
-                localStorage.setItem(route, id)
-            } else {
-                id = localStorage.getItem(route)
+            if (typeof window !== "undefined") {
+
+                if (!localStorage.getItem(route)) {
+                    id = getRandomArbitrary(100000, 999999).toString()
+                    localStorage.setItem(route, id)
+                } else {
+                    id = localStorage.getItem(route)
+                }
+                console.log(localStorage, route, localStorage.getItem(route))
+
+
+                this.id = "/" + id
             }
-                        console.log(localStorage, route, localStorage.getItem(route))
-
-
-            this.id = "/" + id
         }
     }
 
@@ -68,7 +71,7 @@ export default class ServerResource <T> {
 
 
         if (!response.ok) {
-            throw new Error(response.statusText)
+            throw response.statusText
         }
 
         const result = await response.json()

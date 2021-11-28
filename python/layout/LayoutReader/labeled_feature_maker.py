@@ -47,10 +47,6 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
                     continue
 
             for random_i, final_feature_df in enumerate(self.feature_fuzz(feature_df)):
-
-
-
-
                 final_feature_df = self.compute_complex_coordination_data(final_feature_df)
 
                 final_feature_df["doc_id"] = str(doc_id) + ".random" + str(random_i)
@@ -68,7 +64,7 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
                     df['image_path'] = np.where(final_feature_df.page_number == page_number,
                                                 final_feature_df.page_number.map({page_number:image_path}),
                                                 final_feature_df.page_number
-                     )
+                    )
                     pil.save(image_path)
 
                 yield final_feature_df, meta

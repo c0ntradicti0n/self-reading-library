@@ -2,7 +2,7 @@ import React from 'react'
 import App from 'next/app'
 import * as glob from 'glob'
 import SideBar from '../components/SideBar'
-//import 'react-pro-sidebar/dist/css/styles.css';
+import '../src/App.css';
 
 
 class MyApp extends App {

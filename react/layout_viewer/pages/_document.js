@@ -1,34 +1,53 @@
-import Document, { Head, Main, NextScript } from 'next/document';
-import glob from 'glob'
+import React from 'react'
+
+import Document, {
+  DocumentInitialProps,
+  Html,
+  Head,
+  Main,
+  NextScript
+} from 'next/document'
 
 
 export default class MyDocument extends Document {
-  constructor(props) {
-    super(props);
-    this.state = {
-      pages : []
+  static async getInitialProps(ctx) {
+    const originalRenderPage = ctx.renderPage
+
+    try {
+      ctx.renderPage = () =>
+        originalRenderPage({
+          enhanceApp: App => props => <App {...props} />
+        })
+
+      const initialProps = await Document.getInitialProps(ctx)
+      return {
+        ...initialProps,
+        styles: (
+          <>
+            {initialProps.styles}
+          </>
+        )
+      }
+    } finally {
     }
-
-    let a = (async () => {
-  try {
-    result =  await glob('pages/**/*.js', {cwd: './'}, (res) => this.setState({pages:res}));
-  } catch(e) {}
-})()
   }
-
-   static getInitialProps({ renderPage }) {
-    return {html : "", ... this.state}
-  }
-
 
   render() {
     return (
-      <html>
+      <Html lang="pt">
+        <Head>
+          <meta charSet="utf-8" />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap"
+            rel="stylesheet"
+          />
+          <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+        </Head>
         <body>
           <Main />
           <NextScript />
         </body>
-      </html>
-    );
+      </Html>
+    )
   }
 }
