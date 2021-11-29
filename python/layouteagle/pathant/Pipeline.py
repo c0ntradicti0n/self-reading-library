@@ -13,10 +13,13 @@ class Pipeline:
         self.dummy_generator = itertools.cycle([("dummy", {"meta": None})])
 
     def log_progress(self, gen, *args, name='unknown', logger=print, **kwargs):
-        for x in gen:
-            msg = f"Pipeline step {name} running on result: '''{str(x)[:100]}...'''"
-            with timeit_context(msg, logger=logger):
-                yield x
+        try:
+            for x in gen:
+                msg = f"Pipeline step {name} running on result: '''{str(x)[:100]}...'''"
+                with timeit_context(msg, logger=logger):
+                    yield x
+        except TypeError as e:
+            logger(f"{name} finished")
 
     def __call__(self, arg, **flags):
         intermediate_result = arg

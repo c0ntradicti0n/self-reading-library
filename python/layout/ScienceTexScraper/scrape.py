@@ -3,6 +3,7 @@ import hashlib
 import os
 from itertools import count
 import random
+from helpers.list_tools import add_meta
 
 import requests
 import time
@@ -25,17 +26,16 @@ class ScienceTexScraper(PathSpec):
         if not os.path.isdir(self.save_dir):
             os.system(f"mkdir {config.tex_data}")
 
-    @file_persistent_cached_generator(
-        config.cache + 'scraped_tex_paths.json',
-        if_cache_then_finished=True,
-        load_via_glob=config.tex_data + "**/*.tex"
-    )
+
     def __call__(self, url):
         self.scrape_count = count()
         self.i = 0
         self.yet = []
         self.url = url
-        yield from self.surf_random(url)
+        if 'texs' in self.flags:
+            yield from list(add_meta(self.flags['texs']))
+        else:
+            yield from self.surf_random(url)
 
     headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36'}
 
@@ -43,6 +43,11 @@ class ScienceTexScraper(PathSpec):
         self.logger.info("navigating backt to " + self.cwd)
         os.chdir(self.cwd)
 
+    @file_persistent_cached_generator(
+        config.cache + 'scraped_tex_paths.json',
+        if_cache_then_finished=True,
+        load_via_glob=config.tex_data + "**/*.tex"
+    )
     def surf_random(self, url):
         logging.info(f"trying {url}")
 

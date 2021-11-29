@@ -30,13 +30,18 @@ import regex
 from dataset_workflow.model_helpers import find_best_model
 from pprint import pprint
 
+"""
+Filters depending on existing annotation files if 
+this file is in the annotation set
+or not. Returns True for not used, False for has been used yet
+"""
 def unlabeled_not_existent_filter(x_m):
     hash = x_m[0][:54].replace("/", "-")
     res = file_exists_regex(config.COLLECTION_PATH, rf"{hash}.*")
     yet_not_res = file_exists_regex(config.NOT_COLLECTED_PATH, rf"{hash}.*")
     is_labeled = "labeled" in x_m[0]
     subprocess.call(["touch", config.NOT_COLLECTED_PATH + "/" + hash])
-
+    return True
     return not (res or yet_not_res or is_labeled)
 
 def annotate_train_model():
@@ -59,7 +64,9 @@ def annotate_train_model():
                           num_labels=config.NUM_LABELS,
                           via='pdf',
                           filter={'tex': unlabeled_not_existent_filter},
-                          model_path=full_model_path
+                          model_path=full_model_path,
+                          #texs = ['.layouteagle/tex_data/e58dd6bbc7c23fd05c9b120fef282145//cccconstant-curvature.text']
+                          #ignore_incomplete=True
                           )
 
         model_pipe = ant("annotation.collection", "model",

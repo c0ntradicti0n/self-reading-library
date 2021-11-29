@@ -62,12 +62,19 @@ class Prediction(PathSpec):
                 prediction['image'] = Image.open(config.path_prefix + example['image_path'][0][0])
                 prediction['page_number'] = page_number
 
-                self.logger.info(f"predicted {page_number =} with labels {box_predictions = }")
+                if "ignore_incomplete" in self.flags:
+                    if len(box_predictions) != len(example['text'][0]):
+                        print (len(box_predictions), box_predictions, len(example['text'][0]), example['text'][0])
+                        self.logger.error(f"predicted less labels than textfields on the page, continuing!")
+                        continue
+                else:
 
-                prediction_meta = model_helpers.repaint_image_from_labels ((prediction, meta))
-                prediction_meta[0]['human_image'].save(f"{config.PREDICTION_PATH}/boxes_{page_number}.png")
+                    self.logger.info(f"predicted {page_number =} with labels {box_predictions =}")
 
-                predictions_metas_per_document.append(prediction_meta)
+                    prediction_meta = model_helpers.repaint_image_from_labels ((prediction, meta))
+                    prediction_meta[0]['human_image'].save(f"{config.PREDICTION_PATH}/boxes_{page_number}.png")
+
+                    predictions_metas_per_document.append(prediction_meta)
 
             yield predictions_metas_per_document, meta
 

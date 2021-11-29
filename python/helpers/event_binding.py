@@ -97,8 +97,11 @@ class RestQueue ():
             d.put(None)
 
     def discard(self, id):
-        item = self.workbook.pop(id)
-        q.put(item)
+        try:
+            item = self.workbook.pop(id)
+            q.task_done()
+        except Exception as e:
+            logging.error(f"could noit remove ${id} from {self.workbook}")
 
     def delete(self, id):
         self.workbook.pop(id)
@@ -129,6 +132,10 @@ class RestQueue ():
     def on_post(self, req, resp, id=None): # ok
         print(req, resp)
         self.ok(id)
+
+    def on_delete(self, req, resp, id=None):
+        print(req, resp)
+        self.discard(id)
 
 def fibonacciGenerator():
     a=0
