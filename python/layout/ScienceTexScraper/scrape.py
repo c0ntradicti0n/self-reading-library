@@ -46,7 +46,7 @@ class ScienceTexScraper(PathSpec):
     @file_persistent_cached_generator(
         config.cache + 'scraped_tex_paths.json',
         if_cache_then_finished=True,
-        load_via_glob=config.tex_data + "**/*.tex"
+        load_via_glob=config.tex_data + "**/*[!labeled].tex"
     )
     def surf_random(self, url):
         logging.info(f"trying {url}")

@@ -1,4 +1,4 @@
-from python.layouteagle.pathant.PathSpec import PathSpec
+from layouteagle.pathant.PathSpec import PathSpec
 
 
 class Filter (PathSpec):
@@ -11,3 +11,5 @@ class Filter (PathSpec):
             if self.f(x_m):
                 print(self.f(x_m))
                 yield x_m
+
+

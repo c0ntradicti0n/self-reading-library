@@ -206,7 +206,7 @@ class ??title!! extends React.Component<State, Props> {
     render ()  {
         console.log("values?", this, "??type!!" )
         
-        if ("??type!!" === "annotation")  {
+        if (["upload_annotation", "annotation"].includes("??type!!") )  {
             console.log("RENDER", this.state.??title!!s)
             return (<>
                 <BoxAnnotator 

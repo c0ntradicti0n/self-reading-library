@@ -29,6 +29,7 @@ def find_repeating(lst, count=2):
 
 def add_meta(l):
     for e in l:
+        logging.info(f"metaize {e}")
         yield e, {}
 
 def reverse_dict_of_lists(d):

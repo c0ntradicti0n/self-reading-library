@@ -46,7 +46,7 @@ export default class ServerResource <T> {
         }
     }
 
-     request = async (method : String, data = {}, callback: Function) => {
+     request = async (method : String, data = {}, callback: Function, is_file=false) => {
       // Default options are marked with *
         console.log("URL", AppSettings.SAUSSAGEPOINT + this.route + this.id, callback)
 
@@ -56,16 +56,21 @@ export default class ServerResource <T> {
             //cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
             credentials: 'same-origin', // include, *same-origin, omit
             headers: {
-                'Content-Type': 'application/json',
-                'API-Key': 'secret'
+                ...(!is_file ? {'Content-Type': 'application/json'}:{}),
+                'API-Key': 'secret',
+                'Cache-Control': 'no-cache'
               },
+
             //redirect: 'follow', // manual, *follow, error
             //referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-            body: JSON.stringify(data)
+            body: !is_file ? JSON.stringify(data) : data
         }
         if (method === "get")  {
             delete fetch_init.body
         }
+
+        console.log(fetch_init)
+
         const response = await fetch(
             AppSettings.SAUSSAGEPOINT + this.route + this.id, fetch_init )
 
@@ -104,6 +109,14 @@ export default class ServerResource <T> {
      change = async (json_path, value, callback) =>{
         if (this.upload_allowed) {
             this.request("put", [json_path, value], callback)
+        }
+    }
+
+    upload = async (form_data, callback) => {
+        console.log("UPLOADING", form_data, this.upload_allowed)
+        if (this.upload_allowed) {
+            console.log(new FormData(form_data), new FormData(form_data).get("file"))
+            await this.request("patch", new FormData(form_data), callback, true)
         }
     }
     /*

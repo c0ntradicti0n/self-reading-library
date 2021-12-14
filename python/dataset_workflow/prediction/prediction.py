@@ -19,9 +19,10 @@ class Prediction(PathSpec):
             raise Exception("Model path must be set via pipeline flags, these are the keywords in the call args")
         self.model_path = model_path
 
-        predictions_metas_per_document = []
 
         for feature_df, meta in x_meta:
+
+            predictions_metas_per_document = []
 
             df = model_helpers.post_process_df(feature_df)
 

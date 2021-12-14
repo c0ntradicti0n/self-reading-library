@@ -188,7 +188,7 @@ NOT_COLLECTED_PATH = hidden_folder + "non_collection/"
 
 COLLECTION_PATH = hidden_folder + "collection/"
 # label2id = {'NONE': 0, 'c1': 1, 'c2': 2, 'c3': 3}
-LABELS = ['NONE', 'c1', 'c2', 'c3',   'wh', 'h',  'pn', 'fn', 'fg', 'tb']
+LABELS = ['NONE', 'c1', 'c2', 'c3', 'wh', 'h', 'pn', 'fn', 'fg', 'tb']
 
 TEXT_LABELS = ['c1', 'c2', 'c3', 'wh', 'h']
 
@@ -203,7 +203,7 @@ label2color = {'c1': 'blue',
                None: 'violet',
                'pn': 'yellow',
                'h': 'red',
-               'wh':  'purple',
+               'wh': 'purple',
                'fg': 'brown',
                'fn': 'grey',
                'tb': 'beige'}
@@ -227,3 +227,5 @@ NUM_LABELS = len(LABELS)
 PROCESSOR_PICKLE = f"processor_module{NUM_LABELS}.pickle"
 MODEL_PICKLE = f"model_module{NUM_LABELS}.pickle"
 EPOCHS_LAYOUT = 84
+
+PDF_UPLOAD_DIR = hidden_folder + "/pdf_upload/"

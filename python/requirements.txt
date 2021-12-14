@@ -11,7 +11,7 @@ TexSoup~=0.2.1
 networkx~=2.4
 pygraphviz
 databases[postgresql]
-falcon~=2.0.0
+falcon
 falcon-cors
 paired
 coloredlogs

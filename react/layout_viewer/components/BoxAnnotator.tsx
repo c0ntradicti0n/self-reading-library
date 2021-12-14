@@ -8,19 +8,19 @@ export default class BoxAnnotator extends Component {
     LABEL_SWITCH = Object.fromEntries(pairwise([...this.LABELS, this.LABELS[0]]))
 
     KEYS = {
-            'KeyF':  'fn',
-            'KeyG': 'fg',
-            'KeyT':  'tb',
-            'Digit1': 'c1',
-            'Digit2': 'c2',
-            'Digit3': 'c3',
-            'Digit0': 'wh',
-                    'KeyW': 'wh',
+        'KeyF': 'fn',
+        'KeyG': 'fg',
+        'KeyT': 'tb',
+        'Digit1': 'c1',
+        'Digit2': 'c2',
+        'Digit3': 'c3',
+        'Digit0': 'wh',
+        'KeyW': 'wh',
 
-            'KeyN': 'pn',
-            'KeyH': 'h',
-            'Space': 'NONE'
-        }
+        'KeyN': 'pn',
+        'KeyH': 'h',
+        'Space': 'NONE'
+    }
 
     state = {
         next_key: null
@@ -51,63 +51,75 @@ export default class BoxAnnotator extends Component {
 
     render() {
         console.log(this.props)
-        if (this.props.superState.value) {
-            const cols = zip([this.props.superState.value.bbox, this.props.superState.value.labels])
 
-            return <>
-                <h4> {this.props.superState.meta.html_path}</h4>
-                <div className="container" style={{position: "absolute"}}>
+        let cols
+        if (this.props.superState.value)
+            cols = zip([this.props.superState.value.bbox, this.props.superState.value.labels])
 
-                    <img src={"data:image/jpeg;charset=utf-8;base64," + this.props.superState?.value?.human_image}>
+        return <>
+            <form onSubmit={(e) => {
+                console.log("submit", e, e.target)
+                this.props.service.upload(e.target)
+            }}>
+                <input type="file" name="file" multiple/>
+                <button type="submit">Upload</button>
 
-                    </img>
+            </form>
+            <h4> {this.props.superState?.meta?.html_path}</h4>
+            <div className="container" style={{position: "absolute"}}>
+                {this.props.superState?.value?.human_image ?
+                <img src={"data:image/jpeg;charset=utf-8;base64," + this.props.superState?.value?.human_image} />
+                    : null }
 
 
-                    {cols.map((row, i) =>
-                        <div style={{
-                            position: "absolute",
-                            left: row[0][0].toString() + "px",
-                            top: row[0][1].toString() + "px",
-                            width: (row[0][2] - row[0][0]).toString() + "px",
-                            height: (row[0][3] - row[0][1]).toString() + "px",
-                            border: "1px solid black",
-                            zIndex: (Math.ceil(9000000-(row[0][2] - row[0][0]) * (row[0][3] - row[0][1])))
-                        }}
-                             onClick={() => {
-                                 console.log("row", i)
-                                 let label
-                                 if (this.state.next_key) {
-                                     label = this.state.next_key
-                                 } else {
-                                     label = this.LABEL_SWITCH[row[1]]
-                                 }
-                                 console.log({label, ls: this.LABEL_SWITCH})
-                                 if (label)
-                                     this.props.service.change(
-                                         "[0].labels.[" + i + "]", label,
-                                         this.props.setFullState)
-                             }}>
-                            }
-                        </div>)}
 
+                {cols?.map((row, i) =>
+                    <div style={{
+                        position: "absolute",
+                        left: row[0][0].toString() + "px",
+                        top: row[0][1].toString() + "px",
+                        width: (row[0][2] - row[0][0]).toString() + "px",
+                        height: (row[0][3] - row[0][1]).toString() + "px",
+                        border: "1px solid black",
+                        zIndex: (Math.ceil(9000000 - (row[0][2] - row[0][0]) * (row[0][3] - row[0][1])))
+                    }}
+                         onClick={() => {
+                             console.log("row", i)
+                             let label
+                             if (this.state.next_key) {
+                                 label = this.state.next_key
+                             } else {
+                                 label = this.LABEL_SWITCH[row[1]]
+                             }
+                             console.log({label, ls: this.LABEL_SWITCH})
+                             if (label)
+                                 this.props.service.change(
+                                     "[0].labels.[" + i + "]", label,
+                                     this.props.setFullState)
+                         }}>
+                        }
+                    </div>)}
+
+                {cols ? <>
                     <button
                         onClick={() => {
                             this.props.service.ok([this.props.superState.value, this.props.superState.meta])
                             this.props.service.fetch_all(this.props.setFullState)
-
-
                         }
                         }>OK
                     </button>
                     <button onClick={this.props.service.discard}>Discard</button>
+                </> : null
+                }
 
-                    <h1><pre>{JSON.stringify(this.KEYS, null, 2)}</pre></h1>
 
-                </div>
-            </>
-        } else {
-            return null
-        }
+                <h1>
+                    <pre>{JSON.stringify(this.KEYS, null, 2)}</pre>
+                </h1>
+
+            </div>
+        </>
+
 
     }
 }

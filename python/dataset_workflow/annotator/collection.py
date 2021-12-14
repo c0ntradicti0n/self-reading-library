@@ -1,6 +1,6 @@
 import unittest
-from python.layouteagle.pathant.PathSpec import PathSpec
-from python.layouteagle.pathant.Converter import converter
+from layouteagle.pathant.PathSpec import PathSpec
+from layouteagle.pathant.Converter import converter
 from layouteagle.RestPublisher.RestPublisher import RestPublisher
 from layouteagle.RestPublisher.RestPublisher import Resource
 from layouteagle.RestPublisher.react import react
@@ -20,7 +20,7 @@ def load_all_annotations(path):
     concatenated_df = pd.concat(df_from_each_file, ignore_index=True)
     return concatenated_df
 
-@converter("annotation", "annotation.collection")
+@converter(("annotation", "upload_annotation"), "annotation.collection")
 class Annotator(PathSpec):
     def __init__(self,
                  *args,

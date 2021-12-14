@@ -147,7 +147,7 @@ class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
 
 class TestComputedFeatureTable(unittest.TestCase):
     def init(self):
-        from python.layout.LayoutReader.labeled_feature_maker import LabeledFeatureMaker
+        from layout.LayoutReader.labeled_feature_maker import LabeledFeatureMaker
 
         latex_maker = LabeledFeatureMaker
         res = list(latex_maker.__call__(

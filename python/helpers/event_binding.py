@@ -1,6 +1,6 @@
 import random
 import threading
-from queue import Queue
+from queue import Queue, Empty
 import json
 from traceback_with_variables import Format, ColorSchemes, is_ipython_global, activate_by_import
 import logging
@@ -16,20 +16,16 @@ import io
 from jsonpath_ng import jsonpath, parse
 from pprint import pprint
 import falcon
+import threading
 
+q = {}
+d = {}
 
-fmt = Format(
-    before=5,
-    after=3,
-    max_value_str_len=-1,
-    max_exc_str_len=-1,
-    ellipsis_='...',
-    color_scheme=ColorSchemes.synthwave
-)
-
-q = Queue()
-d = Queue()
-w = Queue()
+def init_queues(service_id):
+    global q
+    global d
+    q[service_id] = Queue()
+    d[service_id] = Queue()
 
 
 def encode_base64(image):
@@ -56,24 +52,44 @@ def encode_some(k, v):
         return v
 
 def encode(obj_meta):
-    pprint(obj_meta)
     obj, meta = obj_meta
     obj = {k: encode_some(k, v)
            for k,v in obj.items()}
     return (obj, meta)
 
 
-class RestQueue ():
-    def __init__(self, update_data = lambda x: x):
+class RestQueue:
+    def __init__(
+            self,
+            service_id,
+            update_data = lambda x: x,
+            work_on_upload = None
+    ):
+        self.service_id = service_id
+        init_queues(service_id)
         self.update_data = update_data
+        self.work_on_upload = work_on_upload
 
     workbook = {}
 
     def get(self, id):
-        if not id in self.workbook or not self.workbook[id]:
-            self.workbook[id] = q.get()
+        print("get")
 
-        return self.workbook[id]
+        if not id in self.workbook or not self.workbook[id]:
+            print ("get new")
+            try:
+
+                self.workbook[id] = q[self.service_id].get(timeout=3)
+            except Exception as e:
+                print (f"{self.workbook=}")
+                logging.error("queue not ready")
+
+        if id in self.workbook:
+            print ("get old")
+
+            return self.workbook[id]
+        else:
+            return None
 
     def change(self, item, path, value):
         self.apply(item, path, value)
@@ -89,35 +105,45 @@ class RestQueue ():
 
     def ok(self, id):
         try:
-            q.task_done()
+            print ("ok")
+
+            q[self.service_id].task_done()
             item = self.workbook.pop(id)
-            d.put(item)
+            d[self.service_id].put_nowait(item)
         except Exception as e:
-            logging.error(f"could noit remove ${id} from {self.workbook}")
-            d.put(None)
+            print ("ok, but end of gen")
+
+            logging.error(f"could not remove ${id} from {self.workbook}")
+            d[self.service_id].put_nowait(None)
 
     def discard(self, id):
         try:
+            print ("discarding")
+
             item = self.workbook.pop(id)
-            q.task_done()
+            q[self.service_id].task_done()
         except Exception as e:
-            logging.error(f"could noit remove ${id} from {self.workbook}")
+            print ("discarding error")
+
+            logging.error(f"could not remove ${id} from {self.workbook}")
 
     def delete(self, id):
         self.workbook.pop(id)
 
     def on_get(self, req, resp, id=None): # get image
-        pprint((req, resp, self.workbook))
-        data = self.get(id)
-        pprint(q.queue)
-        pprint(data)
-        data = encode(data)
-        pprint(data)
+        pprint(req)
 
+        data = self.get(id)
+        if not data:
+            resp.status = falcon.HTTP_300
+            return
+        data = encode(data)
         resp.body = json.dumps(data, ensure_ascii=False)
         resp.status = falcon.HTTP_OK
 
     def on_put(self, req, resp, id = None):  # edit, update image
+        pprint(req)
+
         result = req.media
         path, value = result
         item = self.workbook[id]
@@ -128,6 +154,43 @@ class RestQueue ():
         resp.body = json.dumps(item, ensure_ascii=False)
         resp.status = falcon.HTTP_OK
 
+    def on_patch(self, req, resp, id = None):
+        pprint(req)
+
+        form = req.get_media()
+
+        file_part = req.get_param('file')
+        pprint(file_part)
+
+        # Read image as binary
+
+        raw = file_part.file.read()
+        file_part.file.close()
+
+        # Retrieve filename
+        filename = file_part.filename
+
+        path = config.PDF_UPLOAD_DIR + filename
+        with open(path, "wb") as f:
+            f.write(raw)
+
+        logging.info(f"Uploaded {filename=} to {config.PDF_UPLOAD_DIR} ")
+
+        if self.work_on_upload:
+            logging.info(f"starting thread! for {self.work_on_upload}")
+
+            t = threading.Thread(target=self.work_on_upload, args=(path,))
+            t.start()
+
+        logging.info(f"Started task {self.work_on_upload} after upload")
+
+        resp.media = {'status': 'ok'}
+        resp.status = falcon.HTTP_OK
+
+
+
+
+
 
     def on_post(self, req, resp, id=None): # ok
         print(req, resp)
@@ -137,95 +200,105 @@ class RestQueue ():
         print(req, resp)
         self.discard(id)
 
-def fibonacciGenerator():
-    a=0
-    b=1
-    while(True):
-        yield b
-        a,b= b,a+b
 
-obj = fibonacciGenerator()
+def queue_iter (service_id, gen):
 
+    global q, d
 
+    for i in range(1):
+        print("insert first")
 
-def queue_iter (gen):
+        q[service_id].put_nowait(next(gen))
+
     while True:
 
-        for i in range(1):
-            q.put(next(gen))
+        try:
+            print("getting iterator")
 
-            r = d.get()
+            r = d[service_id].get(timeout= 3)
+            print("got iterator item")
 
             if r:
-                d.task_done()
-                yield r
+                d[service_id].task_done()
+            print("task done")
+
+        except Empty:
+            r = None
+            logging.info("pulse")
+
+        if r:
+            print("yielding")
+
+            yield r
+            print("yielded")
+
+            q[service_id].put_nowait(next(gen))
+            print("inserted new item")
 
 
     print("ende")
 
 if __name__ == "__main__":
-
-    import subprocess
-    import sys
-
-    cmd_parts = ["gunicorn", "event_binding:api", "-b", "127.0.0.1:7789",
-                 "-t", "90000"]
-    print(" ".join(cmd_parts))
-    # start the resource server with gunicorn, that it can recompile, when changed
-    subprocess.check_call(cmd_parts,
-                          stdout=sys.stdout, stderr=subprocess.STDOUT)
-
-
-else:
-    pass
-    """
-    import falcon
-    from pprint import pprint
-    def get_all_routes(api):
-        routes_list = []
-
-        def get_children(node):
-            if len(node.children):
-                for child_node in node.children:
-                    get_children(child_node)
-            else:
-                routes_list.append((node.uri_template, node.resource))
-
-        [get_children(node) for node in api._router._roots]
-        return routes_list
+    def fibonacciGenerator(min, max = 1000):
+        a = 0
+        b = 1
+        for i in range (max):
+            if i >= min:
+                yield b
+            a, b = b, a + b
 
 
 
-    publishing = {
-        '/annotator/{id}': AnnotationRest()
-    }
-
-    from falcon_cors import CORS
-
-    cors = CORS(
-        allow_all_origins=True,
-        allow_all_headers=True,
-        allow_all_methods=True,
-    )
-
-    api = falcon.API(middleware=[cors.middleware])
-
-    for route, module in publishing.items():
-        api.add_route(route, module)
-
-    pprint(get_all_routes(api))
 
     def worker():
         logging.info("yielding")
 
+        fib1 = fibonacciGenerator(0, 3)
+        fib2 = fibonacciGenerator(10, 13)
 
-        for e in iter(obj):
-            print (f"yielded {e}")
+        for fib in [fib1, fib2]:
+
+            try:
+
+                for e in queue_iter(fib):
+                    print (f"yielded {e}")
+            except RuntimeError as e:
+                print ("end...")
 
 
-    #t = threading.Thread(target=worker)
-    #t.start()
-    """
+    t = threading.Thread(target=worker)
+    t.start()
+
+    rq = RestQueue(service_id="test")
+
+    id = 123
+    i = rq.get(id)
+    rq.ok(id)
+    i = rq.get(id)
+    rq.ok(id)
+
+    i = rq.get(id)
+    rq.ok(id)
+
+
+    i = rq.get(id)
+    rq.ok(id)
+    i = rq.get(id)
+    rq.ok(id)
+
+    i = rq.get(id)
+    rq.ok(id)
+
+    i = rq.get(id)
+    rq.ok(id)
+    i = rq.get(id)
+    rq.ok(id)
+
+    i = rq.get(id)
+    rq.ok(id)
+
+
+
 
 
 
