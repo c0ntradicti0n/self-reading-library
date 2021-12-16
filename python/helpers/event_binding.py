@@ -106,10 +106,10 @@ class RestQueue:
     def ok(self, id):
         try:
             print ("ok")
-
-            q[self.service_id].task_done()
+            self.workbook.get(id)
             item = self.workbook.pop(id)
             d[self.service_id].put_nowait(item)
+            q[self.service_id].task_done()
         except Exception as e:
             print ("ok, but end of gen")
 
@@ -164,6 +164,11 @@ class RestQueue:
 
         # Read image as binary
 
+        if not file_part.file:
+            resp.media = {'status': 'missing file'}
+            resp.status = falcon.HTTP_400
+
+
         raw = file_part.file.read()
         file_part.file.close()
 
@@ -215,7 +220,7 @@ def queue_iter (service_id, gen):
         try:
             print("getting iterator")
 
-            r = d[service_id].get(timeout= 3)
+            r = d[service_id].get(timeout=3)
             print("got iterator item")
 
             if r:

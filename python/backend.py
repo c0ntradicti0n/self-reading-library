@@ -4,9 +4,9 @@ import falcon
 import logging
 from falcon_multipart.middleware import MultipartMiddleware
 from wsgiref import simple_server
-
+import threading
 from layouteagle.RestPublisher.LayoutPublisher import LayoutPublisher
-
+from dataset_workflow.annotation_thread import annotate_train_model
 
 def get_all_routes(api):
     routes_list = []
@@ -76,8 +76,8 @@ if __name__ == "__main__":
 
     pprint(get_all_routes(api))
 
-    #t = threading.Thread(target=annotate_train_model)
-    #t.start()
+    t = threading.Thread(target=annotate_train_model)
+    t.start()
 
     httpd = simple_server.make_server('127.0.0.1', 7789, api)
     print("http://127.0.0.1:8000")

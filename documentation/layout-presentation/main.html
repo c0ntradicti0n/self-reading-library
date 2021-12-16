@@ -1,0 +1,267 @@
+<h1 id="1-2-oder-3-spalten-analyse">1, 2 oder 3 Spalten-Analyse</h1>
+<h1 id="wie-schwierieg-kann-das-sein-"><em>Wie schwierieg kann das sein?</em></h1>
+<table>
+<thead>
+<tr>
+<th>3</th>
+<th>2</th>
+<th>1</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><img src="pics/3_cols.png" alt="Alt text" title="a title"></td>
+<td><img src="pics/boxes_2_cols.png" alt="Alt text" title="a title"></td>
+<td><img src="pics/1_col.png" alt="Alt text" title="a title"></td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="inhalt">Inhalt</h1>
+<ol>
+<li>Motivation</li>
+<li>Alternative Ansätze</li>
+<li>Versuche</li>
+<li>Lösung?</li>
+</ol>
+<hr>
+<h1 id="motivation">Motivation</h1>
+<ul>
+<li><em>Natural Language Processing</em> und <em>Natural Language Understanding</em>  -- bestmögliches Preprocessing notwendig</li>
+</ul>
+<p><strong>Für Natural Language Processing ist Preprocessing sehr entscheidend, analog zu Elephant in the Room</strong></p>
+<p><img src="pics/zebracatdog.png" alt="Alt text">
+(<a href="https://arxiv.org/pdf/1808.03305.pdf">https://arxiv.org/pdf/1808.03305.pdf</a>)</p>
+<ul>
+<li><p>Seitenzahlen, Bildunterschriften Fußnoten, Überschriften, Randnotizen, Tabellen, Bibliographie stört und zerstört den Textfluss.</p>
+</li>
+<li><p>Portable Document Format (PDF) == Grab für den Text</p>
+</li>
+</ul>
+<hr>
+<h1 id="ans-tze">Ansätze</h1>
+<ol start="0">
+<li><p><a href="https://bytescout.com/articles/how-to-extract-pdf-with-multiple-columns-to-text-using-pdf-multitool">Per Hand</a></p>
+</li>
+<li><p>Kein Layout/Processing (Apache Tika, PDF-Miner)</p>
+</li>
+<li><p>Heuristik
+<a href="https://willus.com/k2pdfopt/">K2pdfopt</a></p>
+</li>
+<li><p>Machine learning - Clustering
+KMeans, HDBSCAN auf die Textboxen
+<a href="https://medium.com/lifen-engineering/fast-graph-based-layout-detection-19fc7ab11b17">Lifen</a></p>
+</li>
+<li><p>Deep-Learning und LayoutLMv2
+<a href="https://huggingface.co/spaces/nielsr/LayoutLMv2-FUNSD">LayoutLMv2-FUNSD</a>
+Woher das Datenset?</p>
+</li>
+</ol>
+<hr>
+<h1 id="versuche">Versuche</h1>
+<ol>
+<li>Machine Learning mit Clustering Algorithmen</li>
+<li>Machine Learning mit zeilenbasierten Features</li>
+<li>Machine Learning mit Pretrained Layout-Modellen</li>
+</ol>
+<hr>
+<h1 id="zwickm-hlen-und-dilemmata-bei-dem-layout-was-kann-der-mensch-">Zwickmühlen und Dilemmata bei dem Layout - Was kann der Mensch?</h1>
+<h1 id="soft">Soft</h1>
+<ul>
+<li>Spaltenlayout ohne 2. Spalte</li>
+</ul>
+<p><img src="pics/only-col2.png" alt="Alt text" title="a title"></p>
+<ul>
+<li>Spaltenlayout wechselt auf gleicher Seite</li>
+</ul>
+<p><img src="pics/cols-change.png" alt="Alt text" title="a title"></p>
+<hr>
+<h1 id="hart">Hart</h1>
+<ul>
+<li>Mathematik/Pseudocode/Symbole als inline-Text oder als selbstständige Kategorie?</li>
+</ul>
+<p><img src="pics/inline-math-vs-math.png" alt="Alt text" title="a title"></p>
+<ul>
+<li><p>Wenn selbstständig: Mathematik innerhalb von Fußnoten?</p>
+</li>
+<li><p>Bild  - Bild = Tabelle = Gleichung ?</p>
+</li>
+</ul>
+<p><img src="pics/pic=table=equation.png" alt="Alt text" title="a title"></p>
+<hr>
+<h1 id="framework-path-of-ants">Framework &quot;path of ants&quot;</h1>
+<p><img src="./pics/pathant.png" alt="Alt text" title="a title"></p>
+<p><strong>&#8594;  Pipeline-Architektur zum Anschließen diverser nlp-Anwendungen</strong></p>
+<table>
+<thead>
+<tr>
+<th>Quelle</th>
+<th>...</th>
+<th>PREPROCESSING</th>
+<th>(NLP-Anwendungen)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>.tex  &#8594;</td>
+<td>.pdf &#8594;</td>
+<td>.annotation &#8594;</td>
+<td>.nlp</td>
+</tr>
+<tr>
+<td>Papers/(arxiv.org)</td>
+<td>Boxlayout/Text/Bild</td>
+<td>Trainingsdaten</td>
+<td>Anwendung</td>
+</tr>
+</tbody></table>
+<ul>
+<li>&quot;Pipelineframework&quot; für eine Anwendung mit vielen anschließenden Text-Applikationen (semantische Annotationen im Text, Topic-Modelling, Hörbücher, Kataloge)</li>
+</ul>
+<hr>
+<h1 id="woher-das-datenset-">Woher das Datenset?</h1>
+<p><img src="./pics/pseudo-labels.png" alt="Alt text" title="a title"></p>
+<p>Allen Text entfernen und gegen Labels austauschen, um zu wissen, wo die Spalten sind?</p>
+<p>(In Latex Befehle definieren, um die aktuelle Spalte zu erfragen. Welche Mühe!)</p>
+<hr>
+<h1 id="deep-learning-mit-layoutlv2">Deep Learning mit LayoutLv2</h1>
+<h1 id="transformer-layout-modelle-bei-microsotfs-unilm-abteilung-unified-language-model-">Transformer/Layout Modelle bei microsotfs &quot;uniLM&quot; Abteilung (unified language model):</h1>
+<ul>
+<li><a href="https://github.com/microsoft/unilm">generischere Modelle für Familien von Aufgaben</a></li>
+</ul>
+<p>Erklärungen:</p>
+<ul>
+<li><strong>Transformer</strong>: &quot;Attention&quot; basierte Modelle <a href="https://arxiv.org/pdf/1706.03762.pdf">&quot;Attention is all you need.&quot;</a>, anders als LSTM-s durch einfache <strong>Matrixmultiplikation parallelisierbar</strong>. </li>
+</ul>
+<ul>
+<li><strong>Embeddings</strong>: Features werden als Vektor repräsentiert, bsw. die *&quot;Bedeutung&quot; von einem Wort* oder die <em>Position einer Textbox</em>. </li>
+</ul>
+<ul>
+<li><strong>Multimodal</strong>: Verschiedene Arten von Features können miteinander verbunden werden und nicht &quot;nur&quot; repräsentierte kontinuierliche Werte oder Labelkategorien.</li>
+</ul>
+<p>Transformer Modelle werden über <strong>unsupervised learning</strong> vortrainiert -- kein Datenset nötig
+und dann durch <strong>supervised learning</strong> für spezifische Aufgaben einsetzbar</p>
+<hr>
+<p><img src="pics/layoutmv2-architecture.png" alt="Alt text" title="a title"></p>
+<h1 id="pretraining-tasks">Pretraining Tasks</h1>
+<p>Das Transformer-Model lernt die Zusammenhänge zwischen den Embedding-Modalitäten durch folgende Aufgaben während des Pretraining</p>
+<ul>
+<li><strong>masking</strong>: Masked Visual-Language Model: Nur mit den Positionen und umgebendem Text (ohne Bild) sollen einzelne Textteile vorhergesagt werden</li>
+<li><strong>covering</strong>: Ein Dummy-Classifier wird als Downstreamtask angeschlossen, einzelne Textteile ausgewählt und deren Bildposition soll vorhergesagt werden</li>
+<li><strong>text image matching</strong> Mit einem Dummyclassifier werden Text und Bild von Dokumenten vertauscht und das Model soll die Zuordnung als wahr oder falsch angeben</li>
+</ul>
+<p>&quot;soll&quot; = Training</p>
+<hr>
+<h1 id="features">Features</h1>
+<table>
+<thead>
+<tr>
+<th>Embeddings</th>
+<th>Daten</th>
+<th>Konkret</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Text-Embeddings</td>
+<td>Text in jeder Textbox</td>
+<td>4 Worte pro Textbox, estrahiert mit <a href="https://pypi.org/project/pdfminer.six/">https://pypi.org/project/pdfminer.six/</a></td>
+</tr>
+<tr>
+<td>Position-Embeddings</td>
+<td>Liste mit den Textboxen, auf 1000*1000 skaliert</td>
+<td>Textboxen von pdfminer.six</td>
+</tr>
+<tr>
+<td>Bild-Embeddings</td>
+<td>255 * 255 Pixel Bild</td>
+<td>extrem scaliertes Thumbnail jeder PDF-Seite</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="workflow">Workflow</h1>
+<p>Wie bringt man ein Annotationsprojekt zum Laufen und erstellt ein eigenes Datenset, wenn man keines hat? Human-In-The-Loop!</p>
+<p>Datenset:</p>
+<ul>
+<li><p>Starter-Datenset mit richtiger Struktur</p>
+<ul>
+<li><p>Human-in-the-loop: </p>
+<p><strong>WHILE TRUE:</strong></p>
+<ul>
+<li><p>Mensch korrigiert Predictions durch einfaches Interface </p>
+</li>
+<li><p>die annotierten Samples werden dem Datenset hinzugefügt. Nach einer gewissen Menge wird </p>
+</li>
+<li><p>das Model wieder trainiert und </p>
+</li>
+<li><p>der Mensch hat bei der Korrektur weniger zu tun</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h1 id="ergebnis">Ergebnis</h1>
+<ul>
+<li>--&gt; ca. 1000 Samples nach 6 Tagen eine Stunde annotieren.</li>
+</ul>
+<p>Labels für die Textboxen:</p>
+<ul>
+<li>Ganze Zeile, 1.-2.-3.-Spalte, Bild, Tabelle, Fußnote, Seitenzahl</li>
+</ul>
+<p>Textextraktion:</p>
+<ul>
+<li>Alle Textspalten-Kategorien werden sortiert</li>
+</ul>
+<p><a href="http://localhost:3000/annotation"><strong>Annotieren</strong></a></p>
+<hr>
+<h1 id="los-gehts">Los gehts</h1>
+<p>Schickt mir Eure besten (wissenschaftlichen) PDFs!</p>
+<p><a href="http://localhost:3000/upload_annotation"><strong>Hochladen</strong></a></p>
+<hr>
+<h1 id="r-ckschl-ge">Rückschläge</h1>
+<ul>
+<li>Seltsames Preprocessing von LayoutLMv2 wirft einige Teile von der Seite weg (?!)</li>
+</ul>
+<p><img src="pics/missing-last-part.png" alt=""></p>
+<ul>
+<li><p>Begrenzter Raum für Text-Feature. <strong>Brauchbarstes  Model</strong> nutzt nur 4 Worte pro Textbox</p>
+</li>
+<li><p>Fehler im <strong>datasets</strong>-package - man muss es forken und den Fehler bypassen, solange es nicht gefixt/verstanden ist</p>
+</li>
+<li><p><strong>pdf-miner.six</strong> produziert Textboxen in Textboxen bei Mathematik. Wie wieder in den Text einfügen? --&gt; Betrifft nur Mathematik, daher egal</p>
+</li>
+</ul>
+<hr>
+<h1 id="andere-anwendungsideen-">Andere Anwendungsideen?</h1>
+<ul>
+<li><p>Formulare scannen: Ersatz für Teleform (<img src="pics/teleform.jpg" alt="Teleform">)?</p>
+</li>
+<li><p>Tabellen analysieren?</p>
+</li>
+<li><p>... (viele langweilige Fälle)</p>
+</li>
+</ul>
+<hr>
+<p>LayoutLMv2 <a href="https://www.microsoft.com/en-us/research/publication/layoutlmv2-multi-modal-pre-training-for-visually-rich-document-understanding/">https://www.microsoft.com/en-us/research/publication/layoutlmv2-multi-modal-pre-training-for-visually-rich-document-understanding/</a></p>
+<p><a href="https://willus.com/k2pdfopt/">https://willus.com/k2pdfopt/</a></p>
+<hr>
+<h1 id="the-end">The End</h1>
+<h1 id="dankesch-n">Dankeschön</h1>
+<style media="screen"> 
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,400i,700);
+
+img {
+   flex: auto;
+   max-height: 50vh;
+}
+
+.htsd-slide--shown.htsd-slide--h1 {
+   text-align: left;
+}
+
+
+
+</style>
+
+<link rel="stylesheet" href="htsd.min.css" />
+
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/hackers-tiny-slide-deck@0.3.1/build/htsd.min.js"></script>

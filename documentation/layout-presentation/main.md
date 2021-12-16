@@ -1,14 +1,14 @@
 # 1, 2 oder 3 Spalten-Analyse
 
-## _Wie schwierieg kann das sein?_
+# _Wie schwierieg kann das sein?_
 
-3     | 2    | 1 
---------|-----|------
+3       | 2    | 1 
+--------|------|------
 ![Alt text](pics/3_cols.png "a title") | ![Alt text](pics/boxes_2_cols.png "a title") | ![Alt text](pics/1_col.png "a title")
 
 ---
 
-##Inhalt
+# Inhalt
 
 1. Motivation
 2. Alternative Ansätze
@@ -21,32 +21,33 @@
 
 * _Natural Language Processing_ und _Natural Language Understanding_  -- bestmögliches Preprocessing notwendig
 
+**Für Natural Language Processing ist Preprocessing sehr entscheidend, analog zu Elephant in the Room**
+
+![Alt text](pics/zebracatdog.png)
+(https://arxiv.org/pdf/1808.03305.pdf)
+
 * Seitenzahlen, Bildunterschriften Fußnoten, Überschriften, Randnotizen, Tabellen, Bibliographie stört und zerstört den Textfluss.
 
-* Portable Document Format (PDF) == Grab für den semantischen Inhalt
+* Portable Document Format (PDF) == Grab für den Text
 
 --- 
 
 # Ansätze
 
-1. Kein Layout/Processing, d.h. direkt OCR, Apache Tika, PDF-Miner
+0. [Per Hand](https://bytescout.com/articles/how-to-extract-pdf-with-multiple-columns-to-text-using-pdf-multitool)
+
+1. Kein Layout/Processing (Apache Tika, PDF-Miner)
 2. Heuristik
+   [K2pdfopt](https://willus.com/k2pdfopt/)
+   
 3. Machine learning - Clustering
-4. Deep-Learning
-
----
-
-#Packages im Internet:
-
-Die meisten Ansätze bleiben dabei, keine Spalten zu berücksichtigen/den Text von Überschriften, Fußnoten, Seitenzahlen, Bildern und Tabellen zu befreien.
-
-Für Natural Language Processing ist aber Preprocessing sehr entscheidend, analog zu Elephant in the Room
-
-![Alt text](pics/zebracatdog.png)
-(https://arxiv.org/pdf/1808.03305.pdf)
-
-
-
+   KMeans, HDBSCAN auf die Textboxen
+   [Lifen](https://medium.com/lifen-engineering/fast-graph-based-layout-detection-19fc7ab11b17)
+   
+4. Deep-Learning und LayoutLMv2
+   [LayoutLMv2-FUNSD](https://huggingface.co/spaces/nielsr/LayoutLMv2-FUNSD)
+   Woher das Datenset?
+   
 ---
 
 # Versuche
@@ -58,29 +59,38 @@ Für Natural Language Processing ist aber Preprocessing sehr entscheidend, analo
 
 --- 
 
-#Zwickmühlen des Layouts
+# Zwickmühlen und Dilemmata bei dem Layout - Was kann der Mensch?
 
-- Soft:
+# Soft
 
    - Spaltenlayout ohne 2. Spalte
 
+![Alt text](pics/only-col2.png "a title")
+
+
    - Spaltenlayout wechselt auf gleicher Seite
 
-   - Bild/Tabellen-Texte in 2 Spalten-Layout
-    
-
-- Hart:
-
-    - Mathematik/Pseudocode/Symbole als inline-Text oder als selbstständige Kategorie?
-   
-    - Wenn selbstständig: Mathematik innerhalb von Fußnoten?
-
+![Alt text](pics/cols-change.png "a title")
 
 ---
 
-# Framework "Pfadameise"
+# Hart
 
-![Alt text](pics/img.png "a title")
+  - Mathematik/Pseudocode/Symbole als inline-Text oder als selbstständige Kategorie?
+
+![Alt text](pics/inline-math-vs-math.png "a title")
+   
+  - Wenn selbstständig: Mathematik innerhalb von Fußnoten?
+
+  - Bild  - Bild = Tabelle = Gleichung ?
+  
+![Alt text](pics/pic=table=equation.png "a title")
+
+---
+
+# Framework "path of ants"
+
+![Alt text](./pics/pathant.png "a title")
 
 **&#8594;  Pipeline-Architektur zum Anschließen diverser nlp-Anwendungen**
 
@@ -91,32 +101,38 @@ Quelle| ... | PREPROCESSING | (NLP-Anwendungen)
 Papers/(arxiv.org) | Boxlayout/Text/Bild | Trainingsdaten | Anwendung
 
 
-* für einen optimalen Bilbliothekskatalog, wo Gruppierung nach Themen, Suche nach konkreten Inhalten, konkrete Textanalyse in Bildern, Themenanalyse als Unterstützung für Leser:innen der unermesslichen Menge von wissenschaftlicher Literatur
+* "Pipelineframework" für eine Anwendung mit vielen anschließenden Text-Applikationen (semantische Annotationen im Text, Topic-Modelling, Hörbücher, Kataloge)
 
 ---
 
-# Machine Learning mit zeilenbasierten Features
+# Woher das Datenset?
 
-Problem: Wie kann man den Kontext einer ganzen Seite einbeziehen?
+![Alt text](./pics/pseudo-labels.png "a title")
 
-* Winkel und Abstände zwischen den Textboxen
-* "Dichte von Textboxenecken" (Gaussian Blur auf den durch den Text bedeckten Bereich)
+Allen Text entfernen und gegen Labels austauschen, um zu wissen, wo die Spalten sind?
+
+(In Latex Befehle definieren, um die aktuelle Spalte zu erfragen. Welche Mühe!)
+
 ---
 
-# Machine Learning mit LayoutMV2
+# Deep Learning mit LayoutLv2
 
-## Layout Modelle: 
-    * generischere Modelle für Familien von Aufgaben:
-https://github.com/microsoft/unilm
+# Transformer/Layout Modelle bei microsotfs "uniLM" Abteilung (unified language model): 
+ * [generischere Modelle für Familien von Aufgaben](https://github.com/microsoft/unilm)
+    
+Erklärungen:
 
-   * **Transformer**: "Attention" basierte Modelle ("Attention is all you need."
- https://arxiv.org/pdf/1706.03762.pdf), anders als LSTM-s durch einfache Matrixmultiplikation parallelisierbar. 
+ * **Transformer**: "Attention" basierte Modelle ["Attention is all you need."](
+ https://arxiv.org/pdf/1706.03762.pdf), anders als LSTM-s durch einfache **Matrixmultiplikation parallelisierbar**. 
       
 
-   * **Embeddings**: Features werden als Vektor repräsentiert, bsw. die "Bedeutung" von einem Wort, die Position einer Textbox. 
+   * **Embeddings**: Features werden als Vektor repräsentiert, bsw. die *"Bedeutung" von einem Wort* oder die *Position einer Textbox*. 
 
 
-   * **Multimodal**: Verschiedene Arten von Features können miteinander verbunden werden und nicht "nur" repräsentierte kontinuierliche Werte oder Labelkategorien
+   * **Multimodal**: Verschiedene Arten von Features können miteinander verbunden werden und nicht "nur" repräsentierte kontinuierliche Werte oder Labelkategorien.
+
+Transformer Modelle werden über **unsupervised learning** vortrainiert -- kein Datenset nötig
+und dann durch **supervised learning** für spezifische Aufgaben einsetzbar
 
 ---
 
@@ -124,17 +140,17 @@ https://github.com/microsoft/unilm
 ![Alt text](pics/layoutmv2-architecture.png "a title")
 
 # Pretraining Tasks 
-Das Model lernt die Zusammenhänge zwischen den Embedding-Modalitäten
+Das Transformer-Model lernt die Zusammenhänge zwischen den Embedding-Modalitäten durch folgende Aufgaben während des Pretraining
 
 * **masking**: Masked Visual-Language Model: Nur mit den Positionen und umgebendem Text (ohne Bild) sollen einzelne Textteile vorhergesagt werden
-* **covering**: Ein Dummy-Classifier wird als Downstreamtask angeschlossen, einzelne Textteile ausgewählt und deren Bildposition soll vorhergesagt werden.
-* **text image matching** Mit einem Dummyclassifier werden Text und Bild von Dokumenten vertauscht und das Model soll die Zuordnung als wahr oder falsch angeben.
+* **covering**: Ein Dummy-Classifier wird als Downstreamtask angeschlossen, einzelne Textteile ausgewählt und deren Bildposition soll vorhergesagt werden
+* **text image matching** Mit einem Dummyclassifier werden Text und Bild von Dokumenten vertauscht und das Model soll die Zuordnung als wahr oder falsch angeben
 
-"soll" = Training.
+"soll" = Training
 
 ---
 
-###Features
+# Features
 
 Embeddings | Daten | Konkret
 -----| ----- | ----
@@ -147,16 +163,28 @@ Bild-Embeddings | 255 * 255 Pixel Bild | extrem scaliertes Thumbnail jeder PDF-S
 
 # Workflow
 
-Wie bringt man ein Annotationsprojekt zum Laufen und erstellt ein eigenes Datenset, wenn man keins hat?
+Wie bringt man ein Annotationsprojekt zum Laufen und erstellt ein eigenes Datenset, wenn man keines hat? Human-In-The-Loop!
 
 Datenset:
 
    * Starter-Datenset mit richtiger Struktur
 
-   * Human-in-the-loop: Mensch korrigiert Predictions durch einfaches Interface und die annotierten Samples werden dem Datenset hinzugefügt. Nach einer gewissen Menge wird das Model wieder trainiert und der Mensch hat bei der Korrektur weniger zu tun. Das Datenset wird schnell größer.
+      * Human-in-the-loop: 
+         
+        **WHILE TRUE:**
+        
+          - Mensch korrigiert Predictions durch einfaches Interface 
+          - die annotierten Samples werden dem Datenset hinzugefügt. Nach einer gewissen Menge wird 
+            
+          - das Model wieder trainiert und 
+            
+          - der Mensch hat bei der Korrektur weniger zu tun
+   
+---
 
-   * ca. 1000 Samples nach 6 Tagen eine Stunde annotieren.
+# Ergebnis
 
+   * --> ca. 1000 Samples nach 6 Tagen eine Stunde annotieren.
 
 
 Labels für die Textboxen:
@@ -165,44 +193,82 @@ Labels für die Textboxen:
 
 Textextraktion:
 
-* Alle Textspalten-Kategorien:
+* Alle Textspalten-Kategorien werden sortiert
+
+[**Annotieren**](http://localhost:3000/annotation)
 
 ----
 
-#Los gehts
+# Los gehts
 
-(http://localhost:3000/annotation[http://localhost:3000/annotation]
+Schickt mir Eure besten (wissenschaftlichen) PDFs!
 
-Schickt mir doch nun eure besten pdfs!
+[**Hochladen**](http://localhost:3000/upload_annotation)
 
 ----
 
 # Rückschläge
 
-* Preprocessing wirft einige Teile von der Seite weg
-* Fehler im "Datasets-package" - man muss es forken und den Fehler bypassen, solange es nicht gefixt/verstanden ist
-* Begrenzter Raum für Text-Feature. Vorgestelltes Model nutzt nur 4 Worte pro Textbox
+* Seltsames Preprocessing von LayoutLMv2 wirft einige Teile von der Seite weg (?!)
+
+![](pics/missing-last-part.png)
+  
+* Begrenzter Raum für Text-Feature. **Brauchbarstes  Model** nutzt nur 4 Worte pro Textbox
+
+* Fehler im **datasets**-package - man muss es forken und den Fehler bypassen, solange es nicht gefixt/verstanden ist
+  
+* **pdf-miner.six** produziert Textboxen in Textboxen bei Mathematik. Wie wieder in den Text einfügen? --> Betrifft nur Mathematik, daher egal
 
 
 ----
 
-# Andere Anwendungsfälle
+# Andere Anwendungsideen?
 
-- Formulare scannen: Ersatz für Teleform
-- Tabellen analysieren
+- Formulare scannen: Ersatz für Teleform (![Teleform](pics/teleform.jpg))?
+- Tabellen analysieren?
 
+- ... (viele langweilige Fälle)
 
-```
-LayoutLM: Pre-training of Text and Layout for Document Image Understanding
-Yiheng Xu, Minghao Li, Lei Cui, Shaohan Huang, Furu Wei, Ming Zhou
-Pre-training techniques have been verified successfully in a variety of NLP tasks in recent years. Despite the widespread use of pre-training models for NLP applications, they almost exclusively focus on text-level manipulation, while neglecting layout and style information that is vital for document image understanding. In this paper, we propose the \textbf{LayoutLM} to jointly model interactions between text and layout information across scanned document images, which is beneficial for a great number of real-world document image understanding tasks such as information extraction from scanned documents. Furthermore, we also leverage image features to incorporate words' visual information into LayoutLM. To the best of our knowledge, this is the first time that text and layout are jointly learned in a single framework for document-level pre-training. It achieves new state-of-the-art results in several downstream tasks, including form understanding (from 70.72 to 79.27), receipt understanding (from 94.02 to 95.24) and document image classification (from 93.07 to 94.42). The code and pre-trained LayoutLM models are publicly available at \url{this https URL}.
-```
+- und:
+
 
 ---
 
+# Preprocessing für
+
+
+
+ 
 ---
 
-# Ende
+LayoutLMv2 https://www.microsoft.com/en-us/research/publication/layoutlmv2-multi-modal-pre-training-for-visually-rich-document-understanding/
+
+https://willus.com/k2pdfopt/
+
+---
+
+# The End
+
+# Dankeschön
 
 
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/hackers-tiny-slide-deck@VERSION/build/htsd.min.js"></script>
+<style media="screen"> 
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,400i,700);
+
+img {
+   flex: auto;
+   max-height: 50vh;
+}
+
+.htsd-slide--shown.htsd-slide--h1 {
+   text-align: left;
+}
+
+
+
+</style>
+
+<link rel="stylesheet" href="htsd.min.css" />
+
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/hackers-tiny-slide-deck@0.3.1/build/htsd.min.js"></script>

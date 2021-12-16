@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import {zip, pairwise} from "../src/util/array";
-
+import { JSONToHTMLTable } from '@kevincobain2000/json-to-html-table'
 
 export default class BoxAnnotator extends Component {
     LABELS = ['NONE', 'c1', 'c2', 'c3', 'wh', 'h', 'pn', 'fn', 'fg', 'tb']
@@ -56,15 +56,16 @@ export default class BoxAnnotator extends Component {
         if (this.props.superState.value)
             cols = zip([this.props.superState.value.bbox, this.props.superState.value.labels])
 
-        return <>
+        return <div style={{fontSize: "1em !important" }}>
+            <div style={{fontSize: "1em !important" }}>
             <form onSubmit={(e) => {
                 console.log("submit", e, e.target)
                 this.props.service.upload(e.target)
-            }}>
-                <input type="file" name="file" multiple/>
-                <button type="submit">Upload</button>
-
+            }} style={{fontSize: "1em" }}>
+                <input type="file" name="file" multiple style={{fontSize: "2em" }}/>
+                <button type="submit"style={{fontSize: "1em" }}>Upload</button>
             </form>
+                </div>
             <h4> {this.props.superState?.meta?.html_path}</h4>
             <div className="container" style={{position: "absolute"}}>
                 {this.props.superState?.value?.human_image ?
@@ -114,11 +115,11 @@ export default class BoxAnnotator extends Component {
 
 
                 <h1>
-                    <pre>{JSON.stringify(this.KEYS, null, 2)}</pre>
+                    <JSONToHTMLTable data={this.KEYS} tableClassName="table table-sm"/>
                 </h1>
 
             </div>
-        </>
+        </div>
 
 
     }
