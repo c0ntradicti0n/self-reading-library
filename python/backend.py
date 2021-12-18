@@ -1,12 +1,9 @@
 from pprint import pprint
 from time import sleep
-import falcon
 import logging
 from falcon_multipart.middleware import MultipartMiddleware
 from wsgiref import simple_server
-import threading
-from layouteagle.RestPublisher.LayoutPublisher import LayoutPublisher
-from dataset_workflow.annotation_thread import annotate_train_model
+
 
 def get_all_routes(api):
     routes_list = []
@@ -24,22 +21,16 @@ def get_all_routes(api):
 
 def create_app():
 
-    from layouteagle.RestPublisher.DifferencePublisher import DifferencePublisher
-    from layouteagle.pathant.AntPublisher import AntPublisher
-    from layouteagle.pathant.ConfigRest import ConfigRest
 
-    from controlflow import CachePublisher
-    from dataset_workflow.annotator.annotation import Annotator, AnnotationQueueRest
-    from dataset_workflow.upload_annotation.upload_annotation import UploadAnnotator
-    from layouteagle.LayoutEagle import LayoutEagle
-    from dataset_workflow.annotation_thread import annotate_train_model, UploadAnnotationQueueRest
+    # from language.Topics.TopicsPublisher import TopicsPublisher
+
+    import falcon
     import threading
-    from traceback_with_variables import activate_by_import
-
-    # from nlp.Topics.TopicsPublisher import TopicsPublisher
+    from core.RestPublisher.LayoutPublisher import LayoutPublisher
+    from layout.annotation_thread import annotate_train_model
 
     publishing = {
-        '/layout': LayoutPublisher,
+        '/latex': LayoutPublisher,
         '/difference': DifferencePublisher,
         # '/topics': TopicsPublisher,
         '/ant': AntPublisher,
@@ -71,6 +62,21 @@ def create_app():
     return  api
 
 if __name__ == "__main__":
+    from core.RestPublisher.DifferencePublisher import DifferencePublisher
+    from core.pathant.AntPublisher import AntPublisher
+    from core.pathant.ConfigRest import ConfigRest
+    from controlflow import CachePublisher
+    from layout.annotator.annotation import Annotator, AnnotationQueueRest
+    from layout.upload_annotation.upload_annotation import UploadAnnotator
+    from layout.upload_annotation.upload_annotation import UploadAnnotator
+
+    from core.LayoutEagle import LayoutEagle
+    from core.StandardConverter.ScienceTexScraper.scrape import ScienceTexScraper
+    from core.StandardConverter.HTML2PDF import HTML2PDF
+    from core.StandardConverter.PDF2HTML import PDF2HTML
+    from layout.annotation_thread import annotate_train_model, UploadAnnotationQueueRest
+    import threading
+    from traceback_with_variables import activate_by_import
 
     api = create_app()
 

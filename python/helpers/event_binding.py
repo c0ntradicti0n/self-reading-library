@@ -10,7 +10,7 @@ import sys
 import logging
 sys.path.append("../")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from layouteagle import config
+from core import config
 import base64
 import io
 from jsonpath_ng import jsonpath, parse

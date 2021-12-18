@@ -2,10 +2,10 @@ import os
 from typing import List
 
 from helpers.cache_tools import uri_with_cache
-from layouteagle import config
-from layouteagle.RestPublisher.Resource import Resource
-from layouteagle.RestPublisher.RestPublisher import RestPublisher
-from layouteagle.pathant.Converter import converter
+from core import config
+from core.RestPublisher.Resource import Resource
+from core.RestPublisher.RestPublisher import RestPublisher
+from core.pathant.Converter import converter
 
 
 def fs_tree_to_dict(path_):

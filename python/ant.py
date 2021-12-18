@@ -2,9 +2,9 @@ import json
 import logging
 import os
 
-from layouteagle import config
+from core import config
 from helpers.nested_dict_tools import type_spec
-from layouteagle.pathant.PathSpec import PathSpec, cache_flow
+from core.pathant.PathSpec import PathSpec, cache_flow
 
 
 class Ant(PathSpec):
