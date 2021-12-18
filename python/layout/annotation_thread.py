@@ -1,6 +1,5 @@
-from core.pathant.PathAnt import PathAnt
 from layout.model_helpers import repaint_image_from_labels
-from helpers.event_binding import RestQueue
+from core.event_binding import RestQueue
 from core.StandardConverter.ScienceTexScraper.scrape import ScienceTexScraper
 from layout.box_feature_maker.box_feature_maker import BoxFeatureMaker
 from core.StandardConverter.HTML2PDF import HTML2PDF
@@ -9,9 +8,9 @@ from core.StandardConverter.PDF2HTML import PDF2HTML
 from core.StandardConverter.Dict2Graph import Dict2Graph
 from core.StandardConverter.Wordi2Css import Wordi2Css
 from core.pathant.PathAnt import PathAnt
-from language.TransformerStuff.ElmoDifference import ElmoDifference
-from language.TransformerStuff.Pager import Pager
-from language.TransformerStuff.UnPager import UnPager
+from language.transformer.ElmoDifference import ElmoDifference
+from language.transformer.Pager import Pager
+from language.transformer.UnPager import UnPager
 from core.StandardConverter.Tex2Pdf import Tex2Pdf
 from layout.annotator import annotation, collection
 from layout.prediction import prediction
@@ -72,8 +71,6 @@ upload_pipe = ant(
     num_labels=config.NUM_LABELS,
     model_path=full_model_path
 )
-
-ant.info("workflow.png", pipelines_to_highlight=[sample_pipe, model_pipe, upload_pipe])
 
 def annotate_uploaded_file(path_to_pdf):
     print(f"working on {path_to_pdf}")

@@ -1,7 +1,7 @@
 import os
 import sys
 
-from core.LayoutEagle import LayoutEagle
+from core.layout_eagle import LayoutEagle
 
 sys.path.append(os.getcwd() + "/../")
 

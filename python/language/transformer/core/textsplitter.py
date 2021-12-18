@@ -8,7 +8,7 @@ from more_itertools import pairwise, split_before
 from nltk import flatten
 import regex as re
 
-from language.TransformerStuff.core import bio_annotation
+from language.transformer.core import bio_annotation
 
 nlp = spacy.load("en_core_sci_sm")
 

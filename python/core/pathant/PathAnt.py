@@ -58,6 +58,8 @@ class PathAnt:
             if isinstance(via, str):
                 return self.__call__(source=source, target=via, filter=filter, *args, **kwargs) \
                        + self.__call__(source=via, target=target, filter=filter, *args, **kwargs)
+            if isinstance(via, list):
+                raise NotImplemented("Needs to be implemented to have different signs on the way")
 
         converters_path = self.make_path(self.G, source, target)
         converters_implications = {uv: [_a for _a in a if _a not in converters_path]

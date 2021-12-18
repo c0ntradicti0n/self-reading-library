@@ -1,5 +1,5 @@
 from core.pathant.Converter import converter
-from language.TransformerStuff.ElmoPredict import ElmoPredict
+from language.transformer.ElmoPredict import ElmoPredict
 from core import config
 
 @converter("wordi.page", 'wordi.page.difference')

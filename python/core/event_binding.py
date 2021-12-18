@@ -18,8 +18,10 @@ from pprint import pprint
 import falcon
 import threading
 
+
 q = {}
 d = {}
+
 
 def init_queues(service_id):
     global q
@@ -34,15 +36,19 @@ def encode_base64(image):
     byte_object = buffer.getbuffer()
     return byte_object
 
+
 def encode_df(df):
     return None # df.to_dict()
+
 
 def round_double_list(bbox):
     return [[round(c, 2 )for c in box] for box in bbox]
 
+
 funs = {"image": lambda x: base64.b64encode(encode_base64(x)).decode('utf-8'),
         "df": encode_df,
         "bbox": round_double_list}
+
 
 def encode_some(k, v):
     for s, f in funs.items():
@@ -192,11 +198,6 @@ class RestQueue:
         resp.media = {'status': 'ok'}
         resp.status = falcon.HTTP_OK
 
-
-
-
-
-
     def on_post(self, req, resp, id=None): # ok
         print(req, resp)
         self.ok(id)
@@ -242,6 +243,7 @@ def queue_iter (service_id, gen):
 
 
     print("ende")
+
 
 if __name__ == "__main__":
     def fibonacciGenerator(min, max = 1000):

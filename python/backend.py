@@ -22,7 +22,7 @@ def get_all_routes(api):
 def create_app():
 
 
-    # from language.Topics.TopicsPublisher import TopicsPublisher
+    # from language.topics.TopicsPublisher import TopicsPublisher
 
     import falcon
     import threading
@@ -31,7 +31,8 @@ def create_app():
 
     publishing = {
         '/latex': LayoutPublisher,
-        '/difference': DifferencePublisher,
+        '/elmo_difference': ElmoDifferenceQueueRest,
+
         # '/topics': TopicsPublisher,
         '/ant': AntPublisher,
         '/cache': CachePublisher,
@@ -69,21 +70,41 @@ if __name__ == "__main__":
     from layout.annotator.annotation import Annotator, AnnotationQueueRest
     from layout.upload_annotation.upload_annotation import UploadAnnotator
     from layout.upload_annotation.upload_annotation import UploadAnnotator
-
-    from core.LayoutEagle import LayoutEagle
+    from language.layout2wordi import Layout2Wordi
+    from core.layout_eagle import LayoutEagle
     from core.StandardConverter.ScienceTexScraper.scrape import ScienceTexScraper
     from core.StandardConverter.HTML2PDF import HTML2PDF
     from core.StandardConverter.PDF2HTML import PDF2HTML
-    from layout.annotation_thread import annotate_train_model, UploadAnnotationQueueRest
+    from layout.annotation_thread import annotate_train_model, UploadAnnotationQueueRest, sample_pipe, model_pipe, upload_pipe
+    from language.transformer.elmo_difference import ElmoDifference, ElmoDifferenceQueueRest, elmo_difference_pipe
     import threading
     from traceback_with_variables import activate_by_import
+    from core.pathant.PathAnt import PathAnt
 
     api = create_app()
 
     pprint(get_all_routes(api))
 
-    t = threading.Thread(target=annotate_train_model)
-    t.start()
+    ant = PathAnt()
+
+    ant.info("workflow.png", pipelines_to_highlight=[
+        elmo_difference_pipe,
+        sample_pipe,
+        model_pipe,
+        upload_pipe]
+    )
+
+
+    layout = threading.Thread(target=annotate_train_model)
+    layout.start()
+
+    difference_elmo = threading.Thread(target=annotate_difference_elmo)
+    difference_elmo.start()
+    """difference_sokrates = threading.Thread(target=annotate_difference_sokrates)
+    difference_sokrates.start()
+    difference_gpt3 = threading.Thread(target=write_difference_gpt3)
+    difference_gpt3.start()"""
+
 
     httpd = simple_server.make_server('127.0.0.1', 7789, api)
     print("http://127.0.0.1:8000")

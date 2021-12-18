@@ -1,12 +1,12 @@
 import copy
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
-from language.NlpUtils.listalign.fuzzyalign import fuzzyalign
-from language.NlpUtils.listalign.helpers import alignment_table
+from language.nlp_helpers.listalign.fuzzyalign import fuzzyalign
+from language.nlp_helpers.listalign.helpers import alignment_table
 
 
-@converter("wordi.page.*", 'wordi.*')
-class UnPager(PathSpec):
+@converter("annotation", 'wordi')
+class Layout2Wordi(PathSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         pass

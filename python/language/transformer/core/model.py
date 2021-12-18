@@ -9,8 +9,8 @@ from allennlp.predictors import Predictor
 from regex import regex as re
 
 from helpers.list_tools import threewise
-from language.TransformerStuff.core.corpus import Corpus
-from language.TransformerStuff.difference_predictor.difference_predictor import MoreVersatileTaggerPredictor
+from language.transformer.core.corpus import Corpus
+from language.transformer.difference_predictor.difference_predictor import MoreVersatileTaggerPredictor
 
 
 def split_list_on_lambda(l, lam):

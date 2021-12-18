@@ -10,7 +10,7 @@ from core.RestPublisher.Resource import Resource
 from core.RestPublisher.RestPublisher import RestPublisher
 from core.RestPublisher.react import react
 from core.StandardConverter.Dict2Graph import Dict2Graph
-from language.Topics.TopicMaker import TopicMaker
+from language.topics.TopicMaker import TopicMaker
 from core import config
 from helpers.cache_tools import file_persistent_cached_generator, uri_with_cache
 from helpers.nested_dict_tools import type_spec_iterable
@@ -23,7 +23,7 @@ class TopicsPublisher(RestPublisher, react):
                  *args,
                  **kwargs):
         super().__init__(*args, **kwargs, resource=Resource(
-            title="Topics",
+            title="topics",
             type="graph",
             path="topics",
             route="topics",

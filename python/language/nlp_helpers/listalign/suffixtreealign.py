@@ -1,7 +1,7 @@
 from collections import defaultdict, deque
 from typing import List, Tuple
 
-from language.NlpUtils.listalign.helpers import alignment_table
+from language.nlp_helpers.listalign.helpers import alignment_table
 from helpers.time_tools import timeit_context
 
 

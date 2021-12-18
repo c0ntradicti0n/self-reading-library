@@ -1,16 +1,8 @@
-import unittest
 from core.pathant.Converter import converter
 from core.RestPublisher.RestPublisher import RestPublisher
 from core.RestPublisher.RestPublisher import Resource
 from core.RestPublisher.react import react
-import uuid
-from itertools import islice
-import types
-import psutil
-from pprint import pprint
-import threading, queue
-from helpers.event_binding import queue_iter, RestQueue
-import itertools
+from core.event_binding import queue_iter, RestQueue
 from layout.model_helpers import repaint_image_from_labels
 import logging
 

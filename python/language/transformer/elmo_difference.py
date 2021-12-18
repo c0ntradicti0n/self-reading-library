@@ -4,16 +4,13 @@ from layout.latex.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF
 from helpers.cache_tools import file_persistent_cached_generator
 from core.pathant.Converter import converter
 from core.pathant.parallel import paraloop
-
-outputs = {
-    'html': 'html',  # same looking html
-    'wordi': 'wordi',  # numbered word list
-    'feat': 'feat'  # json with indexed single words as they can be reapplied via css to the html-document
-}
+from core.pathant.PathAnt import PathAnt
+from core.event_binding import RestQueue
 
 
-@converter('pdf', list(outputs.values()))
-class PDF2ETC(TrueFormatUpmarkerPDF2HTMLEX):
+
+@converter('css.difference', "elmo.css_html.difference")
+class ElmoDifference(TrueFormatUpmarkerPDF2HTMLEX):
     def __init__(self, debug=True, *args, n=15, **kwargs):
         super().__init__(*args, **kwargs)
         self.n = n
@@ -35,3 +32,21 @@ class PDF2ETC(TrueFormatUpmarkerPDF2HTMLEX):
             meta['feat_path'] = feat_path
 
             yield (html_path, wordi_path, feat_path), meta
+
+
+
+ant = PathAnt()
+
+elmo_difference_pipe = ant(
+    "pdf", "elmo.css_html.difference",
+    num_labels=config.NUM_LABELS,
+    via='annotation'
+)
+
+def annotate_uploaded_file(file):
+    return elmo_difference_pipe(metaize(file))
+
+ElmoDifferenceQueueRest = RestQueue(
+    service_id="elmo_difference",
+    work_on_upload=annotate_uploaded_file
+)

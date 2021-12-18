@@ -6,8 +6,8 @@ from core.pathant.PathSpec import PathSpec
 
 from allennlp.models.model import Model
 
-from language.TransformerStuff.difference_predictor.difference_predictor import DifferenceTaggerPredictor
-import language.TransformerStuff.attentivecrftagger.attentivecrftagger
+from language.transformer.difference_predictor.difference_predictor import DifferenceTaggerPredictor
+import language.transformer.attentivecrftagger.attentivecrftagger
 
 
 

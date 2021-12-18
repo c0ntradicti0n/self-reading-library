@@ -16,7 +16,7 @@ import spacy
 from allennlp.modules.elmo import Elmo, batch_to_ids
 
 from core.StandardConverter.Dict2Graph import Dict2Graph
-from language.Topics.TextRank4Keywords import TextRank4Keyword
+from language.topics.TextRank4Keywords import TextRank4Keyword
 
 
 class TopicMaker:

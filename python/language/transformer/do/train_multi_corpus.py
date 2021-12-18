@@ -6,7 +6,7 @@ import torch
 from _jsonnet import evaluate_file
 from allennlp.common.file_utils import cached_path
 from allennlp.common.params import parse_overrides, _environment_variables, with_fallback
-from language.TransformerStuff.attentivecrftagger.attentivecrftagger import AttentiveCrfTagger
+from language.transformer.attentivecrftagger.attentivecrftagger import AttentiveCrfTagger
 
 from core import config
 models = ['over'] #, 'over']
@@ -20,14 +20,14 @@ args = parser.parse_args()
 for model in models:
 
     tagger_config_file = args.config
-    json_override = """' {{"train_data_path": "language/TransformerStuff/manual_corpus/train_{model}.conll3",    """ \
-                    """  "validation_data_path": "language/TransformerStuff/manual_corpus/test_{model}.conll3"}}'"""
+    json_override = """' {{"train_data_path": "language/transformer/manual_corpus/train_{model}.conll3",    """ \
+                    """  "validation_data_path": "language/transformer/manual_corpus/test_{model}.conll3"}}'"""
 
     dir, fname = os.path.split(tagger_config_file)
     subprocess.run(["rm", "-rf", config.hidden_folder + '_'.join([model, fname])])
 
     script = r"""
-    allennlp train --include-package language.TransformerStuff.attentivecrftagger.attentivecrftagger \
+    allennlp train --include-package language.transformer.attentivecrftagger.attentivecrftagger \
                    {config} \
                    --serialization-dir  {out}/ \
                    -o {json_override}"""  \

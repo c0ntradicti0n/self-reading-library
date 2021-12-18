@@ -7,8 +7,8 @@ from pdfminer.high_level import extract_text
 from core import config
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
-from language.NlpUtils.Regexes import SENTENCE_END_REGEX
-from language.NlpUtils.split_interpunction import split_punctuation
+from language.nlp_helpers.Regexes import SENTENCE_END_REGEX
+from language.nlp_helpers.split_interpunction import split_punctuation
 
 
 @converter("wordi", 'wordi.page')

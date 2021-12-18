@@ -1,16 +1,13 @@
-from core.StandardConverter.Wordi2Css import Wordi2Css
 from core.pathant.PathAnt import PathAnt
-from language.TransformerStuff.ElmoDifference import ElmoDifference
-from language.TransformerStuff.UnPager import UnPager
+from language.transformer.ElmoDifference import ElmoDifference
+from language.transformer.UnPager import UnPager
 
-a = Wordi2Css
+a = UnPager
 b = ElmoDifference
-c = UnPager
-
 
 ant = PathAnt()
-ant.info("front_star.png")
-pipe = ant("wordi.difference", "css.difference")
+ant.info("erase_and_star.png")
+pipe = ant("wordi.page.difference", "wordi.difference")
 vals = [2,3,4]
 css_value, html_meta = list(
                     zip(
