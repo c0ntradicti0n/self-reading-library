@@ -2,7 +2,7 @@ from core.pathant.Converter import converter
 from language.transformer.ElmoPredict import ElmoPredict
 from core import config
 
-@converter("wordi.page", 'wordi.page.difference')
+@converter("reading_order.page", 'reading_order.page.difference')
 class ElmoDifference(ElmoPredict):
     def __init__(self, *args, **kwargs):
         super().__init__(

@@ -5,7 +5,7 @@ from language.nlp_helpers.listalign.fuzzyalign import fuzzyalign
 from language.nlp_helpers.listalign.helpers import alignment_table
 
 
-@converter("annotation", 'wordi')
+@converter("annotation", 'reading_order')
 class Layout2Wordi(PathSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

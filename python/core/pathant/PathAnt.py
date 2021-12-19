@@ -13,7 +13,7 @@ from core.StandardConverter.Dict2Graph import Dict2Graph
 from helpers.os_tools import make_dirs_recursive
 from core.pathant.MatchDescription import match, list_or_values
 from core.pathant.Pipeline import Pipeline
-from core.pathant.converters import converters
+from core.pathant.converters import ____CONVERTERS____
 from regex import regex, Regex
 from core.pathant.Filter import Filter
 
@@ -23,14 +23,14 @@ class PathAnt:
         make_dirs_recursive(necessary_paths)
         self.G = nx.DiGraph()
 
-        for _from, _to, functional_object in converters:
+        for _from, _to, functional_object in ____CONVERTERS____:
             self.add_edge(_from, _to, functional_object)
-            self.add_starred(_from, _to, functional_object, converters)
+            self.add_starred(_from, _to, functional_object, ____CONVERTERS____)
             functional_object.ant = self
 
         for (_froms1, _tos1, functional_object1), \
             (_froms2, _tos2, functional_object2) \
-                in itertools.permutations(converters, 2):
+                in itertools.permutations(____CONVERTERS____, 2):
 
             for (_to1, _from1, _to2, _from2) in list_or_values(_tos1, _froms1, _tos2, _froms2):
                 try:
@@ -46,22 +46,23 @@ class PathAnt:
     def realize_node(self, node):
         os.system(f"mkdir {node.dir}")
 
-    def make_path(self, G, source, target):
+    def make_path(self, G, source, target, via=None):
         try:
+            if via:
+                if isinstance(via, str):
+                    return self.make_path(G, source=source, target=via) \
+                           + self.make_path(G, source=via, target=target)[1:]
+                if isinstance(via, list):
+                    raise NotImplemented("Needs to be implemented to have different signs on the way")
+
             return nx.shortest_path(G, source, target)
         except:
             self.info()
             raise
 
     def __call__(self, source, target, *args, via=None, filter={}, **kwargs):
-        if via:
-            if isinstance(via, str):
-                return self.__call__(source=source, target=via, filter=filter, *args, **kwargs) \
-                       + self.__call__(source=via, target=target, filter=filter, *args, **kwargs)
-            if isinstance(via, list):
-                raise NotImplemented("Needs to be implemented to have different signs on the way")
 
-        converters_path = self.make_path(self.G, source, target)
+        converters_path = self.make_path(self.G, source, target, via=via)
         converters_implications = {uv: [_a for _a in a if _a not in converters_path]
                                    for uv, a in nx.get_edge_attributes(self.G, 'implicite').items()
                                    if uv[1] in converters_path

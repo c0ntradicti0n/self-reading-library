@@ -63,23 +63,28 @@ def create_app():
     return  api
 
 if __name__ == "__main__":
+    import threading
+    from traceback_with_variables import activate_by_import
+
+    from core.pathant.PathAnt import PathAnt
+    from controlflow import CachePublisher
+
     from core.RestPublisher.DifferencePublisher import DifferencePublisher
     from core.pathant.AntPublisher import AntPublisher
     from core.pathant.ConfigRest import ConfigRest
-    from controlflow import CachePublisher
-    from layout.annotator.annotation import Annotator, AnnotationQueueRest
-    from layout.upload_annotation.upload_annotation import UploadAnnotator
-    from layout.upload_annotation.upload_annotation import UploadAnnotator
-    from language.layout2wordi import Layout2Wordi
     from core.layout_eagle import LayoutEagle
     from core.StandardConverter.ScienceTexScraper.scrape import ScienceTexScraper
     from core.StandardConverter.HTML2PDF import HTML2PDF
     from core.StandardConverter.PDF2HTML import PDF2HTML
+
+    from layout.annotator.annotation import Annotator, AnnotationQueueRest
+    from layout.upload_annotation.upload_annotation import UploadAnnotator
+    from layout.upload_annotation.upload_annotation import UploadAnnotator
     from layout.annotation_thread import annotate_train_model, UploadAnnotationQueueRest, sample_pipe, model_pipe, upload_pipe
+
+    from language.layout2reading_order import Layout2Wordi
     from language.transformer.elmo_difference import ElmoDifference, ElmoDifferenceQueueRest, elmo_difference_pipe
-    import threading
-    from traceback_with_variables import activate_by_import
-    from core.pathant.PathAnt import PathAnt
+    from language.heuristic.heuristic_difference import HeurisiticalLogician
 
     api = create_app()
 

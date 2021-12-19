@@ -31,11 +31,11 @@ class CachePublisher(RestPublisher):
         self.dir = config.markup_dir
 
 
-        # pdf -> wordi
-        #     -> wordi.page
-        #     -> wordi.page.difference
-        #     -> wordi.page.difference
-        #     -> wordi.difference
+        # pdf -> reading_order
+        #     -> reading_order.page
+        #     -> reading_order.page.difference
+        #     -> reading_order.page.difference
+        #     -> reading_order.difference
         #     -> css.difference
 
 

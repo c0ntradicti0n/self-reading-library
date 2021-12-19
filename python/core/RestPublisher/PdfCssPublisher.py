@@ -20,11 +20,11 @@ class PdfCssPublisher(RestPublisher):
         self.dir = config.markup_dir
         self.kind = kind
 
-        # pdf -> wordi
-        #     -> wordi.page
-        #     -> wordi.page.difference
-        #     -> wordi.page.difference
-        #     -> wordi.difference
+        # pdf -> reading_order
+        #     -> reading_order.page
+        #     -> reading_order.page.difference
+        #     -> reading_order.page.difference
+        #     -> reading_order.difference
         #     -> css.difference
 
     @uri_with_cache

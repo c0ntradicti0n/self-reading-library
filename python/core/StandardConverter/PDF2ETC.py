@@ -7,7 +7,7 @@ from core.pathant.parallel import paraloop
 
 outputs = {
     'html': 'html',  # same looking html
-    'wordi': 'wordi',  # numbered word list
+    'reading_order': 'reading_order',  # numbered word list
     'feat': 'feat'  # json with indexed single words as they can be reapplied via css to the html-document
 }
 
@@ -23,7 +23,7 @@ class PDF2ETC(TrueFormatUpmarkerPDF2HTMLEX):
     def __call__(self, labeled_paths, *args, **kwargs):
         for doc_id, (pdf_path, meta) in enumerate(labeled_paths):
             html_path = pdf_path + outputs['html']
-            wordi_path = pdf_path + "." + outputs['wordi']
+            reading_order_path = pdf_path + "." + outputs['reading_order']
             feat_path = pdf_path + "." + outputs['feat']
 
             self.logger.warning(f"working on {pdf_path}")
@@ -31,7 +31,7 @@ class PDF2ETC(TrueFormatUpmarkerPDF2HTMLEX):
 
             meta['pdf2htmlEX.html'] = html_path
             meta['pdf_path'] =  pdf_path
-            meta['wordi_path'] = wordi_path
+            meta['reading_order_path'] = reading_order_path
             meta['feat_path'] = feat_path
 
-            yield (html_path, wordi_path, feat_path), meta
+            yield (html_path, reading_order_path, feat_path), meta

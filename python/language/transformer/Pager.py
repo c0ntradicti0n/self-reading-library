@@ -11,7 +11,7 @@ from language.nlp_helpers.Regexes import SENTENCE_END_REGEX
 from language.nlp_helpers.split_interpunction import split_punctuation
 
 
-@converter("wordi", 'wordi.page')
+@converter("reading_order", 'reading_order.page')
 class Pager(PathSpec):
     def __init__(self, *args, max_window=200, **kwargs):
         super().__init__(*args, **kwargs)
@@ -19,26 +19,26 @@ class Pager(PathSpec):
 
     WORD_I_LINE_REGEX = re.compile(r"^(\d+):(.*)", re.DOTALL);
 
-    def match_wordi_line(self, line):
+    def match_reading_order_line(self, line):
         m = Pager.WORD_I_LINE_REGEX.match(line)
         if not m:
-            self.logger.error(f"No match line in wordi! for {line}")
+            self.logger.error(f"No match line in reading_order! for {line}")
             return -1, line
         return int(m.group(1)), m.group(2)
 
     def __call__(self, paths, *args, **kwargs):
         for paths, meta in paths:
-            pdf_path, wordi_path, _ = paths
+            pdf_path, reading_order_path, _ = paths
 
-            # read the text as it is referenced in the html from the wordi file
+            # read the text as it is referenced in the html from the reading_order file
             # containing the class index of the tags and the string, may contain
             # errors: f"{index}:{string}"
-            with open(wordi_path, 'rb') as f:
+            with open(reading_order_path, 'rb') as f:
                 content = f.read()
 
             encoding = chardet.detect(content)['encoding']
             lines = content.decode(encoding).split()
-            i_word = [self.match_wordi_line(line) for line in lines if len(line) > 2]
+            i_word = [self.match_reading_order_line(line) for line in lines if len(line) > 2]
 
 
             # read pure text with better tokenization with pdfminer.six

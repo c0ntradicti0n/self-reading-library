@@ -8,7 +8,7 @@ from latex.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
 from core.pathant.Converter import converter
 
 
-@converter('predicted.feature', "wordi.latex")
+@converter('predicted.feature', "reading_order.latex")
 class MarkupDocument(TrueFormatUpmarkerPDF2HTMLEX):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

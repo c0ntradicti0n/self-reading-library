@@ -5,7 +5,7 @@ from language.nlp_helpers.listalign.fuzzyalign import fuzzyalign
 from language.nlp_helpers.listalign.helpers import alignment_table
 
 
-@converter("wordi.page.*", 'wordi.*')
+@converter("reading_order.page.*", 'reading_order.*')
 class UnPager(PathSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -17,7 +17,7 @@ from helpers.nested_dict_tools import type_spec_iterable
 from core.pathant.Converter import converter
 
 
-@converter("wordi", "topics.dict")
+@converter("reading_order", "topics.dict")
 class TopicsPublisher(RestPublisher, react):
     def __init__(self,
                  *args,
@@ -31,7 +31,7 @@ class TopicsPublisher(RestPublisher, react):
 
         self.topics = None
 
-    wordi_regex = regex.compile(" *\d+:(.*)")
+    reading_order_regex = regex.compile(" *\d+:(.*)")
 
     """@file_persistent_cached_generator(
         config.cache + os.path.basename(__file__).replace('.py', '') +
@@ -45,28 +45,28 @@ class TopicsPublisher(RestPublisher, react):
         # print(len(list(zip(documents))))
         html_paths_json_paths_txt_paths, metas = list(zip(*documents))
 
-        wordi_paths = [meta["wordi_path"] for meta in metas]
-        # print(wordi_paths)
+        reading_order_paths = [meta["reading_order_path"] for meta in metas]
+        # print(reading_order_paths)
         texts = []
         paths = []
         print("Topicizing documents")
 
-        for i, wordi in enumerate(wordi_paths):
+        for i, reading_order in enumerate(reading_order_paths):
             o = os.getcwd()
-            print(f"opening {wordi} {o}  {i+1} of {len(wordi_paths)}")
+            print(f"opening {reading_order} {o}  {i+1} of {len(reading_order_paths)}")
             try:
-                with open(wordi, 'r', encoding='utf-8', errors='ignore')  as f:
+                with open(reading_order, 'r', encoding='utf-8', errors='ignore')  as f:
                     firstlines = [f.readline() for i in range(1000)]
 
-                    words = [TopicsPublisher.wordi_regex.search(w).group(1) for w in firstlines if TopicsPublisher.wordi_regex.search(w)]
+                    words = [TopicsPublisher.reading_order_regex.search(w).group(1) for w in firstlines if TopicsPublisher.reading_order_regex.search(w)]
                     words = [w for w in words if w]
                     if words:
                         text = wordninja.split("".join(words)[:1000].replace(" ", ""))
                         texts.append(text)
-                        paths.append(wordi)
+                        paths.append(reading_order)
                         print (text[:3])
             except FileNotFoundError:
-                logging.error(f"no {wordi}, was not created?")
+                logging.error(f"no {reading_order}, was not created?")
 
         self.topics, text_ids = self.topic_maker(texts, paths)
         yield self.topics, text_ids

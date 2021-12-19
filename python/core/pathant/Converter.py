@@ -1,6 +1,6 @@
 import functools
 
-from core.pathant.converters import converters
+from core.pathant.converters import ____CONVERTERS____
 
 
 class converter(object):
@@ -13,6 +13,6 @@ class converter(object):
     def __call__(self, func):
         self.func = func(*self.args, **self.kwargs, path_spec=self)
         functools.update_wrapper(self, self.func)
-        converters.append((self._from, self._to, self.func))
+        ____CONVERTERS____.append((self._from, self._to, self.func))
 
         return self.func
