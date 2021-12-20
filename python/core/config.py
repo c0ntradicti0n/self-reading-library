@@ -229,3 +229,7 @@ MODEL_PICKLE = f"model_module{NUM_LABELS}.pickle"
 EPOCHS_LAYOUT = 84
 
 PDF_UPLOAD_DIR = hidden_folder + "/pdf_upload/"
+
+
+ELMO_DIFFERENCE_MODEL_PATH=hidden_folder + "elmo_difference_models"
+ELMO_DIFFERENCE_COLLECTION_PATH=hidden_folder + "elmo_difference_collection"

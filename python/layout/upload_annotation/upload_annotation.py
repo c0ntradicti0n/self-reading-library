@@ -3,8 +3,12 @@ from core.RestPublisher.RestPublisher import RestPublisher
 from core.RestPublisher.RestPublisher import Resource
 from core.RestPublisher.react import react
 from core.event_binding import queue_iter
+from core import config
 import logging
+import os
 
+if not os.path.isdir(config.PDF_UPLOAD_DIR):
+    os.makedirs(config.PDF_UPLOAD_DIR)
 
 
 @converter("prediction", "upload_annotation")

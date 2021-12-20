@@ -6,7 +6,9 @@ from core.pathant.Converter import converter
 from core.pathant.parallel import paraloop
 from core.pathant.PathAnt import PathAnt
 from core.event_binding import RestQueue
-
+from helpers.model_tools import model_in_the_loop
+from helpers.list_tools import metaize
+from layout.annotation_thread import full_model_path
 
 
 @converter('css.difference', "elmo.css_html.difference")
@@ -38,9 +40,15 @@ class ElmoDifference(TrueFormatUpmarkerPDF2HTMLEX):
 ant = PathAnt()
 
 elmo_difference_pipe = ant(
-    "pdf", "elmo.css_html.difference",
+    "pdf", f"elmo.css_html.difference", via='annotation',
     num_labels=config.NUM_LABELS,
-    via='annotation'
+    model_path = full_model_path
+)
+
+elmo_difference_model_pipe = ant(
+    "pdf", f"elmo.css_html.difference", via='annotation',
+    model_path = full_model_path
+
 )
 
 def annotate_uploaded_file(file):
@@ -50,3 +58,25 @@ ElmoDifferenceQueueRest = RestQueue(
     service_id="elmo_difference",
     work_on_upload=annotate_uploaded_file
 )
+
+def annotate_difference_elmo():
+    model_in_the_loop(
+        model_dir=config.ELMO_DIFFERENCE_MODEL_PATH,
+        collection_path=config.ELMO_DIFFERENCE_COLLECTION_PATH,
+        on_train=lambda args:
+        list(
+            elmo_difference_model_pipe(metaize(args['samples_files']),
+                       collection_step=args['training_rate']
+                       )
+        ),
+
+        on_predict=lambda args: list(
+            zip(
+                *list(
+                    elmo_difference_pipe(
+                        "https://arxiv.org",
+                        model_path=args['training_rate'])
+                )
+            )
+        )
+    )

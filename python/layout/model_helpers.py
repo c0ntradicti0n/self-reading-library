@@ -109,15 +109,6 @@ def preprocess_data(training=False):
     return _preprocess
 
 
-model_regex = r"(?P<shape>\d+)_(?P<f1>0,\d+)_(?P<epoch>\d+)"
-
-def find_best_model():
-    models = os.listdir(config.TEXT_BOX_MODEL_PATH)
-    best_model_path, scores = \
-        max([(config.TEXT_BOX_MODEL_PATH + p, next(m, ["0", "0", "0"])) for p in models if (m := regex.finditer(model_regex, p))],
-            key=lambda t: t[1] and float(t[1][0].replace(",", ".")))
-    print(scores, f" {best_model_path =}")
-    return best_model_path, scores
 
 
 

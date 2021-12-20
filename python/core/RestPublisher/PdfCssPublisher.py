@@ -32,7 +32,7 @@ class PdfCssPublisher(RestPublisher):
         print (f"KIN{self.kind}")
 
         self.html_pipeline = self.ant("pdf", "htm")
-        self.css_pipeline = self.ant("pdf", f"css.{self.kind}")
+        self.css_pipeline = self.ant("pdf", f"css.{self.kind}", via='annotation')
 
         try:
             id = json.loads(req.stream.read())

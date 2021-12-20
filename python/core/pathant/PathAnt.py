@@ -84,26 +84,29 @@ class PathAnt:
                 pipeline.insert(len(pipeline) - i,
                                 converter('filter-' + step_key, 'filter-' + step_key, f_step)(
                                     Filter))
-        return Pipeline(pipeline, source, target, extra_paths, **kwargs)
+        return Pipeline(pipeline, source, target, extra_paths, via=via, **kwargs)
 
     def info(self, path="pathant.png", pipelines_to_highlight=None):
         import pylab as plt
         pylab.rcParams['figure.figsize'] = 20, 20
 
         dG = self.G.copy()
+        dG = nx.MultiDiGraph(dG, directed=True)
         if pipelines_to_highlight:
-            cmap = plt.cm.get_cmap("plasma", len(pipelines_to_highlight))
+            cmap = plt.cm.get_cmap("nipy_spectral", len(pipelines_to_highlight)+3)
 
         nx.set_edge_attributes(dG, "#CCCCFF", 'color')
         nx.set_edge_attributes(dG, "", 'label')
 
         if pipelines_to_highlight:
             for color, pipeline in enumerate(pipelines_to_highlight):
-                pipe_path = self.make_path(dG, pipeline.source, pipeline.target)
+                pipe_path = self.make_path(dG, pipeline.source, pipeline.target, via=pipeline.via)
                 edges = pairwise(pipe_path)
                 for u, v in edges:
-                    rgba = cmap(color + 1)
-                    dG[u][v]['color'] = matplotlib.colors.rgb2hex(rgba)
+                    rgba = cmap(color+1)
+                    attrs = dict(dict(dG[u][v])[0])
+                    attrs['color'] = matplotlib.colors.rgb2hex(rgba)
+                    dG.add_edge(u, v, **attrs)
                 for n in pipe_path:
                     dG.nodes[n]['label'] = str(pipeline)
 
@@ -119,23 +122,34 @@ class PathAnt:
                            ("(needs also " + (", ".join(a['implicite'])) + ')' if 'implicite' in a else "")
                        for u, v, a in dG.edges(data=True)}
 
-        nx.draw_networkx_edge_labels(dG, pos, edge_labels=edge_labels, rotate=False) \
-
         color_map = []
 
         for node in dG:
             color_map.append((1, 1, 0))
 
-        nx.draw(
-            dG,
-            pos,  # node_color=color_map,
-            font_weight='bold',
-            edge_color=edge_colors,
-            arrowsize=20,
-            label='Path Ant',
-            node_size=15,
-            width=10
+        nx.draw_networkx_edge_labels(dG, pos, edge_labels=edge_labels, rotate=False)
+
+
+        nx.draw_networkx_nodes(
+            dG, pos
         )
+
+        ax = plt.gca()
+        for e, ea in zip(dG.edges, dG.edges(data=True)):
+            ax.annotate(
+                "",
+                xy=pos[e[0]], xycoords='data',
+                xytext=pos[e[1]], textcoords='data',
+                arrowprops=dict(
+                    linewidth=5,
+                    arrowstyle="<-", color=ea[2]['color'],
+                    shrinkA=5, shrinkB=5,
+                    patchA=None, patchB=None,
+                    connectionstyle="arc3,rad=rrr".replace(
+                        'rrr', str(0.3 * e[2])
+                    ),
+                ),
+            )
 
         pos_attrs = {}
         for node, coords in pos.items():

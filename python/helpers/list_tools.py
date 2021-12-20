@@ -27,7 +27,7 @@ def find_repeating(lst, count=2):
                 return ret
 
 
-def add_meta(l):
+def metaize(l):
     for e in l:
         logging.info(f"metaize {e}")
         yield e, {}

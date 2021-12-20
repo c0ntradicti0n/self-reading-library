@@ -31,13 +31,13 @@ class Txt2Mp3(Ant):
 if __name__ == "__main__":
     from core.pathant.PathAnt import PathAnt
     from layout.model_helpers import find_best_model
-    from helpers.list_tools import add_meta
+    from helpers.list_tools import metaize
 
     ant = PathAnt()
     print (ant.graph())
     model_path = model_pat=find_best_model()[0]
     pipe = ant("pdf", "mp3")
-    res = list(pipe(add_meta(["./../test/glue.pdf"]), model_path=model_path))
+    res = list(pipe(metaize(["./../test/glue.pdf"]), model_path=model_path))
     pprint(res)
     os.popen(f"mplayer {res[0][0]}").read()
 

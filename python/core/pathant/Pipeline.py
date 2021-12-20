@@ -4,12 +4,13 @@ from helpers.time_tools import timeit_context
 from core.pathant.parallel import paraloop
 
 class Pipeline:
-    def __init__(self, pipeline, source, target, extra_paths, **flags):
+    def __init__(self, pipeline, source, target, extra_paths, via=None, **flags):
         self.extra_paths = extra_paths
         self.target = target
         self.source = source
         self.pipeline = pipeline
         self.flags = flags
+        self.via = via
         self.dummy_generator = itertools.cycle([("dummy", {"meta": None})])
 
     def log_progress(self, gen, *args, name='unknown', logger=print, **kwargs):

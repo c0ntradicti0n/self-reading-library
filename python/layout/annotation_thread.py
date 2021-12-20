@@ -18,15 +18,15 @@ from layout.training import training
 from layout.upload_annotation.upload_annotation import UploadAnnotator
 import os
 from helpers.os_tools import file_exists_regex
-from helpers.list_tools import add_meta
+from helpers.list_tools import metaize
 from core import config
 import subprocess
-from layout.model_helpers import find_best_model
+from helpers.model_tools import find_best_model
 from pprint import pprint
 
 samples_files = os.listdir(config.COLLECTION_PATH)
 n_samples = len(samples_files)
-best_model_path, scores = find_best_model()
+best_model_path, scores = find_best_model(config.TEXT_BOX_MODEL_PATH)
 full_model_path = best_model_path
 training_rate = (int(scores.groups()[0]) / n_samples)
 
@@ -72,9 +72,11 @@ upload_pipe = ant(
     model_path=full_model_path
 )
 
+
 def annotate_uploaded_file(path_to_pdf):
     print(f"working on {path_to_pdf}")
-    return upload_pipe(add_meta([path_to_pdf]))
+    return upload_pipe(metaize([path_to_pdf]))
+
 
 UploadAnnotationQueueRest = RestQueue(
     update_data=repaint_image_from_labels,
@@ -84,52 +86,28 @@ UploadAnnotationQueueRest = RestQueue(
 
 
 def annotate_train_model():
-    global full_model_path
-    if not os.path.isdir(config.TEXT_BOX_MODEL_PATH):
-        os.makedirs(config.TEXT_BOX_MODEL_PATH)
-    if not os.path.isdir(config.PDF_UPLOAD_DIR):
-        os.makedirs(config.PDF_UPLOAD_DIR)
+    model_in_the_loop(
+        model_dir=config.TEXT_BOX_MODEL_PATH,
+        collection_path=config.COLLECTION_PATH,
+        on_train=lambda args:
+        list(
+            model_pipe(metaize(args['samples_files']),
+                       collection_step=['training_rate']
+                       )
+        ),
 
-    while True:
-        samples_files = os.listdir(config.COLLECTION_PATH)
-        n_samples = len(samples_files)
-        best_model_path, scores = find_best_model()
-        full_model_path = best_model_path
-
-        training_rate = (int(scores.groups()[0]) / n_samples)
-
-        print(f"{training_rate = }")
-        if training_rate < 0.8:
-            # let's train
-
-            model_meta = list(
-                model_pipe(add_meta(samples_files),
-                           collection_step=training_rate
-                           )
-            )
-            pprint(model_meta)
-            model_path = model_meta[0][0]
-        else:
-            # let's make more samples
-
-            try:
-                collection, collection_meta = list(
-                    zip(
-                        *list(
-                            sample_pipe(
-                                "https://arxiv.org",
-                                model_path=best_model_path)
-                        )
-                    )
+        on_predict=lambda: collection, collection_meta=list(
+            zip(
+                *list(
+                    sample_pipe(
+                        "https://arxiv.org",
+                        model_path=best_model_path)
                 )
-            except KeyboardInterrupt as e:
+            )
+        )
+    )
 
-                exit = input("Exit? [y]/n")
 
-                if exit.startswith('n'):
-                    continue
-                else:
-                    break
 
 
 if __name__ == "__main__":

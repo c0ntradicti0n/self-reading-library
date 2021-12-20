@@ -3,7 +3,7 @@ import hashlib
 import os
 from itertools import count
 import random
-from helpers.list_tools import add_meta
+from helpers.list_tools import metaize
 
 import requests
 import time
@@ -33,7 +33,7 @@ class ScienceTexScraper(PathSpec):
         self.yet = []
         self.url = url
         if 'texs' in self.flags:
-            yield from list(add_meta(self.flags['texs']))
+            yield from list(metaize(self.flags['texs']))
         else:
             yield from self.surf_random(url)
 
