@@ -14,6 +14,9 @@ from allennlp.nn import InitializerApplicator, RegularizerApplicator
 import allennlp.nn.util as util
 from allennlp.training.metrics import CategoricalAccuracy, SpanBasedF1Measure
 
+from allennlp.predictors.predictor import DEFAULT_PREDICTORS
+DEFAULT_PREDICTORS.update({'attentive_crf_tagger': 'sentence-tagger'})
+
 
 @Model.register("attentive_crf_tagger")
 class AttentiveCrfTagger(Model):

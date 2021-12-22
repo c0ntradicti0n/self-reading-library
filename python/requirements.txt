@@ -87,3 +87,4 @@ transformerspdf2image
 pdf2image
 texttable
 beautifultable
+allennlp==0.9
