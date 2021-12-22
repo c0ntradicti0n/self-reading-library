@@ -69,8 +69,10 @@ def free_gpu_cache():
     print("GPU Usage after emptying the cache")
     gpu_usage()
 
-
-free_gpu_cache()
+try:
+    free_gpu_cache()
+except Exception as e:
+    logging.error("No cuda available!", e)
 
 feature_fuzz_ranges = (-0.02, 0.04, 0.02),
 sys.path.append(os.getcwd())

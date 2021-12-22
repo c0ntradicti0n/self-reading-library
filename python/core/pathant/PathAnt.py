@@ -17,7 +17,7 @@ from core.pathant.converters import ____CONVERTERS____
 from regex import regex, Regex
 from core.pathant.Filter import Filter
 
-
+OUT_OF_THE_BOX = "OUT_OF_THE_BOX"
 class PathAnt:
     def __init__(self, necessary_paths={".core": ["tex_data", "cache", "log"]}):
         make_dirs_recursive(necessary_paths)
@@ -33,6 +33,11 @@ class PathAnt:
                 in itertools.permutations(____CONVERTERS____, 2):
 
             for (_to1, _from1, _to2, _from2) in list_or_values(_tos1, _froms1, _tos2, _froms2):
+                if _from1 == None:
+                    _from1 =  OUT_OF_THE_BOX
+                if _from2 == None:
+                    _from2 =  OUT_OF_THE_BOX
+
                 try:
                     if match(_to1, _from2):
                         self.add_edge(_to1, regex.sub(_from2 + '$', _to2, _to1), functional_object2)
@@ -47,6 +52,9 @@ class PathAnt:
         os.system(f"mkdir {node.dir}")
 
     def make_path(self, G, source, target, via=None):
+        if source == None:
+            source = OUT_OF_THE_BOX
+
         try:
             if via:
                 if isinstance(via, str):
@@ -161,9 +169,11 @@ class PathAnt:
         plt.show()
 
     def add_edge(self, froms, tos, functional_object, **kwargs):
+
         if isinstance(froms, (List)):
             for _from in froms:
                 self.add_edge(_from, tos, functional_object, **kwargs)
+
         elif isinstance(froms, Tuple):
             for _from in froms:
                 others = list(froms)
@@ -176,6 +186,9 @@ class PathAnt:
             for _to in tos:
                 self.add_edge(froms, _to, functional_object, **kwargs)
         else:
+            if froms == None:
+                froms = OUT_OF_THE_BOX
+
             functional_object.path_spec._from = "." + froms
             functional_object.path_spec._to = "." + tos
 
@@ -184,7 +197,10 @@ class PathAnt:
             self.G.add_edge(froms, tos, functional_object=functional_object, **kwargs)
 
     def lookup(self, _from, _to, attr='functional_object'):
-        return self.G[_from][_to][attr]
+        try:
+            return self.G[_from][_to][attr]
+        except Exception as e:
+            raise e
 
     def estimate_targeting_paths(self, intermediate_target):
         for possible_path in nx.single_target_shortest_path(self.G, intermediate_target).values():
@@ -197,6 +213,10 @@ class PathAnt:
         return list(d2g([nx.to_dict_of_dicts(self.G, edge_data=[])]))[0]
 
     def add_starred(self, _from1, _to1, functional_object, converters):
+
+        if _from1 == None:
+            _from1 = OUT_OF_THE_BOX
+
         if "*" in _from1:
 
             other_things = [(f, t) for f, t, o in converters]

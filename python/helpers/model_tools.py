@@ -2,7 +2,7 @@ import os
 import regex
 model_regex = r"(?P<shape>\d+)_(?P<f1>0,\d+)_(?P<epoch>\d+)"
 import logging
-
+from pprint import pprint
 
 def find_best_model(model_dir):
     models = os.listdir(model_dir)

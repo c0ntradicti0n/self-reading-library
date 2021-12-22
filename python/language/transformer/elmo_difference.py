@@ -9,7 +9,7 @@ from core.event_binding import RestQueue
 from helpers.model_tools import model_in_the_loop
 from helpers.list_tools import metaize
 from layout.annotation_thread import full_model_path
-
+from language.transformer.ElmoDifferenceTrain import ElmoDifferenceTrain
 
 @converter('css.difference', "elmo.css_html.difference")
 class ElmoDifference(TrueFormatUpmarkerPDF2HTMLEX):
@@ -46,7 +46,7 @@ elmo_difference_pipe = ant(
 )
 
 elmo_difference_model_pipe = ant(
-    "pdf", f"elmo.css_html.difference", via='annotation',
+    None, f"elmo_model.difference",
     model_path = full_model_path
 
 )
@@ -74,7 +74,7 @@ def annotate_difference_elmo():
             zip(
                 *list(
                     elmo_difference_pipe(
-                        "https://arxiv.org",
+                        "????",
                         model_path=args['training_rate'])
                 )
             )

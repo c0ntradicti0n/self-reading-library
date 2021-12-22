@@ -12,9 +12,10 @@ import language.transformer.attentivecrftagger.attentivecrftagger
 
 
 class ElmoPredict(PathSpec):
-    def __init__(self, *args, config=None, train_output_dir, **kwargs):
+    def __init__(self, *args, elmo_config=None, train_output_dir, **kwargs):
         super().__init__(*args, **kwargs)
-        self.config = Params.from_file(params_file=config)
+        self.elmo_config = elmo_config
+        self.config = Params.from_file(params_file=elmo_config)
         self.model = Model.load(config=self.config, serialization_dir=train_output_dir)
         self.default_predictor = Predictor.from_path(train_output_dir)
         self.predictor = DifferenceTaggerPredictor(

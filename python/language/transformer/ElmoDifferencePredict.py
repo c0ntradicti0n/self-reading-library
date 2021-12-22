@@ -3,11 +3,11 @@ from language.transformer.ElmoPredict import ElmoPredict
 from core import config
 
 @converter("reading_order.page", 'reading_order.page.difference')
-class ElmoDifference(ElmoPredict):
+class ElmoDifferencePredict(ElmoPredict):
     def __init__(self, *args, **kwargs):
         super().__init__(
             *args,
-            config=config.difference_model_config,
+            elmo_config=config.difference_model_config,
             train_output_dir=config.difference_model_train_output,
             **kwargs)
         pass

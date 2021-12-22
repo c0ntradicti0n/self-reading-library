@@ -20,8 +20,8 @@ args = parser.parse_args()
 for model in models:
 
     tagger_config_file = args.config
-    json_override = """' {{"train_data_path": "language/transformer/manual_corpus/train_{model}.conll3",    """ \
-                    """  "validation_data_path": "language/transformer/manual_corpus/test_{model}.conll3"}}'"""
+    json_override = """' {{"train_data_path": ".layouteagle/elmo_difference_collection/train_{model}.conll3",    """ \
+                    """  "validation_data_path": ".layouteagle/elmo_difference_collection/test_{model}.conll3"}}'"""
 
     dir, fname = os.path.split(tagger_config_file)
     subprocess.run(["rm", "-rf", config.hidden_folder + '_'.join([model, fname])])

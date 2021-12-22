@@ -1,10 +1,10 @@
 from core.StandardConverter.Wordi2Css import Wordi2Css
 from core.pathant.PathAnt import PathAnt
-from language.transformer.ElmoDifference import ElmoDifference
+from language.transformer.ElmoDifferencePredict import ElmoDifferencePredict
 from language.transformer.UnPager import UnPager
 
 a = Wordi2Css
-b = ElmoDifference
+b = ElmoDifferencePredict
 c = UnPager
 
 

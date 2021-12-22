@@ -1,3 +1,7 @@
+#!/bin/sh
+
+
+
 model=$1
 python -m allennlp.service.server_simple \
     --include-package attentivecrftagger.attentivecrftagger \

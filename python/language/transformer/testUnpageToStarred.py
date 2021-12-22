@@ -1,9 +1,9 @@
 from core.pathant.PathAnt import PathAnt
-from language.transformer.ElmoDifference import ElmoDifference
+from language.transformer.ElmoDifferencePredict import ElmoDifferencePredict
 from language.transformer.UnPager import UnPager
 
 a = UnPager
-b = ElmoDifference
+b = ElmoDifferencePredict
 
 ant = PathAnt()
 ant.info("erase_and_star.png")
