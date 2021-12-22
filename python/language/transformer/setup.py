@@ -1,6 +1,6 @@
 import os
 
-from pip._internal.req import parse_requirements
+from req import parse_requirements
 from setuptools import setup, find_packages
 
 print (os.listdir("./"))
