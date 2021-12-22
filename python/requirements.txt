@@ -83,4 +83,6 @@ bs4
 tinycss
 jsonpath_ng
 sklearn
-transformers
+transformerspdf2image
+pdf2image
+texttable
