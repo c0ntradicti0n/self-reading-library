@@ -70,3 +70,17 @@ cython
 hdbscan
 addict
 cytoolz
+tensorflow
+gputil
+numba
+datasets
+coloredlogs
+regex
+joblib
+flask
+seaborn
+bs4
+tinycss
+jsonpath_ng
+sklearn
+transformers

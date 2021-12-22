@@ -68,7 +68,7 @@ if os.path.isfile(config.PROCESSOR_PICKLE):
     with open(config.PROCESSOR_PICKLE, "rb") as f:
         PROCESSOR = pickle.load(f)
 else:
-    PROCESSOR = LayoutLMv2Processor.from_pretrained("microsoft/layoutlmv2-large-uncased", revision="no_ocr")
+    PROCESSOR = LayoutLMv2Processor.from_pretrained("microsoft/layoutlmv2-base-uncased", revision="no_ocr")
     with open(config.PROCESSOR_PICKLE, "wb") as f:
         pickle.dump(PROCESSOR, f)
 
@@ -77,7 +77,7 @@ if os.path.isfile(config.MODEL_PICKLE):
         MODEL = pickle.load(f)
 else:
     MODEL = LayoutLMv2ForTokenClassification.from_pretrained(
-        'microsoft/layoutlmv2-large-uncased',
+        'microsoft/layoutlmv2-base-uncased',
          num_labels=config.NUM_LABELS
     )
     with open(config.MODEL_PICKLE, "wb") as f:
