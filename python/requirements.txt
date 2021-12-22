@@ -1,7 +1,6 @@
 more_itertools
 pdfminer.six
 bs4~=0.0.1
-pandas~=1.0.3
 matplotlib~=3.2.1
 regex~=2020.2.20
 seaborn~=0.10.0
