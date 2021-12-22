@@ -86,3 +86,4 @@ sklearn
 transformerspdf2image
 pdf2image
 texttable
+beautifultable
