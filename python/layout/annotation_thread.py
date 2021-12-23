@@ -24,6 +24,11 @@ import subprocess
 from helpers.model_tools import find_best_model
 from pprint import pprint
 
+if not os.path.isdir(config.COLLECTION_PATH):
+    os.makedirs(config.COLLECTION_PATH)
+if not os.path.isdir(config.TEXT_BOX_MODEL_PATH):
+    os.makedirs(config.TEXT_BOX_MODEL_PATH)
+
 samples_files = os.listdir(config.COLLECTION_PATH)
 n_samples = len(samples_files)
 best_model_path, scores = find_best_model(config.TEXT_BOX_MODEL_PATH)
