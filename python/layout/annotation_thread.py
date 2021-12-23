@@ -35,7 +35,8 @@ best_model_path, scores = find_best_model(config.TEXT_BOX_MODEL_PATH)
 full_model_path = best_model_path
 if scores:
     training_rate = (int(scores.groups()[0]) / n_samples)
-
+else:
+    training_rate = 0
 """
 Filters depending on existing annotation files if 
 this file is in the annotation set
