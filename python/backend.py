@@ -106,7 +106,7 @@ if __name__ == "__main__":
     layout.start()
 
     difference_elmo = threading.Thread(target=annotate_difference_elmo)
-    §difference_elmo.start()
+    #difference_elmo.start()
     """difference_sokrates = threading.Thread(target=annotate_difference_sokrates)
     difference_sokrates.start()
     difference_gpt3 = threading.Thread(target=write_difference_gpt3)
