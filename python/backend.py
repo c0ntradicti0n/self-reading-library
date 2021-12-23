@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     from language.layout2reading_order import Layout2Wordi
     from language.transformer.elmo_difference import ElmoDifference, ElmoDifferenceQueueRest, elmo_difference_pipe, elmo_difference_model_pipe, annotate_difference_elmo
-    from language.heuristic.heuristic_difference import HeurisiticalLogician
+    #from language.heuristic.heuristic_difference import HeurisiticalLogician
 
     api = create_app()
 
