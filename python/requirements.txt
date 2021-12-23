@@ -88,3 +88,7 @@ pdf2image
 texttable
 beautifultable
 allennlp==0.9
+diff_match_patch
+python-Levenshtein
+pycallgraph
+paired

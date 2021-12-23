@@ -17,13 +17,6 @@ from contextlib import contextmanager
 
 import matplotlib.pyplot as plt
 
-with open("/home/finn/PycharmProjects/LayoutEagle/test/faust.txt") as f:
-    text = "".join(f.readlines()) [:10000].replace("", "")
-
-words_a = text.replace("n", "n ").split(" ")
-words_b = text.replace("m", "m ").split(" ")
-m = numpy.zeros((len(words_b), len(words_a)))
-
 
 def lcs(S: str, T: str) -> Set[Tuple[int, int, str]]:
     """
