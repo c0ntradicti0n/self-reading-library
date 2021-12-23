@@ -23,6 +23,7 @@ from core import config
 import subprocess
 from helpers.model_tools import find_best_model
 from pprint import pprint
+from helpers.model_tools import model_in_the_loop
 
 if not os.path.isdir(config.COLLECTION_PATH):
     os.makedirs(config.COLLECTION_PATH)
