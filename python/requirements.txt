@@ -72,7 +72,6 @@ gputil
 numba
 datasets
 coloredlogs
-regex
 joblib
 flask
 seaborn
