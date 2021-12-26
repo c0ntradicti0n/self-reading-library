@@ -72,7 +72,6 @@ gputil
 numba
 datasets
 coloredlogs
-joblib
 flask
 seaborn
 bs4
