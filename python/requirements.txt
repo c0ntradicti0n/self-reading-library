@@ -8,7 +8,6 @@ seaborn~=0.10.0
 tinycss~=0.4
 lxml
 TexSoup~=0.2.1
-networkx~=2.4
 pygraphviz
 databases[postgresql]
 falcon
