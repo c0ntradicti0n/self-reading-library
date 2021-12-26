@@ -50,8 +50,8 @@ git+https://github.com/huggingface/transformers.git
 datasets
 seqeval
 --find-links https://download.pytorch.org/whl/torch_stable.html
-torch==1.8.0+cu101
-torchvision==0.9.0+cu101
+#torch==1.8.0+cu101
+#torchvision==0.9.0+cu101
 git+https://github.com/facebookresearch/detectron2.git
 
 pyprover
