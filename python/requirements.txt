@@ -16,7 +16,6 @@ falcon-multipart
 more_itertools
 networkx
 scipy
-matplotlib
 traceback_with_variables
 paired
 coloredlogs
