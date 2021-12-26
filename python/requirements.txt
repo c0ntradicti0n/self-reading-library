@@ -78,7 +78,7 @@ transformerspdf2image
 pdf2image
 texttable
 beautifultable
-allennlp==0.9
+allennlp
 diff_match_patch
 python-Levenshtein
 pycallgraph
