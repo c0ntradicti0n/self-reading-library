@@ -74,7 +74,7 @@ datasets
 coloredlogs
 flask
 sklearn
-transformerspdf2image
+transformers
 pdf2image
 texttable
 beautifultable
