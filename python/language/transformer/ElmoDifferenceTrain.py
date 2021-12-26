@@ -9,6 +9,7 @@ class ElmoDifferenceTrain(ElmoTrain):
             *args,
             elmo_config=config.difference_model_config,
             train_output_dir=config.difference_model_train_output,
+            collection_path= config.ELMO_DIFFERENCE_COLLECTION_PATH,
             **kwargs)
         pass
 

@@ -2,7 +2,7 @@ from overrides import overrides
 
 from allennlp.common.util import JsonDict
 from allennlp.data import DatasetReader, Instance, Token
-from allennlp.data.tokenizers.word_splitter import SpacyWordSplitter
+from allennlp.data.tokenizers.spacy_tokenizer import SpacyTokenizer
 from allennlp.models import Model
 from allennlp.predictors.predictor import Predictor
 

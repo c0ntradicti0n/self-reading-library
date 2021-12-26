@@ -16,11 +16,11 @@ class ElmoPredict(PathSpec):
         super().__init__(*args, **kwargs)
         self.elmo_config = elmo_config
         self.config = Params.from_file(params_file=elmo_config)
-        self.model = Model.load(config=self.config, serialization_dir=train_output_dir)
-        self.default_predictor = Predictor.from_path(train_output_dir)
-        self.predictor = DifferenceTaggerPredictor(
-            self.default_predictor._model,
-            dataset_reader=self.default_predictor._dataset_reader)
+        #self.model = Model.load(config=self.config, serialization_dir=train_output_dir)
+        #self.default_predictor = Predictor.from_path(train_output_dir)
+        #self.predictor = DifferenceTaggerPredictor(
+        #    self.default_predictor._model,
+        #    dataset_reader=self.default_predictor._dataset_reader)
 
         self.CSS = {
             (span_letter + "-" + tag) if tag != 'O'

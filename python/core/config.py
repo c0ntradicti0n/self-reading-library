@@ -145,7 +145,7 @@ markup_suffix = "pdflayout.html"
 pdf2htmlEX = "pdf2htmlEX"
 
 difference_model_train_output = hidden_folder + f"/over_{model_config}/"
-difference_model_config = hidden_folder + f"/over_{model_config}/config.json"
+difference_model_config = f"language/transformer/experiment_configs/{model_config}"
 
 wordninjalanguagemodel = "language/english.txt.gz"
 logging_level = logging.INFO
