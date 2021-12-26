@@ -73,10 +73,6 @@ numba
 datasets
 coloredlogs
 flask
-seaborn
-bs4
-tinycss
-jsonpath_ng
 sklearn
 transformerspdf2image
 pdf2image
