@@ -78,7 +78,7 @@ feature_fuzz_ranges = (-0.02, 0.04, 0.02),
 sys.path.append(os.getcwd())
 
 logging_config = '/home/finn/PycharmProjects/LayoutEagle/python/logging.yaml'
-model_config = "elmo_lstm3_feedforward4_crf_straight.config"
+model_config = "elmo_lstm3_feedforward4_crf_straight.json"
 jobs = 32
 max_time_per_call = 30
 # "elmo_multi_head_self_attention_crf_straight_fitter.config"
