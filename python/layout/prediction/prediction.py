@@ -14,7 +14,7 @@ class Prediction(PathSpec):
         self.num_labels = num_labels
 
     def __call__(self, x_meta, *args, **kwargs):
-        model_path = self.flags['model_path']
+        model_path = self.flags['layout_model_path']
         if not model_path:
             raise Exception("Model path must be set via pipeline flags, these are the keywords in the call args")
         self.model_path = model_path
@@ -80,7 +80,7 @@ class Prediction(PathSpec):
             yield predictions_metas_per_document, meta
 
     def load_model(self):
-
+        if not self.model:
             self.processor = model_helpers.PROCESSOR
             self.model = model_helpers.MODEL
 

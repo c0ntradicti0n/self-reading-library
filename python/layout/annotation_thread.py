@@ -6,9 +6,8 @@ from core.StandardConverter.HTML2PDF import HTML2PDF
 from core.StandardConverter.PDF2ETC import PDF2ETC
 from core.StandardConverter.PDF2HTML import PDF2HTML
 from core.StandardConverter.Dict2Graph import Dict2Graph
-from core.StandardConverter.Wordi2Css import Wordi2Css
+from core.StandardConverter.ReadingOrder2Css import ReadingOrder2Css
 from core.pathant.PathAnt import PathAnt
-from language.transformer.ElmoDifferencePredict import ElmoDifferencePredict
 from language.transformer.Pager import Pager
 from language.transformer.UnPager import UnPager
 from core.StandardConverter.Tex2Pdf import Tex2Pdf

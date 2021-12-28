@@ -69,6 +69,9 @@ def free_gpu_cache():
     print("GPU Usage after emptying the cache")
     gpu_usage()
 
+import torch
+torch.cuda.empty_cache()
+
 try:
     free_gpu_cache()
 except Exception as e:
@@ -182,7 +185,7 @@ cols_to_use = ["page_number",
 array_cols_to_use = []  # ["box_schema"]
 N = 7
 
-DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+DEVICE = torch.device('cpu') #torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 TEXT_BOX_MODEL_PATH = hidden_folder + "text_box_models/"
 
 PREDICTION_PATH = hidden_folder + "prediction/"
@@ -192,7 +195,7 @@ COLLECTION_PATH = hidden_folder + "collection/"
 # label2id = {'NONE': 0, 'c1': 1, 'c2': 2, 'c3': 3}
 LABELS = ['NONE', 'c1', 'c2', 'c3', 'wh', 'h', 'pn', 'fn', 'fg', 'tb']
 
-TEXT_LABELS = ['c1', 'c2', 'c3', 'wh', 'h']
+TEXT_LABELS = ['c1', 'c2', 'c3', 'wh']
 
 label2id = {t: i for i, t in enumerate(LABELS)}
 label2color = {'c1': 'blue',

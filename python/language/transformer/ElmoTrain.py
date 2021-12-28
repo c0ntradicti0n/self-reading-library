@@ -5,7 +5,6 @@ from core import config
 from core.pathant.PathSpec import PathSpec
 from allennlp.models.model import Model
 from language.transformer.difference_predictor.difference_predictor import DifferenceTaggerPredictor
-import language.transformer.attentivecrftagger.attentivecrftagger
 import os
 import subprocess
 import sys

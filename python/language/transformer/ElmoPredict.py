@@ -7,7 +7,6 @@ from core.pathant.PathSpec import PathSpec
 from allennlp.models.model import Model
 
 from language.transformer.difference_predictor.difference_predictor import DifferenceTaggerPredictor
-import language.transformer.attentivecrftagger.attentivecrftagger
 
 
 
@@ -16,12 +15,7 @@ class ElmoPredict(PathSpec):
         super().__init__(*args, **kwargs)
         self.elmo_config = elmo_config
         self.config = Params.from_file(params_file=elmo_config)
-        #self.model = Model.load(config=self.config, serialization_dir=train_output_dir)
-        #self.default_predictor = Predictor.from_path(train_output_dir)
-        #self.predictor = DifferenceTaggerPredictor(
-        #    self.default_predictor._model,
-        #    dataset_reader=self.default_predictor._dataset_reader)
-
+        self.model = None
         self.CSS = {
             (span_letter + "-" + tag) if tag != 'O'
                 else tag
@@ -35,6 +29,13 @@ class ElmoPredict(PathSpec):
 
     def __call__(self, feature_meta, *args, **kwargs):
         consumed_tokens = 0
+
+        if not self.model:
+            self.model = Model.load(config=self.config, serialization_dir=self.flags['difference_model_path'])
+            # self.default_predictor = Predictor.from_path(train_output_dir)
+            # self.predictor = DifferenceTaggerPredictor(
+            #    self.default_predictor._model,
+            #    dataset_reader=self.default_predictor._dataset_reader)
 
         while True:
             try: # https://stackoverflow.com/questions/51700960/runtimeerror-generator-raised-stopiteration-every-time-i-try-to-run-app

@@ -10,6 +10,9 @@ from helpers.model_tools import model_in_the_loop
 from helpers.list_tools import metaize
 from layout.annotation_thread import full_model_path
 from language.transformer.ElmoDifferenceTrain import ElmoDifferenceTrain
+from language.transformer.ElmoDifferencePredict import ElmoDifferencePredict
+from allennlp_models.tagging.models import crf_tagger
+
 
 @converter('css.difference', "elmo.css_html.difference")
 class ElmoDifference(TrueFormatUpmarkerPDF2HTMLEX):
@@ -40,14 +43,14 @@ class ElmoDifference(TrueFormatUpmarkerPDF2HTMLEX):
 ant = PathAnt()
 
 elmo_difference_pipe = ant(
-    "pdf", f"elmo.css_html.difference", via='annotation',
+    "arxiv.org", f"elmo.css_html.difference", via='prediction',
     num_labels=config.NUM_LABELS,
-    model_path = full_model_path
+    layout_model_path = full_model_path
 )
 
 elmo_difference_model_pipe = ant(
     None, f"elmo_model.difference",
-    model_path = full_model_path
+    layout_model_path = full_model_path
 
 )
 
@@ -75,8 +78,10 @@ def annotate_difference_elmo():
                 *list(
                     elmo_difference_pipe(
                         "????",
-                        model_path=args['training_rate'])
+                        difference_model_path=args['best_model_path'])
                 )
             )
-        )
+        ),
+        training_rate_mode='size',
+        training_rate_file=config.ELMO_DIFFERENCE_COLLECTION_PATH + "/train_over.conll3"
     )

@@ -26,6 +26,7 @@ class Pipeline:
         intermediate_result = arg
 
         for functional_object in self.pipeline:
+            self.flags.update(flags)
             functional_object.flags = self.flags if self.flags else flags
 
             name = functional_object.__class__.__name__

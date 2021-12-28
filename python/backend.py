@@ -82,7 +82,7 @@ if __name__ == "__main__":
     from layout.upload_annotation.upload_annotation import UploadAnnotator
     from layout.annotation_thread import annotate_train_model, UploadAnnotationQueueRest, sample_pipe, model_pipe, upload_pipe
 
-    from language.layout2reading_order import Layout2Wordi
+    from language.layout2reading_order import Layout2ReadingOrder
     from language.transformer.elmo_difference import ElmoDifference, ElmoDifferenceQueueRest, elmo_difference_pipe, elmo_difference_model_pipe, annotate_difference_elmo
     #from language.heuristic.heuristic_difference import HeurisiticalLogician
 
