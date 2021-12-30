@@ -434,19 +434,6 @@ class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
             else:
                 dd_overwrite = dyy[tindex]
 
-    def pdf2htmlEX(self, pdf_filename, html_filename):
-        assert (pdf_filename.endswith(".pdf"))
-        self.logger.info(f"converting pdf {pdf_filename} to html {html_filename} ")
-        return_code = os.system(f"{config.pdf2htmlEX} "
-                  f"--space-as-offset 1 "
-                  f"--decompose-ligature 1 "
-                  f"--optimize-text 1 "
-                  f"--fit-width {config.reader_width}  "
-                  f"\"{pdf_filename}\" \"{html_filename}\"")
-
-        if return_code != 0:
-            raise FileNotFoundError(f"{pdf_filename} was not found!")
-
 
 import unittest
 

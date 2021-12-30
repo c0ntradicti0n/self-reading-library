@@ -84,7 +84,7 @@ class Prediction(PathSpec):
             self.processor = model_helpers.PROCESSOR
             self.model = model_helpers.MODEL
 
-            self.model.load_state_dict(torch.load(self.model_path))
+            self.model.load_state_dict(torch.load(self.model_path, map_location="cpu"))
             self.model.eval()
             self.model.to(config.DEVICE)
 

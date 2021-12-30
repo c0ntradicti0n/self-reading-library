@@ -32,10 +32,11 @@ class ElmoPredict(PathSpec):
 
         if not self.model:
             self.model = Model.load(config=self.config, serialization_dir=self.flags['difference_model_path'])
-            # self.default_predictor = Predictor.from_path(train_output_dir)
-            # self.predictor = DifferenceTaggerPredictor(
-            #    self.default_predictor._model,
-            #    dataset_reader=self.default_predictor._dataset_reader)
+            self.default_predictor = Predictor.from_path(self.flags['difference_model_path'])
+            self.predictor = DifferenceTaggerPredictor(
+                self.default_predictor._model,
+                dataset_reader=self.default_predictor._dataset_reader
+            )
 
         while True:
             try: # https://stackoverflow.com/questions/51700960/runtimeerror-generator-raised-stopiteration-every-time-i-try-to-run-app

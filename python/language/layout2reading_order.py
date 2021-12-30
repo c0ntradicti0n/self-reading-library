@@ -22,8 +22,7 @@ class Layout2ReadingOrder(PathSpec):
 
             meta['used_text_boxes'] = sorted_texts
 
-            enumerated_texts = self.enumerate_words(sorted_texts
-                                                    )
+            enumerated_texts = self.enumerate_words(sorted_texts)
             yield enumerated_texts, meta
 
     def sort_by_label(self, i_l):
@@ -32,5 +31,15 @@ class Layout2ReadingOrder(PathSpec):
     def sort_by_box(self, all_texts, all_boxes):
         return list(sorted(zip(texts, boxes), key=lambda x: x[1][0] + x[1][1] ) for texts, boxes in zip(all_texts, all_boxes))
 
-    def enumerate_words(all_texts):
-        return [list(enumerate(" ".join([text for text, box in texts]).split())) for texts in sorted_texts]
+    def enumerate_words(self, all_texts):
+        i = 0
+        all_enumeration = []
+        for texts in all_texts:
+            enumeration = []
+            for word in " ".join([text for text, box in texts]).split():
+                enumeration.append((i, word))
+                i += 1
+            all_enumeration.append(enumeration)
+
+
+        return all_enumeration

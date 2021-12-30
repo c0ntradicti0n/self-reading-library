@@ -1,6 +1,6 @@
 import re
 import textwrap
-
+import os
 import chardet
 from pdfminer.high_level import extract_text
 
@@ -26,9 +26,34 @@ class Pager(PathSpec):
             return -1, line
         return int(m.group(1)), m.group(2)
 
+    def run_pdf2htmlEX(self, pdf_path, meta):
+        outputs = {
+            'html': 'html',  # same looking html
+            'reading_order': 'wordi',  # numbered word list
+            'feat': 'feat'  # json with indexed single words as they can be reapplied via css to the html-document
+        }
+
+        html_path = pdf_path + "." + outputs['html']
+        reading_order_path = pdf_path + "." + outputs['reading_order']
+        feat_path = pdf_path + "." + outputs['feat']
+
+        if not os.path.exists(reading_order_path):
+            self.logger.warning(f"working on {pdf_path}")
+            self.pdf2htmlEX(pdf_path, html_path)
+        else:
+            self.logger.warning(f"pdf2htmlEX has run yet on {pdf_path}")
+
+
+        meta['pdf2htmlEX.html'] = html_path
+        meta['pdf_path'] = pdf_path
+        meta['reading_order_path'] = reading_order_path
+        meta['feat_path'] = feat_path
+
+        return (html_path, reading_order_path, feat_path)
+
     def __call__(self, paths, *args, **kwargs):
-        for paths, meta in paths:
-            pdf_path, reading_order_path, _ = paths
+        for texts, meta in paths:
+            pdf_path, reading_order_path, _ = self.run_pdf2htmlEX(meta['html_path'], meta)
 
             # read the text as it is referenced in the html from the reading_order file
             # containing the class index of the tags and the string, may contain
@@ -41,12 +66,12 @@ class Pager(PathSpec):
             i_word = [self.match_reading_order_line(line) for line in lines if len(line) > 2]
 
 
-            # read pure text with better tokenization with pdfminer.six
-            text = extract_text(meta['pdf_path']).replace('', "")
+            # use layout filtered text
+            text =  " ".join([word for t in texts for i, word in t])   #extract_text(meta['pdf_path']).replace('', "")
             real_tokens = split_punctuation(text, ":!?;")
 
-            # TODO sorting and filtering by latex analysis
-            # ...
+
+
 
             # start iterating on windows of this text
             generator = self.make_tokenized_windows(real_tokens)
@@ -116,3 +141,18 @@ class Pager(PathSpec):
             print(window)
 
             yield window, {}
+
+
+    def pdf2htmlEX(self, pdf_filename, html_filename):
+        assert (pdf_filename.endswith(".pdf"))
+        self.logger.info(f"converting pdf {pdf_filename} to html {html_filename} ")
+        return_code = os.system(f"{config.pdf2htmlEX} "
+                  f"--space-as-offset 1 "
+                  f"--decompose-ligature 1 "
+                  f"--optimize-text 1 "
+                  f"--fit-width {config.reader_width}  "
+                  f"\"{pdf_filename}\" \"{html_filename}\"")
+
+        if return_code != 0:
+            raise FileNotFoundError(f"{pdf_filename} was not found!")
+
