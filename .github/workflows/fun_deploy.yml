@@ -24,7 +24,7 @@ jobs:
         ip: 141.5.100.77
       run: |
         echo $key > key
-        ssh -i ./key deploy@$ip '
+        ssh -i ./key  -o "StrictHostKeyChecking=no" deploy@$ip '
             sudo rm -rf fullenv
             git clone https://github.com/c0ntradicti0n/LayoutEagle.git fullend
             cd fullend
