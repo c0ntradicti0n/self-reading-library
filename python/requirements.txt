@@ -45,7 +45,7 @@ colorama
 coloredlogs
 pdf2image
 jsonpath_ng
-
+falcon_multipart
 git+https://github.com/huggingface/transformers.git
 datasets
 seqeval

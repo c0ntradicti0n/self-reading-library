@@ -1,5 +1,5 @@
 
-name: Deploy to Amazon ECS
+name: Deploy to VM staging
 
 on:
   push:
@@ -41,10 +41,12 @@ jobs:
               cd fullend
               python3 -m venv venv
               . venv/bin/activate
+              pip install wheel
+
               pip install torch
               pip install -r ./python/requirements.txt
           '
 
       - name: Start
         run: |
-          ssh staging '            screen -S fullend -dm bash -c "cd python; python3 backend.py"    '
+          ssh staging '            screen -S fullend -dm bash -c "cd fullend/LayoutEagle/python; python3 backend.py"    '
