@@ -39,11 +39,11 @@ jobs:
               sudo rm -rf fullenv
               git clone https://github.com/c0ntradicti0n/LayoutEagle.git fullend
               cd fullend
-              python -m venv venv
+              python3 -m venv venv
               . venv/bin/activate
               pip install -r ./python/requirements.txt
           '
 
       - name: Start
         run: |
-          ssh staging '            screen -S fullend -dm bash -c "cd python; python backend.py"    '
+          ssh staging '            screen -S fullend -dm bash -c "cd python; python3 backend.py"    '
