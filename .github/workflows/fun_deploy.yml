@@ -23,7 +23,9 @@ jobs:
         key: ${{ secrets.DEPLOY_SSH_KEY }}
         ip: 141.5.100.77
       run: |
+        echo $key | awk '{print length}'
         echo $key > key
+        
         chmod 600 key
         ssh -i ./key  -o "StrictHostKeyChecking=no" deploy@$ip '
             sudo rm -rf fullenv
