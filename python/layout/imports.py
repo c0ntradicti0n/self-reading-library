@@ -7,7 +7,6 @@ from matplotlib import colors
 from torch.utils.data import DataLoader
 from datasets import load_metric
 from GPUtil import showUtilization as gpu_usage
-from numba import cuda
 from sklearn.preprocessing import MinMaxScaler
 from datasets import Dataset
 from PIL import Image, ImageFilter

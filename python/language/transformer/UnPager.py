@@ -1,8 +1,10 @@
 import copy
+
+from listalign.helpers import alignment_table
+
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
-from language.nlp_helpers.listalign.fuzzyalign import fuzzyalign
-from language.nlp_helpers.listalign.helpers import alignment_table
+from listalign.word_pyalign import align
 
 
 @converter("reading_order.page.*", 'reading_order.*')
@@ -11,10 +13,12 @@ class UnPager(PathSpec):
         super().__init__(*args, **kwargs)
         pass
 
+
     def __call__(self, feature_meta, *args, **kwargs):
         whole_doc_id = None
         whole_annotation = []
         whole_meta = None
+        all_annotations = []
 
         for annotation, meta in feature_meta:
             if whole_doc_id and meta["doc_id"]  != whole_doc_id:
@@ -30,14 +34,25 @@ class UnPager(PathSpec):
             consumed_until_now += meta['consumed_i2']
             whole_annotation.extend(annotation[:meta['consumed_i2']])
 
+            all_annotations.append(annotation)
             try:
                 whole_doc_id = meta["doc_id"]
             except Exception as e:
                 self.logger.error("No doc_id_given")
                 whole_doc_id = "?"
 
-        alignment = fuzzyalign([w for i, w in meta["i_word"]], [w for t, w in whole_annotation])
+        all_alignments = []
+        text_chars = ([cb[0] for l in meta['chars_and_char_boxes'].to_list() for cb in l])
+        l_a = [iw[1] for iw in whole_meta['i_word']]
+        l_b = [jw[1] for jw in whole_annotation]
+        alignment = align(l_a, l_b)
+
+        print(alignment_table(alignment, l_a, l_b))
+
+
         whole_meta["_i_to_i2"] = {meta["i_word"][_i1][0]: _i2 for _i1, _i2 in alignment}
+
+
         yield whole_annotation, whole_meta
 
     default_values = {

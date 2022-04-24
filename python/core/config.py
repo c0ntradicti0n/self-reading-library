@@ -1,11 +1,12 @@
 import os
 import sys
 import logging
-from helpers.nested_dict_tools import flatten
 
 sys.path.append(".")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 import logging
+from helpers.nested_dict_tools import flatten
+
 
 os.environ["LD_LIBRARY_PATH"] = '/usr/local/cuda-11.0/targets/x86_64-linux/lib/'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -51,7 +52,7 @@ logging.basicConfig(format="""%(asctime)s-%(levelname)s: %(message)s""", datefmt
 
 from GPUtil import showUtilization as gpu_usage
 import torch
-from numba import cuda
+#from numba import cuda
 
 path_prefix = "./"
 

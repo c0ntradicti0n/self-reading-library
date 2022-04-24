@@ -113,8 +113,8 @@ if __name__ == "__main__":
     difference_gpt3.start()"""
 
 
-    httpd = simple_server.make_server('127.0.0.1', 7789, api)
+    #httpd = simple_server.make_server('127.0.0.1', 7789, api)
     print("http://127.0.0.1:8000")
-    httpd.serve_forever()
+    #httpd.serve_forever()
 
 

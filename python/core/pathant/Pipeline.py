@@ -49,11 +49,14 @@ class Pipeline:
                 print(functional_object)
                 raise e
 
-            intermediate_result = self.log_progress(
+            intermediate_result = intermediate_result
+
+
+            """self.log_progress(
                 intermediate_result,
                 name=name,
                 logger=logger
-            )
+            )"""
 
         return intermediate_result
 

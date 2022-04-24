@@ -3,12 +3,14 @@ import textwrap
 import os
 import chardet
 from pdfminer.high_level import extract_text
-
 from core import config
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from language.nlp_helpers.Regexes import SENTENCE_END_REGEX
 from language.nlp_helpers.split_interpunction import split_punctuation
+from language.transformer import ElmoPredict
+
+import threading
 
 
 @converter("reading_order", 'reading_order.page')
@@ -67,41 +69,52 @@ class Pager(PathSpec):
 
 
             # use layout filtered text
-            text =  " ".join([word for t in texts for i, word in t])   #extract_text(meta['pdf_path']).replace('', "")
+            text =  " ".join([word for t in texts for i, word in t])
             real_tokens = split_punctuation(text, ":!?;")
-
-
 
 
             # start iterating on windows of this text
             generator = self.make_tokenized_windows(real_tokens)
-            i = 0
-            prev_window = ""
-            while True:
+            next(generator)
+            threading.Thread(target=self.window_thread, args=(generator, meta, i_word, )).start()
+            yield texts, meta
 
-                try:
-                    next(generator)
-                    last_annotated_token = yield
 
-                    window, window_meta = generator.send(last_annotated_token)
-                except StopIteration as e:
-                    self.logger.info(f"finished after {i} texts")
-                    return
+    def window_thread(self, generator, meta, i_word):
+        i = 0
+        prev_window = ""
+        last_annotated_token = 0
+        while True:
+            last_annotated_token = ElmoPredict.q1.get()
+            ElmoPredict.q1.task_done()
 
-                print(f"text window:")
-                print(textwrap.fill(" ".join([t for t in window]), width=200))
+            try:
 
-                yield window, {**window_meta, "i_word": i_word, **meta, 'doc_id': meta['pdf_path']}
+                window, window_meta = generator.send(last_annotated_token)
 
-                i += 1
-                if i > config.max_windows_per_text:
-                    i = 0
-                    break
-                if window == prev_window:
-                    i = 0
-                    break
+            except StopIteration as e:
+                self.logger.info("eof")
+                ElmoPredict.q2.put((None, None))
+                break
 
-                prev_window = window
+            print(f"text window:")
+            print(textwrap.fill(" ".join([t for t in window]), width=200))
+
+            if len(window) == 0:
+                self.logger.info("finishing?")
+
+            ElmoPredict.q2.put( (window, {**window_meta, "i_word": i_word, **meta, 'doc_id': meta['pdf_path']}) )
+
+            #last_annotated_token = ElmoPredict.consumed_tokens_queue.get()
+            i += 1
+            if i > config.max_windows_per_text:
+                i = 0
+                break
+            if window == prev_window:
+                i = 0
+                break
+
+            prev_window = window
 
     def make_tokenized_windows(self, real_tokens):
         # holding three kinds of indices in parallel, splitting windows, keeping
@@ -118,8 +131,10 @@ class Pager(PathSpec):
         windowing = True
         start_i2 = 0
 
+        consumed_tokens = 0
+
         while windowing:
-            consumed_tokens = yield
+
             if consumed_tokens:
                 try:
                     start_i2 = consumed_tokens + start_i2 + 1
@@ -130,7 +145,13 @@ class Pager(PathSpec):
 
             window = []
             sentences_j = 0
-            for j, w in enumerate(real_tokens[start_i2: start_i2 + 300]):
+            rest_text =  real_tokens[start_i2: start_i2 + 300]
+
+            if len(rest_text) == 0:
+                return
+
+
+            for j, w in enumerate(rest_text):
                 window.append(w)
                 if len(window) > self.max_window:
                     window = window[:sentences_j]
@@ -138,9 +159,7 @@ class Pager(PathSpec):
                 if SENTENCE_END_REGEX.match(w):
                     sentences_j = j + 1
 
-            print(window)
-
-            yield window, {}
+            consumed_tokens = yield window, {}
 
 
     def pdf2htmlEX(self, pdf_filename, html_filename):

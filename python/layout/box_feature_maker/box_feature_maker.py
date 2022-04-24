@@ -44,6 +44,7 @@ class BoxFeatureMaker(PathSpec):
                 final_feature_df["doc_id"] = str(doc_id) + ".random" + str(random_i)
                 meta["doc_id"] = str(doc_id) + ".random" + str(random_i)
                 meta['html_path'] = labeled_pdf_path
+                meta['chars_and_char_boxes'] = final_feature_df.chars_and_char_boxes
 
                 final_feature_df['page_number'] = page_numbers
 
@@ -54,7 +55,7 @@ class BoxFeatureMaker(PathSpec):
 
                     image_dict [page_number] = image_path
 
-                    basewidth = 1500
+                    basewidth = 2500
                     wpercent = (basewidth / float(pil.size[0]))
                     hsize = int((float(pil.size[1]) * float(wpercent)))
                     pil = pil.resize((basewidth, hsize), Image.ANTIALIAS)
@@ -71,6 +72,7 @@ class BoxFeatureMaker(PathSpec):
         "x","y", "x0", "x1", "y0", "y1",
         "height", "width",
         "page_height", "page_width",
+        "chars_and_char_boxes",
 
         "text", "LABEL"])
 
@@ -79,6 +81,7 @@ class BoxFeatureMaker(PathSpec):
             for element in page_layout:
                 if isinstance(element, LTTextContainer):
                     text = element.get_text()
+                    chars_and_char_boxes = [(char._text, char.bbox) for line in element._objs for char in line._objs if isinstance( char , LTChar) ]
                     label = determine_layout_label_from_text(text)
                     number_of_lines = len(element._objs) if hasattr(element, "_objs") else 0
                     features = BoxFeatureMaker.TextBoxData(
@@ -89,8 +92,11 @@ class BoxFeatureMaker(PathSpec):
                         int(element.y0), int(element.y0+element.height),
                         int(element.height), int(element.width),
                         int(page_layout.height), int(page_layout.width),
+                        chars_and_char_boxes,
                         text,
-                        label)
+                        label
+
+                    )
                     print (features)
                     yield features._asdict()
 

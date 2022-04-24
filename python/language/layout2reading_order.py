@@ -2,9 +2,7 @@ import copy
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from core import config
-from language.nlp_helpers.listalign.fuzzyalign import fuzzyalign
-from language.nlp_helpers.listalign.helpers import alignment_table
-
+from helpers.cache_tools import file_persistent_cached_generator
 
 @converter("prediction", 'reading_order')
 class Layout2ReadingOrder(PathSpec):
@@ -12,6 +10,7 @@ class Layout2ReadingOrder(PathSpec):
         super().__init__(*args, **kwargs)
         pass
 
+    #@file_persistent_cached_generator("Layout2ReadingOrder.json")
     def __call__(self, feature_meta, *args, **kwargs):
         for annotation, meta in feature_meta:
             used_label_is = [self.sort_by_label([(i,l) for i, l in enumerate(an[0]['labels']) if l in config.TEXT_LABELS]) for an in annotation]

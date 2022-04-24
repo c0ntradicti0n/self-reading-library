@@ -2,7 +2,7 @@ from collections import defaultdict, deque
 from typing import List, Tuple
 
 from language.nlp_helpers.listalign.helpers import alignment_table
-from helpers.time_tools import timeit_context
+from python.helpers .time_tools import timeit_context
 
 
 def suffix_align(*texts, _tree=None) -> List[Tuple[int, int]]:

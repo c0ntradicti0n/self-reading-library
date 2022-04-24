@@ -1,162 +1,427 @@
 import difflib
 import json
-
 from diff_match_patch import diff_match_patch
 
-from language.nlp_helpers.listalign.helpers import preprocess, alignment_table, str_in_list_at, find_pos_at, AlignmentException
-from language.nlp_helpers.listalign.join_astar import lcs
-from language.nlp_helpers.listalign.suffixtreealign import suffix_align
+from python.language.nlp_helpers.listalign.helpers import preprocess, alignment_table, str_in_list_at, find_pos_at, \
+    AlignmentException
+from python.language.nlp_helpers.listalign.join_astar import lcs
+from python.language.nlp_helpers.listalign.suffixtreealign import suffix_align
+
+from alignment.sequence import Sequence
+from alignment.vocabulary import Vocabulary
+from alignment.sequencealigner import LocalSequenceAligner, SimpleScoring, GlobalSequenceAligner
 
 
-def fuzzyalign(seq_a, seq_b):
-    """
+def align(seq1, seq2):
+    # Create sequences to be aligned.
+    a = Sequence(seq1)
+    b = Sequence(seq2)
 
-    :param seq_a:
-    :param seq_b:
-    :return:
-    """
+    # Create a vocabulary and encode the sequences.
+    v = Vocabulary()
+    aEncoded = v.encodeSequence(a)
+    bEncoded = v.encodeSequence(b)
 
-    seq_a, seq_b = preprocess([seq_a, seq_b])
-    new_seq_a, new_seq_b, a_to_take, b_to_take = equalize_seq_b(seq_a, seq_b)
+    # Create a scoring and align the sequences using global aligner.
+    scoring = SimpleScoring(2, -1)
+    aligner = LocalSequenceAligner(scoring, -2)
+    score, encodeds = aligner.align(aEncoded, bEncoded, backtrace=True)
 
-    s = diff_match_patch().diff_main("".join(new_seq_a), "".join(new_seq_b))
+    from listalign.helpers import alignment_table, timeit_context
 
-    s = [d for d in s if d[0] != 0]
-    if not len(s) == 0:
-        print("SEQUENCES DIFFER FOR ALIGNMENT " + str(s))
+    # Iterate over optimal alignments and print them.
+    for encoded in encodeds:
+        with timeit_context('suffix-align-1000-1000'):
+            alignment = v.decodeSequenceAlignment(encoded)
+            print(alignment)
+            print('Alignment score:', alignment.score)
+            print('Percent identity:', alignment.percentIdentity())
+            print(encoded)
 
-    diff = difflib.SequenceMatcher(a="".join(new_seq_a), b="".join(new_seq_b))
-    print(diff.get_opcodes())
-
-    r = suffix_align(new_seq_a, new_seq_b)
-
-    print(alignment_table(r, new_seq_a, new_seq_b))
-    r = [(a_to_take[i], b_to_take[j]) for i, j in r]
-    return r
-
-
-def do_op(param):
-    pass
-
-
-def equalize_ending(append_seq_a, append_seq_b, step):
-    i = 5 * step
-    while True:
-        i += step * 5
-        s_a = str_in_list_at(
-            append_seq_a,
-            pos=(0 if step > 0 else len(append_seq_a)),
-            span=abs(i) * step
-        )
-        s_b = str_in_list_at(
-            append_seq_b,
-            pos=(0 if step > 0 else len(append_seq_b)),
-            span=abs(i) * step
-        )
-
-        if (s_a[:i] == s_b[:i]) if step > 0 else (s_a[i:] == s_b[i:]):
-            break
-        else:
-            sub = lcs(s_a, s_b)[0][2]
-
-            print(sub, s_a, s_b)
-            diff_a = s_a.split(sub)[0 if step > 0 else 1]
-            diff_b = s_b.split(sub)[0 if step > 0 else 1]
-            if diff_a and diff_b:
-                continue
-
-            if not diff_a and not diff_b:
-                break
-            if diff_b:
-                append_seq_a[0 if step > 0 else -1] = \
-                    (diff_b if step > 0 else '') + append_seq_a[0 if step > 0 else -1] + ('' if step > 0 else diff_b)
-            if diff_a:
-                append_seq_b[0 if step > 0 else -1] = \
-                    (diff_a if step > 0 else '') + append_seq_b[0 if step > 0 else -1] + ('' if step > 0 else diff_a)
-            if append_seq_a[step] == append_seq_b[step]:
-                break
-
-    sub = lcs("".join(append_seq_a), "".join(append_seq_b))[0][2]
-
-    print([sub, "".join(append_seq_a), "".join(append_seq_b)])
-    diff_a = "".join(append_seq_a).split(sub)[0 if step > 0 else 1]
-    diff_b = "".join(append_seq_b).split(sub)[0 if step > 0 else 1]
-    if not diff_a == diff_b:
-        print("Equalizing error")
-
-        from pprint import pprint
-
-        diff = difflib.SequenceMatcher(a="".join(append_seq_a), b="".join(append_seq_b))
-        pprint(diff.get_opcodes())
-        print(append_seq_a)
-        print(append_seq_b)
-        equalize_ending(append_seq_a, append_seq_b, step)
-        raise AlignmentException("after equalizing lists of strings, they are not equal!")
-
-
-def strip_to_equal(append_seq_a, append_seq_b):
-    diff = difflib.SequenceMatcher(a="".join(append_seq_a), b="".join(append_seq_b))
-    print(diff.get_opcodes())
-    equalize_ending(append_seq_a, append_seq_b, 1)
-    equalize_ending(append_seq_a, append_seq_b, -1)
-
-    return append_seq_a, append_seq_b
-
-
-def equalize_seq_b(seq_a, seq_b, min_l=3):
-    diff = difflib.SequenceMatcher(a="".join(seq_a), b="".join(seq_b))
-    print(diff.get_opcodes())
-    operations = diff.get_opcodes()
-    operations = [o for o in operations if o[0] == 'equal']
-
-    indices_transpose_a = {}
-    indices_transpose_b = {}
-    new_seq_a, new_seq_b = [], []
-
-    for op in (operations):
-        ia, cia = find_pos_at(seq_a, c_pos=op[1])
-        ja, cja = find_pos_at(seq_a, c_pos=op[2])
-        ib, cib = find_pos_at(seq_b, c_pos=op[3])
-        jb, cjb = find_pos_at(seq_b, c_pos=op[4])
-        ia = ia + (1 if cia != 0 else 0)
-        ja = ja + (1 if cja != 0 else 0)
-        ib = ib + (1 if cib != 0 else 0)
-        jb = jb + (1 if cjb != 0 else 0)
-
-        append_seq_a = seq_a[ia:ja]
-        append_seq_b = seq_b[ib:jb]
-
-        la = len(append_seq_a)
-        lb = len(append_seq_b)
-
-        if (la < min_l or lb < min_l):
-            continue
-        # we may have sliced some chars, that are in the word-string and we need to
-        # trim them until they are equal.
-        append_seq_a, append_seq_b = strip_to_equal(append_seq_a, append_seq_b)
-
-        new_seq_a.extend(append_seq_a)
-        new_seq_b.extend(append_seq_b)
-
-        indices_transpose_a.update({len(indices_transpose_a) + i: i_a for i, i_a in enumerate(range(ia, ja))})
-        indices_transpose_b.update({len(indices_transpose_b) + i: i_a for i, i_a in enumerate(range(ib, jb))})
-
-    return new_seq_a, new_seq_b, indices_transpose_a, indices_transpose_b
+    return v, encodeds
 
 
 if __name__ == "__main__":
-    with open("../../test/data/pdfminer-vs-pdf2htmlex.json") as f:
-        words_a, words_b = json.loads("".join(f.readlines()))
+    input = \
+        ['EPJ', 'W', 'eb', 'of', 'Conferences', 'will', 'be', 'set', 'by', 'the', 'publisher', 'DOI:', 'will', 'be',
+         'set',
+         'by', 'the', 'publisher', '©Owned', 'by', 'the', 'authors,', 'published', 'by', 'EDP', 'Sciences,', '2021',
+         'Electric', 'dipole', 'polarizability:', 'fr', 'om', 'fe', 'w-', 'to', 'man', 'y-bod', 'y', 'systems', 'Mirko',
+         'Miorelli1,2,a,', 'Sonia', 'Bacca1,3,b,', 'Nir', 'Bar', 'nea4,', 'Gaute', 'Hagen5,6,', 'Giuseppina',
+         'Orlandini7,8,', 'and', 'Thomas', 'P', 'apenbroc', 'k5,6', '1TRIUMF', ',', '4004', 'W', 'esbrook', 'Mall,',
+         'V',
+         'ancouver', ',', 'Br', 'itish', 'Columbia,', 'Canada', 'V6T', '2A3', '2Depar', 'tment', 'of', 'Ph', 'ysics',
+         'and',
+         'Astronomy', ',', 'University', 'of', 'British', 'Columbia,', 'V', 'ancouver', ',', 'British', 'Columbia,',
+         'Canada', 'V6T', '1Z4', '3Depar', 'tment', 'of', 'Ph', 'ysics', 'and', 'Astronomy', ',', 'University', 'of',
+         'Manitoba,', 'Winnipeg,', 'Manitoba,', 'Canada', 'R3T', '2N2', '4Racah', 'Institute', 'of', 'Ph', 'ysics,',
+         'Hebre', 'w', 'University', ',', '91904', 'Jer', 'usalem,', 'Israel', '5Ph', 'ysics', 'Division,', 'Oak',
+         'Ridge',
+         'National', 'Laboratory', ',', 'Oak', 'Ridge,', 'T', 'ennessee', '37831,', 'USA', '6Depar', 'tment', 'of',
+         'Ph',
+         'ysics', 'and', 'Astronomy', ',', 'University', 'of', 'T', 'ennessee,', 'Knoxville', ',', 'T', 'ennessee',
+         '37996,', 'USA', '7Dipar', 'timento', 'di', 'Fisica,', 'Univ', 'ersitá', 'di', 'T', 'rento,', 'Via',
+         'Sommarive',
+         '14,', 'I-38123', 'T', 'rento', ',', 'Italy', '8Istituto', 'Nazionale', 'di', 'Fisica', 'Nucleare,', 'TIFP',
+         'A,',
+         'Via', 'Sommar', 'iv', 'e', '14,', 'I-38123', 'T', 'rento,', 'Italy', 'Abstract.', 'W', 'e', 'revie', 'w',
+         'the',
+         'Lorentz', 'inte', 'gral', 'transform', 'coupled-cluster', 'method', 'for', 'the', 'calculation', 'of', 'the',
+         'electric', 'dipole', 'polarizability', '.', 'W', 'e', 'benchmark', 'our', 'results', 'with', 'exact',
+         'hyperspherical', 'harmonics', 'calculations', 'for', '4He', 'and', 'then', 'we', 'mov', 'e', 'to', 'a',
+         'heavier',
+         'nucleus', 'studying', '16', 'O.', 'W', 'e', 'observe', 'that', 'the', 'implemented', 'chiral',
+         'nucleon-nucleon',
+         'interaction', 'at', 'next-to-ne', 'xt-to-next-to-leading', 'order', 'underestimates', 'the', 'electric',
+         'dipole',
+         'polarizability', '.', '1', 'Introduction', 'The', 'electric', 'dipole', 'polarizability', 'is', 'a',
+         'fundamental', 'quantity', 'to', 'understand', 'nuclear', 'dynamics', 'and', 'is', 'related', 'to', 'the',
+         'response', 'of', 'the', 'nucleus', 'to', 'an', 'external', 'electric', 'eld.', 'T', 'ypically', ',', 'it',
+         'is',
+         'measured', 'via', 'photo-', 'absorption', 'reactions', '[1],', 'Compton', 'scattering', '[2]', 'or',
+         'hadronic',
+         'processes,', 'such', 'as', '(', 'p,p0)', 'reactions', '[3].', 'Ab-initio', 'calculations', 'of', 'this',
+         'observ',
+         'able', 'were', 'traditionally', 'av', 'ailable', 'only', 'for', 'v', 'ery', 'light', 'nuclei.', 'It', 'is',
+         'our',
+         'goal', 'to', 'extend', 'such', 'studies', 'to', 'the', 'medium', 'mass', 're', 'gime', 'using',
+         'coupled-cluster',
+         'theory', '.', '2', 'Revie', 'w', 'of', 'the', 'method', 'The', 'electric', 'dipole', 'polarizability', 'can',
+         'be', 'calculated', 'from', 'the', 'dipole', 'response', 'function', 'R(É)', 'as', 'an', 'in', 'v', 'erse',
+         'energy', 'weighted', 'sum', 'rule', '±D=2±Z', 'Éth', 'R(É)', 'ÉdÉ.', '(1)', 'In', 'the', 'coupled-cluster',
+         'formalism', '[4]', 'the', 'dipole', 'response', 'function', 'is', 'R(É)=X', 'n', 'h0L|e\x12Æ', 'T˜',
+         'T|nRihnL|e\x12Æ', 'T˜eÆ', 'T|0Ri´(En\x12E0\x12É),(2)', 'ae-mail:', 'mmiorelli@triumf.ca', 'be-mail:',
+         'bacca@triumf.ca', 'EPJ', 'W', 'eb', 'of', 'Conferences', 'where', 'Æ', '˜is', 'the', 'dipole', 'excitation',
+         'operator', ',', 'Æ', 'Tis', 'the', 'cluster', 'operator', 'dened', 'in', 'coupled-cluster', 'theory', '[5],',
+         'and', 'h0L|,|0Ri(hnL|,|nRi)', 'are', 'the', 'left', 'and', 'right', 'reference', 'ground', 'states',
+         '(excited',
+         'states),', 'respectiv', 'ely', '.', 'Using', 'Eq.', '(1)', 'we', 'can', 'then', 'rewrite', 'the', 'electric',
+         'dipole', 'polarizability', 'as', '±D=2±h0L|˜', '¨Ri,(3)', 'where', '˜', '=', 'e\x12Æ', 'T˜eÆ', 'Tis', 'the',
+         'similarity', 'transformed', 'operator', 'and', 'Ü', '¨Ris', 'the', 'solution', 'of', 'the', 'Schrödinger-',
+         'like', 'equation', '(H\x12\x06E0)|Ü', '¨Ri=', '˜|0Ri,(4)', 'where', '\x06E0is', 'the', 'correlation',
+         'energy',
+         'of', 'the', 'ground', 'state.', 'This', 'equation', 'is', 'obtained', 'using', 'the', 'Lorentz', 'integral',
+         'transform', 'method', '[6]', 'in', 'the', 'coupled-cluster', 'formulation', '[4,', '7].', 'Similarly', 'to',
+         'what', 'was', 'done', 'in', '[8,', '9],', 'the', 'polarizability', 'can', 'be', 'expressed', 'as', 'a',
+         'continued', 'fraction', 'of', 'the', 'Lanczos', 'coecients', '[10]', '±D=2±h0L|˜', '˜|0Riñ', 'ô', 'ô', 'ô',
+         'ô',
+         'ô', 'ô', 'ò', 'ô', 'ô', 'ô', 'ô', 'ô', 'ô', 'ó', '1', 'a0\x12b2', '0', 'a1\x12b2', '1', 'a2\x12···', 'ü', 'ô',
+         'ô', 'ô', 'ô', 'ô', 'ô', 'ý', 'ô', 'ô', 'ô', 'ô', 'ô', 'ô', 'þ', '.(5)', 'If', 'one', 'is', 'able', 'to',
+         'calculate', 'the', 'response', 'function', 'of', 'Eq.', '(2),', 'then', 'the', 'polarizability', 'could',
+         'be',
+         'obtained', 'using', 'the', 'denition', 'in', 'Eq.', '(1).', 'Howe', 'v', 'er', ',', 'using', 'Eq.', '(5)',
+         'allows', 'us', 'to', 'calculate', 'the', 'polarizability', 'directly', 'from', 'the', 'Lanczos', 'coecients,',
+         'thus', 'avoiding', 'further', 'uncertainties', 'coming', 'from', 'the', 'in', 'version', 'of', 'the',
+         'transform.', 'Furthermore,', 'due', 'to', 'the', 'nature', 'of', 'the', 'continued', 'fraction,', 'con', 'v',
+         'ergence', 'is', 'reached', 'with', 'less', 'than', '100', 'Lanczos', 'steps.', 'Eq.', '(5)', 'is', 'an',
+         'exact',
+         'result,', 'free', 'of', 'an', 'y', 'approximation,', 'if', 'the', 'cluster', 'expansion', 'is', 'performed',
+         'up',
+         'to', 'A-part', 'icle-A-hole', 'excitations,', 'Abeing', 'the', 'total', 'number', 'of', 'nucleons.', 'Ho',
+         'wev',
+         'er', ',', 'in', 'practical', 'calculations', 'the', 'cluster', 'expansion', 'is', 'truncated', 'since', 'a',
+         'full', 'e', 'xpansion', 'is', 'not', 'feasible', 'due', 'to', 'the', 'very', 'demanding', 'computational',
+         'cost.', 'In', 'the', 'results', 'we', 'present', 'here', 'we', 'truncated', 'the', 'cluster', 'operators',
+         'at',
+         'the', 'singles-and-doubles', 'excitations', 'le', 'v', 'el', 'and', 'dub', 'this', 'approximation', 'scheme',
+         'LIT', '-CCSD.', '3', 'Results', 'and', 'Conclusions', '3.1', 'Benchmark', 'in', '4He', 'While', 'the', 'LIT',
+         '-CCSD', 'method', 'has', 'been', 'already', 'benchmark', 'ed', 'with', 'the', 'eectiv', 'e', 'interaction',
+         'hyperspher', '-', 'ical', 'harmonic', '(EIHH)', 'method', '[11]', 'for', 'the', 'dipole', 'response',
+         'function',
+         '[4],', 'here', 'we', 'show', 'a', 'benchmark', 'for', 'the', 'electric', 'dipole', 'polarizability',
+         'calculated',
+         'using', 'Eq.', '(5)', 'with', 'a', 'chiral', 'nucleon-nucleon', 'force', 'deri', 'ved', 'at', 'next-to-ne',
+         'xt-to-next-to-ne', 'xt-to-leading', 'order', '[12].', 'In', 'Figure', '1,', 'we', 'show', 'the', 'electric',
+         'dipole', 'polarizability', 'of', '4He', 'as', 'a', 'function', 'of', 'the', 'model', 'space', 'size', 'Nma',
+         'x',
+         '.', 'The', 'green', 'band', 'represents', 'the', 'combined', 'experimental', 'values', 'from', '[13,', '14]',
+         'which', 'ha', 'v', 'e', 'been', 'extracted', 'by', 'tting', 'to', 'e', 'xperimental', 'photo-absorption',
+         'data',
+         '[15,', '16].', 'The', 'continuous', 'line', '(bro', 'wn)', 'is', 'the', 'polarizability', 'obtained', 'with',
+         'the', 'EIHH', 'method.', 'The', 'lines', 'with', 'scatter-symbols', 'are', 'the', 'results', 'from', 'the',
+         'LIT',
+         '-CCSD', 'method', 'obtained', 'for', 'dierent', 'v', 'alues', 'of', 'the', 'frequenc', 'y', '~&of', 'the',
+         'harmonic', 'oscillator', 'basis', 'used', 'to', 'expand', 'the', 'potential.', 'As', 'e', 'xpected,', 'the',
+         'polarizability', 'is', 'independent', 'of', 'the', 'oscillator', 'frequency', 'as', 'one', 'increases', 'Nma',
+         'x', ',', 'and', 'con', 'ver', 'ges', 'rapidly', 'to', 'a', 'v', 'alue', '±D=0.0815', 'fm3,', 'which',
+         'compares',
+         'fairly', 'well', 'with', 'the', 'EIHH', '[9]', 'result', 'of', '±D=0.0831', 'fm3and', '±D=0.0822(5)',
+         'fm3obtained', 'using', 'the', 'no-core-', 'shell-model', 'with', 'the', 'same', 'interaction', '[17].',
+         'Moreover', ',', 'the', 'conv', 'ergence', 'with', 'respect', 'to', 'the', 'number', 'of', 'Lanczos',
+         'coecients',
+         'used', 'in', 'Eq.', '(5)', 'is', 'much', 'faster', 'than', 'the', 'one', 'observed', 'for', 'the', 'response',
+         'function', 'in', '[4].', 'Already', 'with', '15', 'Lanczos', 'coecients', 'the', 'error', 'with', 'respect',
+         'to',
+         'the', 'con', 'ver', 'ged', 'v', 'alue', 'is', '0.3%,', 'which', 'shows', 'the', 'adv', 'antage', 'of',
+         'using',
+         'directly', 'Eq.', '(5).', 'The', 'small', 'dierence', 'between', 'the', 'LIT', '-CCSD', 'and', 'EIHH',
+         'results',
+         'can', 'thus', 'be', 'attributed', 'to', 'the', 'truncation', 'to', 'singles-and-doubles', 'e', 'xcitations',
+         'only', '.', '21st', 'International', 'Conference', 'on', 'Few-Body', 'Problems', 'in', 'Ph', 'ysics', '', '',
+         '',
+         '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+         '',
+         '', '', '', '', '', '', '', '', 'Figure', '1.', 'The', 'electric', 'dipole', 'polarizability', 'in', '4He',
+         'as',
+         'a', 'function', 'of', 'the', 'model', 'space', 'size', 'Nma', 'x', 'for', 'dif-', 'ferent', 'values', 'of',
+         'the',
+         'harmonic', 'oscillator', 'frequenc', 'y', '~&(black,', 'red,', 'blue).', 'The', 'con', 'ver', 'ged', 'v',
+         'alue',
+         'at', 'Nma', 'x', '=18', 'is', 'compared', 'with', 'the', 'result', 'obtained', 'from', 'the', 'EIHH',
+         'method',
+         '(brown)', 'and', 'the', 'e', 'xperi-', 'mental', 'data', 'from', '[13\x1316]', '(green', 'band).', '', '', '',
+         '',
+         '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+         '',
+         '', '', 'Figure', '2.', 'Comparison', 'of', 'the', 'electric', 'dipole', 'polar', '-', 'izability', 'in', '16',
+         'O', 'as', 'a', 'function', 'of', 'the', 'model', 'space', 'size', 'Nma', 'x', 'for', 'three', 'dierent', 'v',
+         'alues', 'of', '~&', '=', '20,24', 'and', '26', 'MeV', '(black,', 'red,', 'blue)', 'with', 'the', 'experimen-',
+         'tal', 'data', 'from', 'Ahrens', 'et', 'al.', '[1]', '(green).', '3.2', 'Application', 'to', '16', 'O', 'The',
+         'very', 'nice', 'agreement', 'in', 'the', 'benchmark', 'for', 'the', '4He', 'polarizability', 'suggests',
+         'that',
+         'we', 'can', 'e', 'xtend', 'the', 'calculation', 'of', '±Dvia', 'this', 'method', 'to', 'heavier', 'nuclei.',
+         'W',
+         'e', 'then', 'consider', '16', 'O,', 'whose', 'response', 'function', 'has', 'been', 'already', 'studied',
+         'previously', '[4,', '7].', 'In', 'Figure', '2,', 'we', 'study', 'the', 'con', 'vergence', 'of', 'the',
+         'polarizability', 'as', 'a', 'function', 'of', 'the', 'model', 'space', 'size.', 'Again,', 'the', 'con',
+         'vergence', 'is', 'v', 'ery', 'fast', 'and', 'the', 'nal', 'v', 'alue', '±D=', '0.461', 'fm3is', 'independent',
+         'of', 'the', 'underlying', 'harmonic', 'oscillator', 'frequency', '.', 'Ho', 'we', 'ver', ',', 'the', 'conv',
+         'erged', 'value', 'is', 'rather', 'lo', 'w', 'if', 'compared', 'to', 'the', 'experimental', 'one', 'of', '±e',
+         'x',
+         'p', 'D=0.585(9)', '[1].', 'This', 'trend', 'is', 'observed', 'also', 'in', 'heavier', 'nuclei', 'such', 'as',
+         '40', 'Ca', 'and', '48', 'Ca', '[4,', '10],', 'and', 'the', 'discrepancy', 'is', 'e', 'ven', 'larger', 'when',
+         'the', 'mass', 'number', 'is', 'increased.', 'As', 'shown', 'in', 'Figure', '1,', 'the', 'eect', 'of', 'the',
+         'cluster', 'expansion', 'truncation', 'is', 'tin', 'y', 'and,', 'because', 'of', 'the', 'size', 'extensi', 'v',
+         'e', 'nature', 'of', 'coupled-cluster', 'theory', ',', 'we', 'expect', 'the', 'eect', 'to', 'be', 'very',
+         'small',
+         'in', 'heavier', 'systems', 'as', 'well.', 'Discrepancies', 'between', 'the', 'calculated', 'values', 'and',
+         'the',
+         'e', 'xperimental', 'data', 'are', 'mainly', 'attributed', 'to', 'deciencies', 'of', 'the', 'emplo', 'yed',
+         'Hamiltonian.', '3.3', 'Conclusions', 'W', 'e', 'used', 'the', 'LIT', '-CCSD', 'method', 'to', 'extend', 'the',
+         'calculation', 'of', 'the', 'electric', 'dipole', 'polarizability', 'from', 'few-', 'to', 'man', 'y-body',
+         'nuclei', 'using', 'nucleon-nucleon', 'chiral', 'interactions.', 'W', 'e', 'have', 'sho', 'wn', 'the',
+         'reliability', 'of', 'the', 'method', 'with', 'benchmarks', 'in', '4He', 'where', 'both', 'EIHH', 'and', 'LIT',
+         '-CCSD', 'calculations', 'and', 'the', 'experi-', 'mental', 'data', 'are', 'in', 'agreement.', 'Moving', 'to',
+         'hea', 'vier', 'systems,', 'e.g', '.,16', 'O,', 'we', 'observe', 'disagreement', 'between', 'calculated',
+         'and',
+         'measured', 'v', 'alues.', 'This', 'points', 'to', 'the', 'inadequacy', 'of', 'chiral', 'interactions', 'at',
+         'the', 'two-body', 'lev', 'el', 'in', 'accounting', 'for', 'the', 'dipole', 'polarizability', 'in', 'hea',
+         'vier',
+         'nuclei,', 'which', 'we', 'also', 'observed', 'for', 'the', 'radii', '[4,', '10].', 'The', 'use', 'of',
+         'newly',
+         'de', 'veloped', 'Hamiltonians', 'with', 'three-nucleon', 'forces', '[18]', 'calibrated', 'on', 'radii', 'of',
+         'nite', 'nuclei', 'can', 'help', 'solving', 'this', 'problem.', 'W', 'ork', 'in', 'this', 'direction', 'is',
+         'underway', '.', 'EPJ', 'W', 'eb', 'of', 'Conferences', 'Ackno', 'wledgements', 'This', 'work', 'was',
+         'supported',
+         'in', 'parts', 'by', 'the', 'Natural', 'Sciences', 'and', 'Engineering', 'Research', 'Council', '(NSERC),',
+         'the',
+         'National', 'Research', 'Council', 'of', 'Canada,', 'the', 'US-Israel', 'Binational', 'Science', 'Foundation',
+         '(Grant', 'No.', '2012212),', 'the', 'Pazy', 'F', 'oundation,', 'the', 'U.S.', 'Department', 'of', 'Energy',
+         '(Oak', 'Ridge', 'National', 'Laboratory),', 'under', 'Grant', 'Nos.', 'DEFG02-', '96ER40963', '(Univ',
+         'ersity',
+         'of', 'T', 'ennessee),', 'de-sc0008499', '(NUCLEI', 'Sci-DA', 'C', 'collaboration),', 'and', 'the', 'Field',
+         'W',
+         'ork', 'Proposal', 'ERKBP57.', 'References', '[1]', 'J.', 'Ahrens,', 'H.', 'Borchert,', 'K.H.', 'Czock,',
+         'H.B.',
+         'Eppler', ',', 'H.', 'Gimm,', 'H.', 'Gundrum,', 'M.', 'Kröning,', 'P', '.', 'Riehn,', 'G.', 'Sita', 'Ram,',
+         'A.',
+         'Zieger', ',', 'and', 'B.', 'Ziegler', ',', 'Nuclear', 'Physics', 'A', '251', '479-492', '(1975)', '[2]',
+         'H.W',
+         '.', 'Griesshammer', ',', 'J.A.', 'McGovern,', 'D.R.', 'Phillips,', 'G.', 'Feldman,', 'Prog.', 'Part.',
+         'Nucl.',
+         'Phys.,', '67,', '841-897', '(2012)', '[3]', 'A.', 'T', 'amii,', 'P', '.', 'von', 'Neumann-Cosel,', 'and',
+         'I.',
+         'Poltoratska,', 'Eur', '.', 'Phys.', 'J.', 'A', '50', '28', '(2014)', '[4]', 'S.', 'Bacca,', 'N.', 'Barnea,',
+         'G.',
+         'Hagen,', 'M.', 'Miorelli,', 'G.', 'Orlandini', 'and', 'T', '.', 'Papenbrock,', 'Phys.', 'Re', 'v', '.', 'C',
+         '90,', '064619', '(2014)', '[5]', 'I.', 'Shavitt,', 'and', 'R.', 'J.', 'Bartlett,', 'Many-body', 'Methods',
+         'in',
+         'Chemistry', 'and', 'Physics', '(Cambridge', 'Uni', 'ver', '-', 'sity', 'Press,', 'Cambridge', 'UK,', '2009)',
+         '255-256', '[6]', 'Efros,', 'V', '.D.,', 'Leidemann,', 'W', '.,', 'Orlandini,', 'G.:', 'Phys.', 'Lett.', 'B',
+         '338,', '130', '(1994)', '[7]', 'S.', 'Bacca,', 'N.', 'Barnea,', 'G.', 'Hagen,', 'G.', 'Orlandini', 'and', 'T',
+         '.', 'Papenbrock,', 'Phys.', 'Rev', '.', 'Lett.', '111,', '122502', '(2013)', '[8]', 'N.', 'Nev', 'o', 'Dinur',
+         ',', 'J.', 'Chen,', 'S.', 'Bacca', 'and', 'N.', 'Barnea,', 'Phys.', 'Rev', '.', 'C', '89,', '064317', '(2014)',
+         '[9]', 'R.', 'Goerke,', 'S.', 'Bacca,', 'and', 'N.', 'Barnea,', 'Phys.', 'Re', 'v', '.', 'C', '86', '064316',
+         '(2012)', '[10]', 'M.', 'Miorelli,', 'S.', 'Bacca,', 'N.', 'Barnea,', 'G.', 'Hagen,', 'G.', 'Orlandini', 'and',
+         'T', '.', 'Papenbrock,', 'in', 'preparation.', '[11]', 'N.', 'Barnea,', 'W', '.', 'Leidemann,', 'and', 'G.',
+         'Orlandini,', 'Phys.', 'Rev', '.', 'C', '61,', '054001', '(2000)', '[12]', 'D.', 'R.', 'Entem,', 'and', 'R.',
+         'Machleidt,', 'Phys.', 'Re', 'v', '.', 'C', '68', '041001', '(2003)', '[13]', 'J.', 'L.', 'Friar', ',',
+         'Phys.',
+         'Re', 'v', '.', 'C', '16', '1540-1548', '(1977)', '[14]', 'K.', 'Pachucki,', 'and', 'A.', 'M.', 'Moro,',
+         'Phys.',
+         'Re', 'v', '.', 'A', '75', '032521', '(2007)', '[15]', 'Y', '.', 'M.', 'Arkatov', ',', 'P', '.', 'I.', 'V',
+         'atset,', 'V', '.', 'I.', 'V', 'oloshuchuk,', 'V', '.', 'A.', 'Zolenko,', 'I.', 'M.', 'Prokhorets,', 'and',
+         'V',
+         '.', 'I.', 'Chimil\x19,', 'Sov', '.', 'J.', 'Nucl.', 'Phys.', '19', '598', '(1980)', '[16]', 'Y', '.', 'M.',
+         'Arkatov', ',', 'P', '.', 'I.', 'V', 'atset,', 'V', '.', 'I.', 'V', 'oloshuchuk,', 'V', '.', 'A.', 'Zolenko,',
+         'and', 'I.', 'M.', 'Prokhorets,', 'Sov', '.', 'J.', 'Nucl.', 'Phys.', '31', '726', '(1980)', '[17]', 'I.',
+         'Stetcu,', 'S.', 'Quaglioni,', 'J.', 'L.', 'Friar', ',', 'A.', 'C.', 'Hayes,', 'and', 'P', '.', 'Navrátil',
+         'Phys.', 'Re', 'v', '.', 'C', '79', '064001', '(2009)', '[18]', 'A.', 'Ekström,', 'G.', 'R.', 'Jansen,', 'K.',
+         'A.', 'W', 'endt,', 'G.', 'Hagen,', 'T', '.', 'Papenbrock,', 'B.', 'D.', 'Carlsson,', 'C.', 'Forssén,', 'M.',
+         'Hjorth-Jensen,', 'P', '.', 'Navrátil,', 'and', 'W', '.', 'Nazarewic,', 'Phys.', 'Re', 'v', '.', 'C', '91',
+         '051301(R)', '(2015)']
 
-    print(alignment_table(fuzzyalign(words_a, words_b), words_a, words_b))
+    annotations = [
+        [('O', 'Abstract.'), ('O', 'We'), ('O', 'review'), ('O', 'the'), ('O', 'Lorentz'), ('B-CONTRAST', 'integral'),
+         ('I-CONTRAST', 'transform'), ('I-CONTRAST', 'coupled-cluster'), ('I-CONTRAST', 'method'),
+         ('I-CONTRAST', 'for'), ('I-CONTRAST', 'the'), ('I-CONTRAST', 'calculation'), ('I-CONTRAST', 'of'),
+         ('I-CONTRAST', 'the'), ('I-CONTRAST', 'electric'), ('I-CONTRAST', 'dipole'), ('I-CONTRAST', 'polarizability.'),
+         ('I-CONTRAST', 'We'), ('I-CONTRAST', 'benchmark'), ('I-CONTRAST', 'our'), ('I-CONTRAST', 'results'),
+         ('I-CONTRAST', 'with'), ('I-CONTRAST', 'exact'), ('I-CONTRAST', 'hyperspherical'), ('I-CONTRAST', 'harmonics'),
+         ('I-CONTRAST', 'calculations'), ('I-CONTRAST', 'for'), ('I-CONTRAST', '4He'), ('I-CONTRAST', 'and'),
+         ('I-CONTRAST', 'then'), ('I-CONTRAST', 'we'), ('I-CONTRAST', 'move'), ('I-CONTRAST', 'to'),
+         ('I-CONTRAST', 'a'), ('I-CONTRAST', 'heavier'), ('I-CONTRAST', 'nucleus'), ('I-CONTRAST', 'studying'),
+         ('I-CONTRAST', '16O.'), ('I-CONTRAST', 'We'), ('I-CONTRAST', 'observe'), ('I-CONTRAST', 'that'),
+         ('I-CONTRAST', 'the'), ('I-CONTRAST', 'implemented'), ('I-CONTRAST', 'chiral'),
+         ('I-CONTRAST', 'nucleon-nucleon'), ('I-CONTRAST', 'interaction'), ('I-CONTRAST', 'at'),
+         ('I-CONTRAST', 'next-to-next-to-next-to-leading'), ('I-CONTRAST', 'order'), ('I-CONTRAST', 'underestimates'),
+         ('I-CONTRAST', 'the'), ('I-CONTRAST', 'electric'), ('I-CONTRAST', 'dipole'), ('I-CONTRAST', 'polarizability.'),
+         ('I-CONTRAST', 'The'), ('I-CONTRAST', 'electric'), ('I-CONTRAST', 'dipole'), ('I-CONTRAST', 'polarizability'),
+         ('I-CONTRAST', 'is'), ('I-CONTRAST', 'a'), ('I-CONTRAST', 'fundamental'), ('I-CONTRAST', 'quantity'),
+         ('I-CONTRAST', 'to'), ('I-CONTRAST', 'understand'), ('I-CONTRAST', 'nuclear'), ('I-CONTRAST', 'dynamics'),
+         ('I-CONTRAST', 'and'), ('I-CONTRAST', 'is'), ('I-CONTRAST', 'related'), ('I-CONTRAST', 'to'),
+         ('I-CONTRAST', 'the'), ('I-CONTRAST', 'response'), ('I-CONTRAST', 'of'), ('I-CONTRAST', 'the'),
+         ('I-CONTRAST', 'nucleus'), ('I-CONTRAST', 'to'), ('I-CONTRAST', 'an'), ('I-CONTRAST', 'external'),
+         ('I-CONTRAST', 'electric'), ('I-CONTRAST', 'ﬁeld.'), ('I-CONTRAST', 'Typically,'), ('I-CONTRAST', 'it'),
+         ('I-CONTRAST', 'is'), ('I-CONTRAST', 'measured'), ('I-CONTRAST', 'via'), ('I-CONTRAST', 'photo-'),
+         ('I-CONTRAST', 'absorption'), ('I-CONTRAST', 'reactions'), ('I-CONTRAST', '[1],'), ('I-CONTRAST', 'Compton'),
+         ('I-CONTRAST', 'scattering'), ('I-CONTRAST', '[2]'), ('I-CONTRAST', 'or'), ('I-CONTRAST', 'hadronic'),
+         ('I-CONTRAST', 'processes,'), ('I-CONTRAST', 'such'), ('I-CONTRAST', 'as'), ('I-CONTRAST', '(p,'),
+         ('I-CONTRAST', 'p(cid'), ('I-CONTRAST', ':48))'), ('I-CONTRAST', 'reactions'), ('I-CONTRAST', '[3].'),
+         ('I-CONTRAST', 'Ab-initio'), ('I-CONTRAST', 'calculations'), ('I-CONTRAST', 'of'), ('I-CONTRAST', 'this'),
+         ('I-CONTRAST', 'observable'), ('I-CONTRAST', 'were'), ('I-CONTRAST', 'traditionally'),
+         ('I-CONTRAST', 'available'), ('I-CONTRAST', 'only'), ('I-CONTRAST', 'for'), ('I-CONTRAST', 'very'),
+         ('I-CONTRAST', 'light'), ('I-CONTRAST', 'nuclei.'), ('I-CONTRAST', 'It'), ('I-CONTRAST', 'is'),
+         ('I-CONTRAST', 'our'), ('I-CONTRAST', 'goal'), ('I-CONTRAST', 'to'), ('I-CONTRAST', 'extend'),
+         ('I-CONTRAST', 'such'), ('I-CONTRAST', 'studies'), ('I-CONTRAST', 'to'), ('I-CONTRAST', 'the'),
+         ('I-CONTRAST', 'medium'), ('I-CONTRAST', 'mass'), ('I-CONTRAST', 'regime'), ('I-CONTRAST', 'using'),
+         ('I-CONTRAST', 'coupled-cluster'), ('L-CONTRAST', 'theory.'), ('B-CONTRAST', 'The'),
+         ('I-CONTRAST', 'electric'), ('I-CONTRAST', 'dipole'), ('I-CONTRAST', 'polarizability'), ('I-CONTRAST', 'can'),
+         ('I-CONTRAST', 'be'), ('I-CONTRAST', 'calculated'), ('I-CONTRAST', 'from'), ('I-CONTRAST', 'the'),
+         ('I-CONTRAST', 'dipole'), ('I-CONTRAST', 'response'), ('L-CONTRAST', 'function'), ('U-SUBJECT', 'R(ω)'),
+         ('B-CONTRAST', 'as'), ('I-CONTRAST', 'an'), ('I-CONTRAST', 'inverse'), ('I-CONTRAST', 'energy'),
+         ('I-CONTRAST', 'weighted'), ('I-CONTRAST', 'sum'), ('L-CONTRAST', 'rule'), ('O', 'In'), ('O', 'the'),
+         ('O', 'coupled-cluster'), ('O', 'formalism'), ('O', '[4]'), ('O', 'the'), ('O', 'dipole'), ('O', 'response'),
+         ('O', 'function'), ('O', 'is'), ('O', 'where'), ('U-SUBJECT', 'ˆΘ'), ('B-CONTRAST', 'is'),
+         ('I-CONTRAST', 'the'), ('I-CONTRAST', 'dipole'), ('I-CONTRAST', 'excitation'), ('I-CONTRAST', 'operator,'),
+         ('I-CONTRAST', 'ˆT'), ('I-CONTRAST', 'is'), ('I-CONTRAST', 'the'), ('I-CONTRAST', 'cluster'),
+         ('I-CONTRAST', 'operator'), ('I-CONTRAST', 'deﬁned'), ('I-CONTRAST', 'in'), ('I-CONTRAST', 'coupled-cluster'),
+         ('I-CONTRAST', 'theory'), ('I-CONTRAST', '[5],'), ('I-CONTRAST', 'and'), ('I-CONTRAST', '(cid'),
+         ('I-CONTRAST', ':104)0L|,'), ('I-CONTRAST', '|0R(cid'), ('I-CONTRAST', ':105)'), ('I-CONTRAST', '((cid'),
+         ('I-CONTRAST', ':104)nL|,'), ('I-CONTRAST', '|nR(cid'), ('I-CONTRAST', ':105))'), ('I-CONTRAST', 'are'),
+         ('I-CONTRAST', 'the'), ('I-CONTRAST', 'left'), ('I-CONTRAST', 'and'), ('I-CONTRAST', 'right'),
+         ('I-CONTRAST', 'reference'), ('I-CONTRAST', 'ground'), ('I-CONTRAST', 'states'), ('I-CONTRAST', '(excited'),
+         ('L-CONTRAST', 'states),'), ('O', 'respectively.'), ('U-CONTRAST', 'Using'), ('O', 'Eq.')],
+        [('B-SUBJECT', 'Eq.'), ('L-SUBJECT', '(1)'), ('B-CONTRAST', 'we'), ('I-CONTRAST', 'can'),
+         ('I-CONTRAST', 'then'), ('I-CONTRAST', 'rewrite'), ('I-CONTRAST', 'the'), ('I-CONTRAST', 'electric'),
+         ('I-CONTRAST', 'dipole'), ('I-CONTRAST', 'polarizability'), ('I-CONTRAST', 'as'), ('I-CONTRAST', 'where'),
+         ('I-CONTRAST', 'Θ'), ('I-CONTRAST', '='), ('I-CONTRAST', 'e−'), ('I-CONTRAST', 'ˆT'), ('I-CONTRAST', 'Θe'),
+         ('I-CONTRAST', 'ˆT'), ('I-CONTRAST', 'is'), ('I-CONTRAST', 'the'), ('I-CONTRAST', 'similarity'),
+         ('I-CONTRAST', 'transformed'), ('I-CONTRAST', 'operator'), ('I-CONTRAST', 'and'), ('I-CONTRAST', '˜ΨR'),
+         ('I-CONTRAST', 'is'), ('I-CONTRAST', 'the'), ('I-CONTRAST', 'solution'), ('I-CONTRAST', 'of'),
+         ('I-CONTRAST', 'the'), ('I-CONTRAST', 'Schrödinger-'), ('I-CONTRAST', 'like'), ('I-CONTRAST', 'equation'),
+         ('I-CONTRAST', '(H'), ('I-CONTRAST', '−'), ('I-CONTRAST', '∆E0)|'), ('I-CONTRAST', '˜ΨR(cid'),
+         ('I-CONTRAST', ':105)'), ('I-CONTRAST', '='), ('I-CONTRAST', 'Θ|0R(cid'), ('I-CONTRAST', ':105),'),
+         ('I-CONTRAST', '(4)'), ('I-CONTRAST', 'where'), ('I-CONTRAST', '∆E0'), ('I-CONTRAST', 'is'),
+         ('I-CONTRAST', 'the'), ('I-CONTRAST', 'correlation'), ('I-CONTRAST', 'energy'), ('I-CONTRAST', 'of'),
+         ('I-CONTRAST', 'the'), ('I-CONTRAST', 'ground'), ('I-CONTRAST', 'state.'), ('I-CONTRAST', 'This'),
+         ('I-CONTRAST', 'equation'), ('I-CONTRAST', 'is'), ('I-CONTRAST', 'obtained'), ('I-CONTRAST', 'using'),
+         ('I-CONTRAST', 'the'), ('I-CONTRAST', 'Lorentz'), ('I-CONTRAST', 'integral'), ('I-CONTRAST', 'transform'),
+         ('I-CONTRAST', 'method'), ('I-CONTRAST', '[6]'), ('I-CONTRAST', 'in'), ('I-CONTRAST', 'the'),
+         ('I-CONTRAST', 'coupled-cluster'), ('I-CONTRAST', 'formulation'), ('I-CONTRAST', '[4,'), ('I-CONTRAST', '7].'),
+         ('I-CONTRAST', 'Similarly'), ('I-CONTRAST', 'to'), ('I-CONTRAST', 'what'), ('I-CONTRAST', 'was'),
+         ('I-CONTRAST', 'done'), ('I-CONTRAST', 'in'), ('I-CONTRAST', '[8,'), ('I-CONTRAST', '9],'),
+         ('I-CONTRAST', 'the'), ('I-CONTRAST', 'polarizability'), ('I-CONTRAST', 'can'), ('I-CONTRAST', 'be'),
+         ('I-CONTRAST', 'expressed'), ('I-CONTRAST', 'as'), ('I-CONTRAST', 'a'), ('I-CONTRAST', 'continued'),
+         ('I-CONTRAST', 'fraction'), ('I-CONTRAST', 'of'), ('I-CONTRAST', 'the'), ('I-CONTRAST', 'Lanczos'),
+         ('I-CONTRAST', 'coeﬃcients'), ('I-CONTRAST', '[10]'), ('I-CONTRAST', 'a1−'), ('I-CONTRAST', '.'),
+         ('I-CONTRAST', 'The'), ('I-CONTRAST', 'very'), ('I-CONTRAST', 'nice'), ('I-CONTRAST', 'agreement'),
+         ('I-CONTRAST', 'in'), ('I-CONTRAST', 'the'), ('I-CONTRAST', 'benchmark'), ('I-CONTRAST', 'for'),
+         ('I-CONTRAST', 'the'), ('I-CONTRAST', '4He'), ('I-CONTRAST', 'polarizability'), ('I-CONTRAST', 'suggests'),
+         ('I-CONTRAST', 'that'), ('I-CONTRAST', 'we'), ('I-CONTRAST', 'can'), ('I-CONTRAST', 'extend'),
+         ('I-CONTRAST', 'the'), ('I-CONTRAST', 'calculation'), ('I-CONTRAST', 'of'), ('I-CONTRAST', 'αD'),
+         ('I-CONTRAST', 'via'), ('I-CONTRAST', 'this'), ('I-CONTRAST', 'method'), ('I-CONTRAST', 'to'),
+         ('I-CONTRAST', 'heavier'), ('I-CONTRAST', 'nuclei.'), ('I-CONTRAST', 'We'), ('I-CONTRAST', 'then'),
+         ('I-CONTRAST', 'consider'), ('I-CONTRAST', '16O,'), ('I-CONTRAST', 'whose'), ('I-CONTRAST', 'response'),
+         ('I-CONTRAST', 'function'), ('I-CONTRAST', 'has'), ('I-CONTRAST', 'been'), ('I-CONTRAST', 'already'),
+         ('I-CONTRAST', 'studied'), ('I-CONTRAST', 'previously'), ('I-CONTRAST', '[4,'), ('I-CONTRAST', '7].'),
+         ('I-CONTRAST', 'In'), ('I-CONTRAST', 'Figure'), ('I-CONTRAST', '2,'), ('I-CONTRAST', 'we'),
+         ('I-CONTRAST', 'study'), ('I-CONTRAST', 'the'), ('I-CONTRAST', 'convergence'), ('I-CONTRAST', 'of'),
+         ('I-CONTRAST', 'the'), ('I-CONTRAST', 'polarizability'), ('I-CONTRAST', 'as'), ('I-CONTRAST', 'a'),
+         ('I-CONTRAST', 'function'), ('I-CONTRAST', 'of'), ('I-CONTRAST', 'the'), ('I-CONTRAST', 'model'),
+         ('I-CONTRAST', 'space'), ('I-CONTRAST', 'size.'), ('I-CONTRAST', 'Again,'), ('I-CONTRAST', 'the'),
+         ('I-CONTRAST', 'convergence'), ('I-CONTRAST', 'is'), ('I-CONTRAST', 'very'), ('I-CONTRAST', 'fast'),
+         ('I-CONTRAST', 'and'), ('I-CONTRAST', 'the'), ('I-CONTRAST', 'ﬁnal'), ('I-CONTRAST', 'value'),
+         ('I-CONTRAST', 'αD'), ('I-CONTRAST', '='), ('I-CONTRAST', '0.461'), ('I-CONTRAST', 'fm3'),
+         ('I-CONTRAST', 'is'), ('I-CONTRAST', 'independent'), ('I-CONTRAST', 'of'), ('I-CONTRAST', 'the'),
+         ('I-CONTRAST', 'underlying'), ('I-CONTRAST', 'harmonic'), ('I-CONTRAST', 'oscillator'),
+         ('I-CONTRAST', 'frequency.'), ('I-CONTRAST', 'However,'), ('I-CONTRAST', 'the'), ('I-CONTRAST', 'converged'),
+         ('I-CONTRAST', 'value'), ('I-CONTRAST', 'is'), ('I-CONTRAST', 'rather'), ('I-CONTRAST', 'low'),
+         ('I-CONTRAST', 'if'), ('I-CONTRAST', 'compared'), ('I-CONTRAST', 'to'), ('I-CONTRAST', 'the'),
+         ('I-CONTRAST', 'experimental'), ('I-CONTRAST', 'one'), ('I-CONTRAST', 'of'), ('I-CONTRAST', 'αexp'),
+         ('I-CONTRAST', '='), ('L-CONTRAST', '0.585(9)'), ('O', '[1].')],
+        [('U-SUBJECT', '[1].'), ('B-CONTRAST', 'This'), ('I-CONTRAST', 'trend'), ('I-CONTRAST', 'is'),
+         ('I-CONTRAST', 'observed'), ('I-CONTRAST', 'D'), ('I-CONTRAST', 'also'), ('I-CONTRAST', 'in'),
+         ('I-CONTRAST', 'heavier'), ('I-CONTRAST', 'nuclei'), ('I-CONTRAST', 'such'), ('I-CONTRAST', 'as'),
+         ('I-CONTRAST', '40Ca'), ('I-CONTRAST', 'and'), ('I-CONTRAST', '48Ca'), ('I-CONTRAST', '[4,'),
+         ('I-CONTRAST', '10],'), ('I-CONTRAST', 'and'), ('I-CONTRAST', 'the'), ('I-CONTRAST', 'discrepancy'),
+         ('I-CONTRAST', 'is'), ('I-CONTRAST', 'even'), ('I-CONTRAST', 'larger'), ('I-CONTRAST', 'when'),
+         ('I-CONTRAST', 'the'), ('I-CONTRAST', 'mass'), ('I-CONTRAST', 'number'), ('I-CONTRAST', 'is'),
+         ('L-CONTRAST', 'increased.'), ('O', 'As'), ('O', 'shown'), ('O', 'in'), ('O', 'Figure'), ('O', '1,'),
+         ('O', 'the'), ('O', 'eﬀect'), ('O', 'of'), ('O', 'the'), ('O', 'cluster'), ('O', 'expansion'),
+         ('O', 'truncation'), ('O', 'is'), ('O', 'tiny'), ('O', 'and,'), ('O', 'because'), ('O', 'of'), ('O', 'the'),
+         ('O', 'size'), ('O', 'extensive'), ('O', 'nature'), ('O', 'of'), ('O', 'coupled-cluster'), ('O', 'theory,'),
+         ('O', 'we'), ('O', 'expect'), ('O', 'the'), ('O', 'eﬀect'), ('O', 'to'), ('O', 'be'), ('O', 'very'),
+         ('O', 'small'), ('O', 'in'), ('O', 'heavier'), ('O', 'systems'), ('O', 'as'), ('O', 'well.'),
+         ('O', 'Discrepancies'), ('O', 'between'), ('O', 'the'), ('O', 'calculated'), ('O', 'values'), ('O', 'and'),
+         ('O', 'the'), ('O', 'experimental'), ('O', 'data'), ('O', 'are'), ('O', 'mainly'), ('O', 'attributed'),
+         ('O', 'to'), ('O', 'deﬁciencies'), ('O', 'of'), ('O', 'the'), ('O', 'employed'), ('O', 'Hamiltonian.'),
+         ('B-CONTRAST', 'We'), ('I-CONTRAST', 'used'), ('I-CONTRAST', 'the'), ('I-CONTRAST', 'LIT-CCSD'),
+         ('I-CONTRAST', 'method'), ('I-CONTRAST', 'to'), ('I-CONTRAST', 'extend'), ('I-CONTRAST', 'the'),
+         ('I-CONTRAST', 'calculation'), ('I-CONTRAST', 'of'), ('I-CONTRAST', 'the'), ('I-CONTRAST', 'electric'),
+         ('I-CONTRAST', 'dipole'), ('I-CONTRAST', 'polarizability'), ('I-CONTRAST', 'from'), ('I-CONTRAST', 'few-'),
+         ('I-CONTRAST', 'to'), ('I-CONTRAST', 'many-body'), ('I-CONTRAST', 'nuclei'), ('I-CONTRAST', 'using'),
+         ('I-CONTRAST', 'nucleon-nucleon'), ('I-CONTRAST', 'chiral'), ('L-CONTRAST', 'interactions.'), ('O', 'We'),
+         ('O', 'have'), ('O', 'shown'), ('O', 'the'), ('O', 'reliability'), ('O', 'of'), ('O', 'the'), ('O', 'method'),
+         ('O', 'with'), ('O', 'benchmarks'), ('O', 'in'), ('O', '4He'), ('O', 'where'), ('O', 'both'), ('O', 'EIHH'),
+         ('O', 'and'), ('O', 'LIT-CCSD'), ('O', 'calculations'), ('O', 'and'), ('O', 'the'), ('O', 'experi-'),
+         ('O', 'mental'), ('O', 'data'), ('O', 'are'), ('O', 'in'), ('O', 'agreement.'), ('O', 'Moving'), ('O', 'to'),
+         ('O', 'heavier'), ('O', 'systems,'), ('O', 'e.g.,'), ('O', '16O,'), ('O', 'we'), ('O', 'observe'),
+         ('O', 'disagreement'), ('O', 'between'), ('O', 'calculated'), ('O', 'and'), ('O', 'measured'),
+         ('O', 'values.'), ('O', 'This'), ('O', 'points'), ('O', 'to'), ('O', 'the'), ('O', 'inadequacy'), ('O', 'of'),
+         ('O', 'chiral'), ('O', 'interactions'), ('O', 'at'), ('O', 'the'), ('O', 'two-body'), ('O', 'level'),
+         ('O', 'in'), ('O', 'accounting'), ('O', 'for'), ('O', 'the'), ('O', 'dipole'), ('O', 'polarizability'),
+         ('O', 'in'), ('O', 'heavier'), ('O', 'nuclei,'), ('O', 'which'), ('O', 'we'), ('O', 'also'), ('O', 'observed'),
+         ('O', 'for'), ('O', 'the'), ('O', 'radii'), ('O', '[4,'), ('O', '10].'), ('O', 'The'), ('O', 'use'),
+         ('O', 'of'), ('O', 'newly'), ('O', 'developed'), ('O', 'Hamiltonians'), ('O', 'with'), ('O', 'three-nucleon'),
+         ('O', 'forces'), ('O', '[18]'), ('O', 'calibrated'), ('O', 'on'), ('O', 'radii'), ('O', 'of'), ('O', 'ﬁnite'),
+         ('O', 'nuclei'), ('O', 'can'), ('O', 'help'), ('O', 'solving'), ('O', 'this'), ('O', 'problem.')],
+        [('O', 'We'), ('O', 'have'), ('O', 'shown'), ('O', 'the'), ('O', 'reliability'), ('O', 'of'), ('O', 'the'),
+         ('O', 'method'), ('O', 'with'), ('O', 'benchmarks'), ('O', 'in'), ('O', '4He'), ('O', 'where'), ('O', 'both'),
+         ('O', 'EIHH'), ('O', 'and'), ('O', 'LIT-CCSD'), ('O', 'calculations'), ('O', 'and'), ('O', 'the'),
+         ('O', 'experi-'), ('O', 'mental'), ('O', 'data'), ('O', 'are'), ('O', 'in'), ('O', 'agreement.'),
+         ('O', 'Moving'), ('O', 'to'), ('O', 'heavier'), ('O', 'systems,'), ('O', 'e.g.,'), ('O', '16O,'), ('O', 'we'),
+         ('O', 'observe'), ('O', 'disagreement'), ('O', 'between'), ('O', 'calculated'), ('O', 'and'),
+         ('O', 'measured'), ('O', 'values.'), ('O', 'This'), ('O', 'points'), ('O', 'to'), ('O', 'the'),
+         ('O', 'inadequacy'), ('O', 'of'), ('O', 'chiral'), ('O', 'interactions'), ('O', 'at'), ('O', 'the'),
+         ('O', 'two-body'), ('O', 'level'), ('O', 'in'), ('O', 'accounting'), ('O', 'for'), ('O', 'the'),
+         ('O', 'dipole'), ('O', 'polarizability'), ('O', 'in'), ('O', 'heavier'), ('O', 'nuclei,'), ('O', 'which'),
+         ('O', 'we'), ('O', 'also'), ('O', 'observed'), ('O', 'for'), ('O', 'the'), ('O', 'radii'), ('O', '[4,'),
+         ('O', '10].'), ('O', 'The'), ('O', 'use'), ('O', 'of'), ('O', 'newly'), ('O', 'developed'),
+         ('O', 'Hamiltonians'), ('O', 'with'), ('O', 'three-nucleon'), ('O', 'forces'), ('O', '[18]'),
+         ('O', 'calibrated'), ('O', 'on'), ('O', 'radii'), ('O', 'of'), ('O', 'ﬁnite'), ('O', 'nuclei'), ('O', 'can'),
+         ('O', 'help'), ('O', 'solving'), ('O', 'this'), ('O', 'problem.'), ('O', 'Work'), ('O', 'in'), ('O', 'this'),
+         ('O', 'direction'), ('O', 'is'), ('O', 'underway.')]]
 
-    print("does not work for shifts")
-    seq_1 = 'cere frangit brum'.split(' ')
-    seq_2 = 'frangit cerebrum'.split(' ')
+    all_alignments = []
+    i1_to_i2 = {}
+    for annotation in annotations:
+     alignment = align(input, [w for t, w in annotation])
+     all_alignments.append(alignment)
 
-    print(alignment_table(fuzzyalign(seq_1, seq_2), seq_1, seq_2))
+     print (str(alignment))
 
-    import doctest
 
-    doctest.NORMALIZE_WHITESPACE = True
-    doctest.testmod()
+     #     i1_to_i2.update({i1: for i1, i2 in zip(alignment.first, alignment.second)})
+
+

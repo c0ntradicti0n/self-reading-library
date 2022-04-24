@@ -26,13 +26,10 @@ class Prediction(PathSpec):
 
             df = model_helpers.post_process_df(feature_df)
 
-            dataset = Dataset.from_pandas(df)
+            dataset = Dataset.from_pandas(df.loc[:, df.columns != 'chars_and_char_boxes'])
 
             for page_number in range(len(dataset)-1):
                 example = dataset[page_number:page_number + 1]
-
-                new_hash = str((example['x0'], example['x1'], example['y0'], example['y1']))
-
 
                 self.load_model()
 

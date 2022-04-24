@@ -64,9 +64,16 @@ def file_persistent_cached_generator(
             os.chdir(cwd)
 
         def yield_cache(cache, cwd):
-            for result in cache.items():
-                os.chdir(cwd)
-                yield result
+
+            if isinstance(cache, dict):
+                for result in cache.items():
+                    os.chdir(cwd)
+                    yield result
+
+            if isinstance(cache, list):
+                for result in cache:
+                    os.chdir(cwd)
+                    yield result
 
         def apply_and_cache(cache, cwd, param, no_cache=False):
             generator = original_func(*param)

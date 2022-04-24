@@ -1,13 +1,15 @@
 from allennlp.common import Params
 from allennlp.predictors import Predictor
 from texttable import Texttable
-
 from core.pathant.PathSpec import PathSpec
-
 from allennlp.models.model import Model
-
 from language.transformer.difference_predictor.difference_predictor import DifferenceTaggerPredictor
+from queue import Queue
 
+
+
+q2 = Queue()
+q1 = Queue()
 
 
 class ElmoPredict(PathSpec):
@@ -18,40 +20,53 @@ class ElmoPredict(PathSpec):
         self.model = None
         self.CSS = {
             (span_letter + "-" + tag) if tag != 'O'
+
                 else tag
 
                     :
+
                         css
 
             for span_letter in ['L', 'I', 'B', 'U']
             for tag, css in self.CSS_SIMPLE.items()
         }
+    consumed_tokens_queue = Queue()
 
     def __call__(self, feature_meta, *args, **kwargs):
-        consumed_tokens = 0
+        consumed_tokens = None
+        next(feature_meta)
 
-        if not self.model:
-            self.model = Model.load(config=self.config, serialization_dir=self.flags['difference_model_path'])
-            self.default_predictor = Predictor.from_path(self.flags['difference_model_path'])
-            self.predictor = DifferenceTaggerPredictor(
-                self.default_predictor._model,
-                dataset_reader=self.default_predictor._dataset_reader
-            )
+
+        q1.put(0)
+
+
 
         while True:
             try: # https://stackoverflow.com/questions/51700960/runtimeerror-generator-raised-stopiteration-every-time-i-try-to-run-app
-                next(feature_meta)
-                words, meta = feature_meta.send(consumed_tokens)
+                words, meta = q2.get()
+                q2.task_done()
 
             except StopIteration:
-                return
+                self.logger.info("finished predicting")
+                break
+
+            if words == None:
+                self.logger.info("finished predicting")
+                break
 
             try:
+                if not self.model:
+                    self.model = Model.load(config=self.config, serialization_dir=self.flags['difference_model_path'])
+                    self.default_predictor = Predictor.from_path(self.flags['difference_model_path'])
+                    self.predictor = DifferenceTaggerPredictor(
+                        self.default_predictor._model,
+                        dataset_reader=self.default_predictor._dataset_reader
+                    )
                 annotation = self.predictor.predict_json({"sentence": words})
                 self.info(annotation)
             except Exception as e:
 
-                self.logger.error("Faking annotation because of error " + str(e))
+                self.logger.error("Faking annotation because of error " + str(e), e)
                 annotation = [('O', w) for w in words]
 
             try:
@@ -61,6 +76,9 @@ class ElmoPredict(PathSpec):
                 except StopIteration as e:
                     consumed_tokens = len(words)
 
+                q1.put(consumed_tokens)
+
+
                 yield annotation, {
                     **meta,
                     'CSS': self.CSS,
@@ -69,7 +87,7 @@ class ElmoPredict(PathSpec):
 
             except Exception as e:
                 self.logger.error(e.__repr__())
-                self.logger.error("Could not process " + str(words))
+                self.logger.error("Could not process " + str(words), e)
                 raise
 
     def info(self, annotation):
