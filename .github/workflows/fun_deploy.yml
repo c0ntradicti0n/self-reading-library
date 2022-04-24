@@ -41,6 +41,7 @@ jobs:
               cd fullend
               python3 -m venv venv
               . venv/bin/activate
+              pip install pytorch
               pip install -r ./python/requirements.txt
           '
 
