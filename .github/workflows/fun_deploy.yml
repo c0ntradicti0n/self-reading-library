@@ -16,24 +16,35 @@ jobs:
     environment: production
 
     steps:
+      - steps:
+          - name: Configure SSH
+            run: |
+              mkdir -p ~/.ssh/
+              echo "$SSH_KEY" > ~/.ssh/staging.key
+              chmod 600 ~/.ssh/staging.key
+              cat >>~/.ssh/config <<END
+              Host staging
+                HostName $SSH_HOST
+                User $SSH_USER
+                IdentityFile ~/.ssh/staging.key
+                StrictHostKeyChecking no
+              END
+            env:
+              SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+              SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+              SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
 
-    - name: deploy
-
-      env:
-        key: ${{ secrets.DEPLOY_SSH_KEY }}
-        ip: 141.5.100.77
+    - name: Deploy
       run: |
-        echo $key | awk '{print length}'
-        echo $key
-        echo $key > key
-        
-        chmod 600 key
-        ssh -i ./key  -o "StrictHostKeyChecking=no" deploy@$ip '
+        ssh staging '
             sudo rm -rf fullenv
             git clone https://github.com/c0ntradicti0n/LayoutEagle.git fullend
             cd fullend
             python -m venv venv
             . venv/bin/activate
             pip install -r ./python/requirements.txt
-            screen -S fullend -dm bash -c "cd python; python backend.py"    
         '
+
+    - name: Start
+      run: |
+        ssh staging '            screen -S fullend -dm bash -c "cd python; python backend.py"    '
