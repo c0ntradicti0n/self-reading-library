@@ -1,0 +1,35 @@
+
+name: Deploy to Amazon ECS
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+
+    - name: deploy
+
+      env:
+        key: ${{ secrets.DEPLOY_SSH_KEY }}
+        ip: 141.5.100.77
+      run: |
+        echo $key > key
+        ssh -i ./key deploy@$ip '
+            sudo rm -rf fullenv
+            git clone https://github.com/c0ntradicti0n/LayoutEagle.git fullend
+            cd fullend
+            python -m venv venv
+            . venv/bin/activate
+            pip install -r ./python/requirements.txt
+            screen -S fullend -dm bash -c "cd python; python backend.py"    
+        '
