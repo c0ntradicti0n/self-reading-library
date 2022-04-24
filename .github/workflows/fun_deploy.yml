@@ -24,6 +24,7 @@ jobs:
         ip: 141.5.100.77
       run: |
         echo $key | awk '{print length}'
+        echo $key
         echo $key > key
         
         chmod 600 key
