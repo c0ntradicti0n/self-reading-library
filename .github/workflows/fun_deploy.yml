@@ -51,6 +51,7 @@ jobs:
               pip install wheel
 
               pip install torch
+              cd LayoutEagle
               pip install -r ./python/requirements.txt
           '
 
