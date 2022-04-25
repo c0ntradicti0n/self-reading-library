@@ -13,7 +13,7 @@ This contains some NLP-Pipeline for Layout recognition, semantic analysis, text 
 
 # Predicting layout of pdf-papers with or without column layout
 
-![predicted layout sections](https://github.com/c0ntradicti0n/LayoutEagle/documentation/layout-presentation/pics/equation-breaking-all-cols.png?raw=true)
+![predicted layout sections](https://github.com/c0ntradicti0n/LayoutEagle/blob/master/documentation/layout-presentation/pics/equation-breaking-all-cols.png?raw=true)
 
 ![alt text](https://github.com/c0ntradicti0n/LayoutEagle/blob/master/accuracy_epochs.png?raw=true)
 
