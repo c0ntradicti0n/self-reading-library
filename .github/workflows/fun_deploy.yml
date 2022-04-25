@@ -36,6 +36,7 @@ jobs:
       - name: Deploy
         run: |
           ssh staging '
+              set -x
           
               rm -rf ./models
               cp -r ./LayoutEagle/python/.layouteagle/elmo_difference_models/ ./models
