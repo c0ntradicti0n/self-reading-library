@@ -36,9 +36,16 @@ jobs:
       - name: Deploy
         run: |
           ssh staging '
+          
+              rm -rf ./models
+              cp -r ./fullenv/python/.layouteagle/elmo_difference_models/ ./models
               sudo rm -rf fullenv
-              git clone https://github.com/c0ntradicti0n/LayoutEagle.git fullend
-              cd fullend
+              git clone https://github.com/c0ntradicti0n/LayoutEagle.git .
+          
+              cp -r  ./models ./LayoutEagle/python/.layouteagle/elmo_difference_models/
+              mkdir LayoutEagle/python/.layouteagle/collection
+              tar -xf  .layouteagle-box-data-collection.tar.xz -C LayoutEagle/python/.layouteagle/collection
+              
               python3 -m venv venv
               . venv/bin/activate
               pip install wheel
@@ -50,3 +57,15 @@ jobs:
       - name: Start
         run: |
           ssh staging '            screen -S fullend -dm bash -c "cd fullend/LayoutEagle/python; python3 backend.py"    '
+          
+          
+
+      - name: DocTest
+        run: |
+          ssh staging '        
+              screen -S fullend -dm bash -c "cd fullend/LayoutEagle/python; pip install -U pytest; pytest --doctest-modules"
+          '
+      - name: RestTest
+        run: |
+          echo $(curl $SSH_HOST:80) 
+          echo $(curl $SSH_HOST:443)

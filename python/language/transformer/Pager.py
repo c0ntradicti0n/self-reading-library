@@ -39,7 +39,7 @@ class Pager(PathSpec):
         reading_order_path = pdf_path + "." + outputs['reading_order']
         feat_path = pdf_path + "." + outputs['feat']
 
-        if not os.path.exists(reading_order_path):
+        if not (os.path.exists(reading_order_path) and os.path.exists(html_path) and os.path.exists(feat_path)):
             self.logger.warning(f"working on {pdf_path}")
             self.pdf2htmlEX(pdf_path, html_path)
         else:
@@ -47,6 +47,7 @@ class Pager(PathSpec):
 
 
         meta['pdf2htmlEX.html'] = html_path
+        meta['html_path'] = html_path
         meta['pdf_path'] = pdf_path
         meta['reading_order_path'] = reading_order_path
         meta['feat_path'] = feat_path

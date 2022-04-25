@@ -1,3 +1,4 @@
+import logging
 import os
 from collections import defaultdict, Counter
 
@@ -38,10 +39,14 @@ class ReadingOrder2Css(PathSpec):
 
             self.logger.warn(f"tag counts {Counter(list(tags))}")
             i_to_tag = {}
-            for _i1, _i2 in meta["_i_to_i2"].items():
-                if _i1 not in i_to_tag or i_to_tag[_i1] == "O":
-                    if _i2 < len(tags):
-                        i_to_tag[_i1] = annotation[_i2]
+
+            try:
+                for _i1, _i2 in meta["_i_to_i2"].items():
+                    if _i1 not in i_to_tag or i_to_tag[_i1] == "O":
+                        if _i2 < len(tags):
+                            i_to_tag[_i1] = annotation[_i2]
+            except TypeError as e:
+                logging.error(e, exc_info=True)
 
             css = self.parse_to_css(i_to_tag, meta)
 

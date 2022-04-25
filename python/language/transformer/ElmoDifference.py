@@ -21,22 +21,22 @@ class ElmoDifference(TrueFormatUpmarkerPDF2HTMLEX):
         self.n = n
         self.debug = debug
 
-    @file_persistent_cached_generator(config.cache + os.path.basename(__file__) + '.json', if_cache_then_finished=True)
+    #@file_persistent_cached_generator(config.cache + os.path.basename(__file__) + '.json', if_cache_then_finished=True)
     def __call__(self, labeled_paths, *args, **kwargs):
-        for doc_id, (pdf_path, meta) in enumerate(labeled_paths):
-            html_path = pdf_path + outputs['html']
-            reading_order_path = pdf_path + "." + outputs['reading_order']
-            feat_path = pdf_path + "." + outputs['feat']
+        for doc_id, (css_str, meta) in enumerate(labeled_paths):
 
-            self.logger.warning(f"working on {pdf_path}")
-            self.pdf2htmlEX(pdf_path, html_path)
+            html_path = meta['html_path']
+            output_html_path = html_path + ".difference.html"
+            with open(html_path, errors="ignore") as f:
+                content = f.read()
+            content = content.replace("</head>", f"<style>\n{css_str}\n</style>\n</head>")
+            with open(output_html_path, "w") as f:
+                f.write(content)
 
-            meta['pdf2htmlEX.html'] = html_path
-            meta['pdf_path'] =  pdf_path
-            meta['reading_order_path'] = reading_order_path
-            meta['feat_path'] = feat_path
+            if "chars_and_char_boxes" in meta:
+                del meta['chars_and_char_boxes']
 
-            yield (html_path, reading_order_path, feat_path), meta
+            yield output_html_path, meta
 
 
 

@@ -25,6 +25,8 @@ def model_in_the_loop(model_dir, collection_path, on_train, on_predict, training
     if not os.path.isdir(collection_path):
         os.makedirs(collection_path)
 
+    loops = []
+
     while True:
         samples_files = os.listdir(collection_path)
 
@@ -43,6 +45,11 @@ def model_in_the_loop(model_dir, collection_path, on_train, on_predict, training
             training_rate = (int(scores.groups()[0]) / n_samples)
         else:
             training_rate = 0
+
+        loops.append(training_rate)
+
+        if loops.count(training_rate) > 2:
+            logging.error("Going in circles!")
 
 
         print(f"{training_rate = }")

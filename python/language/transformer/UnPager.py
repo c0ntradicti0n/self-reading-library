@@ -1,4 +1,5 @@
 import copy
+import logging
 
 from listalign.helpers import alignment_table
 
@@ -41,17 +42,19 @@ class UnPager(PathSpec):
                 self.logger.error("No doc_id_given")
                 whole_doc_id = "?"
 
-        all_alignments = []
-        text_chars = ([cb[0] for l in meta['chars_and_char_boxes'].to_list() for cb in l])
+        if "chars_and_char_boxes" in meta:
+            del meta['chars_and_char_boxes']
+
         l_a = [iw[1] for iw in whole_meta['i_word']]
         l_b = [jw[1] for jw in whole_annotation]
         alignment = align(l_a, l_b)
 
         print(alignment_table(alignment, l_a, l_b))
 
-
-        whole_meta["_i_to_i2"] = {meta["i_word"][_i1][0]: _i2 for _i1, _i2 in alignment}
-
+        try:
+            whole_meta["_i_to_i2"] = {meta["i_word"][_i1][0]: _i2 for _i1, _i2 in alignment if _i1 and _i2}
+        except:
+            logging.error("Error using alignment", exc_info=True)
 
         yield whole_annotation, whole_meta
 
