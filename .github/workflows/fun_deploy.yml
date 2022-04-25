@@ -38,20 +38,20 @@ jobs:
           ssh staging '
           
               rm -rf ./models
-              cp -r ./fullenv/python/.layouteagle/elmo_difference_models/ ./models
-              sudo rm -rf fullenv
+              cp -r ./LayoutEagle/python/.layouteagle/elmo_difference_models/ ./models
+              sudo rm -rf LayoutEagle
               git clone https://github.com/c0ntradicti0n/LayoutEagle.git .
           
               cp -r  ./models ./LayoutEagle/python/.layouteagle/elmo_difference_models/
               mkdir LayoutEagle/python/.layouteagle/collection
               tar -xf  .layouteagle-box-data-collection.tar.xz -C LayoutEagle/python/.layouteagle/collection
               
+              cd LayoutEagle
               python3 -m venv venv
               . venv/bin/activate
+          
               pip install wheel
-
               pip install torch
-              cd LayoutEagle
               pip install -r ./python/requirements.txt
           '
 
