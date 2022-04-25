@@ -49,7 +49,7 @@ def model_in_the_loop(model_dir, collection_path, on_train, on_predict, training
         loops.append(training_rate)
 
         if loops.count(training_rate) > 2:
-            logging.error("Going in circles!")
+            raise RuntimeError("Going in circles!")
 
 
         print(f"{training_rate = }")

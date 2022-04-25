@@ -40,7 +40,7 @@ jobs:
               rm -rf ./models
               cp -r ./LayoutEagle/python/.layouteagle/elmo_difference_models/ ./models
               sudo rm -rf LayoutEagle
-              git clone https://github.com/c0ntradicti0n/LayoutEagle.git .
+              git clone https://github.com/c0ntradicti0n/LayoutEagle.git 
           
               cp -r  ./models ./LayoutEagle/python/.layouteagle/elmo_difference_models/
               mkdir LayoutEagle/python/.layouteagle/collection

@@ -21,7 +21,7 @@ class ElmoDifference(TrueFormatUpmarkerPDF2HTMLEX):
         self.n = n
         self.debug = debug
 
-    #@file_persistent_cached_generator(config.cache + os.path.basename(__file__) + '.json', if_cache_then_finished=True)
+    @file_persistent_cached_generator(config.cache + os.path.basename(__file__) + '.json', if_cache_then_finished=True)
     def __call__(self, labeled_paths, *args, **kwargs):
         for doc_id, (css_str, meta) in enumerate(labeled_paths):
 
