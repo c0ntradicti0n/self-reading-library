@@ -38,8 +38,8 @@ jobs:
           ssh staging '
               set -x
               rm -rf ./app
-
               rm -rf ./cache
+              rm -rf LayoutEagle
               cp -r ./LayoutEagle/python/.layouteagle ./cache
               sudo rm -rf LayoutEagle
               git clone https://github.com/c0ntradicti0n/LayoutEagle.git 
@@ -57,10 +57,13 @@ jobs:
               pip install -r ./python/requirements.txt
           '
 
-      - name: Start
+      - name: StartBack
         run: |
           ssh staging '            screen -S fullend -dm bash -c "cd fullend/LayoutEagle/python; python3 backend.py"    '
           
+      - name: StartWeb
+        run: |
+          ssh staging ' cd LayoutEagle/react/layout_viewer_made/ : yarn install; yarn build ; PORT=80 yarn run "    '
           
 
       - name: DocTest
