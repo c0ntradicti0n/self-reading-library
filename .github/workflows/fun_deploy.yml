@@ -65,7 +65,7 @@ jobs:
           
       - name: StartWeb
         run: |
-          ssh staging 'sleep 300 ; cd LayoutEagle/react/layout_viewer_made/ : yarn install; sudo yarn add --dev typescript @types/node; yarn build ; PORT=80 yarn run  '
+          ssh staging 'sleep 300 ; cd LayoutEagle/react/layout_viewer_made/ ; yarn install; sudo yarn add --dev typescript @types/node; yarn build ; PORT=80 yarn run  '
 
       - name: DocTest
         run: |
