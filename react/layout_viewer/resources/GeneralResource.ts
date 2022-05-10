@@ -101,7 +101,7 @@ export default class ServerResource <T> {
 
 
 
-     ok = async (id , url = '', data = {}, callback) => {
+    ok = async (id , url = '', data = {}, callback) => {
             if (this.read_allowed) {
             this.request("post",   id, callback)
         }

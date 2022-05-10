@@ -116,7 +116,7 @@ class RestPublisher(PathSpec, react) :
 """
 import ServerResource from './GeneralResource'
 
-export default class ??Title!!Service extends ServerResource {
+export default class ??Title!!Service extends ServerResource<any> {
     constructor () {
         super(
          '/??title!!', 
@@ -150,14 +150,19 @@ const Graph = dynamic(
 )
 
 interface ??Title!!State {
+    ??title!!: any
     ??title!!s: any
     meta: any
     value: any
 }
 
-interface ??Title!!Props {}
+interface ??Title!!Props {
+    router?: any
+}
 
-class ??title!! extends React.Component<State, Props> {
+class ??title!! extends React.Component<??Title!!Props, ??Title!!State> {
+    ??title!!Service : ??title!!Service
+   
     constructor (props)  {
         super(props)
         this.??title!!Service = new ??title!!Service()
@@ -171,9 +176,11 @@ class ??title!! extends React.Component<State, Props> {
         console.log(this.set_??title!!)
 
         if (this.props.router.query.id) {
+                            // @ts-ignore
             this.??title!!Service.fetch_one(this.props.router.query.id, this.set_??title!!)
         }
         else {    
+                            // @ts-ignore
             this.??title!!Service.fetch_all(this.set_??title!!s)
         }
     }
@@ -217,7 +224,7 @@ class ??title!! extends React.Component<State, Props> {
             </>)
         }
         
-        
+                            // @ts-ignore
         if ("??type!!" === "text")  {
             console.log("RENDER", this.state.??title!!s)
             return (<>
@@ -225,9 +232,11 @@ class ??title!! extends React.Component<State, Props> {
             </>)
         }
         
+                            // @ts-ignore
         if ("??type!!" === "graph" && this.state.??title!!s)  
             return <Graph data={this.state.??title!!s}/>
         
+                            // @ts-ignore
         if ("??type!!" === "html" && this.state.??title!!) {
             console.log({html:this.state.??title!!})
             return <HtmlRenderer data={this.state.??title!!}/>

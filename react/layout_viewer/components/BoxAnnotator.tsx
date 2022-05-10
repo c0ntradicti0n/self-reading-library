@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import {zip, pairwise} from "../src/util/array";
 
-export default class BoxAnnotator extends Component {
+export default class BoxAnnotator extends Component<any> {
     LABELS = ['NONE', 'c1', 'c2', 'c3', 'wh', 'h', 'pn', 'fn', 'fg', 'tb']
 
     LABEL_SWITCH = Object.fromEntries(pairwise([...this.LABELS, this.LABELS[0]]))
@@ -97,7 +97,7 @@ export default class BoxAnnotator extends Component {
                                      "[0].labels.[" + i + "]", label,
                                      this.props.setFullState)
                          }}>
-                        }
+
                     </div>)}
 
                 {cols ? <>
