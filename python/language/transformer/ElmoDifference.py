@@ -67,7 +67,7 @@ def annotate_difference_elmo():
         model_dir=config.ELMO_DIFFERENCE_MODEL_PATH,
         collection_path=config.ELMO_DIFFERENCE_COLLECTION_PATH,
         on_train=lambda args:
-        list(
+        print(f"{args=}") or     list(
             elmo_difference_model_pipe(metaize(args['samples_files']),
                        collection_step=args['training_rate']
                        )

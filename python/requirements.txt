@@ -23,9 +23,14 @@ pyyaml
 tensorflow
 gunicorn
 wordninja
+overrides
 wn
+jellyfish
+rapidfuzz
+parasail
 spacy
 allennlp
+swalign
 nltk
 Cython
 numpy~=1.18.2
