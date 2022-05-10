@@ -61,7 +61,7 @@ jobs:
 
       - name: StartBack
         run: |
-          ssh staging '            screen -S fullend -dm bash -c "cd fullend/LayoutEagle/python; python3 backend.py"    '
+          ssh staging '            screen -S fullend -dm bash -c " . venv/bin/activate; cd fullend/LayoutEagle/python; python3 backend.py"    '
           
       - name: StartWeb
         run: |
