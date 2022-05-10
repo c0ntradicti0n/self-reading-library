@@ -1,6 +1,5 @@
 import React, {Component} from "react";
 import {zip, pairwise} from "../src/util/array";
-import { JSONToHTMLTable } from '@kevincobain2000/json-to-html-table'
 
 export default class BoxAnnotator extends Component {
     LABELS = ['NONE', 'c1', 'c2', 'c3', 'wh', 'h', 'pn', 'fn', 'fg', 'tb']
@@ -115,7 +114,7 @@ export default class BoxAnnotator extends Component {
 
 
                 <h1>
-                    <JSONToHTMLTable data={this.KEYS} tableClassName="table table-sm"/>
+                   <pre> {JSON.stringify(this.KEYS, null, 2)} </pre>
                 </h1>
 
             </div>

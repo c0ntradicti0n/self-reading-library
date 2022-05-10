@@ -55,6 +55,8 @@ jobs:
               pip install wheel
               pip install torch
               pip install -r ./python/requirements.txt
+              pip install numpy --upgrade
+
           '
 
       - name: StartBack
@@ -63,7 +65,7 @@ jobs:
           
       - name: StartWeb
         run: |
-          ssh staging ' cd LayoutEagle/react/layout_viewer_made/ : yarn install; yarn build ; PORT=80 yarn run "    '
+          ssh staging ' cd LayoutEagle/react/layout_viewer_made/ : yarn install; sudo yarn add --dev typescript @types/node; yarn build ; PORT=80 yarn run "    '
 
       - name: DocTest
         run: |
