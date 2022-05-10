@@ -64,7 +64,6 @@ jobs:
       - name: StartWeb
         run: |
           ssh staging ' cd LayoutEagle/react/layout_viewer_made/ : yarn install; yarn build ; PORT=80 yarn run "    '
-          
 
       - name: DocTest
         run: |
