@@ -37,7 +37,8 @@ jobs:
         run: |
           ssh staging '
               set -x
-          
+              rm -rf ./app
+
               rm -rf ./cache
               cp -r ./LayoutEagle/python/.layouteagle ./cache
               sudo rm -rf LayoutEagle
@@ -69,5 +70,5 @@ jobs:
           '
       - name: RestTest
         run: |
-          echo $(curl $SSH_HOST:80) 
-          echo $(curl $SSH_HOST:443)
+          echo $(curl http://$SSH_HOST:80) 
+          echo $(curl -k https://$SSH_HOST:443)
