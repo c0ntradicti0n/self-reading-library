@@ -1,20 +1,25 @@
 
-class ServerResource <T> {
+export class ServerResource <T> {
+    private fetch_allowed: any;
+    private upload_allowed: any;
+    private correct_allowed: any;
+    private read_allowed: boolean;
+    private delete_allowed: boolean;
     constructor (
          fetch_allowed = true, 
          read_allowed = true, 
          upload_allowed = true,
          correct_allowed = true,
          delete_allowed = true) {
-         correct = fetch_allowed
-         read_allowed = read_allowed
-         correct_allowed = correct_allowed
-         delete_allowed = delete_allowed
+         this.fetch_allowed = fetch_allowed
+         this.read_allowed = read_allowed
+         this.correct_allowed = correct_allowed
+         this.delete_allowed = delete_allowed
          
          
     }
     
-    async function request (method : String, url = '', data = {}) {
+      request = async (method : String, url = '', data = {}) => {
       // Default options are marked with *
         const response = await fetch(url, {
             method: method.toUpperCase(),
@@ -31,28 +36,33 @@ class ServerResource <T> {
       return response.json(); // parses JSON response into native JavaScript objects
     }
     
-    async function read(url = '', data = {}) {
+      read = async (url = '', data = {}, id) => {
         if (this.fetch_allowed) {
-            return this.request(method="get", data = id)
+            return this.request("get", data = id)
         }
     }
-    
 
-    async function upload(url = '', data : T) {
+
+    // @ts-ignore
+    upload = async (url = '', data : T) => {
         if (this.upload_allowed) {
-            this.request(method="put", data = data)
+            return this.request("put", url, data = data)
         }
     }
-    
-    async function correct(url = '', data : T, id : String) {
+        // @ts-ignore
+    correct = async (url = '', data : T, id : String) => {
         if (this.correct_allowed) {
-            this.request(method="patch", data = data, id=id)
+            return this.request("patch",  url, data = data)
         }
     }
-    async function hide(url = '', data = {}) {
+
+        // @ts-ignore
+
+      hide = async (url = '', data = {}) => {
         if (this.delete_allowed) {
-            this.request(method="delete", data = data)
+            return this.request("delete", url, data = data)
         }
     }
 
 }
+

@@ -72,6 +72,7 @@ export default class ServerResource <T> {
         console.log(fetch_init)
 
         const response = await fetch(
+                // @ts-ignore
             AppSettings.SAUSSAGEPOINT + this.route + this.id, fetch_init )
 
 
@@ -101,17 +102,20 @@ export default class ServerResource <T> {
 
 
 
+    // @ts-ignore
     ok = async (id , url = '', data = {}, callback) => {
             if (this.read_allowed) {
             this.request("post",   id, callback)
         }
     }
-     change = async (json_path, value, callback) =>{
+     // @ts-ignore
+    change = async (json_path, value, callback) =>{
         if (this.upload_allowed) {
             this.request("put", [json_path, value], callback)
         }
     }
 
+    // @ts-ignore
     upload = async (form_data, callback) => {
         console.log("UPLOADING", form_data, this.upload_allowed)
         if (this.upload_allowed) {
