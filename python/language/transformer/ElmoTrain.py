@@ -1,3 +1,5 @@
+import logging
+
 from allennlp.common import Params
 from allennlp.predictors import Predictor
 from texttable import Texttable
@@ -30,4 +32,4 @@ class ElmoTrain(PathSpec):
 
         except subprocess.CalledProcessError as e:
             print(os.getcwd())
-            sleep(10)
+            logging.error("Training of Elmo model failed", exc_info=True)

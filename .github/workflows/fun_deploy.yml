@@ -38,12 +38,12 @@ jobs:
           ssh staging '
               set -x
           
-              rm -rf ./models
-              cp -r ./LayoutEagle/python/.layouteagle/elmo_difference_models/ ./models
+              rm -rf ./cache
+              cp -r ./LayoutEagle/python/.layouteagle ./cache
               sudo rm -rf LayoutEagle
               git clone https://github.com/c0ntradicti0n/LayoutEagle.git 
           
-              cp -r  ./models ./LayoutEagle/python/.layouteagle/elmo_difference_models/
+              cp -r  ./cache ./LayoutEagle/python/.layouteagle
               mkdir LayoutEagle/python/.layouteagle/collection
               tar -xf  .layouteagle-box-data-collection.tar.xz -C LayoutEagle/python/.layouteagle/collection
               
