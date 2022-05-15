@@ -61,11 +61,11 @@ jobs:
 
       - name: StartBack
         run: |
-          ssh staging '            screen -S fullend -dm bash -c " . venv/bin/activate; cd fullend/LayoutEagle/python; python3 backend.py"    '
+          ssh staging '            screen -S backend -dm bash -c " . venv/bin/activate; cd fullend/LayoutEagle/python; python3 backend.py"    '
           
       - name: StartWeb
         run: |
-          ssh staging 'sleep 300 ; cd LayoutEagle/react/layout_viewer_made/ ; yarn install; yarn add --dev typescript @types/node; yarn build ; PORT=80 sudo arn run  '
+          ssh staging 'sleep 300 ;  screen -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer_made/ ; yarn install; yarn add --dev typescript @types/node; yarn run build ; sudo yarn run start -p 80 "     '
 
       - name: DocTest
         run: |
