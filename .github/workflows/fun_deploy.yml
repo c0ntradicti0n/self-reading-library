@@ -48,10 +48,10 @@ jobs:
               mkdir LayoutEagle/python/.layouteagle/collection
               tar -xf  .layouteagle-box-data-collection.tar.xz -C LayoutEagle/python/.layouteagle/collection
               
-              cd LayoutEagle
               python3 -m venv venv
-              . venv/bin/activate
-          
+              . venv/bin/activate.fish 
+              cd LayoutEagle
+
               pip install wheel
               pip install torch
               pip install -r ./python/requirements.txt
@@ -61,7 +61,7 @@ jobs:
 
       - name: StartBack
         run: |
-          ssh staging '            screen -S backend -dm bash -c " . venv/bin/activate; cd fullend/LayoutEagle/python; python3 backend.py"    '
+          ssh staging '            screen -S backend -dm bash -c " . venv/bin/activate.fish; cd LayoutEagle/python; python3 backend.py"    '
           
       - name: StartWeb
         run: |
