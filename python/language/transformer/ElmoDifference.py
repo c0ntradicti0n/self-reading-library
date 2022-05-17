@@ -77,7 +77,7 @@ def annotate_difference_elmo():
             zip(
                 *list(
                     elmo_difference_pipe(
-                        "????",
+                        "https://arxiv.org",
                         difference_model_path=args['best_model_path'])
                 )
             )

@@ -39,7 +39,6 @@ jobs:
               set -x
               rm -rf ./app
               rm -rf ./cache
-              rm -rf LayoutEagle
               cp -r ./LayoutEagle/python/.layouteagle ./cache
               sudo rm -rf LayoutEagle
               git clone https://github.com/c0ntradicti0n/LayoutEagle.git 
