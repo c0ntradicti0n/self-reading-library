@@ -70,7 +70,7 @@ def model_in_the_loop(model_dir, collection_path, on_train, on_predict, training
             print(f"prediction args = {args=}")
             try:
                 result = next(on_predict(
-                    **args
+                    args
                 ))
                 pprint(result)
             except KeyboardInterrupt as e:
