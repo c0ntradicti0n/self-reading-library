@@ -97,25 +97,19 @@ def annotate_train_model():
         model_dir=config.TEXT_BOX_MODEL_PATH,
         collection_path=config.COLLECTION_PATH,
         on_train=lambda args:
-            list(
-                model_pipe(metaize(args['samples_files']),
-                           collection_step=['training_rate']
-                           )
-            ),
-        on_predict=lambda: collection, collection_meta=list(
-            zip(
-                *list(
-                    sample_pipe(
-                        "https://arxiv.org",
-                        model_path=best_model_path,
-                        layout_model_path=full_model_path
-                    )
-                )
-            )
+        list(
+            model_pipe(metaize(args['samples_files']),
+                       collection_step=['training_rate']
+                       )
+        ),
+        on_predict=lambda: collection, collection_meta=
+
+        sample_pipe(
+            "https://arxiv.org",
+            model_path=best_model_path,
+            layout_model_path=full_model_path
         )
     )
-
-
 
 
 if __name__ == "__main__":

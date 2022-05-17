@@ -1,6 +1,8 @@
 import os
 import regex
 
+from core import config
+
 model_regex = r"(?P<shape>\d+)_(?P<f1>0,?\d*)_(?P<epoch>\d+)"
 import logging
 from pprint import pprint
@@ -53,19 +55,21 @@ def model_in_the_loop(model_dir, collection_path, on_train, on_predict, training
             raise RuntimeError("Going in circles!")
 
         print(f"{training_rate = }")
-        if training_rate < 0.8:
+        if training_rate < 0.8 or not full_model_path:
             # let's train
 
             model_meta = on_train(
-                {'samples_files': samples_files,
-                 'training_rate': samples_files})
+                {
+                    'samples_files': samples_files,
+                    'training_rate': samples_files
+                })
             pprint(model_meta)
             model_path = model_meta[0][0]
         else:
             # let's make more samples
             args = {'best_model_path': best_model_path,
                     'training_rate': training_rate,
-                    'layout_model_path': full_model_path
+                    'layout_model_path': config.layout_model_path
                     }
             print(f"prediction args = {args=}")
             try:

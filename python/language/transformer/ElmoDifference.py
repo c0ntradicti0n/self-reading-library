@@ -39,49 +39,46 @@ class ElmoDifference(TrueFormatUpmarkerPDF2HTMLEX):
             yield output_html_path, meta
 
 
-
 ant = PathAnt()
 
 elmo_difference_pipe = ant(
     "arxiv.org", f"elmo.css_html.difference", via='prediction',
     num_labels=config.NUM_LABELS,
-    layout_model_path = full_model_path
+    layout_model_path=full_model_path
 )
 
 elmo_difference_model_pipe = ant(
     None, f"elmo_model.difference",
-    layout_model_path = full_model_path
+    layout_model_path=full_model_path
 
 )
 
+
 def annotate_uploaded_file(file):
     return elmo_difference_pipe(metaize(file))
+
 
 ElmoDifferenceQueueRest = RestQueue(
     service_id="elmo_difference",
     work_on_upload=annotate_uploaded_file
 )
 
+
 def annotate_difference_elmo():
     model_in_the_loop(
         model_dir=config.ELMO_DIFFERENCE_MODEL_PATH,
         collection_path=config.ELMO_DIFFERENCE_COLLECTION_PATH,
         on_train=lambda args:
-        print(f"{args=}") or     list(
+        print(f"{args=}") or list(
             elmo_difference_model_pipe(metaize(args['samples_files']),
-                       collection_step=args['training_rate']
-                       )
+                                       collection_step=args['training_rate']
+                                       )
         ),
-
-        on_predict=lambda args: list(
-            zip(
-                *list(
-                    elmo_difference_pipe(
-                        "https://arxiv.org",
-                        difference_model_path=args['best_model_path'])
-                )
-            )
-        ),
+        on_predict=lambda args:
+        elmo_difference_pipe(
+            "https://arxiv.org",
+            difference_model_path=args['best_model_path'])
+        ,
         training_rate_mode='size',
         training_rate_file=config.ELMO_DIFFERENCE_COLLECTION_PATH + "/train_over.conll3"
     )
