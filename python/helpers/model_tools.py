@@ -64,11 +64,13 @@ def model_in_the_loop(model_dir, collection_path, on_train, on_predict, training
         else:
             # let's make more samples
             args = {'best_model_path': best_model_path,
-                    'training_rate': training_rate}
+                    'training_rate': training_rate,
+                    'layout_model_path': full_model_path
+                    }
             print(f"prediction args = {args=}")
             try:
                 result = next(on_predict(
-                    args
+                    **args
                 ))
                 pprint(result)
             except KeyboardInterrupt as e:
