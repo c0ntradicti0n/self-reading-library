@@ -48,7 +48,7 @@ jobs:
               tar -xf  .layouteagle-box-data-collection.tar.xz -C LayoutEagle/python/.layouteagle/collection
               
               python3 -m venv venv
-              . venv/bin/activate.fish 
+              . venv/bin/activate.fish
               cd LayoutEagle
 
               pip install wheel
@@ -64,7 +64,7 @@ jobs:
           
       - name: StartWeb
         run: |
-          ssh staging 'sleep 300 ;  screen -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer_made/ ; yarn install; yarn add --dev typescript @types/node; yarn run build ; sudo yarn run start -p 80 "     '
+          ssh staging 'sleep 300 ;  screen -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer_made/ ; yarn install; yarn add --dev typescript @types/node; yarn build ; sudo yarn run start -p 8080 "     '
 
       - name: DocTest
         run: |
