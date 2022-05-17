@@ -60,7 +60,7 @@ jobs:
 
       - name: StartBack
         run: |
-          ssh staging '            screen -S backend -dm bash -c " . venv/bin/activate.fish; cd LayoutEagle/python; python3 backend.py"    '
+          ssh staging '            screen -L -S backend -dm bash -c " . venv/bin/activate.fish; cd LayoutEagle/python; python3 backend.py"    '
           
       - name: StartWeb
         run: |

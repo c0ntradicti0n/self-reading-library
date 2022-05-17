@@ -65,10 +65,11 @@ def model_in_the_loop(model_dir, collection_path, on_train, on_predict, training
             # let's make more samples
 
             try:
-                result = list(on_predict(
+                result = next(on_predict(
                     {'best_model_path': best_model_path,
                      'training_rate': training_rate}
                 ))
+                pprint(result)
             except KeyboardInterrupt as e:
 
                 exit = input("Exit? [y]/n")

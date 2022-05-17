@@ -108,7 +108,7 @@ def annotate_train_model():
                     sample_pipe(
                         "https://arxiv.org",
                         model_path=best_model_path,
-                        layout_model_path=config.layout_model_path
+                        layout_model_path=full_model_path
                     )
                 )
             )
