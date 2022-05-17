@@ -1,7 +1,7 @@
 import unittest
 
 class Mak(unittest.TestCase):
-    from core.ScienceTexScraper.scrape import ScienceTexScraper
+    from core.StandardConverter.ScienceTexScraper.scrape import ScienceTexScraper
     from core.LatexReplacer.latex_replacer import LatexReplacer
     from core.LayoutReader.labeled_feature_maker import TrueFormatUpmarkerPDF2HTMLEX
     from core.LayoutReader.feature_label_assigner import TrueFormatUpmarkerPDF2HTMLEX
@@ -23,7 +23,6 @@ class Mak(unittest.TestCase):
         self.ant = PathAnt()
         self.model_pipe = self.ant("arxiv.org", "keras")
         self.prediction_pipe = self.ant("pdf", "latex.html")
-
 
     def test_make_model(self):
         model_pipe = self.ant("arxiv.org", "keras")

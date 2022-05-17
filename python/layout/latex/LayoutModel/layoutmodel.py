@@ -6,6 +6,8 @@ import joblib
 import pandas
 import numpy as np
 import tensorflow as tf
+
+
 tf.get_logger().setLevel('ERROR')
 
 from sklearn.model_selection import train_test_split
@@ -14,13 +16,9 @@ from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.python.keras.utils.np_utils import to_categorical
 import logging
 import pprint
-import more_itertools
-
-from helpers.list_tools import Lookup, sorted_by_zipped
-from helpers.pandas_tools import unpack_list_column
+from helpers.list_tools import Lookup
 from core import config
 from core.pathant.PathSpec import PathSpec
-from helpers.nested_dict_tools import flatten
 
 
 class LayoutModeler(PathSpec):
@@ -82,7 +80,7 @@ class LayoutModeler(PathSpec):
         if training:
             self.label_set = list(set(feature_df['LABEL'].tolist()))
             self.label_lookup = Lookup([self.label_set])
-            feature_df['LABEL'] = label_lookup(token_s=feature_df.LABEL.tolist())
+            feature_df['LABEL'] = self.label_lookup(token_s=feature_df.LABEL.tolist())
 
         if training:
             train, test = train_test_split(feature_df, test_size=0.2)

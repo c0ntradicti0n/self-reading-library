@@ -1,9 +1,10 @@
 import os
 
-from latex.LayoutModel.layoutmodel import LayoutModeler
 import logging
 from core.pathant.Converter import converter
 from core import config
+from layout.latex.LayoutModel.layoutmodel import LayoutModeler
+
 
 @converter("features", "keras")
 class LayoutTrainer(LayoutModeler):

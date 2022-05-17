@@ -1,7 +1,9 @@
 import sys
+
+from layout.latex.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
+
 sys.path.append(".")
 
-from latex.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
 from core.pathant.Converter import converter
 from helpers.cache_tools import file_persistent_cached_generator
 from core import config
