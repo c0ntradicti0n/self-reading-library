@@ -16,7 +16,7 @@ class Prediction(PathSpec):
     def __call__(self, x_meta, *args, **kwargs):
         model_path = self.flags['layout_model_path']
         if not model_path:
-            raise Exception("layout model path must be set via pipeline flags, these are the keywords in the call args")
+            raise Exception(f"layout model path must be set via pipeline flags, these are the keywords in the call args, {self.flags=}")
         self.model_path = model_path
 
 
