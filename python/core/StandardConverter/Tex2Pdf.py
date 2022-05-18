@@ -1,5 +1,7 @@
+from core import config
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
+from helpers.cache_tools import file_persistent_cached_generator
 from helpers.os_tools import get_path_filename_extension
 import os
 import subprocess
@@ -12,6 +14,7 @@ class Tex2Pdf(PathSpec):
         super().__init__(*args, **kwargs)
         self.timeout_sec = timout_sec
 
+    @file_persistent_cached_generator(config.cache + os.path.basename(__file__) + '.json', if_cache_then_finished=True)
     def __call__(self, arg_meta, *args, **kwargs):
         for tex, meta in arg_meta:
             if not 'labeled' in tex:

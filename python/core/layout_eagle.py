@@ -2,6 +2,7 @@ import glob
 import os
 import sys
 
+from helpers.list_tools import metaize
 from layout.latex.LayoutReader.feature2features import Feature2Features
 from layout.latex.LayoutReader.feature_label_assigner import FeatureAssigner
 from layout.training.training import Training
@@ -55,10 +56,12 @@ class LayoutEagle:
             f'cp -r {config.hidden_folder + config.layout_model_path} {config.hidden_folder + config.saved_layout_model_dir}')
 
     def make_box_layout_model(self):
-        model_pipe = self.ant("arxiv.org", "model" )
-        print (list(model_pipe("https://arxiv.org", training = True, layout_model_path=config.layout_model_path)))
-        os.system(
-            f'cp -r {config.hidden_folder + config.layout_model_path} {config.hidden_folder + config.saved_layout_model_dir}')
+        model_pipe = self.ant("annotation.collection", "model" )
+        model_path = config.hidden_folder + config.layout_model_path + "/test"
+        collection_path = config.COLLECTION_PATH
+
+        files = list(glob.glob(collection_path + ".*.pickle"))
+        print (list(model_pipe(metaize(files), training = True, collection_step="_testcase", layout_model_path=model_path)))
 
     def test_info(self):
         self.ant.info(pipelines_to_highlight=[self.model_pipe, self.prediction_pipe])

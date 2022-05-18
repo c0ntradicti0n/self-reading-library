@@ -15,12 +15,12 @@ class Training(PathSpec):
 
     def __call__(self, x_meta, *args, **kwargs):
         if 'collection_step' not in self.flags:
-            raise Exception("Declare collection step, that expresses for which ste of features we trained this model")
+            raise Exception("Declare collection step, that expresses for which set of features we trained this model")
         else:
             self.collection_step = self.flags['collection_step']
 
         df_paths_meta = list(x_meta)
-        feature_dfs = [config.COLLECTION_PATH + "/" + path_meta[0] for path_meta in df_paths_meta]
+        feature_dfs = [ path_meta[0] for path_meta in df_paths_meta]
         model_path = f"{config.TEXT_BOX_MODEL_PATH}/{self.collection_step}"
 
         if os.path.exists(model_path):
