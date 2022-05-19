@@ -55,6 +55,8 @@ jobs:
               pip install torch
               pip install -r ./python/requirements.txt
               pip install numpy --upgrade
+          
+              cp python/tokenization_layoutvm2_fast.py venv/lib/python3.8/site-packages/transformers/models/layoutlmv2/tokenization_layoutlmv2_fast.py
 
           '
 
