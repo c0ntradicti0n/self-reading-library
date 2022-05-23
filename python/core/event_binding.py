@@ -64,6 +64,8 @@ def encode(obj_meta):
     return (obj, meta)
 
 
+all_rest_queues = []
+
 class RestQueue:
     def __init__(
             self,
@@ -71,6 +73,8 @@ class RestQueue:
             update_data = lambda x: x,
             work_on_upload = None
     ):
+        global all_rest_queues
+        all_rest_queues.append(self)
         self.service_id = service_id
         init_queues(service_id)
         self.update_data = update_data
@@ -211,10 +215,13 @@ def queue_iter (service_id, gen):
 
     global q, d
 
-    for i in range(1):
+    for i in range(5):
         print("insert first")
-
-        q[service_id].put_nowait(next(gen))
+        try:
+            new_val = next(gen)
+        except Exception as e:
+            raise e
+        q[service_id].put_nowait(new_val)
 
     while True:
 
@@ -267,7 +274,7 @@ if __name__ == "__main__":
 
             try:
 
-                for e in queue_iter(fib):
+                for e in queue_iter("test",fib):
                     print (f"yielded {e}")
             except RuntimeError as e:
                 print ("end...")

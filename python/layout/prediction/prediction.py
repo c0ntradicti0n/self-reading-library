@@ -67,7 +67,7 @@ class Prediction(PathSpec):
                         continue
                 else:
 
-                    self.logger.info(f"predicted {page_number =} with labels {box_predictions =}")
+                    self.logger.info(f"predicted {page_number=} with labels {box_predictions=}")
 
                     prediction_meta = model_helpers.repaint_image_from_labels ((prediction, meta))
                     prediction_meta[0]['human_image'].save(f"{config.PREDICTION_PATH}/boxes_{page_number}.png")

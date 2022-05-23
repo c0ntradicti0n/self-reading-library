@@ -1,7 +1,11 @@
 import os
+
+import more_itertools
 import regex
 
 from core import config
+from core.event_binding import queue_iter
+from helpers.list_tools import dictize
 
 model_regex = r"(?P<shape>\d+)_(?P<f1>0,?\d*)_(?P<epoch>\d+)"
 import logging
@@ -23,7 +27,7 @@ def find_best_model(model_dir):
     return best_model_path, scores
 
 
-def model_in_the_loop(model_dir, collection_path, on_train, on_predict, training_rate_mode='ls',
+def model_in_the_loop(model_dir, collection_path, on_train, service_id, on_predict, training_rate_mode='ls',
                       training_rate_file=None):
     if not os.path.isdir(model_dir):
         os.makedirs(model_dir)
@@ -52,7 +56,7 @@ def model_in_the_loop(model_dir, collection_path, on_train, on_predict, training
         loops.append(training_rate)
 
         if loops.count(training_rate) > 2:
-            raise RuntimeError("Going in circles!")
+            logging.info("training did not change, staying prediction loop")
 
         print(f"{training_rate = }")
         if training_rate < 0.8 or not full_model_path:
@@ -73,10 +77,10 @@ def model_in_the_loop(model_dir, collection_path, on_train, on_predict, training
                     }
             print(f"prediction args = {args=}")
             try:
-                result = next(on_predict(
+                results = list(queue_iter(service_id=service_id, gen=(dictize(on_predict(
                     args
-                ))
-                pprint(result)
+                )))))
+                pprint(results)
             except KeyboardInterrupt as e:
 
                 exit = input("Exit? [y]/n")

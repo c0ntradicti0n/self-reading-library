@@ -14,7 +14,7 @@ class Tex2Pdf(PathSpec):
         super().__init__(*args, **kwargs)
         self.timeout_sec = timout_sec
 
-    @file_persistent_cached_generator(config.cache + os.path.basename(__file__) + '.json', if_cache_then_finished=True)
+    @file_persistent_cached_generator(config.cache + os.path.basename(__file__) + '.json')
     def __call__(self, arg_meta, *args, **kwargs):
         for tex, meta in arg_meta:
             if not 'labeled' in tex:

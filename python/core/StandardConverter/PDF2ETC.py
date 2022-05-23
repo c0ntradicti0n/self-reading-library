@@ -1,6 +1,6 @@
 import os
 from core import config
-from layout.latex.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
+from layout.latex.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
 from helpers.cache_tools import file_persistent_cached_generator
 from core.pathant.Converter import converter
 from core.pathant.parallel import paraloop
@@ -13,7 +13,7 @@ outputs = {
 
 
 @converter('pdf', list(outputs.values()))
-class PDF2ETC(TrueFormatUpmarkerPDF2HTMLEX):
+class PDF2ETC(PDF_AnnotatorTool):
     def __init__(self, debug=True, *args, n=15, **kwargs):
         super().__init__(*args, **kwargs)
         self.n = n

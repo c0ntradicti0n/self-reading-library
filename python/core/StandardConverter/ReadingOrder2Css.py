@@ -76,6 +76,7 @@ class ReadingOrder2Css(PathSpec):
             except KeyError:
                 self.logger.warning("set meta['doc_id'] for logs")
 
+            meta['css'] = css
             yield css, meta
 
     def parse_to_css(self, css_obj, meta):

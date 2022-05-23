@@ -8,6 +8,7 @@ import pylab
 import matplotlib
 from more_itertools import pairwise
 
+from core import config
 from helpers.list_tools import flatten_optional_list_pair, flatten_optional_list_triple
 from core.StandardConverter.Dict2Graph import Dict2Graph
 from helpers.os_tools import make_dirs_recursive
@@ -19,7 +20,7 @@ from core.pathant.Filter import Filter
 
 OUT_OF_THE_BOX = "OUT_OF_THE_BOX"
 class PathAnt:
-    def __init__(self, necessary_paths={".core": ["tex_data", "cache", "log"]}):
+    def __init__(self, necessary_paths={config.hidden_folder: ["tex_data", "cache", "log"]}):
         make_dirs_recursive(necessary_paths)
         self.G = nx.DiGraph()
 
@@ -251,7 +252,7 @@ class TestPathAnt(unittest.TestCase):
     """
    from latex.ScienceTexScraper.scrape import ScienceTexScraper
     from latex.LatexReplacer.latex_replacer import LatexReplacer
-    from latex.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
+    from latex.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
     from latex.LayoutReader.feature_prediction import LayoutPrediction
     from latex.LayoutReader.MarkupDocument import MarkupDocument
     from latex.LayoutReader.feature2features import Feature2Features

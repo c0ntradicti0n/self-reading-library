@@ -60,9 +60,7 @@ sample_pipe = ant(
     num_labels=config.NUM_LABELS,
     via='pdf',
     filter={'tex': unlabeled_not_existent_filter},
-    model_path=full_model_path,
-    # texs = ['.core/tex_data/e58dd6bbc7c23fd05c9b120fef282145//constant-curvature.tex']
-    # ignore_incomplete=True
+    model_path=full_model_path
 )
 
 model_pipe = ant(
@@ -92,7 +90,7 @@ UploadAnnotationQueueRest = RestQueue(
 )
 
 
-def annotate_train_model():
+def layout_annotate_train_model():
     model_in_the_loop(
         model_dir=config.TEXT_BOX_MODEL_PATH,
         collection_path=config.COLLECTION_PATH,
@@ -102,10 +100,11 @@ def annotate_train_model():
                        collection_step=['training_rate']
                        )
         ),
+        service_id='annotation',
         on_predict=lambda: collection, collection_meta=
 
         sample_pipe(
-            "https://arxiv.org",
+            #"https://arxiv.org",
             model_path=best_model_path,
             layout_model_path=full_model_path
         )
@@ -113,4 +112,4 @@ def annotate_train_model():
 
 
 if __name__ == "__main__":
-    annotate_train_model()
+    layout_annotate_train_model()

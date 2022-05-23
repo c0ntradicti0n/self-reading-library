@@ -6,8 +6,6 @@ from allennlp.models.model import Model
 from language.transformer.difference_predictor.difference_predictor import DifferenceTaggerPredictor
 from queue import Queue
 
-
-
 q2 = Queue()
 q1 = Queue()
 
@@ -21,33 +19,36 @@ class ElmoPredict(PathSpec):
         self.CSS = {
             (span_letter + "-" + tag) if tag != 'O'
 
-                else tag
+            else tag
 
-                    :
+            :
 
-                        css
+                css
 
             for span_letter in ['L', 'I', 'B', 'U']
             for tag, css in self.CSS_SIMPLE.items()
         }
-    consumed_tokens_queue = Queue()
+
+    def init_quees(self):
+        global q1
+        global q2
+        q2 = Queue()
+        q1 = Queue()
 
     def __call__(self, feature_meta, *args, **kwargs):
         consumed_tokens = None
         next(feature_meta)
 
-
         q1.put(0)
 
-
-
         while True:
-            try: # https://stackoverflow.com/questions/51700960/runtimeerror-generator-raised-stopiteration-every-time-i-try-to-run-app
+            try:  # https://stackoverflow.com/questions/51700960/runtimeerror-generator-raised-stopiteration-every-time-i-try-to-run-app
                 words, meta = q2.get()
                 q2.task_done()
 
             except StopIteration:
                 self.logger.info("finished predicting")
+                self.init_quees()
                 break
 
             if words == None:
@@ -65,25 +66,27 @@ class ElmoPredict(PathSpec):
                 annotation = self.predictor.predict_json({"sentence": words})
                 self.info(annotation)
             except Exception as e:
-
                 self.logger.error("Faking annotation because of error " + str(e), e)
                 annotation = [('O', w) for w in words]
 
             try:
-                # rfind of not "O"
                 try:
+                    # rfind of not "O"
                     consumed_tokens = next(i for i, (tag, word) in list(enumerate(annotation))[::-1] if tag != 'O')
                 except StopIteration as e:
                     consumed_tokens = len(words)
 
                 q1.put(consumed_tokens)
 
-
                 yield annotation, {
                     **meta,
                     'CSS': self.CSS,
                     "consumed_i2": consumed_tokens,
                 }
+
+                q1.put(consumed_tokens)
+
+
 
             except Exception as e:
                 self.logger.error(e.__repr__())
@@ -94,5 +97,5 @@ class ElmoPredict(PathSpec):
         table = Texttable()
         table.set_deco(Texttable.HEADER)
         table.set_cols_align(["c", "l", "r"])
-        table.add_rows([['i', 'tag', 'word']] + [[i, t, w ] for i, (t, w) in enumerate(annotation)])
-        print (table.draw())
+        table.add_rows([['i', 'tag', 'word']] + [[i, t, w] for i, (t, w) in enumerate(annotation)])
+        print(table.draw())

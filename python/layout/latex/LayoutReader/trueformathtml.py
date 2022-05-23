@@ -1,6 +1,6 @@
 import os
 
-from core.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
+from core.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
 from core.LayoutReader.trueformatupmarker import TrueFormatUpmarker
 from core.helpers.color_logger import *
 import bs4
@@ -10,7 +10,7 @@ from bs4 import NavigableString, Tag
 class TrueFormatUpmarkerHTML (TrueFormatUpmarker):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.pdf2html = TrueFormatUpmarkerPDF2HTMLEX()
+        self.pdf2html = PDF_AnnotatorTool()
 
     def collect_all_divs(self, soup):
         self.text_divs = []

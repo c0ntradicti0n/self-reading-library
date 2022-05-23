@@ -45,7 +45,6 @@ class Pager(PathSpec):
         else:
             self.logger.warning(f"pdf2htmlEX has run yet on {pdf_path}")
 
-
         meta['pdf2htmlEX.html'] = html_path
         meta['html_path'] = html_path
         meta['pdf_path'] = pdf_path
@@ -68,18 +67,15 @@ class Pager(PathSpec):
             lines = content.decode(encoding).split()
             i_word = [self.match_reading_order_line(line) for line in lines if len(line) > 2]
 
-
             # use layout filtered text
-            text =  " ".join([word for t in texts for i, word in t])
+            text = " ".join([word for t in texts for i, word in t])
             real_tokens = split_punctuation(text, ":!?;")
-
 
             # start iterating on windows of this text
             generator = self.make_tokenized_windows(real_tokens)
             next(generator)
-            threading.Thread(target=self.window_thread, args=(generator, meta, i_word, )).start()
+            threading.Thread(target=self.window_thread, args=(generator, meta, i_word,)).start()
             yield texts, meta
-
 
     def window_thread(self, generator, meta, i_word):
         i = 0
@@ -104,9 +100,9 @@ class Pager(PathSpec):
             if len(window) == 0:
                 self.logger.info("finishing?")
 
-            ElmoPredict.q2.put( (window, {**window_meta, "i_word": i_word, **meta, 'doc_id': meta['pdf_path']}) )
+            ElmoPredict.q2.put((window, {**window_meta, "i_word": i_word, **meta, 'doc_id': meta['pdf_path']}))
 
-            #last_annotated_token = ElmoPredict.consumed_tokens_queue.get()
+            # last_annotated_token = ElmoPredict.consumed_tokens_queue.get()
             i += 1
             if i > config.max_windows_per_text:
                 i = 0
@@ -146,11 +142,10 @@ class Pager(PathSpec):
 
             window = []
             sentences_j = 0
-            rest_text =  real_tokens[start_i2: start_i2 + 300]
+            rest_text = real_tokens[start_i2: start_i2 + 300]
 
             if len(rest_text) == 0:
                 return
-
 
             for j, w in enumerate(rest_text):
                 window.append(w)
@@ -162,17 +157,15 @@ class Pager(PathSpec):
 
             consumed_tokens = yield window, {}
 
-
     def pdf2htmlEX(self, pdf_filename, html_filename):
         assert (pdf_filename.endswith(".pdf"))
         self.logger.info(f"converting pdf {pdf_filename} to html {html_filename} ")
         return_code = os.system(f"{config.pdf2htmlEX} "
-                  f"--space-as-offset 1 "
-                  f"--decompose-ligature 1 "
-                  f"--optimize-text 1 "
-                  f"--fit-width {config.reader_width}  "
-                  f"\"{pdf_filename}\" \"{html_filename}\"")
+                                f"--space-as-offset 1 "
+                                f"--decompose-ligature 1 "
+                                f"--optimize-text 1 "
+                                f"--fit-width {config.reader_width}  "
+                                f"\"{pdf_filename}\" \"{html_filename}\"")
 
         if return_code != 0:
             raise FileNotFoundError(f"{pdf_filename} was not found!")
-

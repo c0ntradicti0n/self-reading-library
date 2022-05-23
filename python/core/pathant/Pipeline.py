@@ -1,4 +1,5 @@
 import itertools
+import logging
 
 from helpers.time_tools import timeit_context
 from core.pathant.parallel import paraloop
@@ -35,18 +36,22 @@ class Pipeline:
             logger(start_message)
 
             try:
-                if functional_object in self.extra_paths:
-                    others = self.extra_paths[functional_object]
-                    others = [other(self.dummy_generator) for other in others]
+                try:
+                    if functional_object in self.extra_paths:
+                        others = self.extra_paths[functional_object]
+                        others = [other(self.dummy_generator) for other in others]
 
 
-                    intermediate_result = functional_object(intermediate_result, *others)
-                elif intermediate_result:
-                    intermediate_result = functional_object(intermediate_result)
-                else:
-                    intermediate_result = functional_object()
-            except Exception as e:
-                print(functional_object)
+                        intermediate_result = functional_object(intermediate_result, *others)
+                    elif intermediate_result:
+                        intermediate_result = functional_object(intermediate_result)
+                    else:
+                        intermediate_result = functional_object()
+                except Exception as e:
+                    print(functional_object)
+                    raise e
+            except StopIteration as e:
+                logging.error(f"Stopiteration raised between {functional_object} and {intermediate_result}")
                 raise e
 
             intermediate_result = intermediate_result

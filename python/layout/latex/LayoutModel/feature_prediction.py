@@ -1,11 +1,11 @@
 from pprint import pprint
 
-from latex.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
+from latex.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
 from core.pathant.Converter import converter
 
 
 @converter(("feature", "predictor"), 'predicted.feature')
-class LayoutPrediction(TrueFormatUpmarkerPDF2HTMLEX):
+class LayoutPrediction(PDF_AnnotatorTool):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         pass

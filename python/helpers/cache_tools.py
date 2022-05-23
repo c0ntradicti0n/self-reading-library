@@ -51,15 +51,11 @@ def file_persistent_cached_generator(
 
             if isinstance(param[1], list) and (not if_cache_then_finished and cache):
                 yield from apply_and_cache(cache, cwd, param, no_cache=True)
+            elif if_cached_then_forever:
+                yield from yield_cache(cache, cwd)
             else:
-                if not if_cached_then_forever:
-                    yield from yield_cache(cache, cwd)
-                else:
-                    for res, meta in cache:
-                        yield res, meta
-
-                if (not cache or not if_cache_then_finished):
-                    yield from apply_and_cache(cache, cwd, param, no_cache=dont_use_cache)
+                yield from yield_cache(cache, cwd)
+                yield from apply_and_cache(cache, cwd, param, no_cache=dont_use_cache)
 
             os.chdir(cwd)
 
@@ -126,7 +122,8 @@ def apply(cache, cwd, param):
                 f"{str(e)} while computing on \n {str(result)}\n in {str(original_func)}\n being in {os.getcwd()}")
             raise e
 
-def write_cache(path, gen, cwd, overwrite_cache = False):
+
+def write_cache(path, gen, cwd, overwrite_cache=False):
     if os.path.exists(path):
         append_write = 'a'  # append if already exists
     else:
@@ -144,9 +141,10 @@ def write_cache(path, gen, cwd, overwrite_cache = False):
         yield result
         append_write = 'a'
 
+
 def configurable_cache(
         filename,
-        overwrite_cache = None,
+        overwrite_cache=None,
         load_via_glob=None,
         cache_only=False,
         dont_add_to_cache=False,
@@ -204,8 +202,6 @@ def configurable_cache(
                     yield_cache = False
                     yield_apply = True
 
-
-
             if not yield_apply and not yield_cache:
                 raise AssertionError("Some kind of cache result must be calculated! Bad "
                                      "handling of flags occurred")
@@ -217,11 +213,10 @@ def configurable_cache(
             if yield_apply:
                 gens += apply(cache, cwd, param, no_cache=False)
 
-
             gens = itertools.chain.from_iterable(gens)
 
             if write_down_cache:
-                gen = write_cache(gen = gens, cwd=cwd, path=new_func.cache_path)
+                gen = write_cache(gen=gens, cwd=cwd, path=new_func.cache_path)
 
             yield from gen
             os.chdir(cwd)
@@ -307,17 +302,17 @@ class TestCache(unittest.TestCase):
         return y, f
 
     def check_cached(self,
-                      f,
-                      x,
-                      y,
-                      exists=True,
-                      all_values_in=True,
-                      cargs=[],
-                      ckwargs={}
-                      ):
+                     f,
+                     x,
+                     y,
+                     exists=True,
+                     all_values_in=True,
+                     cargs=[],
+                     ckwargs={}
+                     ):
 
         if "load_via_glob" in ckwargs:
-           pass
+            pass
 
         if "cache_only" in ckwargs:
             pass
@@ -336,13 +331,15 @@ class TestCache(unittest.TestCase):
 
             try:
                 with open(f.cache_path, "r") as fc:
-                    content  = fc.read()
+                    content = fc.read()
             except FileNotFoundError as e:
                 raise e
             try:
                 cache = json.loads(content)
             except Exception as e:
-                raise AssertionError(f"Cache '{f.cache_path}' with content \n\t'{str(content[:100])}' \n\tnot in readable format " + str(e))
+                raise AssertionError(
+                    f"Cache '{f.cache_path}' with content \n\t'{str(content[:100])}' \n\tnot in readable format " + str(
+                        e))
 
             assert (isinstance(cache, dict))
 
@@ -354,7 +351,7 @@ class TestCache(unittest.TestCase):
             assert len(z) == len(x)
 
     def run_test_cache(self
-                   ,x, *cargs, f=None, fargs=[], fkwargs={}, **ckwargs):
+                       , x, *cargs, f=None, fargs=[], fkwargs={}, **ckwargs):
         y, f = self.run_cached(
             *cargs,
             f=f,
@@ -375,8 +372,8 @@ class TestCache(unittest.TestCase):
 
     def test_cache_via_glob(self):
         assert (self.run_test_cache([1, 2, 3],
-                                 load_via_glob='../test/*.pdf',
-                                 )) > 3
+                                    load_via_glob='../test/*.pdf',
+                                    )) > 3
 
     def test_cache1(self):
         assert len(list(self.run_test_cache(

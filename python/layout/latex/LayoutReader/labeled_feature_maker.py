@@ -14,13 +14,13 @@ from core import config
 
 sys.path.append(".")
 
-from latex.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
+from latex.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
 from core.pathant.Converter import converter
 
 FEATURES_FROM_PDF2HTMLEX = "features_from_pdf2htmlex"
 
 @converter("htm", "feature")
-class LabeledFeatureMaker(TrueFormatUpmarkerPDF2HTMLEX):
+class LabeledFeatureMaker(PDF_AnnotatorTool):
     def __init__(self, debug=True, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.debug = debug

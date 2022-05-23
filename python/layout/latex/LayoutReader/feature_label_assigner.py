@@ -1,6 +1,6 @@
 import sys
 
-from layout.latex.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
+from layout.latex.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
 
 sys.path.append(".")
 
@@ -9,7 +9,7 @@ from helpers.cache_tools import file_persistent_cached_generator
 from core import config
 
 @converter("feature", 'assigned.feature')
-class FeatureAssigner(TrueFormatUpmarkerPDF2HTMLEX):
+class FeatureAssigner(PDF_AnnotatorTool):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         pass

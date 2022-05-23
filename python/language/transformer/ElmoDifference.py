@@ -1,6 +1,6 @@
 import os
 from core import config
-from layout.latex.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
+from layout.latex.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
 from helpers.cache_tools import file_persistent_cached_generator
 from core.pathant.Converter import converter
 from core.pathant.parallel import paraloop
@@ -15,13 +15,13 @@ from allennlp_models.tagging.models import crf_tagger
 
 
 @converter('css.difference', "elmo.css_html.difference")
-class ElmoDifference(TrueFormatUpmarkerPDF2HTMLEX):
+class ElmoDifference(PDF_AnnotatorTool):
     def __init__(self, debug=True, *args, n=15, **kwargs):
         super().__init__(*args, **kwargs)
         self.n = n
         self.debug = debug
 
-    @file_persistent_cached_generator(config.cache + os.path.basename(__file__) + '.json', if_cache_then_finished=True)
+    @file_persistent_cached_generator(config.cache + os.path.basename(__file__) + '.json')
     def __call__(self, labeled_paths, *args, **kwargs):
         for doc_id, (css_str, meta) in enumerate(labeled_paths):
 
@@ -42,7 +42,7 @@ class ElmoDifference(TrueFormatUpmarkerPDF2HTMLEX):
 ant = PathAnt()
 
 elmo_difference_pipe = ant(
-    "arxiv.org", f"elmo.css_html.difference", via='prediction',
+    "arxiv.org", f"elmo.html", via='prediction',
     num_labels=config.NUM_LABELS,
     layout_model_path=full_model_path
 )
@@ -53,32 +53,38 @@ elmo_difference_model_pipe = ant(
 
 )
 
-
 def annotate_uploaded_file(file):
     return elmo_difference_pipe(metaize(file))
 
 
 ElmoDifferenceQueueRest = RestQueue(
-    service_id="elmo_difference",
+    service_id="difference",
     work_on_upload=annotate_uploaded_file
 )
 
+def on_predict(args):
+    gen = elmo_difference_pipe(
+        "https://arxiv.org",
+        difference_model_path=args['best_model_path']
+    )
+    #_ = next(gen)
+    return gen
 
 def annotate_difference_elmo():
+
     model_in_the_loop(
         model_dir=config.ELMO_DIFFERENCE_MODEL_PATH,
         collection_path=config.ELMO_DIFFERENCE_COLLECTION_PATH,
         on_train=lambda args:
         print(f"{args=}") or list(
-            elmo_difference_model_pipe(metaize(args['samples_files']),
-                                       collection_step=args['training_rate']
-                                       )
+            elmo_difference_model_pipe(
+                metaize(args['samples_files']),
+                collection_step=args['training_rate']
+            )
         ),
-        on_predict=lambda args:
-        elmo_difference_pipe(
-            "https://arxiv.org",
-            difference_model_path=args['best_model_path'])
-        ,
+    service_id="difference",
+
+        on_predict=on_predict,
         training_rate_mode='size',
         training_rate_file=config.ELMO_DIFFERENCE_COLLECTION_PATH + "/train_over.conll3"
     )

@@ -138,7 +138,7 @@ import React from 'react'
 import Router from 'next/router'
 import { withRouter } from "next/router";
 import ??title!!Service from '../resources/??Title!!Service'
-import HtmlRenderer from './../components/HtmlRenderer.jsx'
+import HtmlRenderer from './../components/HtmlRenderer.tsx'
 import BoxAnnotator from './../components/BoxAnnotator'
 import dynamic from 'next/dynamic'
 const Graph = dynamic(
@@ -237,9 +237,9 @@ class ??title!! extends React.Component<??Title!!Props, ??Title!!State> {
             return <Graph data={this.state.??title!!s}/>
         
                             // @ts-ignore
-        if ("??type!!" === "html" && this.state.??title!!) {
-            console.log({html:this.state.??title!!})
-            return <HtmlRenderer data={this.state.??title!!}/>
+        if ("??type!!" === "html") {
+            console.log({html:this.state})
+            return <HtmlRenderer data={this.state}/>
         }
         else return null
     }

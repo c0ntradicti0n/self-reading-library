@@ -14,12 +14,14 @@ import pdfminer
 from collections import namedtuple
 from pdf2image import convert_from_path, convert_from_bytes
 from PIL import Image
+
 sys.path.append(".")
 from core.pathant.PathSpec import PathSpec
 from helpers.layout import determine_layout_label_from_text
 from core.pathant.Converter import converter
 
 FEATURES_FROM_PDF2HTMLEX = "features_from_pdf2htmlex"
+
 
 @converter(["labeled.pdf", 'pdf'], "feature")
 class BoxFeatureMaker(PathSpec):
@@ -35,7 +37,7 @@ class BoxFeatureMaker(PathSpec):
             feature_gen = self.mine_pdf(labeled_pdf_path)
             feature_df = pandas.DataFrame(
                 list(feature_gen),
-            columns=BoxFeatureMaker.TextBoxData._fields)
+                columns=BoxFeatureMaker.TextBoxData._fields)
 
             for random_i, final_feature_df in enumerate(self.feature_fuzz(feature_df)):
                 final_feature_df = self.compute_complex_coordination_data(final_feature_df)
@@ -53,7 +55,7 @@ class BoxFeatureMaker(PathSpec):
                 for page_number, pil in enumerate(images):
                     image_path = f'{labeled_pdf_path}.{page_number}.jpg'
 
-                    image_dict [page_number] = image_path
+                    image_dict[page_number] = image_path
 
                     basewidth = 2500
                     wpercent = (basewidth / float(pil.size[0]))
@@ -69,7 +71,7 @@ class BoxFeatureMaker(PathSpec):
     TextBoxData = namedtuple("TextBoxData", [
         "page_number",
         "number_of_lines",
-        "x","y", "x0", "x1", "y0", "y1",
+        "x", "y", "x0", "x1", "y0", "y1",
         "height", "width",
         "page_height", "page_width",
         "chars_and_char_boxes",
@@ -81,15 +83,16 @@ class BoxFeatureMaker(PathSpec):
             for element in page_layout:
                 if isinstance(element, LTTextContainer):
                     text = element.get_text()
-                    chars_and_char_boxes = [(char._text, char.bbox) for line in element._objs for char in line._objs if isinstance( char , LTChar) ]
+                    chars_and_char_boxes = [(char._text, char.bbox) for line in element._objs for char in line._objs if
+                                            isinstance(char, LTChar)]
                     label = determine_layout_label_from_text(text)
                     number_of_lines = len(element._objs) if hasattr(element, "_objs") else 0
                     features = BoxFeatureMaker.TextBoxData(
                         page_number,
                         number_of_lines,
                         int(element.x0), int(element.y0),
-                        int(element.x0), int(element.x0+element.width),
-                        int(element.y0), int(element.y0+element.height),
+                        int(element.x0), int(element.x0 + element.width),
+                        int(element.y0), int(element.y0 + element.height),
                         int(element.height), int(element.width),
                         int(page_layout.height), int(page_layout.width),
                         chars_and_char_boxes,
@@ -97,9 +100,8 @@ class BoxFeatureMaker(PathSpec):
                         label
 
                     )
-                    print (features)
+                    print(features)
                     yield features._asdict()
-
 
     def compute_complex_coordination_data(self, feature_df):
         feature_df = feature_df.groupby(['page_number']).apply(self.page_web)
@@ -139,12 +141,15 @@ class BoxFeatureMaker(PathSpec):
 
                 for k in range(config.layout_model_next_text_boxes):
                     sub_df[f'nearest_{k}_center_x'], sub_df[f'nearest_{k}_center_y'] = list(zip(*
-                        [nearest_points[k] for p1, nearest_points in all_nearest_points]
-                    ))
+                                                                                                [nearest_points[k] for
+                                                                                                 p1, nearest_points in
+                                                                                                 all_nearest_points]
+                                                                                                ))
 
             except Exception as e:
-                print (points)
-                self.logger.warning(f"not enough points in page to find {config.layout_model_next_text_boxes} nearest points, faking with 0.5")
+                print(points)
+                self.logger.warning(
+                    f"not enough points in page to find {config.layout_model_next_text_boxes} nearest points, faking with 0.5")
                 for k in range(config.layout_model_next_text_boxes):
                     sub_df[f'nearest_{k}_center_x'] = [0.5] * len(sub_df)
                     sub_df[f'nearest_{k}_center_y'] = [0.5] * len(sub_df)
@@ -159,23 +164,23 @@ class BoxFeatureMaker(PathSpec):
 
         return sub_df
 
-
     FeatureKinds = namedtuple(
         "FeatureKinds",
         ["box_schema"])
 
     edges = numpy.array(
         [[0, 0, config.reader_width, config.reader_height]])
+
     def analyse_point_density_frequence(self, page_features, debug=True, axe_len_X=50, axe_len_Y=50) -> FeatureKinds:
         boxes = numpy.column_stack((page_features.x0, page_features.y0, page_features.x1, page_features.y1))
 
         indices = numpy.einsum(
             "ij,j->ij",
-           boxes,
-           [axe_len_X/config.reader_width,
-            axe_len_Y/config.reader_height,
-            axe_len_X/config.reader_width,
-            axe_len_Y/config.reader_height]
+            boxes,
+            [axe_len_X / config.reader_width,
+             axe_len_Y / config.reader_height,
+             axe_len_X / config.reader_width,
+             axe_len_Y / config.reader_height]
         ).astype(int)
 
         box_schema_pics = []
@@ -184,11 +189,11 @@ class BoxFeatureMaker(PathSpec):
 
             for x0, y0, x1, y1 in indices:
                 try:
-                    box_schema[x0:x1+1, y0:y1+1] = box_schema[x0:x1+1, y0:y1+1] + 1
+                    box_schema[x0:x1 + 1, y0:y1 + 1] = box_schema[x0:x1 + 1, y0:y1 + 1] + 1
                 except IndexError:
                     self.logger.error("Indexes wrong after index normalization ")
 
-            box_schema[_x0:_x1+1, _y0:_y1+1] = box_schema[_x0:_x1+1, _y0:_y1+1] * -1
+            box_schema[_x0:_x1 + 1, _y0:_y1 + 1] = box_schema[_x0:_x1 + 1, _y0:_y1 + 1] * -1
 
             box_schema = (box_schema) / numpy.amax(box_schema)
 
@@ -205,7 +210,6 @@ class BoxFeatureMaker(PathSpec):
             box_schema_pics.append(box_schema)
 
         return box_schema_pics
-
 
     def point_density_frequence_per_page(self, features, **kwargs):
         # map computation to pageclusters
@@ -242,10 +246,10 @@ class TestComputedFeatureTable(unittest.TestCase):
         latex_maker = LabeledFeatureMaker
         res = list(latex_maker.__call__(
             [(
-             "/home/finn/PycharmProjects/LayoutEagle/python/.core/tex_data/8d885eb85effba6b693ab5c3a82715ee/main.tex1.labeled.pdf",
-             {
-                 "filename": ".core/tex_data/8d885eb85effba6b693ab5c3a82715ee/main.tex1.labeled.pdf"
-             })]))
+                "/home/finn/PycharmProjects/LayoutEagle/python/.core/tex_data/8d885eb85effba6b693ab5c3a82715ee/main.tex1.labeled.pdf",
+                {
+                    "filename": ".core/tex_data/8d885eb85effba6b693ab5c3a82715ee/main.tex1.labeled.pdf"
+                })]))
         self.df = res[0][0]
 
     def test_spider_web_lines(self):

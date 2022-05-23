@@ -4,12 +4,12 @@ from more_itertools import pairwise
 from pdfminer.high_level import extract_text
 import logging
 logging.getLogger('pdfminer').setLevel(logging.ERROR)
-from latex.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
+from latex.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
 from core.pathant.Converter import converter
 
 
 @converter('predicted.feature', "reading_order.latex")
-class MarkupDocument(TrueFormatUpmarkerPDF2HTMLEX):
+class MarkupDocument(PDF_AnnotatorTool):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

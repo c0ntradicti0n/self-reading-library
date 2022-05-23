@@ -3,9 +3,9 @@ import unittest
 class Mak(unittest.TestCase):
     from core.StandardConverter.ScienceTexScraper.scrape import ScienceTexScraper
     from core.LatexReplacer.latex_replacer import LatexReplacer
-    from core.LayoutReader.labeled_feature_maker import TrueFormatUpmarkerPDF2HTMLEX
-    from core.LayoutReader.feature_label_assigner import TrueFormatUpmarkerPDF2HTMLEX
-    from core.LayoutReader.trueformatpdf2htmlEX import TrueFormatUpmarkerPDF2HTMLEX
+    from core.LayoutReader.labeled_feature_maker import PDF_AnnotatorTool
+    from core.LayoutReader.feature_label_assigner import PDF_AnnotatorTool
+    from core.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
     from core.LayoutReader.feature_prediction import LayoutPrediction
     from core.LayoutReader.MarkupDocument import MarkupDocument
     from core.LayoutReader.feature2features import Feature2Features

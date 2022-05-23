@@ -24,7 +24,7 @@ from helpers.list_tools import threewise
 from layout.latex.LayoutReader.trueformatupmarker import TrueFormatUpmarker
 
 
-class TrueFormatUpmarkerPDF2HTMLEX(TrueFormatUpmarker):
+class PDF_AnnotatorTool(TrueFormatUpmarker):
     replacement_mapping_tag2tag = {
         "div": "z"
     }
@@ -471,7 +471,7 @@ class TestPaperReader(unittest.TestCase):
             kwargs['html_write_to'] = path + ".computed.htm"
             columns = int(regex.search(r"\d", path).group(0))
 
-            pdf_obj = TrueFormatUpmarkerPDF2HTMLEX(**kwargs)
+            pdf_obj = PDF_AnnotatorTool(**kwargs)
 
             score = pdf_obj.verify(serious=True, test_document=True)
             self.logger.info(f"PDF extraction score: {score}")
@@ -538,7 +538,7 @@ class TestPaperReader(unittest.TestCase):
 
 if __name__ == '__main__':
 
-    tfu_pdf = TrueFormatUpmarkerPDF2HTMLEX(debug=True, parameterize=False)
+    tfu_pdf = PDF_AnnotatorTool(debug=True, parameterize=False)
 
     files = list(pathlib.Path('testdata').glob('*.html'))
     dfs = []
