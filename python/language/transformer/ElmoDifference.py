@@ -23,20 +23,24 @@ class ElmoDifference(PDF_AnnotatorTool):
 
     @file_persistent_cached_generator(config.cache + os.path.basename(__file__) + '.json')
     def __call__(self, labeled_paths, *args, **kwargs):
-        for doc_id, (css_str, meta) in enumerate(labeled_paths):
 
-            html_path = meta['html_path']
-            output_html_path = html_path + ".difference.html"
-            with open(html_path, errors="ignore") as f:
-                content = f.read()
-            content = content.replace("</head>", f"<style>\n{css_str}\n</style>\n</head>")
-            with open(output_html_path, "w") as f:
-                f.write(content)
+        try:
+            for doc_id, (css_str, meta) in enumerate(labeled_paths):
 
-            if "chars_and_char_boxes" in meta:
-                del meta['chars_and_char_boxes']
+                html_path = meta['html_path']
+                output_html_path = html_path + ".difference.html"
+                with open(html_path, errors="ignore") as f:
+                    content = f.read()
+                content = content.replace("</head>", f"<style>\n{css_str}\n</style>\n</head>")
+                with open(output_html_path, "w") as f:
+                    f.write(content)
 
-            yield output_html_path, meta
+                if "chars_and_char_boxes" in meta:
+                    del meta['chars_and_char_boxes']
+
+                yield output_html_path, meta
+        except StopIteration as e:
+            raise e
 
 
 ant = PathAnt()

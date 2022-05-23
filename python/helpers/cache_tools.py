@@ -16,48 +16,54 @@ def file_persistent_cached_generator(
 
         def new_func(*param):
 
-            cwd = os.getcwd()
+            try:
+                cwd = os.getcwd()
 
-            flags = standard_flags.copy()
-            flags.update(param[0].flags)
-            load_via_glob = flags['load_via_glob'] if 'load_via_glob' in flags else None
-            if_cache_then_finished = flags['if_cache_then_finished'] if 'if_cache_then_finished' in flags else False
-            if_cached_then_forever = flags['if_cached_then_forever'] if 'if_cached_then_forever' in flags else False
-            dont_use_cache = flags['dont_use_cache'] if 'dont_use_cache' in flags else False
+                flags = standard_flags.copy()
+                flags.update(param[0].flags)
+                load_via_glob = flags['load_via_glob'] if 'load_via_glob' in flags else None
+                if_cache_then_finished = flags['if_cache_then_finished'] if 'if_cache_then_finished' in flags else False
+                if_cached_then_forever = flags['if_cached_then_forever'] if 'if_cached_then_forever' in flags else False
+                dont_use_cache = flags['dont_use_cache'] if 'dont_use_cache' in flags else False
 
-            if_cache_then_finished = flags['dont_use_cache'] if 'dont_use_cache' in flags else if_cache_then_finished
-            if_cached_then_forever = flags['dont_use_cache'] if 'dont_use_cache' in flags else if_cached_then_forever
+                if_cache_then_finished = flags['dont_use_cache'] if 'dont_use_cache' in flags else if_cache_then_finished
+                if_cached_then_forever = flags['dont_use_cache'] if 'dont_use_cache' in flags else if_cached_then_forever
 
-            if dont_use_cache:
-                cache = {}
-            else:
-                try:
-                    with open(filename, 'r') as f:
-                        cache = list(f.readlines())
-
-                    if load_via_glob:
-                        if isinstance(load_via_glob, str):
-                            load_via_glob = [load_via_glob]
-                        cache = [f'["{fp}", {"{}"} ]' for path in load_via_glob for fp in glob(path)]
-
-                    cache = [tuple(json.loads(line)) for line in cache]
-                    cache = [(a if not isinstance(a, list) else tuple(a), b) for a, b in cache]
-                    try:
-                        cache = dict(cache)
-                    except:
-                        pass
-                except (IOError, ValueError):
+                if dont_use_cache:
                     cache = {}
+                else:
+                    try:
+                        with open(filename, 'r') as f:
+                            cache = list(f.readlines())
 
-            if isinstance(param[1], list) and (not if_cache_then_finished and cache):
-                yield from apply_and_cache(cache, cwd, param, no_cache=True)
-            elif if_cached_then_forever:
-                yield from yield_cache(cache, cwd)
-            else:
-                yield from yield_cache(cache, cwd)
-                yield from apply_and_cache(cache, cwd, param, no_cache=dont_use_cache)
+                        if load_via_glob:
+                            if isinstance(load_via_glob, str):
+                                load_via_glob = [load_via_glob]
+                            cache = [f'["{fp}", {"{}"} ]' for path in load_via_glob for fp in glob(path)]
 
-            os.chdir(cwd)
+                        cache = [tuple(json.loads(line)) for line in cache]
+                        cache = [(a if not isinstance(a, list) else tuple(a), b) for a, b in cache]
+                        try:
+                            cache = dict(cache)
+                        except:
+                            pass
+                    except (IOError, ValueError):
+                        cache = {}
+
+                if isinstance(param[1], list) and (not if_cache_then_finished and cache):
+                    yield from apply_and_cache(cache, cwd, param, no_cache=True)
+                elif if_cached_then_forever:
+                    yield from yield_cache(cache, cwd)
+                else:
+                    yield from yield_cache(cache, cwd)
+                    yield from apply_and_cache(cache, cwd, param, no_cache=dont_use_cache)
+
+                os.chdir(cwd)
+            except Exception as e:
+                logging.error(e, exc_info=True)
+                raise e
+
+
 
         def yield_cache(cache, cwd):
 

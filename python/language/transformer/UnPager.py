@@ -23,7 +23,7 @@ class UnPager(PathSpec):
 
         for annotation, meta in feature_meta:
             if whole_doc_id and meta["doc_id"]  != whole_doc_id:
-                yield whole_annotation, whole_meta
+                #yield whole_annotation, whole_meta
                 whole_annotation = []
                 whole_meta = None
 

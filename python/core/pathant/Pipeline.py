@@ -50,8 +50,8 @@ class Pipeline:
                 except Exception as e:
                     print(functional_object)
                     raise e
-            except StopIteration as e:
-                logging.error(f"Stopiteration raised between {functional_object} and {intermediate_result}")
+            except RuntimeError as e:
+                logging.error(f"Stopiteration {e} raised between {functional_object} and {intermediate_result}")
                 raise e
 
             intermediate_result = intermediate_result

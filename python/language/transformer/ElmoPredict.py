@@ -36,62 +36,65 @@ class ElmoPredict(PathSpec):
         q1 = Queue()
 
     def __call__(self, feature_meta, *args, **kwargs):
-        consumed_tokens = None
-        next(feature_meta)
 
-        q1.put(0)
 
-        while True:
-            try:  # https://stackoverflow.com/questions/51700960/runtimeerror-generator-raised-stopiteration-every-time-i-try-to-run-app
-                words, meta = q2.get()
-                q2.task_done()
+        for _ in feature_meta:
 
-            except StopIteration:
-                self.logger.info("finished predicting")
-                self.init_quees()
-                break
+            q1.put(0)
 
-            if words == None:
-                self.logger.info("finished predicting")
-                break
+            while True:
+                try:  # https://stackoverflow.com/questions/51700960/runtimeerror-generator-raised-stopiteration-every-time-i-try-to-run-app
+                    words, meta = q2.get()
+                    q2.task_done()
 
-            try:
-                if not self.model:
-                    self.model = Model.load(config=self.config, serialization_dir=self.flags['difference_model_path'])
-                    self.default_predictor = Predictor.from_path(self.flags['difference_model_path'])
-                    self.predictor = DifferenceTaggerPredictor(
-                        self.default_predictor._model,
-                        dataset_reader=self.default_predictor._dataset_reader
-                    )
-                annotation = self.predictor.predict_json({"sentence": words})
-                self.info(annotation)
-            except Exception as e:
-                self.logger.error("Faking annotation because of error " + str(e), e)
-                annotation = [('O', w) for w in words]
+                except StopIteration:
+                    self.logger.info("finished predicting")
+                    self.init_quees()
+                    break
 
-            try:
+                if words == None:
+                    self.logger.info("finished predicting")
+                    break
+
                 try:
-                    # rfind of not "O"
-                    consumed_tokens = next(i for i, (tag, word) in list(enumerate(annotation))[::-1] if tag != 'O')
-                except StopIteration as e:
-                    consumed_tokens = len(words)
+                    if not self.model:
+                        self.model = Model.load(config=self.config, serialization_dir=self.flags['difference_model_path'])
+                        self.default_predictor = Predictor.from_path(self.flags['difference_model_path'])
+                        self.predictor = DifferenceTaggerPredictor(
+                            self.default_predictor._model,
+                            dataset_reader=self.default_predictor._dataset_reader
+                        )
+                    annotation = self.predictor.predict_json({"sentence": words})
+                    self.info(annotation)
+                except Exception as e:
+                    self.logger.error("Faking annotation because of error " + str(e), e)
+                    annotation = [('O', w) for w in words]
 
-                q1.put(consumed_tokens)
+                try:
+                    try:
+                        # rfind of not "O"
+                        consumed_tokens = next(i for i, (tag, word) in list(enumerate(annotation))[::-1] if tag != 'O')
+                    except StopIteration as e:
+                        consumed_tokens = len(words)
 
-                yield annotation, {
-                    **meta,
-                    'CSS': self.CSS,
-                    "consumed_i2": consumed_tokens,
-                }
+                    q1.put(consumed_tokens)
 
-                q1.put(consumed_tokens)
+                    yield annotation, {
+                        **meta,
+                        'CSS': self.CSS,
+                        "consumed_i2": consumed_tokens,
+                    }
+
+                    q1.put(consumed_tokens)
 
 
 
-            except Exception as e:
-                self.logger.error(e.__repr__())
-                self.logger.error("Could not process " + str(words), e)
-                raise
+                except Exception as e:
+                    self.logger.error(e.__repr__())
+                    self.logger.error("Could not process " + str(words), e)
+                    raise
+
+            self.init_quees()
 
     def info(self, annotation):
         table = Texttable()

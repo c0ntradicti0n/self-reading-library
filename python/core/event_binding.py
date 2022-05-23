@@ -1,5 +1,6 @@
 import random
 import threading
+import traceback
 from queue import Queue, Empty
 import json
 from traceback_with_variables import Format, ColorSchemes, is_ipython_global, activate_by_import
@@ -216,11 +217,16 @@ def queue_iter (service_id, gen):
     global q, d
 
     for i in range(5):
-        print("insert first")
+        print("insert first some samples in the queue")
         try:
             new_val = next(gen)
         except Exception as e:
+            traceback.print_exc()
+            # or
+            print(sys.exc_info()[2])
+            logging.error(e, exc_info=True)
             raise e
+
         q[service_id].put_nowait(new_val)
 
     while True:
