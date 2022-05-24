@@ -37,6 +37,7 @@ jobs:
         run: |
           ssh staging '
               set -x
+              killall screen
               rm -rf *.log
               rm -rf ./cache
               #cp -r ./LayoutEagle/python/.layouteagle ./cache
