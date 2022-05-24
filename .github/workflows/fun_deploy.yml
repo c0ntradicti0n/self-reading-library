@@ -63,6 +63,7 @@ jobs:
           
               mkdir python/.layouteagle
               cp -R ~/../cloud/minimal_cache/. python/.layouteagle/
+              mkdir python/.layouteagle/prediction
               ls python/.layouteagle/
 
               pip install wheel
