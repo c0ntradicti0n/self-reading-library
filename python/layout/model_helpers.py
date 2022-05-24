@@ -98,7 +98,7 @@ def preprocess_data(training=False):
         if training:
             print (f"{word_labels = }")
 
-        images = [Image.open(config.path_prefix + path[0]).convert("RGB") for path in examples['image_path']]
+        images = [Image.open(path[0]).convert("RGB") for path in examples['image_path']]
 
         images = [resize(image, 255) for image in images]
 

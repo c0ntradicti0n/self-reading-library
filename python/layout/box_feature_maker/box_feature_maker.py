@@ -100,7 +100,7 @@ class BoxFeatureMaker(PathSpec):
                         label
 
                     )
-                    print(features)
+                    #print(features)
                     yield features._asdict()
 
     def compute_complex_coordination_data(self, feature_df):
