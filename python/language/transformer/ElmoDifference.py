@@ -38,7 +38,7 @@ class ElmoDifference(PDF_AnnotatorTool):
                 if "chars_and_char_boxes" in meta:
                     del meta['chars_and_char_boxes']
 
-                yield output_html_path, meta
+                yield html_path, meta
         except StopIteration as e:
             raise e
 

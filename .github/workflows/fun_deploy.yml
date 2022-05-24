@@ -40,7 +40,7 @@ jobs:
               rm -rf ./app
               rm -rf ./cache
               cp -r ./LayoutEagle/python/.layouteagle ./cache
-              sudo rm -rf LayoutEagle
+              rm -rf LayoutEagle
               git clone https://github.com/c0ntradicti0n/LayoutEagle.git 
           
               cp -r  ./cache ./LayoutEagle/python/.layouteagle
@@ -48,7 +48,7 @@ jobs:
               tar -xf  .layouteagle-box-data-collection.tar.xz -C LayoutEagle/python/.layouteagle/collection
               
               python3 -m venv venv
-              . venv/bin/activate.fish
+              . venv/bin/activate
               cd LayoutEagle
 
               pip install wheel

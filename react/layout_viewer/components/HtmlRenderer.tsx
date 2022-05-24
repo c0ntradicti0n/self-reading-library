@@ -14,9 +14,9 @@ class HtmlRenderer extends Component<Props> {
     console.log("HtmlRenderer", this);
     return (<>
 
-          {this.props?.meta ?
+          {this.props?.data.meta ?
               <style dangerouslySetInnerHTML={{
-                __html: this.props.meta.css +
+                __html: this.props.data.meta.css +
                     `\n\n#page-container { 
          background-color: transparent !important;
          background-image: none !important;
@@ -24,8 +24,8 @@ class HtmlRenderer extends Component<Props> {
               }}/>
               : "no css found!"
           }
-          {this.props.meta?.html ?
-              <div dangerouslySetInnerHTML={{__html: this.props.meta.html}}/>
+          {this.props.data.meta?.html ?
+              <div dangerouslySetInnerHTML={{__html: this.props.data.meta.html}}/>
               : "no html found"
           }
       </>

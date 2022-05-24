@@ -64,7 +64,13 @@ class ReadingOrder2Css(PathSpec):
                 except Exception as e:
                     self.logger.error(f"did not find all original indices from all indice {e}")
                     break
-            df = pd.DataFrame(nested_dict_list).sort_values(by='_i')
+
+            try:
+                df = pd.DataFrame(nested_dict_list).sort_values(by='_i')
+            except Exception as e:
+                logging.error(e, exc_info=True)
+                logging.error("Was unable to compose css")
+                continue
 
             try:
                 with open(

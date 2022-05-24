@@ -22,8 +22,25 @@ class UnPager(PathSpec):
         all_annotations = []
 
         for annotation, meta in feature_meta:
-            if whole_doc_id and meta["doc_id"]  != whole_doc_id:
-                #yield whole_annotation, whole_meta
+            if not whole_doc_id:
+                whole_doc_id = meta["doc_id"]
+            if meta["doc_id"] != whole_doc_id:
+                if "chars_and_char_boxes" in meta:
+                    del meta['chars_and_char_boxes']
+
+                l_a = [iw[1] for iw in whole_meta['i_word']]
+                l_b = [jw[1] for jw in whole_annotation]
+                alignment, cigar = align(l_a, l_b)
+
+                print(alignment_table(alignment, l_a, l_b))
+
+                try:
+                    whole_meta["_i_to_i2"] = {meta["i_word"][_i1][0]: _i2 for _i1, _i2 in alignment if _i1 and _i2}
+                except:
+                    logging.error("Error using alignment", exc_info=True)
+
+                yield whole_annotation, whole_meta
+
                 whole_annotation = []
                 whole_meta = None
 
@@ -42,21 +59,7 @@ class UnPager(PathSpec):
                 self.logger.error("No doc_id_given")
                 whole_doc_id = "?"
 
-        if "chars_and_char_boxes" in meta:
-            del meta['chars_and_char_boxes']
 
-        l_a = [iw[1] for iw in whole_meta['i_word']]
-        l_b = [jw[1] for jw in whole_annotation]
-        alignment = align(l_a, l_b)
-
-        print(alignment_table(alignment, l_a, l_b))
-
-        try:
-            whole_meta["_i_to_i2"] = {meta["i_word"][_i1][0]: _i2 for _i1, _i2 in alignment if _i1 and _i2}
-        except:
-            logging.error("Error using alignment", exc_info=True)
-
-        yield whole_annotation, whole_meta
 
     default_values = {
         str: "",

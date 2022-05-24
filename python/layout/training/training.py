@@ -80,7 +80,7 @@ class Training(PathSpec):
                     box = model_helpers.unnormalize_box(box, width, height)
                     draw.rectangle(box, outline=config.label2color[actual_label], width=2)
                     draw.text((box[0] + 10, box[1] - 10), actual_label, fill=config.label2color[actual_label], font=font)
-                image.save(f"boxes_unpredicted_{x}.jpg")
+                #image.save(f"boxes_unpredicted_{x}.jpg")
 
             batch = next(iter(train_dataloader))
 
