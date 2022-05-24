@@ -63,6 +63,7 @@ jobs:
           
               mkdir python/.layouteagle
               cp -R ~/../cloud/minimal_cache/. LayoutEagle/python/.layouteagle/
+              ls LayoutEagle/python/.layouteagle/
 
               pip install wheel
               pip install torch
