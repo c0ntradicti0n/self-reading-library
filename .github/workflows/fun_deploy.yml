@@ -49,6 +49,10 @@ jobs:
               
               python3 -m venv venv
               . venv/bin/activate
+          
+              [[ ! -d ./models ]] && mkdir models && cd models && wget https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_options.json && wget https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_weights.hdf5 && cd ..
+              ln -s /home/deploy/models/ /home/deploy/LayoutEagle/python/language/transformer/models
+
               cd LayoutEagle
           
               mkdir python/.layouteagle
