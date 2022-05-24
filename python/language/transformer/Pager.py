@@ -95,7 +95,7 @@ class Pager(PathSpec):
                 break
 
             print(f"text window:")
-            print(textwrap.fill(" ".join([t for t in window]), width=200))
+            print(textwrap.fill(" ".join([t for t in window]), width=160))
 
             if len(window) == 0:
                 self.logger.info("finishing?")
@@ -103,6 +103,9 @@ class Pager(PathSpec):
             ElmoPredict.q2.put((window, {**window_meta, "i_word": i_word, **meta, 'doc_id': meta['pdf_path']}))
 
             # last_annotated_token = ElmoPredict.consumed_tokens_queue.get()
+
+            # determine if we annotated some text with a unrealistic number if text
+            # windows
             i += 1
             if i > config.max_windows_per_text:
                 i = 0
@@ -124,11 +127,11 @@ class Pager(PathSpec):
         # * _i2 -> index of the text, after it was splitted again in more rational
         #      words
         #
-
         windowing = True
         start_i2 = 0
 
         consumed_tokens = 0
+
 
         while windowing:
 
