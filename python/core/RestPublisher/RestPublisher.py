@@ -138,7 +138,7 @@ import React from 'react'
 import Router from 'next/router'
 import { withRouter } from "next/router";
 import ??title!!Service from '../resources/??Title!!Service'
-import HtmlRenderer from './../components/HtmlRenderer.tsx'
+import HtmlRenderer from './../components/HtmlRenderer'
 import BoxAnnotator from './../components/BoxAnnotator'
 import dynamic from 'next/dynamic'
 const Graph = dynamic(

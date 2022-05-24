@@ -1,8 +1,7 @@
 import {Component} from "react";
 
 interface Props {
-  value: any
-  meta: any
+  data: {value:any, meta:any}
 }
 
 class HtmlRenderer extends Component<Props> {
