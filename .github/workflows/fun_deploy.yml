@@ -62,11 +62,20 @@ jobs:
 
       - name: StartBack
         run: |
-          ssh staging '            screen -L -S backend -dm bash -c " . venv/bin/activate.fish; cd LayoutEagle/python; python3 backend.py"    '
+          ssh staging '   screen -L  -Logfile backend.log -S backend -dm bash -c " . venv/bin/activate; cd LayoutEagle/python; python3 backend.py"    '
           
       - name: StartWeb
         run: |
-          ssh staging 'sleep 300 ;  screen -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer_made/ ; yarn install; yarn add --dev typescript @types/node; yarn build ; sudo yarn run start -p 8080 "     '
+          ssh staging 'sleep 300 ;  screen  -L  -Logfile frontend.log -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer_made/ ; yarn install; yarn add --dev typescript @types/node; yarn build ; sudo yarn run start -p 8080 "     '
+
+      - name: Glance at backend logs
+        run: |
+          ssh staging ' cat backend.log "     '
+
+      - name: Glance at frontend logs
+        run: |
+          ssh staging ' cat frontend.log "     '
+
 
       - name: DocTest
         run: |
