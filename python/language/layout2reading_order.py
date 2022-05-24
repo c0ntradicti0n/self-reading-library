@@ -10,7 +10,6 @@ class Layout2ReadingOrder(PathSpec):
         super().__init__(*args, **kwargs)
         pass
 
-    #@file_persistent_cached_generator("Layout2ReadingOrder.json")
     def __call__(self, feature_meta, *args, **kwargs):
         for annotation, meta in feature_meta:
             used_label_is = [self.sort_by_label([(i,l) for i, l in enumerate(an[0]['labels']) if l in config.TEXT_LABELS]) for an in annotation]

@@ -71,6 +71,8 @@ class Prediction(PathSpec):
 
                     prediction_meta = model_helpers.repaint_image_from_labels ((prediction, meta))
                     prediction_meta[0]['human_image'].save(f"{config.PREDICTION_PATH}/boxes_{page_number}.png")
+                    prediction_meta[0]['human_image'].save(f"{os.path.dirname(meta['html_path'])}/layout_boxes_{page_number}.png")
+
 
                     predictions_metas_per_document.append(prediction_meta)
 

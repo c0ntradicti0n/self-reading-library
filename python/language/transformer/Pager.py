@@ -69,7 +69,7 @@ class Pager(PathSpec):
 
             # use layout filtered text
             text = " ".join([word for t in texts for i, word in t])
-            real_tokens = split_punctuation(text, ":!?;")
+            real_tokens = split_punctuation(text, ".,:!?;")
 
             # start iterating on windows of this text
             generator = self.make_tokenized_windows(real_tokens)
