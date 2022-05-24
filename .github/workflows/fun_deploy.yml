@@ -37,19 +37,22 @@ jobs:
         run: |
           ssh staging '
               set -x
-              rm -rf ./app
+              rm -rf *.log
               rm -rf ./cache
-              cp -r ./LayoutEagle/python/.layouteagle ./cache
+              #cp -r ./LayoutEagle/python/.layouteagle ./cache
               rm -rf LayoutEagle
               git clone https://github.com/c0ntradicti0n/LayoutEagle.git 
           
-              cp -r  ./cache ./LayoutEagle/python/.layouteagle
-              mkdir LayoutEagle/python/.layouteagle/collection
-              tar -xf  .layouteagle-box-data-collection.tar.xz -C LayoutEagle/python/.layouteagle/collection
+              #cp -r  ./cache ./LayoutEagle/python/.layouteagle
+              #mkdir LayoutEagle/python/.layouteagle/collection
+              #tar -xf  .layouteagle-box-data-collection.tar.xz -C LayoutEagle/python/.layouteagle/collection
               
               python3 -m venv venv
               . venv/bin/activate
               cd LayoutEagle
+          
+              mkdir python/.layouteagle
+              cp -r ~/../cloud/minimal_cache python/.layouteagle/
 
               pip install wheel
               pip install torch
@@ -66,7 +69,7 @@ jobs:
           
       - name: StartWeb
         run: |
-          ssh staging 'sleep 300 ;  screen  -L  -Logfile frontend.log -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer_made/ ; yarn install; yarn add --dev typescript @types/node; yarn build ; sudo yarn run start -p 8080 "     '
+          ssh staging 'sleep 300 ;  screen  -L  -Logfile frontend.log -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer_made/ ; yarn install; yarn add --dev typescript @types/node; yarn build ; yarn run start -p 8080 "     '
 
       - name: Glance at backend logs
         run: |
