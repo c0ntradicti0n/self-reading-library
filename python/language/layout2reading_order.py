@@ -37,7 +37,7 @@ class Layout2ReadingOrder(PathSpec):
             for word in " ".join([text for text, box in texts]).split(" "):
                 enumeration.append((i, word))
                 i += 1
-            enumeration.append((i, "/n    "))
+            enumeration.append((i, "\n    "))
             i += 1
             all_enumeration.append(enumeration)
 

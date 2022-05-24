@@ -13,3 +13,5 @@ addict
 tensorflow>=2.5.1
 ordered_set
 guppy3
+python-poppler
+
