@@ -38,7 +38,7 @@ class UnPager(PathSpec):
                     whole_meta["_i_to_i2"] = {}
                     for _i1, _i2 in alignment:
                         if _i1 and _i2:
-                            whole_meta["_i_to_i2"][meta["i_word"][_i1][0]] = _i2
+                            whole_meta["_i_to_i2"][whole_meta["i_word"][_i1][0]] = _i2
                 except:
                     logging.error("Error using alignment", exc_info=True)
 

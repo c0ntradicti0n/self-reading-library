@@ -44,7 +44,7 @@ class Prediction(PathSpec):
                 predictions = outputs.logits.argmax(-1).squeeze().tolist()
                 token_boxes = encoded_inputs.bbox.squeeze().tolist()
 
-                image = Image.open(config.path_prefix + example['image_path'][0][0])
+                image = Image.open(example['image_path'][0][0])
                 image = image.convert("RGB")
                 width, height = image.size
 
@@ -57,7 +57,7 @@ class Prediction(PathSpec):
                 prediction['labels'] = box_predictions
                 prediction['bbox'] = enc_boxes
                 prediction['df'] = df.iloc[page_number:page_number+1]
-                prediction['image'] = Image.open(config.path_prefix + example['image_path'][0][0])
+                prediction['image'] = Image.open(example['image_path'][0][0])
                 prediction['page_number'] = page_number
 
                 if "ignore_incomplete" in self.flags:
