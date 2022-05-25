@@ -35,16 +35,16 @@ class ReadingOrder2Css(PathSpec):
 
     def __call__(self, feature_meta, *args, **kwargs):
         for annotation, meta in feature_meta:
-            tags, words = list(zip(*annotation))
+            #tags, words = list(zip(*annotation))
 
-            self.logger.warn(f"tag counts {Counter(list(tags))}")
+            #self.logger.warn(f"tag counts {Counter(list(tags))}")
             i_to_tag = {}
 
             try:
-                for _i1, _i2 in meta["_i_to_i2"].items():
+                for _i1, (i_annotation, _i2) in meta["_i_to_i2"].items():
                     if _i1 not in i_to_tag or i_to_tag[_i1] == "O":
-                        if _i2 < len(tags):
-                            i_to_tag[_i1] = annotation[_i2]
+                        #if _i2 < len(tags):
+                        i_to_tag[_i1] = annotation[i_annotation][_i2]
             except Exception as e:
                 logging.error(e, exc_info=True)
 

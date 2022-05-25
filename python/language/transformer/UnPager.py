@@ -29,18 +29,21 @@ class UnPager(PathSpec):
                     del meta['chars_and_char_boxes']
 
                 l_a = [iw[1] if iw[1] else '*' for iw in whole_meta['i_word']]
-                l_b = [jw[1] if jw[1] else '~' for jw in whole_annotation]
-                alignment, cigar = align(l_a, l_b)
 
-                print(alignment_table(alignment, l_a, l_b))
+                whole_meta["_i_to_i2"] = {}
 
-                try:
-                    whole_meta["_i_to_i2"] = {}
-                    for _i1, _i2 in alignment:
-                        if _i1 and _i2:
-                            whole_meta["_i_to_i2"][whole_meta["i_word"][_i1][0]] = _i2
-                except:
-                    logging.error("Error using alignment", exc_info=True)
+                for i_annotation, part_annotation in enumerate(whole_annotation):
+                    l_b = [jw[1] if jw[1] else '~' for jw in part_annotation]
+                    alignment, cigar = align(l_a, l_b)
+
+                    print(alignment_table(alignment, l_a, l_b))
+
+                    try:
+                        for _i1, _i2 in alignment:
+                            if _i1 and _i2:
+                                whole_meta["_i_to_i2"][whole_meta["i_word"][_i1][0]] = (i_annotation, _i2)
+                    except:
+                        logging.error("Error using alignment", exc_info=True)
 
                 yield whole_annotation, whole_meta
 
@@ -53,7 +56,7 @@ class UnPager(PathSpec):
 
 
             consumed_until_now += meta['consumed_i2']
-            whole_annotation.extend(annotation[:meta['consumed_i2']])
+            whole_annotation.append(annotation[:meta['consumed_i2']])
 
             all_annotations.append(annotation)
             try:
