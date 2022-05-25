@@ -15,7 +15,7 @@ class HtmlRenderer extends Component<Props> {
   render() {
     console.log("HtmlRenderer", this);
     return (<>
-          <Nav forward={() => this.props.service.ok(null, "", {},  () =>  window.location.reload(false))
+          <Nav forward={() => this.props.service.ok(null, "", {},  () =>  window.location.reload())
 }/>
 
           {this.props?.data.meta ?
