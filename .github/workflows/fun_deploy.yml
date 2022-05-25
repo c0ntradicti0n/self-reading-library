@@ -39,6 +39,8 @@ jobs:
           SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
 
       - name: Deploy
+        env:
+          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
         run: |
           ssh staging '
               set -x
@@ -77,6 +79,10 @@ jobs:
               pip install numpy --upgrade
           
               cp python/tokenization_layoutvm2_fast.py ../venv/lib/python3.8/site-packages/transformers/models/layoutlmv2/tokenization_layoutlmv2_fast.py
+              
+              echo " export class AppSettings {  public static SAUSSAGEPOINT = \"http://$SSH_HOST:443\"   } " > react/layout_viewer/config/connection.ts
+              echo "PORT=443" >> python/core/config.py
+
 
           '
 
