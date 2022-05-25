@@ -1,6 +1,9 @@
+import logging
 import re
 import textwrap
 import os
+from queue import Empty
+
 import chardet
 from pdfminer.high_level import extract_text
 from core import config
@@ -82,7 +85,11 @@ class Pager(PathSpec):
         prev_window = ""
         last_annotated_token = 0
         while True:
-            last_annotated_token = ElmoPredict.q1.get()
+            try:
+                last_annotated_token = ElmoPredict.q1.get(timeout=60)
+            except Empty:
+                logging.error("broke up with windowing thread")
+                break
             ElmoPredict.q1.task_done()
 
             try:
