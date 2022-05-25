@@ -77,11 +77,11 @@ jobs:
 
       - name: StartBack
         run: |
-          ssh staging '   screen -L  -Logfile backend.log -S backend -dm bash -c " . venv/bin/activate; cd LayoutEagle/python; python3 backend.py"    '
+          ssh staging '   screen -L  -Logfile backend.log -S backend -dm bash -c " . venv/bin/activate; cd LayoutEagle/python; python3 backend.py"  &  '
           
       - name: StartWeb
         run: |
-          ssh staging 'sleep 300 ;  screen  -L  -Logfile frontend.log -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer_made/ ; yarn install; yarn add --dev typescript @types/node; yarn build ; yarn run start -p 8080 "     '
+          ssh staging 'sleep 300 ;  screen  -L  -Logfile frontend.log -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer_made/ ; yarn install; yarn add --dev typescript @types/node; yarn build ; yarn run start -p 8080 "   &  '
 
       - name: Glance at backend logs
         run: |
