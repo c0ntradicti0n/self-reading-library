@@ -1,3 +1,4 @@
+import {AppSettings} from "../../config/connection";
 
 export class ServerResource <T> {
     private fetch_allowed: any;
@@ -21,7 +22,7 @@ export class ServerResource <T> {
     
       request = async (method : String, url = '', data = {}) => {
       // Default options are marked with *
-        const response = await fetch(url, {
+        const response = await fetch(AppSettings.SAUSSAGEPOINT + url, {
             method: method.toUpperCase(),
             mode: 'cors', // no-cors, *cors, same-origin
             cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
