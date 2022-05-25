@@ -80,10 +80,21 @@ export default class ServerResource <T> {
             throw response.statusText
         }
 
-        const result = await response.json()
-        console.log({result})
+        let result = null
+        try {
+            result = await response.json()
+                    console.log({result})
 
-        return callback(result)
+        } catch (e) {
+            console.log("Did not get a json back")
+            result = null
+        }
+
+        try {
+            return callback(result)
+        } catch (e) {
+            console.log("no callback given")
+        }
     }
 
      fetch_one = async(id, callback: Function)  =>{
