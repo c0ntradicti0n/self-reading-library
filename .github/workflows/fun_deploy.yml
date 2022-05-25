@@ -90,11 +90,11 @@ jobs:
 
       - name: Glance at backend logs
         run: |
-          ssh staging ' cat backend.log     '
+          ssh staging '              set -x ;  cat backend.log     '
 
       - name: Glance at frontend logs
         run: |
-          ssh staging ' cat frontend.log     '
+          ssh staging '              set -x;  cat frontend.log     '
 
 
       - name: DocTest
