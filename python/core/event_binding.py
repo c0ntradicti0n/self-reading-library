@@ -92,7 +92,7 @@ class RestQueue:
 
                 self.workbook[id] = q[self.service_id].get(timeout=3)
             except Exception as e:
-                print (f"{self.workbook=}")
+                #print (f"{self.workbook=}")
                 logging.error("queue not ready")
 
         if id in self.workbook:
@@ -171,7 +171,7 @@ class RestQueue:
         form = req.get_media()
 
         file_part = req.get_param('file')
-        pprint(file_part)
+        #pprint(file_part)
 
         # Read image as binary
 

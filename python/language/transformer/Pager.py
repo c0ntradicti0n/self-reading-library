@@ -99,6 +99,7 @@ class Pager(PathSpec):
 
             if len(window) == 0:
                 self.logger.info("finishing?")
+                return
 
             ElmoPredict.q2.put((window, {**window_meta, "i_word": i_word, **meta, 'doc_id': meta['pdf_path']}))
 

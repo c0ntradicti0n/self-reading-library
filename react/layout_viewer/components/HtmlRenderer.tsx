@@ -1,7 +1,10 @@
 import {Component} from "react";
+import Nav from "./Nav";
+import ServerResource from "../resources/GeneralResource";
 
 interface Props {
   data: {value:any, meta:any}
+  service: ServerResource<any>
 }
 
 class HtmlRenderer extends Component<Props> {
@@ -12,6 +15,7 @@ class HtmlRenderer extends Component<Props> {
   render() {
     console.log("HtmlRenderer", this);
     return (<>
+          <Nav forward={this.props.service.ok}/>
 
           {this.props?.data.meta ?
               <style dangerouslySetInnerHTML={{

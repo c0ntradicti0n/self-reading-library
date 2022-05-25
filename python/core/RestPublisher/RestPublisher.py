@@ -239,7 +239,10 @@ class ??title!! extends React.Component<??Title!!Props, ??Title!!State> {
                             // @ts-ignore
         if ("??type!!" === "html") {
             console.log({html:this.state})
-            return <HtmlRenderer data={this.state}/>
+            return <HtmlRenderer 
+                data={this.state}
+                service={this.??title!!Service}
+            />
         }
         else return null
     }

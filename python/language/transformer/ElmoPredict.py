@@ -69,6 +69,9 @@ class ElmoPredict(PathSpec):
                 except Exception as e:
                     self.logger.error("Faking annotation because of error " + str(e),  stack_info=True)
                     annotation = [('O', w) for w in words]
+                    self.init_quees()
+                    continue
+
 
                 try:
                     try:
