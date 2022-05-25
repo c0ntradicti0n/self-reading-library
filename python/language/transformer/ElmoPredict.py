@@ -4,7 +4,7 @@ from texttable import Texttable
 from core.pathant.PathSpec import PathSpec
 from allennlp.models.model import Model
 from language.transformer.difference_predictor.difference_predictor import DifferenceTaggerPredictor
-from queue import Queue
+from queue import Queue, Empty
 
 q2 = Queue()
 q1 = Queue()
@@ -43,13 +43,18 @@ class ElmoPredict(PathSpec):
             q1.put(0)
 
             while True:
-                try:  # https://stackoverflow.com/questions/51700960/runtimeerror-generator-raised-stopiteration-every-time-i-try-to-run-app
-                    words, meta = q2.get()
-                    q2.task_done()
+                try:
+                    try:  # https://stackoverflow.com/questions/51700960/runtimeerror-generator-raised-stopiteration-every-time-i-try-to-run-app
+                        words, meta = q2.get(timeout=9)
+                        q2.task_done()
 
-                except StopIteration:
-                    self.logger.info("finished predicting")
-                    self.init_quees()
+                    except StopIteration:
+                        self.logger.info("finished predicting")
+                        self.init_quees()
+                        break
+                except Empty:
+                    self.logger.info("Text windowing stopped with length 0 of window 0")
+
                     break
 
                 if words == None:
