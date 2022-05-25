@@ -1,3 +1,4 @@
+import itertools
 import os
 
 import more_itertools
@@ -77,9 +78,9 @@ def model_in_the_loop(model_dir, collection_path, on_train, service_id, on_predi
                     }
             print(f"prediction args = {args=}")
             try:
-                results = list(queue_iter(service_id=service_id, gen=(dictize(on_predict(
+                results = itertools.islice(queue_iter(service_id=service_id, gen=(dictize(on_predict(
                     args
-                )))))
+                )))), 17)
                 pprint(results)
             except KeyboardInterrupt as e:
 
