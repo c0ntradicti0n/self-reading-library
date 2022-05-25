@@ -28,6 +28,10 @@ from language.layout2reading_order import Layout2ReadingOrder
 from language.transformer.ElmoDifference import ElmoDifference, ElmoDifferenceQueueRest, elmo_difference_pipe, elmo_difference_model_pipe, annotate_difference_elmo
 #from language.heuristic.heuristic_difference import HeurisiticalLogician
 
+from hanging_threads import start_monitoring
+
+monitoring_thread = start_monitoring(seconds_frozen=10, test_interval=100)
+
 def get_all_routes(api):
     routes_list = []
 
