@@ -28,8 +28,8 @@ class UnPager(PathSpec):
                 if "chars_and_char_boxes" in meta:
                     del meta['chars_and_char_boxes']
 
-                l_a = [iw[1] for iw in whole_meta['i_word']]
-                l_b = [jw[1] for jw in whole_annotation]
+                l_a = [iw[1] if iw[1] else '*' for iw in whole_meta['i_word']]
+                l_b = [jw[1] if jw[1] else '~' for jw in whole_annotation]
                 alignment, cigar = align(l_a, l_b)
 
                 print(alignment_table(alignment, l_a, l_b))
