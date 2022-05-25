@@ -67,7 +67,7 @@ class ElmoPredict(PathSpec):
                     annotation = self.predictor.predict_json({"sentence": words})
                     self.info(annotation)
                 except Exception as e:
-                    self.logger.error("Faking annotation because of error " + str(e), e)
+                    self.logger.error("Faking annotation because of error " + str(e),  stack_info=True)
                     annotation = [('O', w) for w in words]
 
                 try:

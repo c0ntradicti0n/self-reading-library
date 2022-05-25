@@ -45,13 +45,11 @@ jobs:
               killall screen
               rm -rf *.log
               rm -rf ./cache
-              #cp -r ./LayoutEagle/python/.layouteagle ./cache
+              cp -r ./LayoutEagle/python/.layouteagle ./cache
               rm -rf LayoutEagle
               git clone https://github.com/c0ntradicti0n/LayoutEagle.git 
           
-              #cp -r  ./cache ./LayoutEagle/python/.layouteagle
               #mkdir LayoutEagle/python/.layouteagle/collection
-              #tar -xf  .layouteagle-box-data-collection.tar.xz -C LayoutEagle/python/.layouteagle/collection
               
               python3 -m venv venv
               . venv/bin/activate
@@ -62,7 +60,14 @@ jobs:
               cd LayoutEagle
           
               mkdir python/.layouteagle
+              mkdir python/.layouteagle/text_data
+              mkdir python/.layouteagle/cache
+
+
               cp -R ~/../cloud/minimal_cache/. python/.layouteagle/
+              cp -R  ./cache/text_data/. ./LayoutEagle/python/.layouteagle/tex_data/
+              cp -R  ./cache/cache/. ./LayoutEagle/python/.layouteagle/cache/
+
               mkdir python/.layouteagle/prediction
               ls python/.layouteagle/
 
