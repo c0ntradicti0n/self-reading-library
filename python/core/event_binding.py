@@ -251,8 +251,18 @@ def queue_iter (service_id, gen):
             yield r
             print("yielded")
 
-            q[service_id].put_nowait(next(gen))
-            print("inserted new item")
+            for i in range(3):
+                print("insert some new sample in the queue")
+                try:
+                    new_val = next(gen)
+                except Exception as e:
+                    traceback.print_exc()
+                    # or
+                    print(sys.exc_info()[2])
+                    logging.error(e, exc_info=True)
+                    raise e
+
+                q[service_id].put_nowait(new_val)
 
 
     print("ende")

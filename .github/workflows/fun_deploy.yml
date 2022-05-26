@@ -47,7 +47,7 @@ jobs:
               killall screen
               rm -rf *.log
               rm -rf ./cache
-              cp -r ./LayoutEagle/python/.layouteagle ./cache
+              cp -R ./LayoutEagle/python/.layouteagle ./cache
               rm -rf LayoutEagle
               git clone https://github.com/c0ntradicti0n/LayoutEagle.git 
           
@@ -80,7 +80,7 @@ jobs:
           
               cp python/tokenization_layoutvm2_fast.py ../venv/lib/python3.8/site-packages/transformers/models/layoutlmv2/tokenization_layoutlmv2_fast.py
               
-              echo \" export class AppSettings {  public static SAUSSAGEPOINT = 'http://$SSH_HOST:8443'   } \" > react/layout_viewer/config/connection.ts
+              echo \" export class AppSettings {  public static SAUSSAGEPOINT = 'http://$SSH_HOST:443'   } \" > react/layout_viewer/config/connection.ts
               echo \"PORT=8443\" >> python/core/config.py
 
 

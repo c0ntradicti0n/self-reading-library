@@ -34,9 +34,13 @@ class UnPager(PathSpec):
 
                 for i_annotation, part_annotation in enumerate(whole_annotation):
                     l_b = [jw[1] if jw[1] else '~' for jw in part_annotation]
-                    alignment, cigar = align(l_a, l_b)
+                    try:
+                        alignment, cigar = align(l_a, l_b)
+                    except:
+                        logging.error("alignment failed")
+                        alignment = []
 
-                    print(alignment_table(alignment, l_a, l_b))
+                    print(alignment_table(alignment, l_a, l_b, info_b=lambda i_b: part_annotation[i_b]))
 
                     try:
                         for _i1, _i2 in alignment:

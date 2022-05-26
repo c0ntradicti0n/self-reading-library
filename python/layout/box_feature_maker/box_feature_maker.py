@@ -83,8 +83,12 @@ class BoxFeatureMaker(PathSpec):
             for element in page_layout:
                 if isinstance(element, LTTextContainer):
                     text = element.get_text()
-                    chars_and_char_boxes = [(char._text, char.bbox) for line in element._objs for char in line._objs if
-                                            isinstance(char, LTChar)]
+                    try:
+                        chars_and_char_boxes = [(char._text, char.bbox) for line in element._objs for char in line._objs if
+                                                isinstance(char, LTChar)]
+                    except AttributeError:
+                        logging.error(f"could get box for '{text}'")
+                        continue
                     label = determine_layout_label_from_text(text)
                     number_of_lines = len(element._objs) if hasattr(element, "_objs") else 0
                     features = BoxFeatureMaker.TextBoxData(

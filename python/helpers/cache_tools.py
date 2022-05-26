@@ -1,3 +1,4 @@
+import bz2
 import functools
 import itertools
 import json
@@ -6,6 +7,21 @@ from glob import glob
 import falcon
 import os
 import unittest
+
+# Pickle a file and then compress it into a file with extension
+from zmq.backend.cython.socket import cPickle
+
+
+def compressed_pickle(title, data):
+    with bz2.BZ2File(title + '.pbz2', 'w') as f:
+        cPickle.dump(data, f)
+
+
+# Load any compressed pickle file
+def decompress_pickle(file):
+    data = bz2.BZ2File(file, 'rb')
+    data = cPickle.load(data)
+    return data
 
 
 def file_persistent_cached_generator(
@@ -26,8 +42,10 @@ def file_persistent_cached_generator(
                 if_cached_then_forever = flags['if_cached_then_forever'] if 'if_cached_then_forever' in flags else False
                 dont_use_cache = flags['dont_use_cache'] if 'dont_use_cache' in flags else False
 
-                if_cache_then_finished = flags['dont_use_cache'] if 'dont_use_cache' in flags else if_cache_then_finished
-                if_cached_then_forever = flags['dont_use_cache'] if 'dont_use_cache' in flags else if_cached_then_forever
+                if_cache_then_finished = flags[
+                    'dont_use_cache'] if 'dont_use_cache' in flags else if_cache_then_finished
+                if_cached_then_forever = flags[
+                    'dont_use_cache'] if 'dont_use_cache' in flags else if_cached_then_forever
 
                 if dont_use_cache:
                     cache = {}
@@ -62,8 +80,6 @@ def file_persistent_cached_generator(
             except Exception as e:
                 logging.error(e, exc_info=True)
                 raise e
-
-
 
         def yield_cache(cache, cwd):
 
