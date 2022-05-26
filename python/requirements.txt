@@ -90,3 +90,4 @@ pycallgraph
 paired
 allennlp-models
 hanging_threads
+zmq
