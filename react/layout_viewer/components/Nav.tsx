@@ -5,6 +5,9 @@ import {Link} from "@mui/material";
 
 interface Props {
     forward: () => any
+    goto: (string) => any
+    upload: (form_data) => any
+
 }
 
 export default class Nav extends React.Component<Props, any> {
@@ -30,10 +33,12 @@ export default class Nav extends React.Component<Props, any> {
                         justifyContent: 'center',
 
                     }}>
-                        <form onSubmit={() => this.props.goto(this.state.whereTo)}>
+                        <form onSubmit={(e) => (typeof (e.target as HTMLTextAreaElement).value === "string") ?
+                            this.props.goto(this.state.whereTo) : this.props.upload( (e.target as HTMLTextAreaElement).value)}>
                             <input type="text" style={{
-                                margin: "10px",
+                                margin: "10px"
                             }}/>
+                            <input type="file" id="myfile" name="myfile"/>
                         </form>
                         <a href={"/library"}>Library</a>
                     </div>

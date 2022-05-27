@@ -16,12 +16,17 @@ class HtmlRenderer extends Component<Props> {
     render() {
         console.log("HtmlRenderer", this);
         return <>
-            <Nav forward={() => this.props.service.ok(null, "", {}, () => window.location.reload())
-            }/>
+            <Nav
+                forward={() => this.props.service.ok(null, "", {}, () => window.location.reload())
+
+            }       goto={(form_data) => this.props.service.fetch_one(form_data, () => console.log("will display content..."))}
+            upload={(form_data) => this.props.service.upload(new FormData(form_data), () => console.log("will display content..."))}/>
+
             <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                padding: "9em"
             }}>
                 {this.props?.data.meta ?
                     <style dangerouslySetInnerHTML={{
