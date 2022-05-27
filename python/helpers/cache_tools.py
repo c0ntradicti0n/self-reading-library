@@ -98,6 +98,8 @@ def file_persistent_cached_generator(
         def apply_and_cache(cache, cwd, param, no_cache=False, key=None):
             if isinstance(param[1], types.GeneratorType):
                 filtered_param = (param[0], filter_ant_step(param[1], cache, key=key))
+            else:
+                filtered_param = param
 
             generator = original_func(*filtered_param)
 
