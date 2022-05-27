@@ -52,7 +52,6 @@ logging.basicConfig(format="""%(asctime)s-%(levelname)s: %(message)s""", datefmt
 
 from GPUtil import showUtilization as gpu_usage
 import torch
-#from numba import cuda
 
 path_prefix = "./"
 

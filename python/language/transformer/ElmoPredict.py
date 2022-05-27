@@ -49,7 +49,7 @@ class ElmoPredict(PathSpec):
                         q2.task_done()
 
                     except StopIteration:
-                        self.logger.info("finished predicting")
+                        self.logger.info("finished predicting stopped by queue")
                         self.init_quees()
                         break
                 except Empty:
@@ -58,7 +58,7 @@ class ElmoPredict(PathSpec):
                     break
 
                 if words == None:
-                    self.logger.info("finished predicting")
+                    self.logger.info("finished predicting, words is None now")
                     break
 
                 try:
@@ -74,8 +74,7 @@ class ElmoPredict(PathSpec):
                 except Exception as e:
                     self.logger.error("Faking annotation because of error " + str(e),  stack_info=True)
                     annotation = [('O', w) for w in words]
-                    self.init_quees()
-                    continue
+                    consumed_tokens
 
 
                 try:
@@ -85,6 +84,9 @@ class ElmoPredict(PathSpec):
                     except StopIteration as e:
                         consumed_tokens = len(words)
 
+                    if consumed_tokens == 0:
+                        consumed_tokens = 100
+                        self.logger.info("empty prediction")
                     q1.put(consumed_tokens)
 
                     yield annotation, {

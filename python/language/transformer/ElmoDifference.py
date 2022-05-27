@@ -21,7 +21,10 @@ class ElmoDifference(PDF_AnnotatorTool):
         self.n = n
         self.debug = debug
 
-    @file_persistent_cached_generator(config.cache + os.path.basename(__file__) + '.json')
+    @file_persistent_cached_generator(
+        filename=config.cache + os.path.basename(__file__) + '.json',
+        key="html_path"
+    )
     def __call__(self, labeled_paths, *args, **kwargs):
 
         try:
@@ -57,6 +60,7 @@ elmo_difference_model_pipe = ant(
 
 )
 
+
 def annotate_uploaded_file(file):
     return elmo_difference_pipe(metaize(file))
 
@@ -66,16 +70,17 @@ ElmoDifferenceQueueRest = RestQueue(
     work_on_upload=annotate_uploaded_file
 )
 
+
 def on_predict(args):
     gen = elmo_difference_pipe(
         "https://arxiv.org",
         difference_model_path=args['best_model_path']
     )
-    #_ = next(gen)
+    # _ = next(gen)
     return gen
 
-def annotate_difference_elmo():
 
+def annotate_difference_elmo():
     model_in_the_loop(
         model_dir=config.ELMO_DIFFERENCE_MODEL_PATH,
         collection_path=config.ELMO_DIFFERENCE_COLLECTION_PATH,
@@ -86,7 +91,7 @@ def annotate_difference_elmo():
                 collection_step=args['training_rate']
             )
         ),
-    service_id="difference",
+        service_id="difference",
 
         on_predict=on_predict,
         training_rate_mode='size',

@@ -1,4 +1,6 @@
 import copy
+import os
+
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from core import config
@@ -10,6 +12,10 @@ class Layout2ReadingOrder(PathSpec):
         super().__init__(*args, **kwargs)
         pass
 
+    @file_persistent_cached_generator(
+        filename=config.cache + os.path.basename(__file__) + '.json',
+        key="html_path"
+    )
     def __call__(self, feature_meta, *args, **kwargs):
         for annotation, meta in feature_meta:
             used_label_is = [self.sort_by_label([(i,l) for i, l in enumerate(an[0]['labels']) if l in config.TEXT_LABELS]) for an in annotation]
@@ -21,6 +27,9 @@ class Layout2ReadingOrder(PathSpec):
             meta['used_text_boxes'] = sorted_texts
 
             enumerated_texts = self.enumerate_words(sorted_texts)
+            if 'df' in meta:
+                del meta['df']
+            del meta['chars_and_char_boxes']
             yield enumerated_texts, meta
 
     def sort_by_label(self, i_l):

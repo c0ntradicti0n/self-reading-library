@@ -1,7 +1,6 @@
 import React from 'react'
 import App from 'next/app'
 import * as glob from 'glob'
-import SideBar from '../components/SideBar'
 import '../src/App.css';
 
 
@@ -31,7 +30,6 @@ class MyApp extends App {
 
     return (
         <div id="comp-wrapp">
-          <SideBar />
           <Component {...this.props.pageProps} />
         </div>
     )

@@ -139,7 +139,7 @@ class Pager(PathSpec):
         start_i2 = 0
 
         consumed_tokens = 0
-
+        loop_count = 0
 
         while windowing:
 
@@ -150,6 +150,10 @@ class Pager(PathSpec):
                 except KeyError:
                     self.logger.error("error computing new beginning")
                     return
+            else:
+
+                logging.info("...")
+
 
             window = []
             sentences_j = 0
@@ -166,7 +170,17 @@ class Pager(PathSpec):
                 if SENTENCE_END_REGEX.match(w):
                     sentences_j = j + 1
 
+            if not window:
+                logging.info("giving zero text")
+                window = rest_text[:self.max_window]
+
             consumed_tokens = yield window, {}
+
+            if consumed_tokens == 0 and loop_count >0:
+                consumed_tokens = 123
+                logging.info("consuming more than 0 tokens")
+
+            loop_count += 1
 
     def pdf2htmlEX(self, pdf_filename, html_filename):
         assert (pdf_filename.endswith(".pdf"))

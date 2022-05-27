@@ -220,6 +220,8 @@ def queue_iter (service_id, gen):
         print("insert first some samples in the queue")
         try:
             new_val = next(gen)
+            q[service_id].put_nowait(new_val)
+
         except Exception as e:
             traceback.print_exc()
             # or
@@ -227,7 +229,6 @@ def queue_iter (service_id, gen):
             logging.error(e, exc_info=True)
             raise e
 
-        q[service_id].put_nowait(new_val)
 
     while True:
 
@@ -255,14 +256,13 @@ def queue_iter (service_id, gen):
                 print("insert some new sample in the queue")
                 try:
                     new_val = next(gen)
+                    q[service_id].put_nowait(new_val)
+
                 except Exception as e:
                     traceback.print_exc()
                     # or
                     print(sys.exc_info()[2])
                     logging.error(e, exc_info=True)
-                    raise e
-
-                q[service_id].put_nowait(new_val)
 
 
     print("ende")

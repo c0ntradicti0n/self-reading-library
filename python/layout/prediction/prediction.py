@@ -1,3 +1,4 @@
+from helpers.cache_tools import file_persistent_cached_generator
 from layout.imports import *
 from core import config
 from core.pathant.Converter import converter
@@ -12,6 +13,7 @@ class Prediction(PathSpec):
         self.model = None
         self.processor = None
         self.num_labels = num_labels
+
 
     def __call__(self, x_meta, *args, **kwargs):
         model_path = self.flags['layout_model_path']
@@ -67,7 +69,7 @@ class Prediction(PathSpec):
                         continue
                 else:
 
-                    self.logger.info(f"predicted {page_number=} with labels {box_predictions=}")
+                    self.logger.info(f"predicted {page_number=}/{len(dataset)-1} with {box_predictions=}")
 
                     prediction_meta = model_helpers.repaint_image_from_labels ((prediction, meta))
                     prediction_meta[0]['human_image'].save(f"{config.PREDICTION_PATH}/boxes_{page_number}.png")

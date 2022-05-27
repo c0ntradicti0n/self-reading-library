@@ -18,6 +18,7 @@ from core.layout_eagle import LayoutEagle
 from core.StandardConverter.ScienceTexScraper.scrape import ScienceTexScraper
 from core.StandardConverter.HTML2PDF import HTML2PDF
 from core.StandardConverter.PDF2HTML import PDF2HTML
+from language.topics import TopicsPublisher
 
 from layout.annotator.annotation import Annotator, AnnotationQueueRest
 from layout.upload_annotation.upload_annotation import UploadAnnotator
@@ -30,7 +31,7 @@ from language.transformer.ElmoDifference import ElmoDifference, ElmoDifferenceQu
 
 from hanging_threads import start_monitoring
 
-monitoring_thread = start_monitoring(seconds_frozen=10, test_interval=100)
+monitoring_thread = start_monitoring(seconds_frozen=30, test_interval=1000)
 
 def get_all_routes(api):
     routes_list = []
@@ -59,13 +60,11 @@ def create_app():
         '/latex': LayoutPublisher,
         '/difference': ElmoDifferenceQueueRest,
         '/difference/{id}': ElmoDifferenceQueueRest,
-
-        # '/topics': TopicsPublisher,
+        '/library': TopicsPublisher,
         '/ant': AntPublisher,
         '/cache': CachePublisher,
         '/annotation/{id}': AnnotationQueueRest,
         '/upload_annotation/{id}': UploadAnnotationQueueRest,
-
         '/config': ConfigRest,
     }
 

@@ -26,6 +26,7 @@ def decompress_pickle(file):
 
 def file_persistent_cached_generator(
         filename,
+        key = None,
         **kwargs):
     def decorator(original_func):
         standard_flags = kwargs
@@ -74,7 +75,7 @@ def file_persistent_cached_generator(
                     yield from yield_cache(cache, cwd)
                 else:
                     yield from yield_cache(cache, cwd)
-                    yield from apply_and_cache(cache, cwd, param, no_cache=dont_use_cache)
+                    yield from apply_and_cache(cache, cwd, param, no_cache=dont_use_cache, key=key)
 
                 os.chdir(cwd)
             except Exception as e:
@@ -93,8 +94,10 @@ def file_persistent_cached_generator(
                     os.chdir(cwd)
                     yield result
 
-        def apply_and_cache(cache, cwd, param, no_cache=False):
-            generator = original_func(*param)
+        def apply_and_cache(cache, cwd, param, no_cache=False, key=None):
+            filtered_param = (param[0], filter_ant_step(param[1], cache, key=key))
+
+            generator = original_func(*filtered_param)
 
             for result in generator:
                 try:
@@ -129,6 +132,11 @@ def unroll_cache(cache, cwd):
     for result in cache.items():
         os.chdir(cwd)
         yield result
+
+def filter_ant_step(gen, cache, key=None):
+    for value, meta in gen:
+        if (value if not key else meta[key]) not in cache:
+            yield value, meta
 
 
 def apply(cache, cwd, param):

@@ -23,10 +23,10 @@ class TopicsPublisher(RestPublisher, react):
                  *args,
                  **kwargs):
         super().__init__(*args, **kwargs, resource=Resource(
-            title="topics",
+            title="library",
             type="graph",
-            path="topics",
-            route="topics",
+            path="library",
+            route="library",
             access={"fetch": True, "read": True, "upload": True, "correct": True, "delete": True}))
 
         self.topics = None

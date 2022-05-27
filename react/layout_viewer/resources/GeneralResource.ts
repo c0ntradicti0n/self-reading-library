@@ -58,7 +58,7 @@ export default class ServerResource<T> {
             headers: {
                 ...(!is_file ? {'Content-Type': 'application/json'} : {}),
                 'API-Key': 'secret',
-                'Cache-Control': 'no-cache'
+                //'Cache-Control': 'no-cache'
             },
 
             //redirect: 'follow', // manual, *follow, error

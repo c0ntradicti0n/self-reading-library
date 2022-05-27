@@ -3,7 +3,7 @@ import numpy as np
 import spacy
 from spacy.lang.en.stop_words import STOP_WORDS
 
-nlp = spacy.load('en_core_web_md')
+nlp = spacy.load('en_core_web_trf')
 
 
 class TextRank4Keyword():
