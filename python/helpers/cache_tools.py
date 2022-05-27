@@ -3,6 +3,7 @@ import functools
 import itertools
 import json
 import logging
+import types
 from glob import glob
 import falcon
 import os
@@ -95,7 +96,8 @@ def file_persistent_cached_generator(
                     yield result
 
         def apply_and_cache(cache, cwd, param, no_cache=False, key=None):
-            filtered_param = (param[0], filter_ant_step(param[1], cache, key=key))
+            if isinstance(param[1], types.GeneratorType):
+                filtered_param = (param[0], filter_ant_step(param[1], cache, key=key))
 
             generator = original_func(*filtered_param)
 
