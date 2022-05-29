@@ -89,7 +89,6 @@ jobs:
       - name: StartServer
         run: |
             ssh staging '   screen -L  -Logfile backend_uwsgi.log -S backend -dm bash -c " . venv/bin/activate; cd LayoutEagle/python;         uwsgi wsgi.ini    "  &  '
-        
 
       - name: StartBack
         run: |
