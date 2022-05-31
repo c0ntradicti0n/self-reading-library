@@ -79,7 +79,7 @@ class Graph extends React.Component {
 
         console.log(this)
         return (
-            <div>Hello<ForwardedRefForceGraph3D
+            <div><ul><li>Click left to focus</li><li>Click right to navigate to that document</li></ul> <ForwardedRefForceGraph3D
                 ref={this.myRef}
                 graphData={this.props.data ? this.props.data : this.state.graph}
                 nodeLabel='name'
@@ -100,7 +100,7 @@ class Graph extends React.Component {
                 onNodeClick={(node) => this.handleClick(node)}
                 onNodeRightClick={(node) =>
                     Router.push({
-                        pathname: '/markup',
+                        pathname: '/difference/',
                         query: {...node}
                     })}
 

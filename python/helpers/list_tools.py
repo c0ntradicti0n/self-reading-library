@@ -53,6 +53,20 @@ def threewise(iterable):
     for i in range(1, l - 1):
         yield iterable[i - 1], iterable[i], iterable[i + 1]
 
+def unique(iterable, key=None):
+    collector = []
+    added=[]
+    for v in iterable:
+        if key:
+            k = key(v)
+            if k not in added:
+                collector.append(v)
+                added.append(k)
+        else:
+            if v not in added:
+                collector.append(v)
+                added.append(v)
+    return collector
 
 def nd_fractal(s_value, s_tuple, n=3, lense=1):
     """   [10, 40, 70] ->

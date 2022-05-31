@@ -13,13 +13,13 @@ from core.RestPublisher.Resource import Resource
 from core.RestPublisher.RestPublisher import RestPublisher
 from core.RestPublisher.react import react
 from core.StandardConverter.Dict2Graph import Dict2Graph
+from helpers.list_tools import unique
 from language.topics.TopicMaker import TopicMaker
 from core import config
 from helpers.cache_tools import file_persistent_cached_generator, uri_with_cache
 from helpers.nested_dict_tools import type_spec_iterable
 from core.pathant.Converter import converter
 from flask import jsonify, Blueprint
-
 
 bp = Blueprint('blueprint', __name__, template_folder='templates')
 
@@ -40,36 +40,27 @@ class TopicsPublisher(RestPublisher, react):
 
     reading_order_regex = regex.compile(" *\d+:(.*)")
 
-    """@file_persistent_cached_generator(
-        config.cache + os.path.basename(__file__).replace('.py', '') +
-        '.json',
-        if_cache_then_finished=True,
-        if_cached_then_forever=False)"""
-
     def __call__(self, documents):
-        documents = list(documents)
+        documents = unique(list(documents), key=lambda x: x[1]['html_path'])
         self.topic_maker = TopicMaker()
 
-        # print(len(list(zip(documents))))
         html_paths_json_paths_txt_paths, metas = list(zip(*documents))
 
         texts = [
             " ".join("\n".join([tb[0]
-                       for utb in meta["used_text_boxes"]
-                       for tb in utb]
-                      ).split()[:10])
+                                for utb in meta["used_text_boxes"]
+                                for tb in utb]
+                               ).split()[:10])
             for meta in metas
         ]
         paths = [meta["html_path"] for meta in metas]
 
         self.topics, text_ids = self.topic_maker(texts, paths)
 
-        with open( config.topics_dump, 'wb') as f:
+        with open(config.topics_dump, 'wb') as f:
             pickle.dump([self.topics, metas], f)
 
         yield self.topics, text_ids
-
-
 
     def on_get(self, req, resp):  # get all
         if os.path.exists(config.topics_dump):
@@ -85,7 +76,7 @@ class TopicsPublisher(RestPublisher, react):
 
             value, meta = list(zip(*list(self.ant("prediction", "topics.graph", if_cached_then_forever=True)([]))))
 
-            pprint(type_spec_iterable(value))
+        pprint(type_spec_iterable(value))
 
         resp.body = json.dumps([value, meta], ensure_ascii=False)
         resp.status = falcon.HTTP_OK

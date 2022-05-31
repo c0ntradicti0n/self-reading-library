@@ -157,7 +157,7 @@ class TopicMaker:
 
         titled_clustered_documents = dict()
         for topic_id, text_ids in topic_2_docids.items():
-            constructed_doc = " ".join([w.title() for id in text_ids for w in texts[id]]
+            constructed_doc = "".join([w.title() for id in text_ids for w in texts[id]]
                                        )
             #constructed_doc = remove_stopwords(stop_word_removal(constructed_doc.lower()))
 
