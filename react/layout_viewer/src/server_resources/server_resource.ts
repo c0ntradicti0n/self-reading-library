@@ -22,9 +22,9 @@ export class ServerResource <T> {
     
       request = async (method : String, url = '', data = {}) => {
       // Default options are marked with *
-        const response = await fetch(AppSettings.SAUSSAGEPOINT + url, {
+        const response = await fetch(AppSettings.SAUSSAGE_END_START_PATH + url, {
             method: method.toUpperCase(),
-            mode: 'cors', // no-cors, *cors, same-origin
+            mode: 'no-cors', // no-cors, *cors, same-origin
             cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
             credentials: 'same-origin', // include, *same-origin, omit
             headers: {

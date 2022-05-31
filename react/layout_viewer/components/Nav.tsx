@@ -17,12 +17,12 @@ export default class Nav extends React.Component<Props, any> {
 
     static async getInitialProps({query}) {
 
-        return {A: "HALLO!"}
+        return {A: "initial props nav"}
     }
 
     render() {
         return (
-            <div className="Nav__container" style={{position: "absolute", zIndex: 10000, width: "100%"}}>
+            <div className="Nav" style={{position: "absolute", zIndex: 10000, width: "100%"}}>
                 <div style={{float: "left"}}>
                     <Button variant="contained" onClick={() => this.props.forward()}>I have read it</Button>
                 </div>

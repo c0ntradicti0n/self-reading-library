@@ -70,7 +70,7 @@ def file_persistent_cached_generator(
                     except (IOError, ValueError):
                         cache = {}
 
-                if isinstance(param[1], list) and (not if_cache_then_finished and cache):
+                if len(param)>2 and isinstance(param[1], list) and (not if_cache_then_finished and cache):
                     yield from apply_and_cache(cache, cwd, param, no_cache=True)
                 elif if_cached_then_forever:
                     yield from yield_cache(cache, cwd)

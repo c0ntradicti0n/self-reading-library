@@ -1,4 +1,5 @@
 import json
+from pprint import pprint
 
 from core import config
 from core.RestPublisher.Resource import Resource
@@ -20,19 +21,14 @@ class PdfCssPublisher(RestPublisher):
         self.dir = config.markup_dir
         self.kind = kind
 
-        # pdf -> reading_order
-        #     -> reading_order.page
-        #     -> reading_order.page.difference
-        #     -> reading_order.page.difference
-        #     -> reading_order.difference
-        #     -> css.difference
-
     @uri_with_cache
     def on_post(self, req, resp):
-        print (f"KIN{self.kind}")
+        print (f"Annotating {self.kind}")
+
+        pprint(req)
+        pprint(resp)
 
         self.html_pipeline = self.ant("pdf", "htm")
-        self.css_pipeline = self.ant("pdf", f"css.{self.kind}", via='annotation')
 
         try:
             id = json.loads(req.stream.read())

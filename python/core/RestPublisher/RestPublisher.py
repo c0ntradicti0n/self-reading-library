@@ -233,8 +233,8 @@ class ??title!! extends React.Component<??Title!!Props, ??Title!!State> {
         }
         
                             // @ts-ignore
-        if ("??type!!" === "graph" && this.state.??title!!s)  
-            return <Graph data={this.state.??title!!s}/>
+        if ("??type!!" === "graph" && this.state.value)  
+            return <Graph data={this.state.value}/>
         
                             // @ts-ignore
         if ("??type!!" === "html") {

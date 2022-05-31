@@ -40,7 +40,7 @@ class TopicMaker:
                 self.nouns = [w.strip() for w in f.readlines()]
 
     def test(self):
-        self.nlp = spacy.load("en_core_web_md")
+        self.nlp = spacy.load("en_core_web_trf")
 
         logging.warning("Reading texts")
 
@@ -79,16 +79,10 @@ class TopicMaker:
         return texts, [{"text": text} for text in texts]
 
     def __call__(self, texts, meta, *args, **kwargs):
-        self.nlp = spacy.load("en_core_web_md")
-        self.elmo = Elmo(self.options_file, self.weight_file, 1, dropout=0)
-
-        texts = list(texts)
-
-        embeddings = self.embed(texts=texts)
+        self.nlp = spacy.load("en_core_web_trf")
+        embeddings = np.vstack([self.nlp(text)._.trf_data.tensors[1] for text in texts])
         topics = self.topicize_recursively(embeddings, meta, texts)
 
-        with open( config.topics_dump, 'wb') as f:
-            pickle.dump(topics, f)
         return topics, meta
 
     def topicize_recursively(self, embeddings, meta, texts, split_size=10, max_level=3, level=0):
@@ -125,43 +119,6 @@ class TopicMaker:
                 return topics
         return topics
 
-    def embed(self, texts):
-        logging.info("Topic modelling")
-
-        logging.warning("- getting embeddings")
-
-        character_ids = batch_to_ids(texts)
-
-        def chunks(lst, n):
-            """Yield successive n-sized chunks from lst."""
-            for i in range(0, len(lst), n):
-                yield lst[i:i + n]
-
-        Xs = []
-        chunks_ = list(chunks(character_ids, 30))
-
-        for n, chunk in enumerate(chunks_):
-            print(f" · {n + 1} of {len(chunks_)}")
-            embeddings = self.elmo(chunk)
-            X = embeddings['elmo_representations'][0].detach().numpy()
-            X = X.reshape(X.shape[0], -1)
-
-            Xs.append(X)
-
-            del embeddings
-            del X
-
-        X = np.vstack(Xs)
-        # print(X.shape)
-        logging.warning("sizing embeddings")
-
-        pca = decomposition.PCA(n_components=min(X.shape[0], 1000))
-        pca.fit(X)
-        X = pca.transform(X)
-
-        logging.warning("- cluster embeddings")
-        return X
-
     def cluster(self, embeddings):
         X = embeddings
 
@@ -183,7 +140,6 @@ class TopicMaker:
         for i in range(len(texts)):
             topic_2_docids[labels[i]].append(i)
 
-        # print(topic_2_docids)
         return topic_2_docids
 
     def make_keywords(self, topic_2_docids, texts, lookup=None):

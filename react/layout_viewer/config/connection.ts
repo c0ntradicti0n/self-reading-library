@@ -1,4 +1,4 @@
 
 export class AppSettings {
-    public static SAUSSAGEPOINT = "http://localhost:7789"
+    public static SAUSSAGE_END_START_PATH = "http://localhost:7789"
 }

@@ -48,7 +48,7 @@ export default class ServerResource<T> {
 
     request = async (method: String, data = {}, callback: Function, is_file = false) => {
         // Default options are marked with *
-        console.log("URL", AppSettings.SAUSSAGEPOINT + this.route + this.id, callback)
+        console.log("URL", AppSettings.SAUSSAGE_END_START_PATH + this.route + this.id, callback)
 
         var fetch_init = {
             method: method.toUpperCase(),
@@ -59,6 +59,7 @@ export default class ServerResource<T> {
                 ...(!is_file ? {'Content-Type': 'application/json'} : {}),
                 'API-Key': 'secret',
                 //'Cache-Control': 'no-cache'
+                'origin': "localhost"
             },
 
             //redirect: 'follow', // manual, *follow, error
@@ -74,7 +75,7 @@ export default class ServerResource<T> {
         try {
             const response = await fetch(
                 // @ts-ignore
-                AppSettings.SAUSSAGEPOINT + this.route + this.id, fetch_init)
+                AppSettings.SAUSSAGE_END_START_PATH + this.route + this.id, fetch_init)
 
 
             if (!response.ok) {
@@ -87,7 +88,7 @@ export default class ServerResource<T> {
                 console.log({result})
 
             } catch (e) {
-                console.log("Did not get a json back")
+                console.log("Did not get a json back", e)
                 result = null
             }
 

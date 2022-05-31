@@ -5,8 +5,6 @@ import Router, {withRouter} from 'next/router'
 import window from 'global'
 
 
-
-
 // Having enourmous problems with these imports: one dynamic as recommended in the internet
 const ForceGraph3D = dynamic(
     () => import('./ForceGraph3d.js'),
@@ -35,7 +33,7 @@ class Graph extends React.Component {
 
         console.log(props)
         this.state = {
-            graph:  {
+            graph: {
                 "nodes": [
                     {
                         "id": "id1",
@@ -79,9 +77,9 @@ class Graph extends React.Component {
 
     render() {
 
-        console.log(this, this.props.data.length ? this.props.data : this.state.graph, this.props.data, this.state.graph)
+        console.log(this)
         return (
-            <ForwardedRefForceGraph3D
+            <div>Hello<ForwardedRefForceGraph3D
                 ref={this.myRef}
                 graphData={this.props.data ? this.props.data : this.state.graph}
                 nodeLabel='name'
@@ -106,7 +104,9 @@ class Graph extends React.Component {
                         query: {...node}
                     })}
 
-            />)
+            />
+            </div>
+        )
     }
 }
 
