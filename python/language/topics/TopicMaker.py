@@ -136,31 +136,20 @@ class TopicMaker:
         return labels
 
     def labels2docs(self, texts, labels):
-        topic_2_docids = defaultdict(list)
+        topic_2_doc_ids = defaultdict(list)
         for i in range(len(texts)):
-            topic_2_docids[labels[i]].append(i)
+            topic_2_doc_ids[labels[i]].append(i)
 
-        return topic_2_docids
+        return topic_2_doc_ids
 
     def make_keywords(self, topic_2_docids, texts, lookup=None):
         if not lookup:
             lookup = texts
 
-        stop_words = stopwords.words()
-
-        def stop_word_removal(x):
-            tokens = x.split()
-
-            return ' '.join([w for w in tokens
-                             if (not w in stop_words)
-                             and (w in self.nouns)])
-
         titled_clustered_documents = dict()
         for topic_id, text_ids in topic_2_docids.items():
             constructed_doc = "".join([w.title() for id in text_ids for w in texts[id]]
                                        )
-            #constructed_doc = remove_stopwords(stop_word_removal(constructed_doc.lower()))
-
             tr4w = TextRank4Keyword()
             tr4w.analyze(constructed_doc, candidate_pos=['NOUN', 'PROPN'], window_size=4, lower=False)
             keywords = tr4w.get_keywords(10)
@@ -168,8 +157,8 @@ class TopicMaker:
             try:
                 titled_clustered_documents[tuple(keywords) if keywords else ("no keywords",)] = \
                         [lookup[id] for id in text_ids]
-            except:
-                logging.error("ERROR")
+            except Exception as e:
+                logging.error("Error making keywords", exc_info=True)
         return titled_clustered_documents
 
     def numpy_fillna(self, data, fill_value=0):
