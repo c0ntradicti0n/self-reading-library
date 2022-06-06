@@ -1,3 +1,4 @@
+import itertools
 import os
 from pprint import pprint
 from time import sleep
@@ -18,6 +19,8 @@ from core.layout_eagle import LayoutEagle
 from core.StandardConverter.ScienceTexScraper.scrape import ScienceTexScraper
 from core.StandardConverter.HTML2PDF import HTML2PDF
 from core.StandardConverter.PDF2HTML import PDF2HTML
+from helpers.list_tools import metaize
+from helpers.model_tools import TRAINING_RATE
 from language.topics.TopicsPublisher import TopicsPublisher
 
 from layout.annotator.annotation import Annotator, AnnotationQueueRest
@@ -117,6 +120,15 @@ if __name__ == "__main__":
     layout.start()
     difference_elmo = threading.Thread(target=annotate_difference_elmo)
     difference_elmo.start()
+
+
+    def fill_library():
+        list(itertools.islice(elmo_difference_pipe(
+            "https://arxiv.org"
+        ), 50))
+
+    fill_library_thread = threading.Thread(target=fill_library).start()
+
     """difference_sokrates = threading.Thread(target=annotate_difference_sokrates)
     difference_sokrates.start()
     difference_gpt3 = threading.Thread(target=write_difference_gpt3)

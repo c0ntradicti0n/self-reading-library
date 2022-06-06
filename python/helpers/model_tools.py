@@ -26,6 +26,7 @@ def find_best_model(model_dir):
     print(scores, f" {best_model_path =}")
     return best_model_path, scores
 
+TRAINING_RATE = {}
 
 def model_in_the_loop(model_dir, collection_path, on_train, service_id, on_predict, training_rate_mode='ls',
                       training_rate_file=None):
@@ -37,6 +38,8 @@ def model_in_the_loop(model_dir, collection_path, on_train, service_id, on_predi
     loops = []
 
     while True:
+
+        TRAINING_RATE['service_id'] = service_id
         samples_files = os.listdir(collection_path)
 
         if training_rate_mode == 'ls':
