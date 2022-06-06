@@ -133,9 +133,16 @@ if __name__ == "__main__":
 
 
     def fill_library():
-        list(itertools.islice(elmo_difference_pipe(
-            "https://arxiv.org"
-        ), 100))
+        x = None
+        while not x:
+            try:
+                x = list(itertools.islice(elmo_difference_pipe(
+                    "https://arxiv.org"
+                ), 100))
+            except Exception as e:
+                logging.error("Geeting first 50 threw", exc_info=True)
+
+                continue
 
 
     fill_library_thread = threading.Thread(target=fill_library).start()
