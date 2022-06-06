@@ -6,8 +6,6 @@ import logging
 from falcon_multipart.middleware import MultipartMiddleware
 from wsgiref import simple_server
 import threading
-from traceback_with_variables import activate_by_import
-
 from core import config
 from core.RestPublisher.DifferencePublisher import DifferencePublisher
 from core.StandardConverter import PATH2HTML
