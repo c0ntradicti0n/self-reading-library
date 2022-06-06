@@ -20,7 +20,7 @@ from core.pathant.Filter import Filter
 
 OUT_OF_THE_BOX = "OUT_OF_THE_BOX"
 class PathAnt:
-    def __init__(self, necessary_paths={config.hidden_folder: ["tex_data", "cache", "log"]}):
+    def __init__(self, necessary_paths={config.hidden_folder: ["tex_data", "cache", "log", "topics"]}):
         make_dirs_recursive(necessary_paths)
         self.G = nx.DiGraph()
 

@@ -1,20 +1,12 @@
 import logging
 import os
-import pickle
 from collections import defaultdict
 import nltk
-from nltk.corpus import stopwords
-from sklearn import mixture, decomposition
-
+from sklearn import mixture
 from core import config
-
 from nltk.corpus import wordnet as wn
 import numpy as np
-
 import spacy
-
-from allennlp.modules.elmo import Elmo, batch_to_ids
-
 from core.StandardConverter.Dict2Graph import Dict2Graph
 from language.topics.TextRank4Keywords import TextRank4Keyword
 
@@ -82,7 +74,6 @@ class TopicMaker:
         self.nlp = spacy.load("en_core_web_trf")
         embeddings = np.vstack([self.nlp(text)._.trf_data.tensors[1] for text in texts])
         topics = self.topicize_recursively(embeddings, meta, texts)
-
         return topics, meta
 
     def topicize_recursively(self, embeddings, meta, texts, split_size=10, max_level=3, level=0):
@@ -91,7 +82,6 @@ class TopicMaker:
         topic_ids_2_doc_ids = self.labels2docs(texts=texts, labels=labels)
         keywords = self.make_keywords(topic_2_docids=topic_ids_2_doc_ids, texts=texts, lookup=meta)
         topics = self.make_titles(keywords)
-
 
         if max_level == level:
             return topics

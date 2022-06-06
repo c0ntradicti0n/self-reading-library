@@ -68,8 +68,8 @@ class Prediction(PathSpec):
                         self.logger.error(f"predicted less labels than textfields on the page, continuing!")
                         continue
                 else:
-
-                    self.logger.info(f"predicted {page_number=}/{len(dataset)-1} with {box_predictions=}")
+                    pagenumber = page_number + 1
+                    self.logger.info(f"predicted {pagenumber=}/{len(dataset)-1} with {box_predictions=}")
 
                     prediction_meta = model_helpers.repaint_image_from_labels ((prediction, meta))
                     prediction_meta[0]['human_image'].save(f"{config.PREDICTION_PATH}/boxes_{page_number}.png")

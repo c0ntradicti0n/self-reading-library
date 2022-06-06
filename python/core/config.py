@@ -141,7 +141,7 @@ page_margin_bottom = 0.06
 page_margin_top = 0.15
 
 pdf_dir = "../test/"
-topics_dump = "./topics.pickle"
+topics_dump = hidden_folder + "/topics/topics.pickle"
 markup_dir = pdf_dir
 markup_suffix = "pdflayout.html"
 
@@ -196,6 +196,8 @@ COLLECTION_PATH = hidden_folder + "collection/"
 LABELS = ['NONE', 'c1', 'c2', 'c3', 'wh', 'h', 'pn', 'fn', 'fg', 'tb']
 
 TEXT_LABELS = ['c1', 'c2', 'c3', 'wh']
+TITLE = ['h']
+
 
 label2id = {t: i for i, t in enumerate(LABELS)}
 label2color = {'c1': 'blue',

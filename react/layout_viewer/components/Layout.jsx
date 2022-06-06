@@ -2,7 +2,8 @@ import * as React from 'react'
 import Link from 'next/link'
 import Head from 'next/head'
 import Graph from "./Graph";
-
+import FlutterDashIcon from '@mui/icons-material/FlutterDash';
+import styled from 'styled-components'
 
 const layoutStyle = {
     margin: 20,
@@ -10,6 +11,11 @@ const layoutStyle = {
     border: '1px solid #DDD',
     display: "flex"
 }
+
+
+const Lib = styled.p`
+  background: 'yellow';
+`;
 
 export default class Layout extends React.Component {
     render() {
@@ -22,17 +28,27 @@ export default class Layout extends React.Component {
                 <meta name="viewport" content="initial-scale=1.0, width=device-width"/>
             </Head>
             <header>
-                <nav>
-                    {this.props.pages?.map((page, index) =>
-                        <> <Link href={"/" + page} key={index}>
-                            <a>{page}</a>
-                        </Link>) {' '} </>)
-                    }
-                </nav>
+                <ul>
+                    <Lib><FlutterDashIcon/><Link href="/library">universe of documents</Link></Lib>
+                    <Lib><FlutterDashIcon/><Link href="/difference">preread document</Link></Lib>
+                    <Lib><FlutterDashIcon/><Link href="/birds">
+                        <a>Birds Example</a>
+                    </Link></Lib>
+                    <Lib><FlutterDashIcon/><Link href="/boxes">
+                        <a>Boxes Example</a>
+                    </Link></Lib>
+                </ul>
+                {/*this.props.pages?.map((page, index) =>
+                    <> <Link href={"/" + page} key={index}>
+                        <a>{page}</a>
+                    </Link> {' '} </>)
+                */}
             </header>
-            {/*<Graph input={this.props.pages}></Graph>*/}
 
-            {this.props.children}
+
+            {
+                this.props.children
+            }
         </div>)
     }
 

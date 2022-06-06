@@ -55,16 +55,20 @@ class TopicsPublisher(RestPublisher, react):
         ]
         paths = [meta["html_path"] for meta in metas]
 
-        self.topics, text_ids = self.topic_maker(texts, paths)
+        self.topics, text_ids = self.topic_maker(texts, meta=metas)
 
-        with open(config.topics_dump, 'wb') as f:
+        with open(config.topics_dump + f"_{len(documents)}", 'wb') as f:
             pickle.dump([self.topics, metas], f)
 
         yield self.topics, text_ids
 
     def on_get(self, req, resp):  # get all
-        if os.path.exists(config.topics_dump):
-            with open(config.topics_dump, mode="rb") as f:
+        documents = unique(list(self.ant("prediction", "reading_order", if_cached_then_forever=True)([]))
+                           , key=lambda x: x[1]['html_path'])
+
+        path = config.topics_dump + f"_{len(documents)}"
+        if os.path.exists(path):
+            with open(path, mode="rb") as f:
                 d2g = Dict2Graph
                 topics, meta = pickle.load(f)
                 print("TOPICS")

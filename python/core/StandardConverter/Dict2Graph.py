@@ -11,7 +11,7 @@ import networkx as nx
 @converter('dict', 'graph')
 class Dict2Graph(Ant):
     def __init__(self, debug=True, *args, n=15, **kwargs):
-        super().__init__(*args, cached= cache_flow.iterate, **kwargs)
+        super().__init__(*args, cached=cache_flow.iterate, **kwargs)
         self.n = n
         self.debug = debug
 
@@ -23,8 +23,8 @@ class Dict2Graph(Ant):
             yield from [(k, z) for k, v in dict_list.items() for y in list(self.rec_items(v)) for z in y]
         elif isinstance(dict_list, (list, set, tuple, ndarray)):
             yield from [list(self.rec_items(e)) for e in dict_list]
-        else: yield dict_list
-
+        else:
+            yield dict_list
 
     def to_graph_dict(self, topics, fun=None):
         from collections import Mapping
@@ -39,7 +39,11 @@ class Dict2Graph(Ant):
             if isinstance(dl, (list, set)):
                 for l in dl:
                     dig.add_edge(v, n)
-                    dig.add_node(n, attr=l)
+                    if isinstance(l, dict):
+                        attr = l
+                    else:
+                        attr = {'attr': l}
+                    dig.add_node(n, **attr)
                     n += 1
                 continue
             for nv, nd in dl.items():
@@ -50,12 +54,14 @@ class Dict2Graph(Ant):
         ddic = nx.to_dict_of_dicts(dig)
         levels = 3
         nodes = [{'id': k,
-                  'name': dig.nodes[k]['attr'] if 'attr' in dig.nodes[k]  else k,
-                  #'attr': ,
-                  'val': 2 ** (levels - 1) if v else 2 ** (levels - 2)}
+                  'name': dig.nodes[k]['attr'] if 'attr' in dig.nodes[k] else k,
+                  'val': 2 ** (levels - 1) if v else 2 ** (levels - 2),
+                  'title': dig.nodes[k]['title'] if 'title' in dig.nodes[k] else None,
+                  'color': dig.nodes[k]['color'] if 'color' in dig.nodes[k] else 'white'
+                  }
 
                  for k, v in ddic.items()] \
-                + [{'id': "ROOT", 'name': "root", 'val': 2 ** (levels)}]
+                + [{'id': "ROOT", 'name': "root", 'color': 'red', 'val': 2 ** (levels)}]
 
         center_links = [{'source': "ROOT", 'target': k}
                         for k, v in ddic.items() if list(v.items())]
