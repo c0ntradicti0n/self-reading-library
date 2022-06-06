@@ -67,7 +67,7 @@ jobs:
 
 
               cp -R ~/../cloud/minimal_cache/. python/.layouteagle/
-              cp -R  ./cache/text_data/. ./LayoutEagle/python/.layouteagle/tex_data/
+              cp -R  ./cache/tex_data/. ./LayoutEagle/python/.layouteagle/tex_data/
               cp -R  ./cache/cache/. ./LayoutEagle/python/.layouteagle/cache/
 
               mkdir python/.layouteagle/prediction
