@@ -21,14 +21,12 @@ class PDF2HTML(PDF_AnnotatorTool):
             path, pdf_filename, _, _  = get_path_filename_extension(pdf_path)
             path, html_filename, _, _ = get_path_filename_extension(html_path)
 
-            os.chdir(path)
             try:
                 self.pdf2htmlEX(pdf_filename, html_filename)
                 meta['html_path'] = html_path
                 meta['pdf_path'] = pdf_path
                 meta['html_filename'] = html_filename
                 meta['pdf_filename'] = pdf_filename
-                os.chdir(self.cwd)
 
                 yield html_path, meta
             except FileNotFoundError as e:

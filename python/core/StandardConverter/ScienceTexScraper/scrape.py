@@ -41,7 +41,6 @@ class ScienceTexScraper(PathSpec):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.logger.info("navigating backt to " + self.cwd)
-        os.chdir(self.cwd)
 
     @file_persistent_cached_generator(
         config.cache + 'scraped_tex_paths.json',
@@ -97,7 +96,12 @@ class ScienceTexScraper(PathSpec):
                 os.system(f"mkdir -p {unpack_path} & "
                           f"tar -zxvf {tar_gz_path} -C {unpack_path}/")
                 tex_files = glob.glob(path + "/*" + self.path_spec._to)
-                yield from [(tex_file, {'meta':{'url': url}}) for tex_file in tex_files]
+                pdf_files = glob.glob(path + "/*.pdf")
+
+                if pdf_files:
+                    yield from [(pdf, {'meta':{'url': url}}) for pdf in pdf_files]
+                else:
+                    yield from [(tex, {'meta':{'url': url}}) for tex in tex_files]
 
         # if not enough, random surf further
         for href in hrefs:

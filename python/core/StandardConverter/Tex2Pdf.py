@@ -8,6 +8,7 @@ import subprocess
 from threading import Timer
 from regex import regex
 
+
 @converter("tex", "pdf")
 class Tex2Pdf(PathSpec):
     def __init__(self, timout_sec=10, *args, **kwargs):
@@ -18,18 +19,12 @@ class Tex2Pdf(PathSpec):
     def __call__(self, arg_meta, *args, **kwargs):
         for tex, meta in arg_meta:
             if not 'labeled' in tex:
-                if pdf_path:=self.compiles(tex):
+                if pdf_path := self.compiles(tex):
                     yield pdf_path, meta
-
-
 
     def compiles(self, tex_file_path, n=1, clean=False):
         path, filename, extension, filename_without_extension = get_path_filename_extension(tex_file_path)
-        cwd = os.getcwd()
-        try:
-            os.chdir(path)
-        except:
-            raise
+
         if clean:
             subprocess.run(['rm', '*.pdf.html'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             subprocess.run(['rm', '*.pdf'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -41,8 +36,9 @@ class Tex2Pdf(PathSpec):
                 ['pdflatex',
                  '-halt-on-error',
                  '-file-line-error',
-                 filename
-                 ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                 f'-output-directory={path}',
+                  filename
+                 ], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             timer = Timer(self.timeout_sec, process.kill)
             try:
                 timer.start()
@@ -60,20 +56,16 @@ class Tex2Pdf(PathSpec):
                 if line_number_match:
                     line_number = int(line_number_match.groups(1)[0])
                     try:
-                        with open(filename) as f:
+                        with open(path + "/" + filename) as f:
                             lines = f.readlines()
 
                     except UnicodeDecodeError:
                         self.path_spec.logger.error("Could not read latex file because of encoding")
-
-                        os.chdir(cwd)
                         break
                     faulty_code = "\n".join(lines[max(0, line_number - 1):
                                                   min(len(lines), line_number + 1)])
                     self.path_spec.logger.error(f'  --->  see file {tex_file_path}: """\n{faulty_code}"""')
-                os.chdir(cwd)
                 return None
-        os.chdir(cwd)
 
         if process.returncode != 0:
             print(errors)

@@ -114,15 +114,24 @@ def file_persistent_cached_generator(
                     if no_cache or result_string not in cache:
                         content, meta = result
 
-                        os.chdir(cwd)
+                        done = False
+                        while not done:
+                            try:
+                                os.chdir(cwd)
 
-                        if os.path.exists(filename):
-                            append_write = 'a'  # append if already exists
-                        else:
-                            append_write = 'w'  # make a new file if not
+                                if os.path.exists(filename):
+                                    append_write = 'a'  # append if already exists
+                                else:
+                                    append_write = 'w'  # make a new file if not
 
-                        with open(filename, append_write) as f:
-                            f.write(result_string)
+                                with open(filename, append_write) as f:
+                                    f.write(result_string)
+
+                            except FileNotFoundError:
+                                logging.error("multithreading file not found error...")
+                                continue
+                            done = True
+
                         os.chdir(cwd)
                     yield content, meta
                 except Exception as e:
