@@ -56,6 +56,7 @@ class Pager(PathSpec):
 
         return (html_path, reading_order_path, feat_path)
 
+
     def __call__(self, paths, *args, **kwargs):
         for texts, meta in paths:
             pdf_path, reading_order_path, _ = self.run_pdf2htmlEX(meta['html_path'], meta)

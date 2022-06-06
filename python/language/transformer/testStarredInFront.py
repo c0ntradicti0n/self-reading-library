@@ -1,9 +1,9 @@
-from core.StandardConverter.ReadingOrder2Css import ReadingOrder2Css
+from language.PredictionAlignment2Css import PredictionAlignment2Css
 from core.pathant.PathAnt import PathAnt
 from language.transformer.ElmoDifferencePredict import ElmoDifferencePredict
 from language.transformer.UnPager import UnPager
 
-a = ReadingOrder2Css
+a = PredictionAlignment2Css
 b = ElmoDifferencePredict
 c = UnPager
 

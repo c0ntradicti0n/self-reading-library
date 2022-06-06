@@ -14,7 +14,7 @@ from core.RestPublisher.RestPublisher import RestPublisher
 from core.RestPublisher.react import react
 from core.StandardConverter.Dict2Graph import Dict2Graph
 from helpers.list_tools import unique
-from language.topics.TopicMaker import TopicMaker
+from topics.TopicMaker import TopicMaker
 from core import config
 from helpers.cache_tools import file_persistent_cached_generator, uri_with_cache
 from helpers.nested_dict_tools import type_spec_iterable

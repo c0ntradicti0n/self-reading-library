@@ -3,29 +3,12 @@ import os
 import sys
 
 from helpers.list_tools import metaize
-from layout.latex.LayoutReader.feature2features import Feature2Features
-from layout.latex.LayoutReader.feature_label_assigner import FeatureAssigner
 from layout.training.training import Training
 
 sys.path.append(".")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from core import config
 from core.pathant.PathAnt import PathAnt
-from core.StandardConverter.ScienceTexScraper.scrape import ScienceTexScraper
-from layout.box_feature_maker.box_feature_maker import BoxFeatureMaker
-from core.StandardConverter.HTML2PDF import HTML2PDF
-from core.StandardConverter.PDF2ETC import PDF2ETC
-from core.StandardConverter.PDF2HTML import PDF2HTML
-from core.StandardConverter.Dict2Graph import Dict2Graph
-from core.StandardConverter.ReadingOrder2Css import ReadingOrder2Css
-from core.pathant.PathAnt import PathAnt
-from language.transformer.Pager import Pager
-from language.transformer.UnPager import UnPager
-from core.StandardConverter.Tex2Pdf import Tex2Pdf
-from layout.annotator import annotation, collection
-from layout.prediction import prediction
-from layout.training import training
-from layout.upload_annotation.upload_annotation import UploadAnnotator
 
 Training
 class LayoutEagle:

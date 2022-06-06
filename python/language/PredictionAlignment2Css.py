@@ -8,7 +8,7 @@ from core.pathant.PathSpec import PathSpec
 import pandas as pd
 
 @converter("reading_order.*", 'css.*')
-class ReadingOrder2Css(PathSpec):
+class PredictionAlignment2Css(PathSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         pass

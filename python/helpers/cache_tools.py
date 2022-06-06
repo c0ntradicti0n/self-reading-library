@@ -105,7 +105,8 @@ def file_persistent_cached_generator(
 
             for result in generator:
                 try:
-                    if result[0] in cache:
+
+                    if key and result[1][key] in cache:
                         yield result[0], cache[result[0]]
                         continue
 

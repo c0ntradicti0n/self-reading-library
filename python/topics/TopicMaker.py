@@ -8,7 +8,7 @@ from nltk.corpus import wordnet as wn
 import numpy as np
 import spacy
 from core.StandardConverter.Dict2Graph import Dict2Graph
-from language.topics.TextRank4Keywords import TextRank4Keyword
+from topics.TextRank4Keywords import TextRank4Keyword
 
 
 class TopicMaker:

@@ -30,6 +30,9 @@ class Prediction(PathSpec):
 
             dataset = Dataset.from_pandas(df.loc[:, df.columns != 'chars_and_char_boxes'])
 
+            if len(dataset) > config.MAX_PAGES_PER_DOCUMENT:
+                continue
+
             for page_number in range(len(dataset)-1):
                 example = dataset[page_number:page_number + 1]
 

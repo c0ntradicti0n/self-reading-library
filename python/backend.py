@@ -11,7 +11,6 @@ from traceback_with_variables import activate_by_import
 from core.StandardConverter import PATH2HTML
 from core.config import PORT
 from core.pathant.PathAnt import PathAnt
-from controlflow import CachePublisher
 
 from core.pathant.AntPublisher import AntPublisher
 from core.pathant.ConfigRest import ConfigRest
@@ -21,15 +20,15 @@ from core.StandardConverter.HTML2PDF import HTML2PDF
 from core.StandardConverter.PDF2HTML import PDF2HTML
 from helpers.list_tools import metaize
 from helpers.model_tools import TRAINING_RATE
-from language.topics.TopicsPublisher import TopicsPublisher
+from topics.TopicsPublisher import TopicsPublisher
 
 from layout.annotator.annotation import Annotator, AnnotationQueueRest
 from layout.upload_annotation.upload_annotation import UploadAnnotator
 from layout.upload_annotation.upload_annotation import UploadAnnotator
 from layout.annotation_thread import layout_annotate_train_model, UploadAnnotationQueueRest, sample_pipe, model_pipe, \
     upload_pipe
-
-from language.layout2reading_order import Layout2ReadingOrder
+from language.PredictionAlignment2Css import PredictionAlignment2Css
+from layout.Layout2ReadingOrder import Layout2ReadingOrder
 from language.transformer.ElmoDifference import ElmoDifference, ElmoDifferenceQueueRest, elmo_difference_pipe, \
     elmo_difference_model_pipe, annotate_difference_elmo
 # from language.heuristic.heuristic_difference import HeurisiticalLogician
@@ -54,7 +53,7 @@ def get_all_routes(api):
 
 
 def create_app():
-    # from language.topics.TopicsPublisher import TopicsPublisher
+    # from topics.TopicsPublisher import TopicsPublisher
 
     from language.transformer.ElmoDifference import ElmoDifferenceQueueRest
     import falcon
@@ -63,19 +62,25 @@ def create_app():
     from layout.annotation_thread import layout_annotate_train_model
 
     publishing = {
-        '/latex': LayoutPublisher,
-        '/difference': ElmoDifferenceQueueRest,
-        '/difference/{id}': ElmoDifferenceQueueRest,
-        '/library': TopicsPublisher,
-        '/ant': AntPublisher,
-        '/cache': CachePublisher,
-        '/annotation/{id}': AnnotationQueueRest,
-        '/upload_annotation/{id}': UploadAnnotationQueueRest,
-        '/config': ConfigRest,
-    }
+        '/ant':
+            AntPublisher,
 
-    le = LayoutEagle()
-    # le.test_info()
+        # difference
+        '/difference':
+            ElmoDifferenceQueueRest,
+        '/difference/{id}':
+            ElmoDifferenceQueueRest,
+
+        # topics
+        '/library':
+            TopicsPublisher,
+
+        # layout
+        '/annotation/{id}':
+            AnnotationQueueRest,
+        '/upload_annotation/{id}':
+            UploadAnnotationQueueRest,
+    }
 
     from falcon_cors import CORS
 
@@ -120,6 +125,10 @@ if __name__ == "__main__":
     layout.start()
     difference_elmo = threading.Thread(target=annotate_difference_elmo)
     difference_elmo.start()
+    """difference_sokrates = threading.Thread(target=annotate_difference_sokrates)
+    difference_sokrates.start()
+    difference_gpt3 = threading.Thread(target=write_difference_gpt3)
+    difference_gpt3.start()"""
 
 
     def fill_library():
@@ -127,12 +136,8 @@ if __name__ == "__main__":
             "https://arxiv.org"
         ), 50))
 
-    fill_library_thread = threading.Thread(target=fill_library).start()
 
-    """difference_sokrates = threading.Thread(target=annotate_difference_sokrates)
-    difference_sokrates.start()
-    difference_gpt3 = threading.Thread(target=write_difference_gpt3)
-    difference_gpt3.start()"""
+    fill_library_thread = threading.Thread(target=fill_library).start()
 
     httpd = simple_server.make_server('0.0.0.0', PORT, api)
     httpd.serve_forever()
