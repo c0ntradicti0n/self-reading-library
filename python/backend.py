@@ -8,6 +8,7 @@ from wsgiref import simple_server
 import threading
 from traceback_with_variables import activate_by_import
 
+from core import config
 from core.RestPublisher.DifferencePublisher import DifferencePublisher
 from core.StandardConverter import PATH2HTML
 from core.config import PORT
@@ -27,7 +28,7 @@ from layout.annotator.annotation import Annotator, AnnotationQueueRest
 from layout.upload_annotation.upload_annotation import UploadAnnotator
 from layout.upload_annotation.upload_annotation import UploadAnnotator
 from layout.annotation_thread import layout_annotate_train_model, UploadAnnotationQueueRest, sample_pipe, model_pipe, \
-    upload_pipe
+    upload_pipe, full_model_path
 from language.PredictionAlignment2Css import PredictionAlignment2Css
 from layout.Layout2ReadingOrder import Layout2ReadingOrder
 from language.transformer.ElmoDifference import ElmoDifference, ElmoDifferenceQueueRest, elmo_difference_pipe, \
@@ -70,7 +71,7 @@ def create_app():
         '/difference':
             ElmoDifferenceQueueRest,
         '/difference/{id}':
-            DifferencePublisher,
+            ElmoDifferenceQueueRest,
 
         # topics
         '/library':
@@ -136,7 +137,11 @@ if __name__ == "__main__":
         x = None
         while not x:
             try:
-                x = list(itertools.islice(elmo_difference_pipe(
+                x = list(itertools.islice(ant(
+                    "arxiv.org", f"reading_order", via='prediction',
+                    num_labels=config.NUM_LABELS,
+                    layout_model_path=full_model_path
+                )(
                     "https://arxiv.org"
                 ), 100))
             except Exception as e:

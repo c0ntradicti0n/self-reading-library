@@ -203,9 +203,20 @@ class RestQueue:
         resp.media = {'status': 'ok'}
         resp.status = falcon.HTTP_OK
 
-    def on_post(self, req, resp, id=None): # ok
+    # ok or use one existing file
+    def on_post(self, req, resp, id=None):
         print(req, resp)
-        self.ok(id)
+
+        if (req.media):
+            # fetching one document for annotation
+            path = config.tex_data + req.media
+            item = next(self.work_on_upload(path), None)
+            self.workbook[id] = item
+            resp.body = json.dumps(item, ensure_ascii=False)
+            resp.status = falcon.HTTP_OK
+        else:
+            # annotation positive
+            self.ok(id)
 
     def on_delete(self, req, resp, id=None):
         print(req, resp)

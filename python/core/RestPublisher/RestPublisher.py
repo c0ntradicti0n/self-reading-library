@@ -176,9 +176,12 @@ class ??title!! extends React.Component<??Title!!Props, ??Title!!State> {
         console.log(this.set_??title!!)
 
         if (this.props.router.query.id) {
+            console.log("query", this.props.router.query)
                             // @ts-ignore
-            this.??title!!Service.fetch_one(this.props.router.query.id, this.set_??title!!)
+            this.??title!!Service.fetch_one(this.props.router.query.id, this.set_??title!!s)
         }
+        
+
         else {    
                             // @ts-ignore
             this.??title!!Service.fetch_all(this.set_??title!!s)
@@ -202,12 +205,20 @@ class ??title!! extends React.Component<??Title!!Props, ??Title!!State> {
     }
     
     set_??title!! = async (v) => {
-        await v.then(prom => {
-            console.log('VALUES', prom.response)
-
+        
+        if (v instanceof Promise) {
+            await v.then(prom => {
+                console.log('VALUES', prom.response)
+    
+                this.setState({
+                    ??title!!: prom.response}
+                )
+            })
+        } else {
             this.setState({
-                ??title!!: prom.response}
-                )})
+                ??title!!: v}
+            )
+        }
     }
     
     render ()  {

@@ -24,6 +24,8 @@ from flask import jsonify, Blueprint
 bp = Blueprint('blueprint', __name__, template_folder='templates')
 
 
+topic_maker = TopicMaker()
+
 @converter("reading_order", "topics.dict")
 class TopicsPublisher(RestPublisher, react):
     def __init__(self,
@@ -42,7 +44,6 @@ class TopicsPublisher(RestPublisher, react):
 
     def __call__(self, documents):
         documents = unique(list(documents), key=lambda x: x[1]['html_path'])
-        self.topic_maker = TopicMaker()
 
         html_paths_json_paths_txt_paths, metas = list(zip(*documents))
 
@@ -53,9 +54,8 @@ class TopicsPublisher(RestPublisher, react):
                                ).split()[:10])
             for meta in metas
         ]
-        paths = [meta["html_path"] for meta in metas]
 
-        self.topics, text_ids = self.topic_maker(texts, meta=metas)
+        self.topics, text_ids = topic_maker(texts, meta=metas)
 
         with open(config.topics_dump + f"_{len(documents)}", 'wb') as f:
             pickle.dump([self.topics, metas], f)

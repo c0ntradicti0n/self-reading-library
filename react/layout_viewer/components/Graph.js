@@ -53,8 +53,9 @@ class Graph extends React.Component {
         data.links.forEach(link => {
             const a = data.nodes.find((n) => n.id == link.source)
             const b = data.nodes.find((n) => n.id == link.target)
-            if (! a)
-               console.log(a , link)
+            if (!a.title && b.title)
+                b.group = a.name
+
             !a.neighbors && (a.neighbors = []);
             !b.neighbors && (b.neighbors = []);
             a.neighbors.push(b);
@@ -153,7 +154,7 @@ class Graph extends React.Component {
                 }}
                 onNodeClick={(node) => this.handleClick(node)}
                 onNodeRightClick={(node) => Router.push({
-                    pathname: '/difference/', query: {...node}
+                    pathname: '/difference/', query: {id: node.path}
                 })}
                 autoPauseRedraw={false}
                 linkWidth={link => this.state.highlightLinks.has(link) ? 5 : 1}
@@ -163,7 +164,12 @@ class Graph extends React.Component {
                 nodeCanvasObject={this.paintRing}
                 onNodeHover={this.handleNodeHover}
                 onLinkHover={this.handleLinkHover}
-
+                nodeAutoColorBy="group"
+                  onNodeDragEnd={node => {
+                    node.fx = node.x;
+                    node.fy = node.y;
+                    node.fz = node.z;
+                  }}
             />
         </div>)
     }

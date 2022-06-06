@@ -21,8 +21,7 @@ class PdfCssPublisher(RestPublisher):
         self.dir = config.markup_dir
         self.kind = kind
 
-    @uri_with_cache
-    def on_post(self, req, resp):
+    def on_get(self, req, resp, id=None):
         print (f"Annotating {self.kind}")
 
         pprint(req)

@@ -312,7 +312,7 @@ def uri_with_cache(fun):
             print("extra kwargs", kwargs)
 
         if not (fun, req) in memory_caches:
-            print(req, resp, *args, **kwargs)
+            print(req, resp, args, kwargs)
             memory_caches[fun] = "working..."
             res = fun(self, req, resp)
             memory_caches[(fun, req)] = res

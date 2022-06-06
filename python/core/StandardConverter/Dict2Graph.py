@@ -52,12 +52,17 @@ class Dict2Graph(Ant):
                     q.append((nv, nd))
 
         ddic = nx.to_dict_of_dicts(dig)
-        levels = 3
+        cross_nodes_2_i = {kk: i for i, kk in enumerate((k for (k, v) in (ddic.items()) if v))}
+        rev_ddic= {kk: k for k, v in ddic.items() for kk, vv in v.items()}
+
+        levels = 6
         nodes = [{'id': k,
                   'name': dig.nodes[k]['attr'] if 'attr' in dig.nodes[k] else k,
                   'val': 2 ** (levels - 1) if v else 2 ** (levels - 2),
                   'title': dig.nodes[k]['title'] if 'title' in dig.nodes[k] else None,
-                  'color': dig.nodes[k]['color'] if 'color' in dig.nodes[k] else 'white'
+                  #'color': dig.nodes[k]['color'] if 'color' in dig.nodes[k] else 'white',
+                  'group': cross_nodes_2_i[rev_ddic[k]] if k in rev_ddic else None,
+                  'path':  dig.nodes[k]['html_path'].replace(config.tex_data, "") if 'html_path' in dig.nodes[k] else None
                   }
 
                  for k, v in ddic.items()] \

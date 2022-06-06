@@ -106,7 +106,7 @@ reader_height = numpy.sqrt(2) * reader_width
 page_margin_bottom = 0.06
 page_margin_top = 0.15
 
-pdf_dir = "../test/"
+pdf_dir = ""
 topics_dump = hidden_folder + "/topics/topics.pickle"
 markup_dir = pdf_dir
 markup_suffix = "pdflayout.html"
@@ -170,3 +170,5 @@ PDF_UPLOAD_DIR = hidden_folder + "/pdf_upload/"
 ELMO_DIFFERENCE_MODEL_PATH = hidden_folder + "elmo_difference_models"
 ELMO_DIFFERENCE_COLLECTION_PATH = hidden_folder + "elmo_difference_collection"
 PORT = 7789
+
+TOPIC_TEXT_LENGTH = 180

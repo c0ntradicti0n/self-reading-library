@@ -72,11 +72,11 @@ class TopicMaker:
 
     def __call__(self, texts, meta, *args, **kwargs):
         self.nlp = spacy.load("en_core_web_trf")
-        embeddings = np.vstack([self.nlp(text)._.trf_data.tensors[1] for text in texts])
+        embeddings = np.vstack([self.nlp(text[:config.TOPIC_TEXT_LENGTH])._.trf_data.tensors[1] for text in texts])
         topics = self.topicize_recursively(embeddings, meta, texts)
         return topics, meta
 
-    def topicize_recursively(self, embeddings, meta, texts, split_size=10, max_level=3, level=0):
+    def topicize_recursively(self, embeddings, meta, texts, split_size=10, max_level=5, level=0):
         print(f"Making Topics {level+1} of maximally {max_level+1}")
         labels = self.cluster(embeddings=embeddings)
         topic_ids_2_doc_ids = self.labels2docs(texts=texts, labels=labels)
