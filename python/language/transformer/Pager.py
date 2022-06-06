@@ -59,7 +59,11 @@ class Pager(PathSpec):
 
     def __call__(self, paths, *args, **kwargs):
         for texts, meta in paths:
-            pdf_path, reading_order_path, _ = self.run_pdf2htmlEX(meta['html_path'], meta)
+            try:
+                pdf_path, reading_order_path, _ = self.run_pdf2htmlEX(meta['html_path'], meta)
+            except Exception as e:
+                logging.error("could not transpile pdf to html", exc_info=True)
+                continue
 
             # read the text as it is referenced in the html from the reading_order file
             # containing the class index of the tags and the string, may contain

@@ -8,6 +8,7 @@ from wsgiref import simple_server
 import threading
 from traceback_with_variables import activate_by_import
 
+from core.RestPublisher.DifferencePublisher import DifferencePublisher
 from core.StandardConverter import PATH2HTML
 from core.config import PORT
 from core.pathant.PathAnt import PathAnt
@@ -69,7 +70,7 @@ def create_app():
         '/difference':
             ElmoDifferenceQueueRest,
         '/difference/{id}':
-            ElmoDifferenceQueueRest,
+            DifferencePublisher,
 
         # topics
         '/library':
@@ -134,7 +135,7 @@ if __name__ == "__main__":
     def fill_library():
         list(itertools.islice(elmo_difference_pipe(
             "https://arxiv.org"
-        ), 50))
+        ), 100))
 
 
     fill_library_thread = threading.Thread(target=fill_library).start()
