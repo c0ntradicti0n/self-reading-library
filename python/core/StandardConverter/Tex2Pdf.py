@@ -40,15 +40,16 @@ class Tex2Pdf(PathSpec):
             subprocess.run(['rm', '*.log'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
         for i in range(n):
+            print(f"trying to compile {path}")
             process = subprocess.Popen(
                 f'cd {path}  && echo $(pwd) && pdflatex -interaction=nonstopmode -halt-on-error -file-line-error {filename}'
                 , stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             time.sleep(self.timeout_sec)
             process.send_signal(signal.SIGINT)
             output = process.stdout.read().decode('utf-8', errors="ignore")
-            print(output)
+            #print(output)
             errors = process.stderr.read().decode('utf-8', errors="ignore")
-            print(errors)
+            #print(errors)
             if (any(error in output.lower() for error in ["latex error", "fatal error"])):
                 where = output.lower().index('error')
                 error_msg_at = output[where - 150:where + 150]
