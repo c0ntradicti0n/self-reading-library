@@ -1,3 +1,7 @@
+import signal
+import time
+from sys import stdout, stderr
+
 from core import config
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
@@ -17,10 +21,14 @@ class Tex2Pdf(PathSpec):
 
     @file_persistent_cached_generator(config.cache + os.path.basename(__file__) + '.json')
     def __call__(self, arg_meta, *args, **kwargs):
-        for tex, meta in arg_meta:
-            if not 'labeled' in tex:
-                if pdf_path := self.compiles(tex):
+        for path, meta in arg_meta:
+            if path.endswith('.tex'):
+                if pdf_path := self.compiles(path):
                     yield pdf_path, meta
+            elif path.endswith('.pdf'):
+                yield path, meta
+            else:
+                self.logger.error("dont know how to handle file " + path)
 
     def compiles(self, tex_file_path, n=1, clean=False):
         path, filename, extension, filename_without_extension = get_path_filename_extension(tex_file_path)
@@ -33,21 +41,14 @@ class Tex2Pdf(PathSpec):
 
         for i in range(n):
             process = subprocess.Popen(
-                ['pdflatex',
-                 '-halt-on-error',
-                 '-file-line-error',
-                 f'-output-directory={path}',
-                  filename
-                 ], cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            timer = Timer(self.timeout_sec, process.kill)
-            try:
-                timer.start()
-                stdout, stderr = process.communicate()
-            finally:
-                timer.cancel()
-            output = stdout.decode('latin1')
-            errors = stderr.decode('latin1')
-
+                f'cd {path}  && echo $(pwd) && pdflatex -interaction=nonstopmode -halt-on-error -file-line-error {filename}'
+                , stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            time.sleep(self.timeout_sec)
+            process.send_signal(signal.SIGINT)
+            output = process.stdout.read().decode('utf-8', errors="ignore")
+            print(output)
+            errors = process.stderr.read().decode('utf-8', errors="ignore")
+            print(errors)
             if (any(error in output.lower() for error in ["latex error", "fatal error"])):
                 where = output.lower().index('error')
                 error_msg_at = output[where - 150:where + 150]

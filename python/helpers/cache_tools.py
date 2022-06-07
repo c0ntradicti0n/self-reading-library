@@ -112,12 +112,14 @@ def file_persistent_cached_generator(
 
                     result_string = json.dumps(result) + "\n"
                     if no_cache or result_string not in cache:
-                        content, meta = result
+                        try:
+                            content, meta = result
+                        except:
+                            raise
 
                         done = False
                         while not done:
                             try:
-                                os.chdir(cwd)
 
                                 if os.path.exists(filename):
                                     append_write = 'a'  # append if already exists
@@ -132,7 +134,6 @@ def file_persistent_cached_generator(
                                 continue
                             done = True
 
-                        os.chdir(cwd)
                     yield content, meta
                 except Exception as e:
                     logging.error(

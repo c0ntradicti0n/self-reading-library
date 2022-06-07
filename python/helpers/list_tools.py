@@ -53,9 +53,9 @@ def threewise(iterable):
     for i in range(1, l - 1):
         yield iterable[i - 1], iterable[i], iterable[i + 1]
 
-def unique(iterable, key=None):
+def unique(iterable, key=None, delivered = []):
     collector = []
-    added=[]
+    added=delivered
     for v in iterable:
         if key:
             k = key(v)

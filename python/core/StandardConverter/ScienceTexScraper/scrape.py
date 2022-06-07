@@ -3,7 +3,7 @@ import hashlib
 import os
 from itertools import count
 import random
-from helpers.list_tools import metaize
+from helpers.list_tools import metaize, unique
 
 import requests
 import time
@@ -25,6 +25,7 @@ class ScienceTexScraper(PathSpec):
         self.save_dir = config.tex_data
         if not os.path.isdir(self.save_dir):
             os.system(f"mkdir {config.tex_data}")
+    delivered = []
 
 
     def __call__(self, url):
@@ -99,9 +100,9 @@ class ScienceTexScraper(PathSpec):
                 pdf_files = glob.glob(path + "/*.pdf")
 
                 if pdf_files:
-                    yield from [(pdf, {'meta':{'url': url}}) for pdf in pdf_files]
+                    yield from unique([(pdf, {'meta':{'url': url}}) for pdf in pdf_files], key=lambda x: x[0], delivered = self.delivered)
                 else:
-                    yield from [(tex, {'meta':{'url': url}}) for tex in tex_files]
+                    yield from unique([(tex, {'meta':{'url': url}}) for tex in tex_files], key=lambda x: x[0], delivered = self.delivered)
 
         # if not enough, random surf further
         for href in hrefs:
