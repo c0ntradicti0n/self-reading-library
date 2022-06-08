@@ -1,28 +1,37 @@
-import bz2
+import collections
 import functools
 import itertools
 import json
 import logging
+import pickle
+import shutil
 import types
+import zlib
 from glob import glob
 import falcon
 import os
 import unittest
 
-# Pickle a file and then compress it into a file with extension
-from zmq.backend.cython.socket import cPickle
+import numpy
+
+from helpers.lazy import lazy
+
+logger = logging.getLogger(__file__)
 
 
-def compressed_pickle(title, data):
-    with bz2.BZ2File(title + '.pbz2', 'w') as f:
-        cPickle.dump(data, f)
+def compressed_pickle(value):
+    pvalue = pickle.dumps(obj=value)
+    cvalue = zlib.compress(pvalue)
+    return cvalue
 
 
-# Load any compressed pickle file
-def decompress_pickle(file):
-    data = bz2.BZ2File(file, 'rb')
-    data = cPickle.load(data)
-    return data
+def decompress_pickle(value):
+    try:
+        pvalue = zlib.decompress(value)
+        rvalue = pickle.loads(data=pvalue)
+        return rvalue
+    except:
+        raise
 
 
 def file_persistent_cached_generator(
@@ -147,162 +156,102 @@ def file_persistent_cached_generator(
     return decorator
 
 
-def unroll_cache(cache, cwd):
+def unroll_cache(cache):
     for result in cache.items():
-        os.chdir(cwd)
         yield result
 
 
 def filter_ant_step(gen, cache, key=None):
-    for value, meta in gen:
-        if (value if not key else meta[key]) not in cache:
-            yield value, meta
+    try:
+        for value, meta in gen:
+            if (str(value) if not key else meta[key]) not in cache:
+                yield value, meta
+
+    except Exception:
+        print(f"{gen=} {cache=} {key=}")
+        raise
 
 
-def apply(cache, cwd, param):
-    generator = original_func(*param)  # , cache=cache)
-
-    for result in generator:
-        try:
-            result_string = json.dumps(result) + "\n"
-            content, meta = result
-            yield content, meta
-        except Exception as e:
-            logging.error(
-                f"{str(e)} while computing on \n {str(result)}\n in {str(original_func)}\n being in {os.getcwd()}")
-            raise e
-
-
-def write_cache(path, gen, cwd, overwrite_cache=False):
-    if os.path.exists(path):
-        append_write = 'a'  # append if already exists
-    else:
-        append_write = 'w'  # make a new file if not
-
-    if overwrite_cache:
-        append_write = "w"
-    for result in gen:
-        os.chdir(cwd)
-
-        with open(path, append_write) as f:
-            f.write(result_string)
-        os.chdir(cwd)
-
+def apply(f, gen, cache):
+    for result in f(filter_ant_step(gen, cache)):
         yield result
-        append_write = 'a'
+
+
+def read_cache_file(path, value):
+    with open(path + "/" + value, 'rb') as f:
+        content = f.read()
+        return decompress_pickle(content)
+
+
+def read_cache(path):
+    if os.path.isfile(path):
+        raise IOError(f"cache {path=} is a file, but should be a dict")
+    if not os.path.isdir(path):
+        os.mkdir(path)
+        return {}
+
+    contents = os.listdir(path)
+
+    new_cache = {
+        key: read_cache_file(path, key) for key in contents
+    }
+
+    return new_cache
+
+
+def write_cache(old_cache, path, result, overwrite_cache=False):
+    try:
+        value, meta = result
+    except:
+        raise IndexError(f"{result=} is not a value-meta tuple")
+    old_cache[value] = compressed_pickle(meta)
+
+    fpath = path + "/" + str(value)
+    if os.path.exists(fpath):
+        logger.error(".")
+        return
+
+    with open(fpath, "wb") as f:
+        f.write(old_cache[value])
 
 
 def configurable_cache(
         filename,
-        overwrite_cache=None,
-        load_via_glob=None,
-        cache_only=False,
-        dont_add_to_cache=False,
-        dont_use_more_then_cache=False,
-        apply_only=False,
-        cycle_cache_or_compute=False
+        from_path_blob=None,
+        from_cache_only=False,
+        from_cache_if_exists_else_run=False,
+        from_function_only=False,
+        dont_append_to_cache=False
 ):
     def decorator(original_func):
-        def new_func(*param, load_via_glob=load_via_glob):
-            # consts
-            cwd = os.getcwd()
-            new_func.cache_path = cwd + "/" + filename
+        def new_func(source, from_path_blob=from_path_blob):
+            yield_cache = True if not from_function_only else False
+            yield_apply = not from_cache_only and not from_path_blob
+            append_cache = not dont_append_to_cache and not from_path_blob
 
-            # flags
-            if load_via_glob or cache_only or dont_use_more_then_cache:
-                yield_cache = True
-                yield_apply = False
-
-            if load_via_glob:
-                write_down_cache = True
-            else:
-                write_down_cache = False
-            # load
-            try:
-                with open(new_func.cache_path, 'r') as f:
-                    cache = list(f.readlines())
-            except FileNotFoundError:
-                logging.warning(f"No cache found for {new_func.cache_path}, creating new one")
-                cache = {}
-
-            if load_via_glob:
-                if isinstance(load_via_glob, str):
-                    load_via_glob = [load_via_glob]
-                cache = [f'["{fp}", {"{}"} ]' for path in load_via_glob for fp in glob(path)]
+            if from_path_blob:
+                if isinstance(from_path_blob, str):
+                    from_path_blob = [from_path_blob]
+                cache = {fp: {} for path in from_path_blob for fp in glob(path)}
                 if len(cache) == 0:
-                    logging.info(f"Found nothing via glob {load_via_glob} from {cwd}")
+                    logging.info(f"Found nothing via glob {from_path_blob} from {os.getcwd()}")
+            else:
+                cache = read_cache(filename)
 
-            cache = [tuple(json.loads(line)) for line in cache]
-            cache = [(a if not isinstance(a, list) else tuple(a), b) for a, b in cache]
-            try:
-                cache = dict(cache)
-            except:
-                pass
-
-            if len(param) <= 1:
-                logging.warning(f"Second attribute 'meta' was not given for {original_func}")
-
-            # flags 2
-
-            if cycle_cache_or_compute:
-                if cache:
-                    yield_cache = True
-                    yield_apply = False
-                else:
-                    yield_cache = False
-                    yield_apply = True
-
-            if not yield_apply and not yield_cache:
-                raise AssertionError("Some kind of cache result must be calculated! Bad "
-                                     "handling of flags occurred")
-            # produce
-            gens = []
-
+            combine_gens = []
             if yield_cache:
-                gens += unroll_cache(cache, cwd)
+                combine_gens += unroll_cache(cache)
             if yield_apply:
-                gens += apply(cache, cwd, param, no_cache=False)
+                combine_gens += apply(original_func, source, cache)
 
-            gens = itertools.chain.from_iterable(gens)
+            gens = itertools.chain.from_iterable([combine_gens])
 
-            if write_down_cache:
-                gen = write_cache(gen=gens, cwd=cwd, path=new_func.cache_path)
-
-            yield from gen
-            os.chdir(cwd)
+            for result in gens:
+                if append_cache:
+                    write_cache(path=filename, result=result, old_cache=cache)
+                yield result
 
         functools.update_wrapper(new_func, original_func)
-
-        return new_func
-
-    return decorator
-
-
-def persist_to_file(file_name):
-    def decorator(original_func):
-
-        try:
-            cache = json.load(open(file_name, 'r'))
-        except (IOError, ValueError):
-            cache = {}
-
-        def new_func(*param):
-
-            hash = str(list(
-                {
-                    k if any(isinstance(k, t) for t in [int, str, float]) else type(k):
-                        v if any(isinstance(v, t) for t in [int, str, float]) else type(v)
-                    for k, v in kv.__dict__.items()} if hasattr(kv, "__dict__") else str(kv)
-                for kv in param))
-
-            if hash not in cache:
-                return_val = original_func(*param)
-                cache[hash] = return_val
-
-                json.dump(cache, open(file_name, 'w'))
-                logging.warning(f"Dumping {hash} to cache file {file_name}")
-
-            return cache[hash]
 
         return new_func
 
@@ -339,97 +288,123 @@ def uri_with_cache(fun):
 
 class TestCache(unittest.TestCase):
 
-    def run_cached(self, x, *args, f=None, fargs=[], fkwargs={}, **kwargs):
-        if not f:
-            @configurable_cache("test.cache", *args, **kwargs)
-            def f(values_metas, *fargs, **fkwrags):
-                for i in values_metas:
-                    yield i + 1, m
-        else:
-            f = configurable_cache("test.cache", *args, **kwargs)(f)
+    def run_cached(self, x, filename,  *args,  cargs=[], ckwargs={},**kwargs):
+        @configurable_cache(filename=filename, *cargs, **ckwargs)
+        def f(values_metas, *_, **__):
+            for i, m in values_metas:
+                yield i, {
+                    k:
+                        not v if k == "bool" else v
+                    for k, v in m.items()
+                }
 
-        y = list(f(x, *fargs, **fkwargs))
-        return y, f
+        _f = configurable_cache(filename=filename, *args, **kwargs)(f)
+
+        y = list(f(x, *args, **kwargs))
+        return x, y, _f
 
     def check_cached(self,
                      f,
                      x,
                      y,
-                     exists=True,
-                     all_values_in=True,
-                     cargs=[],
-                     ckwargs={}
+                     filename,
+                     *args,
+                     **kwargs
                      ):
+        print(f"content of {os.getcwd()=} \n{os.listdir(os.getcwd())}")
 
-        if "load_via_glob" in ckwargs:
-            pass
-
-        if "cache_only" in ckwargs:
-            pass
-
-        if "dont_add_to_cache" in ckwargs:
-            pass
-
-        if "apply_only" in ckwargs:
-            pass
-
-        if "cycle_cache_or_compute" in ckwargs:
-            pass
-
-        if exists:
-            assert os.path.isfile(f.cache_path)
-
-            try:
-                with open(f.cache_path, "r") as fc:
-                    content = fc.read()
-            except FileNotFoundError as e:
-                raise e
-            try:
-                cache = json.loads(content)
-            except Exception as e:
-                raise AssertionError(
-                    f"Cache '{f.cache_path}' with content \n\t'{str(content[:100])}' \n\tnot in readable format " + str(
-                        e))
-
-            assert (isinstance(cache, dict))
-
-            if contains_values:
-                assert all((m in cache for m in contains_values))
-        else:
-            assert not os.path.exists(f.cache_path)
-
-            assert len(z) == len(x)
+        if not 'from_path_blob' in kwargs:
+            assert os.path.exists(filename)
 
     def run_test_cache(self
-                       , x, *cargs, f=None, fargs=[], fkwargs={}, **ckwargs):
-        y, f = self.run_cached(
-            *cargs,
-            f=f,
-            x=x,
-            fargs=fargs,
-            fkwargs=fkwargs,
-            **ckwargs
+                       , gen, filename="test_cache", *args, test_delete_cache_before=True, **kwargs):
+
+        if test_delete_cache_before:
+            try:
+                os.remove(filename)
+            except FileNotFoundError:
+                pass
+            except IsADirectoryError:
+                shutil.rmtree(filename)
+
+        x, y, f = self.run_cached(
+            gen, filename=filename, *args, **kwargs
         )
         self.check_cached(
-            f=f,
-            x=x,
-            y=y,
-            exists=True,
-            all_values_in=True,
-            cargs=cargs,
-            ckwargs=ckwargs
+            x, y, f, filename=filename, *args, **kwargs
         )
+        print(y)
+        return y
 
-    def test_cache_via_glob(self):
-        assert (self.run_test_cache([1, 2, 3],
-                                    load_via_glob='../test/*.pdf',
+    def test_cache_blob(self):
+        assert len(self.run_test_cache(None,
+                                    from_path_blob='*.py',
                                     )) > 3
 
-    def test_cache1(self):
+    def test_cache1_gen(self):
         assert len(list(self.run_test_cache(
-            [(1, {}), (2, {}), (3, {})],
-            load_via_glob='../../test/*.pdf',
-        ))) > 3
+            ((i, {}) for i in range(1, 4))
+        ))) == 3
+
+    def test_cached1_gen(self):
+        assert len(list(self.run_test_cache(
+            ((i, {}) for i in range(1, 4))
+        ))) == 3
+        assert len(list(self.run_test_cache(
+            ((i, {}) for i in range(4, 7))
+            , test_delete_cache_before=False))) == 6
+
+    def test_cached1_gen_meta_numpy(self):
+        assert len(list(self.run_test_cache(
+            ((i, {"np": numpy.zeros((1, 3))}) for i in range(1, 4))
+        ))) == 3
+        assert len(list(self.run_test_cache(
+            ((i, {}) for i in range(4, 7))
+            , test_delete_cache_before=False))) == 6
+
+    def test_cached1_not_doing_again(self):
+        assert len(list(self.run_test_cache(
+            ((str(i), {"bool": True}) for i in range(0, 3))
+        ))) == 3
+        res = list(self.run_test_cache(
+            ((str(i), {"bool": True}) for i in range(2, 4))
+            , test_delete_cache_before=False))
+        assert len(res) == 4
+        assert all((c==1 for e, c in collections.Counter([int(k) for k, m in res]).items()))
+        assert all((not r[1]['bool'] for r in res))
+
+    def test_cache1_list(self):
+        assert len(list(self.run_test_cache(
+            [(1, {}), (2, {}), (3, {})]
+        ))) == 3
+
+    def test_cached1_list(self):
+        assert len(list(self.run_test_cache(
+            [(1, {}), (2, {}), (3, {})]
+        ))) == 3
+        assert len(list(self.run_test_cache(
+            [(4, {}), (5, {}), (6, {})]
+            , test_delete_cache_before=False))) == 6
+
+    def test_cache_only(self):
+        assert len(list(self.run_test_cache(
+            [(1, {}), (2, {}), (3, {})]
+        ))) == 3
+        assert len(list(self.run_test_cache(
+            [(4, {}), (5, {}), (6, {})]
+            , test_delete_cache_before=False, ckwargs={'from_cache_only':True}))) == 3
+
+    def test_function_only(self):
+        assert len(list(self.run_test_cache(
+            [(1, {}), (2, {}), (3, {})]
+        ))) == 3
+        assert len(list(self.run_test_cache(
+            [(4, {}), (5, {}), (6, {})]
+            , test_delete_cache_before=False, ckwargs={'from_function_only':True}))) == 3
+
+
+    def test_uncompress_decompress(self):
+        decompress_pickle(compressed_pickle([1, 2, 3, 4])) == [1, 2, 3, 4]
 
 
 if __name__ == "__main__":

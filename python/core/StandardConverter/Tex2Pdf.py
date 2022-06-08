@@ -40,7 +40,7 @@ class Tex2Pdf(PathSpec):
             subprocess.run(['rm', '*.log'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
         for i in range(n):
-            print(f"trying to compile {path}")
+            print(f"trying to compile {path} + {filename}")
             process = subprocess.Popen(
                 f'cd {path}  && echo $(pwd) && pdflatex -interaction=nonstopmode -halt-on-error -file-line-error {filename}'
                 , stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -69,7 +69,7 @@ class Tex2Pdf(PathSpec):
                     self.path_spec.logger.error(f'  --->  see file {tex_file_path}: """\n{faulty_code}"""')
                 return None
 
-        if process.returncode != 0:
+        if process.returncode:
             print(errors)
             return None
         self.path_spec.logger.info(f"{tex_file_path} compiled")
