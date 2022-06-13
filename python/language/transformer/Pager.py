@@ -2,6 +2,7 @@ import logging
 import re
 import textwrap
 import os
+import unicodedata
 from queue import Empty
 
 import chardet
@@ -56,7 +57,6 @@ class Pager(PathSpec):
 
         return (html_path, reading_order_path, feat_path)
 
-
     def __call__(self, paths, *args, **kwargs):
         for _pdf_path, meta in paths:
             texts = meta['enumerated_texts']
@@ -73,11 +73,16 @@ class Pager(PathSpec):
                 content = f.read()
 
             encoding = chardet.detect(content)['encoding']
-            lines = content.decode(encoding).split()
+            if not encoding:
+                encoding = "utf-8"
+            lines = content.decode(encoding, errors="ignore").split()
             i_word = [self.match_reading_order_line(line) for line in lines if len(line) > 2]
 
             # use layout filtered text
             text = " ".join([word for t in texts for i, word in t])
+            text = text.replace('-\n', '')
+            text = unicodedata.normalize("NFKD", text)
+
             real_tokens = split_punctuation(text, ".,:!?;")
 
             # start iterating on windows of this text
@@ -95,7 +100,7 @@ class Pager(PathSpec):
             try:
                 last_annotated_token = ElmoPredict.q1.get(timeout=60)
             except Empty:
-                logging.error("broke up with windowing thread")
+                logging.error("Broke up with windowing thread")
                 break
             ElmoPredict.q1.task_done()
 
@@ -108,8 +113,7 @@ class Pager(PathSpec):
                 ElmoPredict.q2.put((None, None))
                 break
 
-            print(f"text window:")
-            print(textwrap.fill(" ".join([t for t in window]), width=160))
+            logging.info(" ".join([t for t in window]))
 
             if len(window) == 0:
                 self.logger.info("finishing?")
@@ -161,7 +165,6 @@ class Pager(PathSpec):
 
                 logging.info("...")
 
-
             window = []
             sentences_j = 0
             rest_text = real_tokens[start_i2: start_i2 + 300]
@@ -178,12 +181,12 @@ class Pager(PathSpec):
                     sentences_j = j + 1
 
             if not window:
-                logging.info("giving zero text")
+                logging.info("Zero text, reset window")
                 window = rest_text[:self.max_window]
 
             consumed_tokens = yield window, {}
 
-            if consumed_tokens == 0 and loop_count >0:
+            if consumed_tokens == 0 and loop_count > 0:
                 consumed_tokens = 123
                 logging.info("consuming more than 0 tokens")
 

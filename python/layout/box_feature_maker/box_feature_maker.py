@@ -5,11 +5,17 @@ import unittest
 import pandas
 import numpy
 import random
+
+from pdfminer.psparser import PSEOF
 from sklearn.preprocessing import MinMaxScaler
 import scipy.spatial as spatial
 from core import config
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextContainer, LTChar
+from pdfminer.pdfparser import PDFParser
+from pdfminer.pdfdocument import PDFDocument
+from pdfminer.pdfpage import PDFPage
+from pdfminer.pdfinterp import resolve1
 import pdfminer
 from collections import namedtuple
 from pdf2image import convert_from_path, convert_from_bytes
@@ -34,12 +40,22 @@ class BoxFeatureMaker(PathSpec):
             if "training" in self.flags and not any([tex in labeled_pdf_path for tex in ["tex1", 'tex2', 'tex3']]):
                 continue
 
+            if self.get_number_of_pages(labeled_pdf_path) > config.MAX_PAGES_PER_DOCUMENT:
+                self.logger.warning(f"Document {labeled_pdf_path=} has to many pages, continuing")
+                continue
             feature_gen = self.mine_pdf(labeled_pdf_path)
+            if feature_gen is None:
+                logging.error("Ignoring damaged pdf")
+                continue
+
             feature_df = pandas.DataFrame(
                 list(feature_gen),
                 columns=BoxFeatureMaker.TextBoxData._fields)
 
             for random_i, final_feature_df in enumerate(self.feature_fuzz(feature_df)):
+                if final_feature_df.empty:
+                    self.logger.warning("Feature df is empty")
+                    continue
                 final_feature_df = self.compute_complex_coordination_data(final_feature_df)
                 page_numbers = final_feature_df.page_number
 
@@ -52,10 +68,6 @@ class BoxFeatureMaker(PathSpec):
 
                 images = convert_from_path(labeled_pdf_path)
                 image_dict = {}
-
-                if len(images) > config.MAX_PAGES_PER_DOCUMENT:
-                    self.logger.warning(f"document {labeled_pdf_path=} has to many pages, continuing")
-                    continue
 
                 for page_number, pil in enumerate(images):
                     image_path = f'{labeled_pdf_path}.{page_number}.jpg'
@@ -83,34 +95,52 @@ class BoxFeatureMaker(PathSpec):
 
         "text", "LABEL"])
 
-    def mine_pdf(self, pdf_path):
-        for page_number, page_layout in enumerate(extract_pages(pdf_path)):
-            for element in page_layout:
-                if isinstance(element, LTTextContainer):
-                    text = element.get_text()
-                    try:
-                        chars_and_char_boxes = [(char._text, char.bbox) for line in element._objs for char in line._objs if
-                                                isinstance(char, LTChar)]
-                    except AttributeError:
-                        logging.error(f"could get box for '{text}'")
-                        continue
-                    label = determine_layout_label_from_text(text)
-                    number_of_lines = len(element._objs) if hasattr(element, "_objs") else 0
-                    features = BoxFeatureMaker.TextBoxData(
-                        page_number,
-                        number_of_lines,
-                        int(element.x0), int(element.y0),
-                        int(element.x0), int(element.x0 + element.width),
-                        int(element.y0), int(element.y0 + element.height),
-                        int(element.height), int(element.width),
-                        int(page_layout.height), int(page_layout.width),
-                        chars_and_char_boxes,
-                        text,
-                        label
+    def get_number_of_pages(self, pdf_path):
+        try:
+            with open(pdf_path, 'rb') as f:
+                parser = PDFParser(f)
+                document = PDFDocument(parser)
+                return resolve1(document.catalog['Pages'])['Count']
+        except:
+            logging.error("File not found on determining filesize", exc_info=True)
+            return 999999
 
-                    )
-                    #print(features)
-                    yield features._asdict()
+    def mine_pdf(self, pdf_path):
+        try:
+            pages = extract_pages(pdf_path)
+
+            for page_number, page_layout in enumerate(pages):
+                for element in page_layout:
+                    if isinstance(element, LTTextContainer):
+                        text = element.get_text()
+                        try:
+                            chars_and_char_boxes = [(char._text, char.bbox) for line in element._objs for char in
+                                                    line._objs if
+                                                    isinstance(char, LTChar)]
+                        except AttributeError:
+                            _text = text.replace('\n', '\/n')
+                            logging.error(f"Could not get box for '{_text}'")
+                            continue
+                        label = determine_layout_label_from_text(text)
+                        number_of_lines = len(element._objs) if hasattr(element, "_objs") else 0
+                        features = BoxFeatureMaker.TextBoxData(
+                            page_number,
+                            number_of_lines,
+                            int(element.x0), int(element.y0),
+                            int(element.x0), int(element.x0 + element.width),
+                            int(element.y0), int(element.y0 + element.height),
+                            int(element.height), int(element.width),
+                            int(page_layout.height), int(page_layout.width),
+                            chars_and_char_boxes,
+                            text,
+                            label
+
+                        )
+                        # print(features)
+                        yield features._asdict()
+        except PSEOF:
+            logging.error("Damaged PDF-file")
+            return None
 
     def compute_complex_coordination_data(self, feature_df):
         feature_df = feature_df.groupby(['page_number']).apply(self.page_web)
@@ -156,9 +186,8 @@ class BoxFeatureMaker(PathSpec):
                                                                                                 ))
 
             except Exception as e:
-                print(points)
                 self.logger.warning(
-                    f"not enough points in page to find {config.layout_model_next_text_boxes} nearest points, faking with 0.5")
+                    f"Not enough points in page to find {config.layout_model_next_text_boxes} nearest points, faking with 0.5")
                 for k in range(config.layout_model_next_text_boxes):
                     sub_df[f'nearest_{k}_center_x'] = [0.5] * len(sub_df)
                     sub_df[f'nearest_{k}_center_y'] = [0.5] * len(sub_df)

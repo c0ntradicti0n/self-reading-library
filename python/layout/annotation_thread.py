@@ -1,6 +1,8 @@
+import itertools
+
 from layout.model_helpers import repaint_image_from_labels
 from core.event_binding import RestQueue
-from core.StandardConverter.ScienceTexScraper.scrape import ScienceTexScraper
+from core.StandardConverter.ScienceTexScraper.ScienceTexScraper import ScienceTexScraper
 from layout.box_feature_maker.box_feature_maker import BoxFeatureMaker
 from core.StandardConverter.HTML2PDF import HTML2PDF
 from core.StandardConverter.PDF2ETC import PDF2ETC
@@ -12,12 +14,13 @@ from language.transformer.Pager import Pager
 from language.transformer.UnPager import UnPager
 from core.StandardConverter.Tex2Pdf import Tex2Pdf
 from layout.annotator import annotation, collection
-from layout.prediction import prediction
 from layout.training import training
 from layout.upload_annotation.upload_annotation import UploadAnnotator
+from layout.Layout2ReadingOrder import Layout2ReadingOrder
+
 import os
 from helpers.os_tools import file_exists_regex
-from helpers.list_tools import metaize
+from helpers.list_tools import metaize, forget_except
 from core import config
 import subprocess
 from helpers.model_tools import find_best_model
@@ -90,6 +93,14 @@ UploadAnnotationQueueRest = RestQueue(
 )
 
 
+def on_predict(args):
+    gen = forget_except(sample_pipe(
+        metaize(itertools.cycle(["http://export.arxiv.org/"])),
+        model_path=args['best_model_path'],
+        layout_model_path=['full_model_path']
+    ), keys=['html_path'])
+    return gen
+
 def layout_annotate_train_model():
     model_in_the_loop(
         model_dir=config.TEXT_BOX_MODEL_PATH,
@@ -101,13 +112,7 @@ def layout_annotate_train_model():
                        )
         ),
         service_id='annotation',
-        on_predict=lambda: collection, collection_meta=
-
-        sample_pipe(
-            #"https://arxiv.org",
-            model_path=best_model_path,
-            layout_model_path=full_model_path
-        )
+        on_predict=on_predict
     )
 
 

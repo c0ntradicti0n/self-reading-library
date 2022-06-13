@@ -15,10 +15,10 @@ from core.pathant.PathAnt import PathAnt
 from core.pathant.AntPublisher import AntPublisher
 from core.pathant.ConfigRest import ConfigRest
 from core.layout_eagle import LayoutEagle
-from core.StandardConverter.ScienceTexScraper.scrape import ScienceTexScraper
+from core.StandardConverter.ScienceTexScraper.ScienceTexScraper import ScienceTexScraper
 from core.StandardConverter.HTML2PDF import HTML2PDF
 from core.StandardConverter.PDF2HTML import PDF2HTML
-from helpers.list_tools import metaize
+from helpers.list_tools import metaize, forget_except
 from helpers.model_tools import TRAINING_RATE
 from topics.TopicsPublisher import TopicsPublisher
 
@@ -31,11 +31,12 @@ from language.PredictionAlignment2Css import PredictionAlignment2Css
 from layout.Layout2ReadingOrder import Layout2ReadingOrder
 from language.transformer.ElmoDifference import ElmoDifference, ElmoDifferenceQueueRest, elmo_difference_pipe, \
     elmo_difference_model_pipe, annotate_difference_elmo
+
+
 # from language.heuristic.heuristic_difference import HeurisiticalLogician
 
-from hanging_threads import start_monitoring
-
-monitoring_thread = start_monitoring(seconds_frozen=30, test_interval=1000)
+# from hanging_threads import start_monitoring
+# monitoring_thread = start_monitoring(seconds_frozen=30, test_interval=1000)
 
 
 def get_all_routes(api):
@@ -108,16 +109,23 @@ def create_app():
 if __name__ == "__main__":
     api = create_app()
 
-    pprint(get_all_routes(api))
+    logging.debug(get_all_routes(api))
 
     ant = PathAnt()
+
+    filling_pipe = ant(
+        "arxiv.org", f"reading_order",
+        num_labels=config.NUM_LABELS,
+        model_path=full_model_path
+    )
 
     ant.info("workflow.png", pipelines_to_highlight=[
         elmo_difference_pipe,
         sample_pipe,
         model_pipe,
         upload_pipe,
-        elmo_difference_model_pipe
+        elmo_difference_model_pipe,
+        filling_pipe
     ]
              )
 
@@ -135,15 +143,11 @@ if __name__ == "__main__":
         x = None
         while not x:
             try:
-                x = list(itertools.islice(ant(
-                    "arxiv.org", f"reading_order", via='prediction',
-                    num_labels=config.NUM_LABELS,
-                    layout_model_path=full_model_path
-                )(
+                x = list(forget_except(filling_pipe(itertools.islice((
                     metaize(itertools.cycle(["http://export.arxiv.org/"]))
-                ), 100))
+                ), 100)), keys=["html_path"])),
             except Exception as e:
-                logging.error("Geeting first 50 threw", exc_info=True)
+                logging.error("Getting first 50 threw", exc_info=True)
 
                 continue
 

@@ -36,7 +36,7 @@ class ScienceTexScraper(PathSpec):
         if 'texs' in self.flags:
             yield from list(metaize(self.flags['texs']))
         else:
-            yield from self.surf_random(enumerate(url))
+            yield from self.surf(enumerate(url))
 
     headers = {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36'}
@@ -44,10 +44,14 @@ class ScienceTexScraper(PathSpec):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.logger.info("navigating backt to " + self.cwd)
 
+
     @configurable_cache(
-        config.cache + 'scraped_tex_paths'
+        config.cache + os.path.basename(__file__)
     )
-    def surf_random(self, i_url):
+    def surf(self, i_url):
+        yield from self.surf_random(i_url)
+
+    def surf_random(self, i_url, depth=5):
         for i, url in i_url:
 
             url = url[0]
@@ -56,18 +60,22 @@ class ScienceTexScraper(PathSpec):
 
             logging.info(f"trying {url}")
 
-            try:
-                response = requests.get(url, headers=self.headers, timeout=30)
-                soup = BeautifulSoup(response.text, "lxml")
-                links = soup.findAll('a')
-                random.shuffle(links)
-                if response.status_code == 404:
-                    logging.error(f"404 for {url}")
+            links = []
+            while not links:
+                try:
+                    response = requests.get(url, headers=self.headers, timeout=30)
+                    time.sleep(random.uniform(0.9, 1.9))
+                    soup = BeautifulSoup(response.text, "lxml")
+                    links = soup.findAll('a')
+                    random.shuffle(links)
+                    if response.status_code == 404:
+                        logging.error(f"404 for {url}")
+                        links = []
+                except Exception:
+                    logging.error(
+                        f"Connection error, maybe timeout, maybe headers, maybe bad connection, keeping trying", exc_info=True)
                     links = []
-            except Exception as e:
-                logging.error(
-                    f"Connection error, maybe timeout, maybe headers, maybe bad connection, continuing elsewhere: {e}")
-                links = []
+                    time.sleep(40)
 
             hrefs = []
             for link in links:
@@ -98,7 +106,7 @@ class ScienceTexScraper(PathSpec):
                     if not path in self.delivered:
                         os.system(
                             f'mkdir {path} &  wget '
-                            f'--user-agent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36" '
+                            f'--user-agent="{self.headers["User-Agent"]}" '
                             f'{href} '
                             f'-O {path}/main.pdf')
 
@@ -112,5 +120,5 @@ class ScienceTexScraper(PathSpec):
             for href in hrefs:
                 self.yet.append(href)
                 print(f"Got {href}")
-                yield from self.surf_random([(href, (href, {}))])
-                time.sleep(random.uniform(0.9, 1.9))
+                if not depth < 0:
+                    yield from self.surf_random([(href, (href, {}))], depth=depth - 1)

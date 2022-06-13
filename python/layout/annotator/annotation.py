@@ -12,7 +12,7 @@ AnnotationQueueRest = RestQueue(service_id="annotation", update_data=repaint_ima
 
 
 
-@converter("prediction", ["annotation", "upload_annotation"])
+@converter("reading_order", ["annotation", "upload_annotation"])
 class Annotator(RestPublisher, react):
     def __init__(self,
                  *args,

@@ -25,11 +25,10 @@ class ElmoTrain(PathSpec):
             path = f"{config.ELMO_DIFFERENCE_MODEL_PATH}/{train_size}_0_0"
 
             cmd_parts = ["./language/transformer/do/train_difference_cp.sh", self.elmo_config, path]
-            print(" ".join(cmd_parts))
+            logging.info(" ".join(cmd_parts))
             # start the resource server with gunicorn, that it can recompile, when changed
             subprocess.check_call(cmd_parts,
                                   stdout=sys.stdout, stderr=subprocess.STDOUT)
 
         except subprocess.CalledProcessError as e:
-            print(os.getcwd())
             logging.error("Training of Elmo model failed", exc_info=True)

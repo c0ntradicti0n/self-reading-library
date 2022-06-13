@@ -48,13 +48,7 @@ def post_process_df(feature_df):
     ymask = feature_df['y1'] >= feature_df['y0']
     assert (all(ymask))
 
-    labels = list(sorted(list(set(feature_df['LABEL'].tolist()))))
-    print(labels)
-
-
-
     feature_df['label'] = feature_df.LABEL.map(config.label2id)
-    labels = list(set(feature_df['label'].tolist()))
 
     page_groups = feature_df.groupby(['page_number', "doc_id"])
     feature_df = page_groups.agg({col: (lambda x: list(x)) for col in feature_df.columns})

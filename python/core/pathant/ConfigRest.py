@@ -24,7 +24,7 @@ class ConfigRest(RestPublisher, react):
 
     @uri_with_cache
     def on_get(self, req, resp):
-        print("giving config info")
+        print("Config info")
         resp.body = json.dumps(self(), ensure_ascii=False)
         resp.status = falcon.HTTP_OK
 

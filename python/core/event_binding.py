@@ -228,7 +228,6 @@ def queue_iter (service_id, gen):
     global q, d
 
     for i in range(5):
-        print("insert first some samples in the queue")
         try:
             new_val = next(gen)
             q[service_id].put_nowait(new_val)
@@ -240,31 +239,32 @@ def queue_iter (service_id, gen):
             logging.error(e, exc_info=True)
             raise e
 
+    logging.info("Inserted first some samples in the queue")
+
 
     while True:
 
         try:
-            print("getting iterator")
-
+            logging.debug("Getting iterator")
             r = d[service_id].get(timeout=3)
-            print("got iterator item")
+            logging.info("Got iterator item")
 
             if r:
                 d[service_id].task_done()
-            print("task done")
+            logging.info("Task done")
 
         except Empty:
             r = None
-            logging.info("pulse")
+            logging.debug("Pulse")
 
         if r:
-            print("yielding")
+            logging.debug("Yielding")
 
             yield r
-            print("yielded")
+            logging.debug("Yielded")
 
             for i in range(3):
-                print("insert some new sample in the queue")
+                logging.debug("Inserting some new sample in the queue")
                 try:
                     new_val = next(gen)
                     q[service_id].put_nowait(new_val)
@@ -274,7 +274,6 @@ def queue_iter (service_id, gen):
                     # or
                     print(sys.exc_info()[2])
                     logging.error(e, exc_info=True)
-
 
     print("ende")
 

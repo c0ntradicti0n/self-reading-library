@@ -37,6 +37,11 @@ def dictize(obj_meta_gen):
     for o, m in obj_meta_gen:
         yield {"value": o}, m
 
+def forget_except(obj_meta_gen, keys):
+    for o, m in obj_meta_gen:
+        yield  o, {kk:v for kk, v in m.items() if kk in keys}
+
+
 
 def reverse_dict_of_lists(d):
     reversed_dict = defaultdict(list)

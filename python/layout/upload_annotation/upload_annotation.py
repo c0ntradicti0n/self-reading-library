@@ -11,7 +11,7 @@ if not os.path.isdir(config.PDF_UPLOAD_DIR):
     os.makedirs(config.PDF_UPLOAD_DIR)
 
 
-@converter("prediction", "upload_annotation")
+@converter("reading_order", "upload_annotation")
 class UploadAnnotator(RestPublisher, react):
     def __init__(self,
                  *args,

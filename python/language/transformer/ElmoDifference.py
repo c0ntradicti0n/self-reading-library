@@ -8,7 +8,7 @@ from core.pathant.parallel import paraloop
 from core.pathant.PathAnt import PathAnt
 from core.event_binding import RestQueue
 from helpers.model_tools import model_in_the_loop
-from helpers.list_tools import metaize
+from helpers.list_tools import metaize, forget_except
 from layout.annotation_thread import full_model_path
 from language.transformer.ElmoDifferenceTrain import ElmoDifferenceTrain
 from language.transformer.ElmoDifferencePredict import ElmoDifferencePredict
@@ -49,7 +49,7 @@ class ElmoDifference(PDF_AnnotatorTool):
 ant = PathAnt()
 
 elmo_difference_pipe = ant(
-    "arxiv.org", f"elmo.html", via='prediction',
+    "arxiv.org", f"elmo.html", via='reading_order',
     num_labels=config.NUM_LABELS,
     layout_model_path=full_model_path
 )
@@ -72,10 +72,10 @@ ElmoDifferenceQueueRest = RestQueue(
 
 
 def on_predict(args):
-    gen = elmo_difference_pipe(
-        metaize(itertools.cycle("https://arxiv.org")),
+    gen = forget_except(elmo_difference_pipe(
+        metaize(itertools.cycle(["http://export.arxiv.org/"])),
         difference_model_path=args['best_model_path']
-    )
+    ), keys=['html_path', 'css', 'html'])
     return gen
 
 
@@ -84,7 +84,7 @@ def annotate_difference_elmo():
         model_dir=config.ELMO_DIFFERENCE_MODEL_PATH,
         collection_path=config.ELMO_DIFFERENCE_COLLECTION_PATH,
         on_train=lambda args:
-        print(f"{args=}") or list(
+        list(
             elmo_difference_model_pipe(
                 metaize(args['samples_files']),
                 collection_step=args['training_rate']

@@ -21,7 +21,7 @@ class AntPublisher(RestPublisher, react):
 
     @uri_with_cache
     def on_get(self, req, resp):
-        print("giving ant info")
+        print("Ant info")
         return self.ant.graph()[0][0]
 
 

@@ -17,8 +17,8 @@ class PathSpec:
         self.path_spec = path_spec
         logger = logging.getLogger(sys.modules[self.__class__.__module__].__file__)
         coloredlogs.install(
-            fmt=">>>\t%(asctime)s-"
-                "%(levelname)s-%(name)s:\n\t%(message)s",
+            fmt="%(asctime)s-"
+                "%(levelname)s-%(name)s:%(message)s",
             level=config.logging_level, logger=logger)
         self.logger = logger
 

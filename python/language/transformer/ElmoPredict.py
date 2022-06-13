@@ -48,7 +48,7 @@ class ElmoPredict(PathSpec):
                         q2.task_done()
 
                     except StopIteration:
-                        self.logger.info("finished predicting stopped by queue")
+                        self.logger.info("Finished predicting (on stop of queue)")
                         self.init_quees()
                         break
                 except Empty:
@@ -56,8 +56,8 @@ class ElmoPredict(PathSpec):
 
                     break
 
-                if words == None:
-                    self.logger.info("finished predicting, words is None now")
+                if words is None:
+                    self.logger.info("Finished predicting (on words is None)")
                     break
 
                 try:
@@ -70,7 +70,8 @@ class ElmoPredict(PathSpec):
                             dataset_reader=self.default_predictor._dataset_reader
                         )
                     annotation = self.predictor.predict_json({"sentence": words})
-                    self.info(annotation)
+                    subj_annotation = [(t,w) for t, w in annotation if "SUBJ" in t]
+                    self.info(subj_annotation)
                 except Exception as e:
                     self.logger.error("Faking annotation because of error " + str(e), stack_info=True)
                     annotation = [('O', w) for w in words]
@@ -110,5 +111,5 @@ class ElmoPredict(PathSpec):
         table = Texttable()
         table.set_deco(Texttable.HEADER)
         table.set_cols_align(["c", "l", "r"])
-        table.add_rows([['i', 'tag', 'word']] + [[i, t, w] for i, (t, w) in enumerate(annotation)])
+        table.add_rows([['i', 'tag', 'subj']] + [[i, t, w] for i, (t, w) in enumerate(annotation)])
         print(table.draw())

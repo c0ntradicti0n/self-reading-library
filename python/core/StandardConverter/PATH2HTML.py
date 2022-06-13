@@ -22,4 +22,4 @@ class PATH2HTML(RestPublisher, react):
             with open(path, "r") as f:
                 content = f.read()
             meta['html'] = content
-            yield content, meta
+            yield path, meta

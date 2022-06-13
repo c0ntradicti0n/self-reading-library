@@ -30,23 +30,24 @@ def decompress_pickle(value):
         logging.error(f"corrupted cache file {value=}")
 
 
-def unroll_cache(cache):
-    for result in cache.items():
-        yield result
+def unroll_cache(path, cache):
+    for m in cache:
+        yield m, decompress_pickle(read_cache_file(path, m))
 
 
 def filter_ant_step(gen, cache, key=None):
     try:
         for value, meta in gen:
-            if urllib.parse.quote_plus(str(value) if not key else meta[key]) not in cache:
+            if (str(value) if not key else meta[key]) not in cache \
+                    and (urllib.parse.quote_plus(str(value)) if not key else meta[key]) not in cache:
                 yield value, meta
 
     except Exception:
         raise
 
 
-def apply(cls, f, gen, cache, append_cache, filename):
-    for result in f(cls, filter_ant_step(gen, cache)):
+def apply(cls, f, gen, cache, append_cache, filename, **kwargs):
+    for result in f(cls, filter_ant_step(gen, cache), **kwargs):
         should_yield = True
         if append_cache:
             should_yield = write_cache(path=filename, result=result, old_cache=cache)
@@ -55,12 +56,16 @@ def apply(cls, f, gen, cache, append_cache, filename):
             yield result
 
 
-
-
 def read_cache_file(path, value):
-    with open(path + "/" + value, 'rb') as f:
-        content = f.read()
-        return decompress_pickle(content)
+    try:
+        with open(path + "/" + value, 'rb') as f:
+            content = f.read()
+            return content
+    except Exception as e:
+        logger.warning("Value was not encoded!")
+        with open(path + "/" + urllib.parse.quote_plus(value), 'rb') as f:
+            content = f.read()
+            return content
 
 
 def read_cache(path):
@@ -68,14 +73,13 @@ def read_cache(path):
         raise IOError(f"cache {path=} is a file, but should be a dict")
     if not os.path.isdir(path):
         os.mkdir(path)
-        return {}
+        return []
 
     contents = os.listdir(path)
 
-    new_cache = {
-        urllib.parse.unquote_plus(key): c for key in contents
-        if (c := read_cache_file(path, key)) !=None
-    }
+    new_cache = [
+        urllib.parse.unquote_plus(key) for key in contents
+    ]
 
     return new_cache
 
@@ -87,18 +91,18 @@ def write_cache(old_cache, path, result, overwrite_cache=False):
         raise IndexError(f"{result=} is not a value-meta tuple")
 
     if not isinstance(value, str):
-        raise IndexError(f"{value=} is not a string")
+        raise IndexError(f"Not a string {value=}")
 
     value = urllib.parse.quote_plus(value)
-    old_cache[value] = compressed_pickle(meta)
+    old_cache.append(value)
 
     fpath = path + "/" + str(value)
     if os.path.exists(fpath):
-        logger.error("double writing cache")
+        logger.error("Double writing cache")
         return False
 
     with open(fpath, "wb") as f:
-        f.write(old_cache[value])
+        f.write(compressed_pickle(meta))
     return True
 
 
@@ -110,11 +114,12 @@ def configurable_cache(
         from_function_only=False,
         dont_append_to_cache=False
 ):
+    filename = filename.replace(".py", "")
+
     def decorator(original_func):
-        def new_func(cls, source, from_path_glob=from_path_glob):
+        def new_func(cls, source, from_path_glob=from_path_glob, **kwargs):
 
-
-            _cls = cls if cls and cls.flags != None else configurable_cache
+            _cls = cls if cls and cls.flags is not None else configurable_cache
             _from_cache_only = _cls.flags.get("from_cache_only", from_cache_only)
             _from_path_glob = _cls.flags.get("from_path_glob", from_path_glob)
             _from_function_only = _cls.flags.get("from_function_only", from_function_only)
@@ -127,22 +132,25 @@ def configurable_cache(
             if _from_path_glob:
                 if isinstance(_from_path_glob, str):
                     _from_path_glob = [_from_path_glob]
-                cache = {fp: {} for path in _from_path_glob for fp in glob(path)}
+                cache = [fp for path in _from_path_glob for fp in glob(path)]
                 if len(cache) == 0:
                     logging.info(f"Found nothing via glob {_from_path_glob} from {os.getcwd()}")
+                yield from [(p, {}) for p in cache]
             else:
                 cache = read_cache(filename)
 
-            if yield_cache:
-                yield from unroll_cache(cache)
-            if yield_apply:
-                yield from apply(cls, original_func, source, cache, append_cache, filename)
+                if yield_cache:
+                    yield from unroll_cache(filename, cache)
+                if yield_apply:
+                    yield from apply(cls, original_func, source, cache, append_cache, filename, **kwargs)
 
         functools.update_wrapper(new_func, original_func)
 
         return new_func
 
     return decorator
+
+
 configurable_cache.flags = {}
 
 memory_caches = {}
@@ -153,12 +161,12 @@ def uri_with_cache(fun):
         global memory_caches
 
         if args:
-            print("extra args", args)
+            logging.debug("extra args", args)
         if kwargs:
-            print("extra kwargs", kwargs)
+            logging.debug("extra kwargs", kwargs)
 
         if not (fun, req) in memory_caches:
-            print(req, resp, args, kwargs)
+            logging.debug(req, resp, args, kwargs)
             memory_caches[fun] = "working..."
             res = fun(self, req, resp)
             memory_caches[(fun, req)] = res
@@ -175,20 +183,22 @@ def uri_with_cache(fun):
 
 class TestCache(unittest.TestCase):
 
-    def run_cached(self, x, filename, *args, cargs=[], ckwargs={}, **kwargs):
-        @configurable_cache(filename=filename, *cargs, **ckwargs)
-        def f(self, values_metas, *_, **__):
-            for i, m in values_metas:
-                yield i, {
-                    k:
-                        not v if k == "bool" else v
-                    for k, v in m.items()
-                }
+    def run_cached(self, x, filename, *args, f_=None, cargs=[], ckwargs={}, **kwargs):
 
-        _f = configurable_cache(filename=filename, *args, **kwargs)(f)
+        if not f_:
+            @configurable_cache(filename=filename, *cargs, **ckwargs)
+            def f(self, values_metas, *_, **__):
+                for i, m in values_metas:
+                    yield i, {
+                        k:
+                            not v if k == "bool" else v
+                        for k, v in m.items()
+                    }
+        else:
+            f = f_
 
         y = list(f(None, x, *args, **kwargs))
-        return x, y, _f
+        return x, y, f
 
     def check_cached(self,
                      f,
@@ -198,7 +208,7 @@ class TestCache(unittest.TestCase):
                      *args,
                      **kwargs
                      ):
-        print(f"content of {os.getcwd()=} \n{os.listdir(os.getcwd())}")
+        logging.debug(f"Content of {os.getcwd()=} \n{os.listdir(os.getcwd())}")
 
         if not 'from_path_glob' in kwargs:
             assert os.path.exists(filename)
@@ -302,6 +312,21 @@ class TestCache(unittest.TestCase):
 
     def test_uncompress_decompress(self):
         decompress_pickle(compressed_pickle([1, 2, 3, 4])) == [1, 2, 3, 4]
+
+    def test_keyword_arg(self):
+        @configurable_cache(filename="t_k")
+        def f(self, values_metas, depth="4"):
+            for i, m in values_metas:
+                yield i, {
+                    k:
+                        not v if k == "bool" else v
+                    for k, v in m.items()
+                }
+
+        assert len(list(self.run_test_cache(
+            [("1", {}), ("2", {}), ("3", {})],
+            f_=f, filename="t_k"
+        ))) == 3
 
 
 if __name__ == "__main__":

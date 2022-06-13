@@ -63,7 +63,7 @@ class TopicsPublisher(RestPublisher, react):
         yield self.topics, text_ids
 
     def on_get(self, req, resp):  # get all
-        documents = list(self.ant("prediction", "reading_order", from_cache_only=True)([]))
+        documents = list(self.ant("feature", "reading_order", from_cache_only=True)([]))
 
         path = config.topics_dump + f"_{len(documents)}"
         if os.path.exists(path):
@@ -77,9 +77,7 @@ class TopicsPublisher(RestPublisher, react):
                 print(value)
         else:
 
-            value, meta = list(zip(*list(self.ant("prediction", "topics.graph", from_cache_only=True)([]))))
-
-        pprint(type_spec_iterable(value))
+            value, meta = list(zip(*list(self.ant("arxiv.org", "topics.graph", from_cache_only=True)([]))))
 
         resp.body = json.dumps([value, meta], ensure_ascii=False)
         resp.status = falcon.HTTP_OK

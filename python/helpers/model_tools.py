@@ -23,10 +23,12 @@ def find_best_model(model_dir):
         logging.warning(f"No models found in {model_dir}")
         return None, None
 
-    print(scores, f" {best_model_path =}")
+    logging.info(f"{scores=} {best_model_path =}")
     return best_model_path, scores
 
+
 TRAINING_RATE = {}
+
 
 def model_in_the_loop(model_dir, collection_path, on_train, service_id, on_predict, training_rate_mode='ls',
                       training_rate_file=None):
@@ -59,9 +61,9 @@ def model_in_the_loop(model_dir, collection_path, on_train, service_id, on_predi
         loops.append(training_rate)
 
         if loops.count(training_rate) > 2:
-            logging.info("training did not change, staying prediction loop")
+            logging.info("Training did not change, staying prediction loop")
 
-        print(f"{training_rate = }")
+        logging.info(f"Having {training_rate = }")
         if training_rate < 0.8 or not full_model_path:
             # let's train
 
@@ -78,7 +80,7 @@ def model_in_the_loop(model_dir, collection_path, on_train, service_id, on_predi
                     'training_rate': training_rate,
                     'layout_model_path': config.layout_model_path
                     }
-            print(f"prediction args = {args=}")
+            logging.debug(f"Prediction args = {args=}")
             try:
                 results = list(queue_iter(service_id=service_id, gen=(dictize(on_predict(
                     args
