@@ -1,7 +1,8 @@
+import itertools
 import os
 from core import config
 from layout.latex.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
-from helpers.cache_tools import file_persistent_cached_generator
+from helpers.cache_tools import configurable_cache
 from core.pathant.Converter import converter
 from core.pathant.parallel import paraloop
 from core.pathant.PathAnt import PathAnt
@@ -21,9 +22,8 @@ class ElmoDifference(PDF_AnnotatorTool):
         self.n = n
         self.debug = debug
 
-    @file_persistent_cached_generator(
-        filename=config.cache + os.path.basename(__file__) + '.json',
-        key="html_path"
+    @configurable_cache(
+        filename=config.cache + os.path.basename(__file__)
     )
     def __call__(self, labeled_paths, *args, **kwargs):
 
@@ -73,10 +73,9 @@ ElmoDifferenceQueueRest = RestQueue(
 
 def on_predict(args):
     gen = elmo_difference_pipe(
-        "https://arxiv.org",
+        metaize(itertools.cycle("https://arxiv.org")),
         difference_model_path=args['best_model_path']
     )
-    # _ = next(gen)
     return gen
 
 

@@ -5,7 +5,7 @@ from layout.latex.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
 sys.path.append(".")
 
 from core.pathant.Converter import converter
-from helpers.cache_tools import file_persistent_cached_generator
+from helpers.cache_tools import configurable_cache
 from core import config
 
 @converter("feature", 'assigned.feature')
@@ -14,7 +14,7 @@ class FeatureAssigner(PDF_AnnotatorTool):
         super().__init__(*args, **kwargs)
         pass
 
-    @file_persistent_cached_generator(
+    @configurable_cache(
         config.cache + 'labeled_features_pickled.json',
         if_cache_then_finished=True
     )

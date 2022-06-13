@@ -1,7 +1,7 @@
 import os
 from core import config
 from layout.latex.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
-from helpers.cache_tools import file_persistent_cached_generator
+from helpers.cache_tools import configurable_cache
 from core.pathant.Converter import converter
 from core.pathant.parallel import paraloop
 
@@ -19,7 +19,7 @@ class PDF2ETC(PDF_AnnotatorTool):
         self.n = n
         self.debug = debug
 
-    @file_persistent_cached_generator(config.cache + os.path.basename(__file__) + '.json', if_cache_then_finished=True)
+    @configurable_cache(config.cache + os.path.basename(__file__) + '.json')
     def __call__(self, labeled_paths, *args, **kwargs):
         for doc_id, (pdf_path, meta) in enumerate(labeled_paths):
             html_path = pdf_path + outputs['html']

@@ -52,6 +52,11 @@ class BoxFeatureMaker(PathSpec):
 
                 images = convert_from_path(labeled_pdf_path)
                 image_dict = {}
+
+                if len(images) > config.MAX_PAGES_PER_DOCUMENT:
+                    self.logger.warning(f"document {labeled_pdf_path=} has to many pages, continuing")
+                    continue
+
                 for page_number, pil in enumerate(images):
                     image_path = f'{labeled_pdf_path}.{page_number}.jpg'
 
@@ -65,8 +70,8 @@ class BoxFeatureMaker(PathSpec):
                     pil.save(image_path)
 
                 final_feature_df['image_path'] = final_feature_df.page_number.map(image_dict)
-
-                yield final_feature_df, meta
+                meta['final_feature_df'] = final_feature_df
+                yield labeled_pdf_path, meta
 
     TextBoxData = namedtuple("TextBoxData", [
         "page_number",

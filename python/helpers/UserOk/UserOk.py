@@ -3,7 +3,7 @@ import os
 import tkinter
 
 from core import config
-from helpers.cache_tools import file_persistent_cached_generator
+from helpers.cache_tools import configurable_cache
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 
@@ -14,7 +14,7 @@ class OK(PathSpec):
         super().__init__(*args, **kwargs)
         pass
 
-    @file_persistent_cached_generator(config.cache + 'user_ok_tex_paths.json')
+    @configurable_cache(config.cache + 'user_ok_tex_paths.json')
     def __call__(self, paths, *args, cache=None, **kwargs):
         while True:
             batch = list(itertools.islice(paths, 165))

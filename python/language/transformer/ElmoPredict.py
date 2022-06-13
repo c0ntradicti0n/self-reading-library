@@ -37,14 +37,13 @@ class ElmoPredict(PathSpec):
 
     def __call__(self, feature_meta, *args, **kwargs):
 
-
-        for _ in feature_meta:
+        for pdf_path, meta in feature_meta:
 
             q1.put(0)
 
             while True:
                 try:
-                    try:  # https://stackoverflow.com/questions/51700960/runtimeerror-generator-raised-stopiteration-every-time-i-try-to-run-app
+                    try:
                         words, meta = q2.get(timeout=9)
                         q2.task_done()
 
@@ -63,7 +62,8 @@ class ElmoPredict(PathSpec):
 
                 try:
                     if not self.model:
-                        self.model = Model.load(config=self.config, serialization_dir=self.flags['difference_model_path'])
+                        self.model = Model.load(config=self.config,
+                                                serialization_dir=self.flags['difference_model_path'])
                         self.default_predictor = Predictor.from_path(self.flags['difference_model_path'])
                         self.predictor = DifferenceTaggerPredictor(
                             self.default_predictor._model,
@@ -72,10 +72,9 @@ class ElmoPredict(PathSpec):
                     annotation = self.predictor.predict_json({"sentence": words})
                     self.info(annotation)
                 except Exception as e:
-                    self.logger.error("Faking annotation because of error " + str(e),  stack_info=True)
+                    self.logger.error("Faking annotation because of error " + str(e), stack_info=True)
                     annotation = [('O', w) for w in words]
                     consumed_tokens
-
 
                 try:
                     try:
@@ -89,8 +88,9 @@ class ElmoPredict(PathSpec):
                         self.logger.info("empty prediction")
                     q1.put(consumed_tokens)
 
-                    yield annotation, {
+                    yield pdf_path, {
                         **meta,
+                        'annotation': annotation,
                         'CSS': self.CSS,
                         "consumed_i2": consumed_tokens,
                     }

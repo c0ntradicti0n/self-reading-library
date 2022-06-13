@@ -1,21 +1,21 @@
 import glob
 import hashlib
+import itertools
 import os
 from itertools import count
 import random
 from helpers.list_tools import metaize, unique
-
 import requests
 import time
 from bs4 import BeautifulSoup
-
 from core import config
-from helpers.cache_tools import file_persistent_cached_generator
+from helpers.cache_tools import configurable_cache
 
 import logging
 
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
+
 
 @converter("arxiv.org", "tex")
 class ScienceTexScraper(PathSpec):
@@ -25,93 +25,92 @@ class ScienceTexScraper(PathSpec):
         self.save_dir = config.tex_data
         if not os.path.isdir(self.save_dir):
             os.system(f"mkdir {config.tex_data}")
-    delivered = []
 
+    delivered = []
 
     def __call__(self, url):
         self.scrape_count = count()
         self.i = 0
         self.yet = []
-        self.url = url
+        self.url = None
         if 'texs' in self.flags:
             yield from list(metaize(self.flags['texs']))
         else:
-            yield from self.surf_random(url)
+            yield from self.surf_random(enumerate(url))
 
-    headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36'}
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36'}
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.logger.info("navigating backt to " + self.cwd)
 
-    @file_persistent_cached_generator(
-        config.cache + 'scraped_tex_paths.json',
-        if_cache_then_finished=True,
-        load_via_glob=config.tex_data + "**/*[!labeled].tex"
+    @configurable_cache(
+        config.cache + 'scraped_tex_paths'
     )
-    def surf_random(self, url):
-        logging.info(f"trying {url}")
+    def surf_random(self, i_url):
+        for i, url in i_url:
 
-        try:
-            response = requests.get(url, headers=self.headers)
-            soup = BeautifulSoup(response.text, "lxml")
-            links = soup.findAll('a')
-            random.shuffle(links)
-            if response.status_code == 404:
-                logging.error(f"404 for {url}")
-                links = []
-        except Exception as e:
-            logging.error(f"Connection error, maybe timeout, maybe headers, maybe bad connection, continuing elsewhere: {e}")
-            links = []
+            url = url[0]
+            if not self.url:
+                self.url = url
 
+            logging.info(f"trying {url}")
 
-
-        hrefs = []
-        for link in links:
             try:
-                new_href = link['href']
-                if not new_href.startswith("http"):
-                    new_href= self.url + new_href
-                if not (
-                        any(s in new_href for s in ['e-print', 'archive', 'year', 'list', 'format'])
-                        and not any(forbidden in new_href for forbidden in ['cornell.edu', 'pastweek', 'searchtype', 'recent', 'help'])
-                        and new_href not in self.yet):
+                response = requests.get(url, headers=self.headers, timeout=30)
+                soup = BeautifulSoup(response.text, "lxml")
+                links = soup.findAll('a')
+                random.shuffle(links)
+                if response.status_code == 404:
+                    logging.error(f"404 for {url}")
+                    links = []
+            except Exception as e:
+                logging.error(
+                    f"Connection error, maybe timeout, maybe headers, maybe bad connection, continuing elsewhere: {e}")
+                links = []
+
+            hrefs = []
+            for link in links:
+                try:
+                    new_href = link['href']
+                    if new_href in url:
+                        continue
+                    if not new_href.startswith("http"):
+                        new_href = self.url + new_href
+                    if not (
+                            any(s in new_href for s in ['e-print', 'archive', 'year', 'list', 'format'])
+                            and not any(
+                        forbidden in new_href for forbidden in
+                        ['cornell.edu', 'pastweek', 'searchtype', 'recent', 'help', 'stat'])
+                            and new_href not in self.yet):
+                        continue
+                except KeyError:
                     continue
-            except KeyError:
-                continue
-            hrefs.append(new_href)
+                hrefs.append(new_href)
 
-        # First look on the page for downloads, that should be done
-        for href in hrefs:
-            if "e-print" in href:
-                logging.warning(f"getting {href}")
-                name = hashlib.md5(href.encode('utf-8')).hexdigest()
-                tar_gz_path = self.cwd + config.tex_data + name + ".tar.gz"
-                path  = self.cwd + config.tex_data + name
-                os.system(
-                    f'wget '
-                    f'--user-agent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36" '
-                    f'{href} '
-                    f'-O {tar_gz_path}')
+            # First look on the page for downloads, that should be done
+            for href in hrefs:
+                href = href.replace('format', 'pdf')
+                if "pdf" in href:
+                    logging.warning(f"getting {href}")
+                    name = href.replace(self.url, '').replace('/', '-')
+                    path = self.cwd + config.tex_data + name
+                    if not path in self.delivered:
+                        os.system(
+                            f'mkdir {path} &  wget '
+                            f'--user-agent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36" '
+                            f'{href} '
+                            f'-O {path}/main.pdf')
 
-                unpack_path = self.cwd + config.tex_data + name
-                os.system(f"mkdir -p {unpack_path} & "
-                          f"tar -zxvf {tar_gz_path} -C {unpack_path}/")
-                tex_files = glob.glob(path + "/*" + self.path_spec._to)
-                pdf_files = glob.glob(path + "/*.pdf")
+                        pdf = f"{path}/main.pdf"
+                        self.delivered.append(path)
 
-                if pdf_files:
-                    yield from unique([(pdf, {'meta':{'url': url}}) for pdf in pdf_files], key=lambda x: x[0], delivered = self.delivered)
-                else:
-                    yield from unique([(tex, {'meta':{'url': url}}) for tex in tex_files], key=lambda x: x[0], delivered = self.delivered)
+                        yield (pdf, {'pdf': pdf, 'url': url})
 
-        # if not enough, random surf further
-        for href in hrefs:
+            # if not enough, random surf further
+            random.shuffle(hrefs)
+            for href in hrefs:
                 self.yet.append(href)
                 print(f"Got {href}")
-                yield from self.surf_random(href)
+                yield from self.surf_random([(href, (href, {}))])
                 time.sleep(random.uniform(0.9, 1.9))
-
-
-
-
-

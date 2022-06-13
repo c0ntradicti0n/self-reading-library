@@ -292,16 +292,16 @@ class TestPaperPublisher(unittest.TestCase):
 
     def setUp(self):
         self.ant = PathAnt()
-        self.model_pipe = self.ant("arxiv.org", "keras")
+        self.model_pipe = self.ant(itertools.cycle(["arxiv.org"]), "keras")
         self.prediction_pipe = self.ant("pdf", "latex.html")
 
     def test_make_model(self):
-        model_pipe = self.ant("arxiv.org", "keras")
+        model_pipe = self.ant(itertools.cycle(["arxiv.org"]), "keras")
         print(list(model_pipe("https://arxiv.org")))
 
     def test_rest(self):
         os.system(" git clone https://github.com/matt-sm/create-react-flask.git ")
-        model_pipe = self.ant("arxiv.org", "keras")
+        model_pipe = self.ant(itertools.cycle(["arxiv.org"]), "keras")
 
 
 if __name__ == '__main__':

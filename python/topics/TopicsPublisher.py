@@ -16,15 +16,15 @@ from core.StandardConverter.Dict2Graph import Dict2Graph
 from helpers.list_tools import unique
 from topics.TopicMaker import TopicMaker
 from core import config
-from helpers.cache_tools import file_persistent_cached_generator, uri_with_cache
+from helpers.cache_tools import configurable_cache, uri_with_cache
 from helpers.nested_dict_tools import type_spec_iterable
 from core.pathant.Converter import converter
 from flask import jsonify, Blueprint
 
 bp = Blueprint('blueprint', __name__, template_folder='templates')
 
-
 topic_maker = TopicMaker()
+
 
 @converter("reading_order", "topics.dict")
 class TopicsPublisher(RestPublisher, react):
@@ -43,7 +43,7 @@ class TopicsPublisher(RestPublisher, react):
     reading_order_regex = regex.compile(" *\d+:(.*)")
 
     def __call__(self, documents):
-        documents = unique(list(documents), key=lambda x: x[1]['html_path'])
+        documents = list(documents)
 
         html_paths_json_paths_txt_paths, metas = list(zip(*documents))
 
@@ -63,8 +63,7 @@ class TopicsPublisher(RestPublisher, react):
         yield self.topics, text_ids
 
     def on_get(self, req, resp):  # get all
-        documents = unique(list(self.ant("prediction", "reading_order", if_cached_then_forever=True)([]))
-                           , key=lambda x: x[1]['html_path'])
+        documents = list(self.ant("prediction", "reading_order", from_cache_only=True)([]))
 
         path = config.topics_dump + f"_{len(documents)}"
         if os.path.exists(path):
@@ -78,7 +77,7 @@ class TopicsPublisher(RestPublisher, react):
                 print(value)
         else:
 
-            value, meta = list(zip(*list(self.ant("prediction", "topics.graph", if_cached_then_forever=True)([]))))
+            value, meta = list(zip(*list(self.ant("prediction", "topics.graph", from_cache_only=True)([]))))
 
         pprint(type_spec_iterable(value))
 

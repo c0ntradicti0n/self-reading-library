@@ -58,7 +58,8 @@ class Pager(PathSpec):
 
 
     def __call__(self, paths, *args, **kwargs):
-        for texts, meta in paths:
+        for _pdf_path, meta in paths:
+            texts = meta['enumerated_texts']
             try:
                 pdf_path, reading_order_path, _ = self.run_pdf2htmlEX(meta['html_path'], meta)
             except Exception as e:
@@ -83,7 +84,8 @@ class Pager(PathSpec):
             generator = self.make_tokenized_windows(real_tokens)
             next(generator)
             threading.Thread(target=self.window_thread, args=(generator, meta, i_word,)).start()
-            yield texts, meta
+            meta['texts'] = texts
+            yield _pdf_path, meta
 
     def window_thread(self, generator, meta, i_word):
         i = 0

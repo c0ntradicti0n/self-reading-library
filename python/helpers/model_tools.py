@@ -84,6 +84,7 @@ def model_in_the_loop(model_dir, collection_path, on_train, service_id, on_predi
                     args
                 )))))
                 pprint(results)
+
             except KeyboardInterrupt as e:
 
                 exit = input("Exit? [y]/n")

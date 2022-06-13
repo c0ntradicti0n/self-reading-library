@@ -23,7 +23,7 @@ class LayoutEagle:
 
 
     def test_topics(self):
-        self.model_pipe = self.ant("arxiv.org", "keras")
+        self.model_pipe = self.ant(itertools.cycle(["arxiv.org"]), "keras")
 
         pdfs = [file for file in glob.glob(config.pdf_dir + "*.pdf")]
         self.ant.info()
@@ -33,7 +33,7 @@ class LayoutEagle:
 
 
     def make_layout_model(self):
-        model_pipe = self.ant("arxiv.org", "keras" )
+        model_pipe = self.ant(itertools.cycle(["arxiv.org"]), "keras" )
         print (list(model_pipe("https://arxiv.org", training = True)))
         os.system(
             f'cp -r {config.hidden_folder + config.layout_model_path} {config.hidden_folder + config.saved_layout_model_dir}')

@@ -140,7 +140,7 @@ if __name__ == "__main__":
                     num_labels=config.NUM_LABELS,
                     layout_model_path=full_model_path
                 )(
-                    "https://arxiv.org"
+                    metaize(itertools.cycle(["http://export.arxiv.org/"]))
                 ), 100))
             except Exception as e:
                 logging.error("Geeting first 50 threw", exc_info=True)

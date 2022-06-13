@@ -21,7 +21,8 @@ class UnPager(PathSpec):
         whole_meta = None
         all_annotations = []
 
-        for annotation, meta in feature_meta:
+        for _pdf_path, meta in feature_meta:
+            annotation = meta['annotation']
             if not whole_doc_id:
                 whole_doc_id = meta["doc_id"]
             if meta["doc_id"] != whole_doc_id:
@@ -48,8 +49,8 @@ class UnPager(PathSpec):
                                 whole_meta["_i_to_i2"][whole_meta["i_word"][_i1][0]] = (i_annotation, _i2)
                     except:
                         logging.error("Error using alignment", exc_info=True)
-
-                yield whole_annotation, whole_meta
+                whole_meta['whole_annotation'] = whole_annotation
+                yield _pdf_path, whole_meta
 
                 whole_annotation = []
                 whole_meta = None

@@ -43,7 +43,7 @@ class Pipeline:
 
 
                         intermediate_result = functional_object(intermediate_result, *others)
-                    elif intermediate_result:
+                    elif intermediate_result != None:
                         intermediate_result = functional_object(intermediate_result)
                     else:
                         intermediate_result = functional_object()

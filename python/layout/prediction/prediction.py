@@ -1,6 +1,6 @@
 import logging
 
-from helpers.cache_tools import file_persistent_cached_generator
+from helpers.cache_tools import configurable_cache
 from layout.imports import *
 from core import config
 from core.pathant.Converter import converter
@@ -24,17 +24,13 @@ class Prediction(PathSpec):
         self.model_path = model_path
 
 
-        for feature_df, meta in x_meta:
-
+        for pdf_path, meta in x_meta:
+            feature_df = meta['final_feature_df']
             predictions_metas_per_document = []
 
             df = model_helpers.post_process_df(feature_df)
 
             dataset = Dataset.from_pandas(df.loc[:, df.columns != 'chars_and_char_boxes'])
-
-            if len(dataset) > config.MAX_PAGES_PER_DOCUMENT:
-                dataset = dataset[:config.MAX_PAGES_PER_DOCUMENT]
-                logging.warning(f"document exceding {config.MAX_PAGES_PER_DOCUMENT} pages, truncating")
 
             for page_number in range(len(dataset)-1):
                 example = dataset[page_number:page_number + 1]
@@ -84,7 +80,8 @@ class Prediction(PathSpec):
 
                     predictions_metas_per_document.append(prediction_meta)
 
-            yield predictions_metas_per_document, meta
+            meta['predictions_metas_per_document'] = predictions_metas_per_document
+            yield pdf_path, meta
 
     def load_model(self):
         if not self.model:

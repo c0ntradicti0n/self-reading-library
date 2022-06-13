@@ -1,26 +1,22 @@
 import collections
 import functools
-import itertools
 import json
 import logging
-import pickle
 import shutil
-import types
+import urllib
 import zlib
 from glob import glob
 import falcon
 import os
 import unittest
-
 import numpy
 
-from helpers.lazy import lazy
-
 logger = logging.getLogger(__file__)
+import _pickle as cPickle
 
 
 def compressed_pickle(value):
-    pvalue = pickle.dumps(obj=value)
+    pvalue = cPickle.dumps(obj=value)
     cvalue = zlib.compress(pvalue)
     return cvalue
 
@@ -28,132 +24,10 @@ def compressed_pickle(value):
 def decompress_pickle(value):
     try:
         pvalue = zlib.decompress(value)
-        rvalue = pickle.loads(data=pvalue)
+        rvalue = cPickle.loads(data=pvalue)
         return rvalue
     except:
-        raise
-
-
-def file_persistent_cached_generator(
-        filename,
-        key=None,
-        **kwargs):
-    def decorator(original_func):
-        standard_flags = kwargs
-
-        def new_func(*param):
-
-            try:
-                cwd = os.getcwd()
-
-                flags = standard_flags.copy()
-                flags.update(param[0].flags)
-                load_via_glob = flags['load_via_glob'] if 'load_via_glob' in flags else None
-                if_cache_then_finished = flags['if_cache_then_finished'] if 'if_cache_then_finished' in flags else False
-                if_cached_then_forever = flags['if_cached_then_forever'] if 'if_cached_then_forever' in flags else False
-                dont_use_cache = flags['dont_use_cache'] if 'dont_use_cache' in flags else False
-
-                if_cache_then_finished = flags[
-                    'dont_use_cache'] if 'dont_use_cache' in flags else if_cache_then_finished
-                if_cached_then_forever = flags[
-                    'dont_use_cache'] if 'dont_use_cache' in flags else if_cached_then_forever
-
-                if dont_use_cache:
-                    cache = {}
-                else:
-                    try:
-                        with open(filename, 'r') as f:
-                            cache = list(f.readlines())
-
-                        if load_via_glob:
-                            if isinstance(load_via_glob, str):
-                                load_via_glob = [load_via_glob]
-                            cache = [f'["{fp}", {"{}"} ]' for path in load_via_glob for fp in glob(path)]
-
-                        cache = [tuple(json.loads(line)) for line in cache]
-                        cache = [(a if not isinstance(a, list) else tuple(a), b) for a, b in cache]
-                        try:
-                            cache = dict(cache)
-                        except:
-                            pass
-                    except (IOError, ValueError):
-                        cache = {}
-
-                if len(param) > 2 and isinstance(param[1], list) and (not if_cache_then_finished and cache):
-                    yield from apply_and_cache(cache, cwd, param, no_cache=True)
-                elif if_cached_then_forever:
-                    yield from yield_cache(cache, cwd)
-                else:
-                    yield from yield_cache(cache, cwd)
-                    yield from apply_and_cache(cache, cwd, param, no_cache=dont_use_cache, key=key)
-
-                os.chdir(cwd)
-            except Exception as e:
-                logging.error(e, exc_info=True)
-                raise e
-
-        def yield_cache(cache, cwd):
-
-            if isinstance(cache, dict):
-                for result in cache.items():
-                    os.chdir(cwd)
-                    yield result
-
-            if isinstance(cache, list):
-                for result in cache:
-                    os.chdir(cwd)
-                    yield result
-
-        def apply_and_cache(cache, cwd, param, no_cache=False, key=None):
-            if isinstance(param[1], types.GeneratorType):
-                filtered_param = (param[0], filter_ant_step(param[1], cache, key=key))
-            else:
-                filtered_param = param
-
-            generator = original_func(*filtered_param)
-
-            for result in generator:
-                try:
-
-                    if key and result[1][key] in cache:
-                        yield result[0], cache[result[0]]
-                        continue
-
-                    result_string = json.dumps(result) + "\n"
-                    if no_cache or result_string not in cache:
-                        try:
-                            content, meta = result
-                        except:
-                            raise
-
-                        done = False
-                        while not done:
-                            try:
-
-                                if os.path.exists(filename):
-                                    append_write = 'a'  # append if already exists
-                                else:
-                                    append_write = 'w'  # make a new file if not
-
-                                with open(filename, append_write) as f:
-                                    f.write(result_string)
-
-                            except FileNotFoundError:
-                                logging.error("multithreading file not found error...")
-                                continue
-                            done = True
-
-                    yield content, meta
-                except Exception as e:
-                    logging.error(
-                        f"{str(e)} while computing on \n {str(result)}\n in {str(original_func)}\n being in {os.getcwd()}")
-                    raise e
-
-        functools.update_wrapper(new_func, original_func)
-
-        return new_func
-
-    return decorator
+        logging.error(f"corrupted cache file {value=}")
 
 
 def unroll_cache(cache):
@@ -164,17 +38,22 @@ def unroll_cache(cache):
 def filter_ant_step(gen, cache, key=None):
     try:
         for value, meta in gen:
-            if (str(value) if not key else meta[key]) not in cache:
+            if urllib.parse.quote_plus(str(value) if not key else meta[key]) not in cache:
                 yield value, meta
 
     except Exception:
-        print(f"{gen=} {cache=} {key=}")
         raise
 
 
-def apply(f, gen, cache):
-    for result in f(filter_ant_step(gen, cache)):
-        yield result
+def apply(cls, f, gen, cache, append_cache, filename):
+    for result in f(cls, filter_ant_step(gen, cache)):
+
+        should_yield = True
+        if append_cache:
+            should_yield = write_cache(path=filename, result=result, old_cache=cache)
+
+        if should_yield:
+            yield result
 
 
 def read_cache_file(path, value):
@@ -193,7 +72,8 @@ def read_cache(path):
     contents = os.listdir(path)
 
     new_cache = {
-        key: read_cache_file(path, key) for key in contents
+        urllib.parse.unquote_plus(key): c for key in contents
+        if (c := read_cache_file(path, key)) !=None
     }
 
     return new_cache
@@ -204,59 +84,65 @@ def write_cache(old_cache, path, result, overwrite_cache=False):
         value, meta = result
     except:
         raise IndexError(f"{result=} is not a value-meta tuple")
+
+    if not isinstance(value, str):
+        raise IndexError(f"{value=} is not a string")
+
+    value = urllib.parse.quote_plus(value)
     old_cache[value] = compressed_pickle(meta)
 
     fpath = path + "/" + str(value)
     if os.path.exists(fpath):
-        logger.error(".")
-        return
+        logger.error("double writing cache")
+        return False
 
     with open(fpath, "wb") as f:
         f.write(old_cache[value])
+    return True
 
 
 def configurable_cache(
         filename,
-        from_path_blob=None,
+        from_path_glob=None,
         from_cache_only=False,
         from_cache_if_exists_else_run=False,
         from_function_only=False,
         dont_append_to_cache=False
 ):
     def decorator(original_func):
-        def new_func(source, from_path_blob=from_path_blob):
-            yield_cache = True if not from_function_only else False
-            yield_apply = not from_cache_only and not from_path_blob
-            append_cache = not dont_append_to_cache and not from_path_blob
+        def new_func(cls, source, from_path_glob=from_path_glob):
 
-            if from_path_blob:
-                if isinstance(from_path_blob, str):
-                    from_path_blob = [from_path_blob]
-                cache = {fp: {} for path in from_path_blob for fp in glob(path)}
+
+            _cls = cls if cls and cls.flags != None else configurable_cache
+            _from_cache_only = _cls.flags.get("from_cache_only", from_cache_only)
+            _from_path_glob = _cls.flags.get("from_path_glob", from_path_glob)
+            _from_function_only = _cls.flags.get("from_function_only", from_function_only)
+            _dont_append_to_cache = _cls.flags.get("dont_append_to_cache", dont_append_to_cache)
+
+            yield_cache = True if not _from_function_only else False
+            yield_apply = not _from_cache_only and not _from_path_glob
+            append_cache = not _dont_append_to_cache and not _from_path_glob
+
+            if _from_path_glob:
+                if isinstance(_from_path_glob, str):
+                    _from_path_glob = [_from_path_glob]
+                cache = {fp: {} for path in _from_path_glob for fp in glob(path)}
                 if len(cache) == 0:
-                    logging.info(f"Found nothing via glob {from_path_blob} from {os.getcwd()}")
+                    logging.info(f"Found nothing via glob {_from_path_glob} from {os.getcwd()}")
             else:
                 cache = read_cache(filename)
 
-            combine_gens = []
             if yield_cache:
-                combine_gens += unroll_cache(cache)
+                yield from unroll_cache(cache)
             if yield_apply:
-                combine_gens += apply(original_func, source, cache)
-
-            gens = itertools.chain.from_iterable([combine_gens])
-
-            for result in gens:
-                if append_cache:
-                    write_cache(path=filename, result=result, old_cache=cache)
-                yield result
+                yield from apply(cls, original_func, source, cache, append_cache, filename)
 
         functools.update_wrapper(new_func, original_func)
 
         return new_func
 
     return decorator
-
+configurable_cache.flags = {}
 
 memory_caches = {}
 
@@ -288,9 +174,9 @@ def uri_with_cache(fun):
 
 class TestCache(unittest.TestCase):
 
-    def run_cached(self, x, filename,  *args,  cargs=[], ckwargs={},**kwargs):
+    def run_cached(self, x, filename, *args, cargs=[], ckwargs={}, **kwargs):
         @configurable_cache(filename=filename, *cargs, **ckwargs)
-        def f(values_metas, *_, **__):
+        def f(self, values_metas, *_, **__):
             for i, m in values_metas:
                 yield i, {
                     k:
@@ -300,7 +186,7 @@ class TestCache(unittest.TestCase):
 
         _f = configurable_cache(filename=filename, *args, **kwargs)(f)
 
-        y = list(f(x, *args, **kwargs))
+        y = list(f(None, x, *args, **kwargs))
         return x, y, _f
 
     def check_cached(self,
@@ -313,7 +199,7 @@ class TestCache(unittest.TestCase):
                      ):
         print(f"content of {os.getcwd()=} \n{os.listdir(os.getcwd())}")
 
-        if not 'from_path_blob' in kwargs:
+        if not 'from_path_glob' in kwargs:
             assert os.path.exists(filename)
 
     def run_test_cache(self
@@ -336,30 +222,41 @@ class TestCache(unittest.TestCase):
         print(y)
         return y
 
-    def test_cache_blob(self):
+    def test_cache_glob(self):
         assert len(self.run_test_cache(None,
-                                    from_path_blob='*.py',
-                                    )) > 3
+                                       from_path_glob='*.py',
+                                       )) > 3
 
     def test_cache1_gen(self):
         assert len(list(self.run_test_cache(
-            ((i, {}) for i in range(1, 4))
+            ((str(i), {}) for i in range(1, 4))
+        ))) == 3
+
+    def test_cache1_gen_multiple_times(self):
+        assert len(list(self.run_test_cache(
+            ((str(i), {}) for i in range(1, 4))
+        ))) == 3
+        assert len(list(self.run_test_cache(
+            ((str(i), {}) for i in range(1, 4))
+        ))) == 3
+        assert len(list(self.run_test_cache(
+            ((str(i), {}) for i in range(1, 4))
         ))) == 3
 
     def test_cached1_gen(self):
         assert len(list(self.run_test_cache(
-            ((i, {}) for i in range(1, 4))
+            ((str(i), {}) for i in range(1, 4))
         ))) == 3
         assert len(list(self.run_test_cache(
-            ((i, {}) for i in range(4, 7))
+            ((str(i), {}) for i in range(4, 7))
             , test_delete_cache_before=False))) == 6
 
     def test_cached1_gen_meta_numpy(self):
         assert len(list(self.run_test_cache(
-            ((i, {"np": numpy.zeros((1, 3))}) for i in range(1, 4))
+            ((str(i), {"np": numpy.zeros((1, 3))}) for i in range(1, 4))
         ))) == 3
         assert len(list(self.run_test_cache(
-            ((i, {}) for i in range(4, 7))
+            ((str(i), {}) for i in range(4, 7))
             , test_delete_cache_before=False))) == 6
 
     def test_cached1_not_doing_again(self):
@@ -370,38 +267,37 @@ class TestCache(unittest.TestCase):
             ((str(i), {"bool": True}) for i in range(2, 4))
             , test_delete_cache_before=False))
         assert len(res) == 4
-        assert all((c==1 for e, c in collections.Counter([int(k) for k, m in res]).items()))
+        assert all((c == 1 for e, c in collections.Counter([int(k) for k, m in res]).items()))
         assert all((not r[1]['bool'] for r in res))
 
     def test_cache1_list(self):
         assert len(list(self.run_test_cache(
-            [(1, {}), (2, {}), (3, {})]
+            [("1", {}), ("2", {}), ("3", {})]
         ))) == 3
 
     def test_cached1_list(self):
         assert len(list(self.run_test_cache(
-            [(1, {}), (2, {}), (3, {})]
+            [("1", {}), ("2", {}), ("3", {})]
         ))) == 3
         assert len(list(self.run_test_cache(
-            [(4, {}), (5, {}), (6, {})]
+            [("4", {}), ("5", {}), ("6", {})]
             , test_delete_cache_before=False))) == 6
 
     def test_cache_only(self):
         assert len(list(self.run_test_cache(
-            [(1, {}), (2, {}), (3, {})]
+            [("1", {}), ("2", {}), ("3", {})]
         ))) == 3
         assert len(list(self.run_test_cache(
-            [(4, {}), (5, {}), (6, {})]
-            , test_delete_cache_before=False, ckwargs={'from_cache_only':True}))) == 3
+            [("4", {}), ("5", {}), ("6", {})]
+            , test_delete_cache_before=False, ckwargs={'from_cache_only': True}))) == 3
 
     def test_function_only(self):
         assert len(list(self.run_test_cache(
-            [(1, {}), (2, {}), (3, {})]
+            [("1", {}), ("2", {}), ("3", {})]
         ))) == 3
         assert len(list(self.run_test_cache(
-            [(4, {}), (5, {}), (6, {})]
-            , test_delete_cache_before=False, ckwargs={'from_function_only':True}))) == 3
-
+            [("4", {}), ("5", {}), ("6", {})]
+            , test_delete_cache_before=False, ckwargs={'from_function_only': True}))) == 3
 
     def test_uncompress_decompress(self):
         decompress_pickle(compressed_pickle([1, 2, 3, 4])) == [1, 2, 3, 4]

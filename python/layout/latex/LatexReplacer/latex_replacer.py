@@ -8,7 +8,7 @@ from threading import Timer
 from TexSoup import TexSoup, TexNode
 from TexSoup.data import TexEnv, TexCmd, TexText, BracketGroup, BraceGroup, TexNamedEnv
 
-from helpers.cache_tools import file_persistent_cached_generator
+from helpers.cache_tools import configurable_cache
 from layout.latex.LatexReplacer import multicol_defs
 from layout.latex.LatexReplacer.replacer import SoupReplacer
 from helpers.os_tools import get_path_filename_extension
@@ -131,7 +131,7 @@ class LatexReplacer(SoupReplacer):
             self.logger.info("No multi column instruction found, so its single col")
             return r" c 1 "
 
-    @file_persistent_cached_generator(
+    @configurable_cache(
         config.cache + 'replaced_tex_paths.json',
         if_cache_then_finished=True
         #load_via_glob=[

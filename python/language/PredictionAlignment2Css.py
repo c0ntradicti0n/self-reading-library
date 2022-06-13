@@ -34,10 +34,9 @@ class PredictionAlignment2Css(PathSpec):
             return None
 
     def __call__(self, feature_meta, *args, **kwargs):
-        for annotation, meta in feature_meta:
-            #tags, words = list(zip(*annotation))
+        for _pdf_path, meta in feature_meta:
 
-            #self.logger.warn(f"tag counts {Counter(list(tags))}")
+            annotation = meta['whole_annotation']
             i_to_tag = {}
 
             try:
@@ -83,7 +82,7 @@ class PredictionAlignment2Css(PathSpec):
                 self.logger.warning("set meta['doc_id'] for logs")
 
             meta['css'] = css
-            yield css, meta
+            yield _pdf_path, meta
 
     def parse_to_css(self, css_obj, meta):
         try:

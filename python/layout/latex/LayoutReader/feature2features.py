@@ -2,7 +2,7 @@ import itertools
 import pandas
 
 from core import config
-from helpers.cache_tools import file_persistent_cached_generator
+from helpers.cache_tools import configurable_cache
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 
@@ -14,7 +14,7 @@ class Feature2Features(PathSpec):
         self.pandas_path = pandas_path
         self.n = n
 
-    @file_persistent_cached_generator(config.cache + 'collected_features.json')
+    @configurable_cache(config.cache + 'collected_features.json')
     def __call__(self, feature_dfs_meta,  *args, **kwargs):
         feature_dfs_meta = list(itertools.islice(feature_dfs_meta, self.n))
         df_paths, meta = zip(*feature_dfs_meta)
