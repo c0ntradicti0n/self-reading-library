@@ -88,10 +88,7 @@ jobs:
           "
       - name: StartServer
         run: |
-            ssh staging '   screen -L  -Logfile backend_uwsgi.log -S backend -dm bash -c " . venv/bin/activate; cd LayoutEagle/python; until    uwsgi wsgi.ini ; do
-    echo "Server 'myserver' crashed with exit code $?.  Respawning.." >&2
-    sleep 1
-done    "  &  '
+            ssh staging '   screen -L  -Logfile backend_uwsgi.log -S backend -dm bash -c " . venv/bin/activate; cd LayoutEagle/python; until    uwsgi wsgi.ini ; do ; echo 'Server  crashed with exit code $?.  Respawning.." >&2; sleep 1; done    "  &  '
 
       - name: StartBack
         run: |
