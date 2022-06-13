@@ -47,13 +47,14 @@ def filter_ant_step(gen, cache, key=None):
 
 def apply(cls, f, gen, cache, append_cache, filename):
     for result in f(cls, filter_ant_step(gen, cache)):
-
         should_yield = True
         if append_cache:
             should_yield = write_cache(path=filename, result=result, old_cache=cache)
 
         if should_yield:
             yield result
+
+
 
 
 def read_cache_file(path, value):
