@@ -76,12 +76,12 @@ elmo_difference_model_pipe = ant(
 
 
 def annotate_uploaded_file(file, service_id):
-    return list(
+    return next(
         elmo_difference_single_pipe(
             metaize((f for f in [file])),
             difference_model_path=BEST_MODELS["difference"]['best_model_path'],
             service_id=service_id
-        )
+        ), None
     )
 
 
