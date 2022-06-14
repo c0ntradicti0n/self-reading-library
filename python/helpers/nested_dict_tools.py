@@ -216,6 +216,17 @@ def type_spec_iterable(iterable, name="Types of it are "):
     result = name + "=" + str(length) + "[" + element_types + "]"
     return result
 
+def list2dict(d, key):
+    try:
+        if isinstance(d, dict):
+            return {k: list2dict(v, key) for k, v in d.items()}
+        elif isinstance(d, (set, list)):
+            return {key(e): list2dict(e, key) if isinstance( e, dict) else list2dict(e, key)  for e in d}
+        else:
+            return d
+    except:
+        return d
+
 def type_spec_dict(dict, name):
     def dict_info(dict):
         # With a dict for it to be comparable

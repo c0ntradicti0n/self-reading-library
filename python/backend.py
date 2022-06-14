@@ -15,7 +15,7 @@ from core.pathant.PathAnt import PathAnt
 from core.pathant.AntPublisher import AntPublisher
 from core.pathant.ConfigRest import ConfigRest
 from core.layout_eagle import LayoutEagle
-from core.StandardConverter.ScienceTexScraper.ScienceTexScraper import ScienceTexScraper
+from core.StandardConverter.Scraper import Scraper
 from core.StandardConverter.HTML2PDF import HTML2PDF
 from core.StandardConverter.PDF2HTML import PDF2HTML
 from helpers.list_tools import metaize, forget_except
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     filling_pipe = ant(
         "arxiv.org", f"reading_order",
         num_labels=config.NUM_LABELS,
-        model_path=full_model_path
+        layout_model_path=full_model_path
     )
 
     ant.info("workflow.png", pipelines_to_highlight=[
@@ -146,10 +146,9 @@ if __name__ == "__main__":
                 x = list(forget_except(filling_pipe(itertools.islice((
                     metaize(itertools.cycle(["http://export.arxiv.org/"]))
                 ), 100)), keys=["html_path"])),
-            except Exception as e:
-                logging.error("Getting first 50 threw", exc_info=True)
-
-                continue
+            except Exception:
+                logging.error("Getting first 100 threw", exc_info=True)
+                raise
 
 
     fill_library_thread = threading.Thread(target=fill_library).start()

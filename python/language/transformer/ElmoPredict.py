@@ -6,16 +6,18 @@ from allennlp.models.model import Model
 from language.transformer.difference_predictor.difference_predictor import DifferenceTaggerPredictor
 from queue import Queue, Empty
 
-q2 = Queue()
-q1 = Queue()
+q2 = {}
+q1 = {}
 
+
+model = None
 
 class ElmoPredict(PathSpec):
     def __init__(self, *args, elmo_config=None, train_output_dir, **kwargs):
         super().__init__(*args, **kwargs)
         self.elmo_config = elmo_config
         self.config = Params.from_file(params_file=elmo_config)
-        self.model = None
+
         self.CSS = {
             (span_letter + "-" + tag) if tag != 'O'
 
@@ -29,23 +31,25 @@ class ElmoPredict(PathSpec):
             for tag, css in self.CSS_SIMPLE.items()
         }
 
-    def init_quees(self):
+    def init_queues(self):
         global q1
         global q2
-        q2 = Queue()
-        q1 = Queue()
+        service_id = self.flags['service_id']
+        q2[service_id] = Queue()
+        q1[service_id] = Queue()
 
     def __call__(self, feature_meta, *args, **kwargs):
-
+        self.init_queues()
+        global model
         for pdf_path, meta in feature_meta:
 
-            q1.put(0)
+            q1[self.flags['service_id']].put(0)
 
             while True:
                 try:
                     try:
-                        words, meta = q2.get(timeout=9)
-                        q2.task_done()
+                        words, meta = q2[self.flags['service_id']].get(timeout=9)
+                        q2[self.flags['service_id']].task_done()
 
                     except StopIteration:
                         self.logger.info("Finished predicting (on stop of queue)")
@@ -58,11 +62,15 @@ class ElmoPredict(PathSpec):
 
                 if words is None:
                     self.logger.info("Finished predicting (on words is None)")
+                    m = {}
+                    m['doc_id'] = "finito"
+                    m['annotation'] = []
+                    yield pdf_path, m
                     break
 
                 try:
-                    if not self.model:
-                        self.model = Model.load(config=self.config,
+                    if not model:
+                        model = Model.load(config=self.config,
                                                 serialization_dir=self.flags['difference_model_path'])
                         self.default_predictor = Predictor.from_path(self.flags['difference_model_path'])
                         self.predictor = DifferenceTaggerPredictor(
@@ -87,7 +95,7 @@ class ElmoPredict(PathSpec):
                     if consumed_tokens == 0:
                         consumed_tokens = 100
                         self.logger.info("empty prediction")
-                    q1.put(consumed_tokens)
+                    q1[self.flags['service_id']].put(consumed_tokens)
 
                     yield pdf_path, {
                         **meta,
@@ -96,7 +104,7 @@ class ElmoPredict(PathSpec):
                         "consumed_i2": consumed_tokens,
                     }
 
-                    q1.put(consumed_tokens)
+                    q1[self.flags['service_id']].put(consumed_tokens)
 
 
 
@@ -105,7 +113,7 @@ class ElmoPredict(PathSpec):
                     self.logger.error("Could not process " + str(words), e)
                     raise
 
-            self.init_quees()
+            self.init_queues()
 
     def info(self, annotation):
         table = Texttable()

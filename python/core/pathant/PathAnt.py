@@ -250,7 +250,7 @@ import unittest
 
 class TestPathAnt(unittest.TestCase):
     """
-   from latex.ScienceTexScraper.ScienceTexScraper import ScienceTexScraper
+   from latex.Scraper.Scraper import Scraper
     from latex.LatexReplacer.latex_replacer import LatexReplacer
     from latex.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
     from latex.LayoutReader.feature_prediction import LayoutPrediction

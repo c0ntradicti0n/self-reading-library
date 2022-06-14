@@ -5,6 +5,9 @@ from queue import Queue, Empty
 import json
 from traceback_with_variables import Format, ColorSchemes, is_ipython_global, activate_by_import
 import logging
+
+from helpers.list_tools import metaize
+
 logging.getLogger().setLevel(logging.INFO)
 import os
 import sys
@@ -141,6 +144,10 @@ class RestQueue:
     def delete(self, id):
         self.workbook.pop(id)
 
+    def get_specific(self, id):
+        self.work_on_upload(id)
+
+
     def on_get(self, req, resp, id=None): # get image
         pprint(req)
 
@@ -209,8 +216,13 @@ class RestQueue:
 
         if (req.media):
             # fetching one document for annotation
-            path = config.tex_data + req.media
-            item = next(self.work_on_upload(path), None)
+            path = req.media
+            item = self.work_on_upload(path, req.params['id'])
+            self.workbook[id] = item
+            resp.body = json.dumps(item, ensure_ascii=False)
+            resp.status = falcon.HTTP_OK
+        elif req.params:
+            item =  self.work_on_upload(req.params['id'])
             self.workbook[id] = item
             resp.body = json.dumps(item, ensure_ascii=False)
             resp.status = falcon.HTTP_OK

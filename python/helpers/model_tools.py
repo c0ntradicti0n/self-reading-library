@@ -29,6 +29,8 @@ def find_best_model(model_dir):
 
 TRAINING_RATE = {}
 
+BEST_MODELS ={}
+
 
 def model_in_the_loop(model_dir, collection_path, on_train, service_id, on_predict, training_rate_mode='ls',
                       training_rate_file=None):
@@ -80,7 +82,11 @@ def model_in_the_loop(model_dir, collection_path, on_train, service_id, on_predi
                     'training_rate': training_rate,
                     'layout_model_path': config.layout_model_path
                     }
+
+            BEST_MODELS[service_id] = args
+
             logging.debug(f"Prediction args = {args=}")
+
             try:
                 results = list(queue_iter(service_id=service_id, gen=(dictize(on_predict(
                     args

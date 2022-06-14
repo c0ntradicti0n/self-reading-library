@@ -35,19 +35,24 @@ def unroll_cache(path, cache):
         yield m, decompress_pickle(read_cache_file(path, m))
 
 
-def filter_ant_step(gen, cache, key=None):
+def filter_ant_step(gen, cache, filter_by_cache, path):
     try:
         for value, meta in gen:
-            if (str(value) if not key else meta[key]) not in cache \
-                    and (urllib.parse.quote_plus(str(value)) if not key else meta[key]) not in cache:
+
+
+            if not filter_by_cache:
+                yield value, meta
+            elif  str(value) not in cache \
+                    and urllib.parse.quote_plus(str(value)) not in cache:
                 yield value, meta
 
-    except Exception:
+    except Exception as e:
         raise
 
 
-def apply(cls, f, gen, cache, append_cache, filename, **kwargs):
-    for result in f(cls, filter_ant_step(gen, cache), **kwargs):
+def apply(cls, f, gen, cache, filter_by_cache, append_cache, filename, **kwargs):
+    for result in f(cls, filter_ant_step(gen, cache, filter_by_cache, filename), **kwargs):
+
         should_yield = True
         if append_cache:
             should_yield = write_cache(path=filename, result=result, old_cache=cache)
@@ -65,7 +70,7 @@ def read_cache_file(path, value):
         logger.warning("Value was not encoded!")
         with open(path + "/" + urllib.parse.quote_plus(value), 'rb') as f:
             content = f.read()
-            return content
+        return content
 
 
 def read_cache(path):
@@ -128,21 +133,35 @@ def configurable_cache(
             yield_cache = True if not _from_function_only else False
             yield_apply = not _from_cache_only and not _from_path_glob
             append_cache = not _dont_append_to_cache and not _from_path_glob
+            filter_by_cache = not _from_function_only
 
             if _from_path_glob:
-                if isinstance(_from_path_glob, str):
-                    _from_path_glob = [_from_path_glob]
-                cache = [fp for path in _from_path_glob for fp in glob(path)]
-                if len(cache) == 0:
-                    logging.info(f"Found nothing via glob {_from_path_glob} from {os.getcwd()}")
-                yield from [(p, {}) for p in cache]
+                if yield_cache:
+                    if isinstance(_from_path_glob, str):
+                        _from_path_glob = [_from_path_glob]
+                    cache = [fp for path in _from_path_glob for fp in glob(path)]
+                    if len(cache) == 0:
+                        logging.info(f"Found nothing via glob {_from_path_glob} from {os.getcwd()}")
+                    yield from [(p, {}) for p in cache]
+                else:
+                    yield from apply(cls, original_func, source, [], filter_by_cache, append_cache, filename, **kwargs)
+
             else:
                 cache = read_cache(filename)
 
                 if yield_cache:
                     yield from unroll_cache(filename, cache)
                 if yield_apply:
-                    yield from apply(cls, original_func, source, cache, append_cache, filename, **kwargs)
+                    yield from apply(
+                        cls,
+                        original_func,
+                        source,
+                        cache,
+                        filter_by_cache,
+                        append_cache if filter_by_cache else False,
+                        filename,
+                        **kwargs
+                    )
 
         functools.update_wrapper(new_func, original_func)
 

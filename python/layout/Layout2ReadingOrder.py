@@ -21,14 +21,20 @@ class Layout2ReadingOrder(PathSpec):
         filename=config.cache + os.path.basename(__file__),
     )
     def __call__(self, x_meta, *args, **kwargs):
-        model_path = self.flags['model_path']
-        if not model_path:
+        if  'model_path' not in self.flags and  'layout_model_path' not in self.flags:
             raise Exception(
                 f"layout model path must be set via pipeline flags, these are the keywords in the call args, {self.flags=}")
+        model_path = self.flags['model_path'] if 'model_path' in self.flags else self.flags['layout_model_path']
+
         self.model_path = model_path
 
         for pdf_path, meta in x_meta:
-            feature_df = meta['final_feature_df']
+            try:
+                feature_df = meta['final_feature_df']
+            except:
+                logging.error("final feature df must be there!")
+                continue
+
             predictions_metas_per_document = []
 
             df = model_helpers.post_process_df(feature_df)

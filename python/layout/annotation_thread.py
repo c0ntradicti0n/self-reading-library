@@ -2,7 +2,7 @@ import itertools
 
 from layout.model_helpers import repaint_image_from_labels
 from core.event_binding import RestQueue
-from core.StandardConverter.ScienceTexScraper.ScienceTexScraper import ScienceTexScraper
+from core.StandardConverter.Scraper import Scraper
 from layout.box_feature_maker.box_feature_maker import BoxFeatureMaker
 from core.StandardConverter.HTML2PDF import HTML2PDF
 from core.StandardConverter.PDF2ETC import PDF2ETC
@@ -81,7 +81,7 @@ upload_pipe = ant(
 )
 
 
-def annotate_uploaded_file(path_to_pdf):
+def annotate_uploaded_file(path_to_pdf, id):
     print(f"working on {path_to_pdf}")
     return upload_pipe(metaize([path_to_pdf]))
 

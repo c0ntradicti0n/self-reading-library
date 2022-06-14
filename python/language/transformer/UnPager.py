@@ -38,7 +38,7 @@ class UnPager(PathSpec):
                     try:
                         alignment, cigar = align(l_a, l_b)
                     except:
-                        logging.error("alignment failed")
+                        self.logger.error("alignment failed")
                         alignment = []
 
                     print(alignment_table(alignment, l_a, l_b, info_b=lambda i_b: part_annotation[i_b]))
@@ -48,7 +48,7 @@ class UnPager(PathSpec):
                             if _i1 and _i2:
                                 whole_meta["_i_to_i2"][whole_meta["i_word"][_i1][0]] = (i_annotation, _i2)
                     except:
-                        logging.error("Error using alignment", exc_info=True)
+                        self.logger.error("Error using alignment", exc_info=True)
                 whole_meta['whole_annotation'] = whole_annotation
                 yield _pdf_path, whole_meta
 

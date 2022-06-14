@@ -49,6 +49,8 @@ export default class Layout extends React.Component {
             {
                 this.props.children
             }
+
+            Source of papers: <a href={'http://arxiv.org'}>http://arxiv.org</a>
         </div>)
     }
 

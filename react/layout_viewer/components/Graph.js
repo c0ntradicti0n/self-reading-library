@@ -46,7 +46,6 @@ class Graph extends React.Component {
     componentDidMount() {
 
 
-
         const data = this.props.data ? this.props.data : this.state.graph
 
         console.log(data, "TATA data")
@@ -153,9 +152,12 @@ class Graph extends React.Component {
                     return obj;
                 }}
                 onNodeClick={(node) => this.handleClick(node)}
-                onNodeRightClick={(node) => Router.push({
-                    pathname: '/difference/', query: {id: node.path}
-                })}
+                onNodeRightClick={(node) => {
+                    console.log(node)
+                    Router.push({
+                        pathname: '/difference/', query: {id: node.name}
+                    })
+                }}
                 autoPauseRedraw={false}
                 linkWidth={link => this.state.highlightLinks.has(link) ? 5 : 1}
                 linkDirectionalParticles={4}
@@ -165,11 +167,11 @@ class Graph extends React.Component {
                 onNodeHover={this.handleNodeHover}
                 onLinkHover={this.handleLinkHover}
                 nodeAutoColorBy="group"
-                  onNodeDragEnd={node => {
+                onNodeDragEnd={node => {
                     node.fx = node.x;
                     node.fy = node.y;
                     node.fz = node.z;
-                  }}
+                }}
             />
         </div>)
     }

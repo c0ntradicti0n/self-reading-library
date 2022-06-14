@@ -7,7 +7,7 @@ from core.pathant.Converter import converter
 from core.pathant.parallel import paraloop
 from core.pathant.PathAnt import PathAnt
 from core.event_binding import RestQueue
-from helpers.model_tools import model_in_the_loop
+from helpers.model_tools import model_in_the_loop, BEST_MODELS
 from helpers.list_tools import metaize, forget_except
 from layout.annotation_thread import full_model_path
 from language.transformer.ElmoDifferenceTrain import ElmoDifferenceTrain
@@ -54,15 +54,35 @@ elmo_difference_pipe = ant(
     layout_model_path=full_model_path
 )
 
-elmo_difference_model_pipe = ant(
-    None, f"elmo_model.difference",
-    layout_model_path=full_model_path
-
+elmo_difference_single_pipe = ant(
+    "arxiv.org", f"elmo.html", via='reading_order',
+    num_labels=config.NUM_LABELS,
+    layout_model_path=full_model_path,
+    from_function_only=True
 )
 
 
-def annotate_uploaded_file(file):
-    return elmo_difference_pipe(metaize(file))
+elmo_difference_single_pipe = ant(
+    "arxiv.org", f"elmo.html",
+    num_labels=config.NUM_LABELS,
+    layout_model_path=full_model_path,
+    from_function_only=True
+)
+
+elmo_difference_model_pipe = ant(
+    None, f"elmo_model.difference",
+    layout_model_path=full_model_path
+)
+
+
+def annotate_uploaded_file(file, service_id):
+    return list(
+        elmo_difference_single_pipe(
+            metaize((f for f in [file])),
+            difference_model_path=BEST_MODELS["difference"]['best_model_path'],
+            service_id=service_id
+        )
+    )
 
 
 ElmoDifferenceQueueRest = RestQueue(
@@ -74,7 +94,8 @@ ElmoDifferenceQueueRest = RestQueue(
 def on_predict(args):
     gen = forget_except(elmo_difference_pipe(
         metaize(itertools.cycle(["http://export.arxiv.org/"])),
-        difference_model_path=args['best_model_path']
+        difference_model_path=args['best_model_path'],
+        service_id="difference"
     ), keys=['html_path', 'css', 'html'])
     return gen
 

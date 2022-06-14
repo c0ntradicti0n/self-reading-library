@@ -2,7 +2,7 @@ from numpy.core.multiarray import ndarray
 
 from ant import Ant
 from core import config
-from helpers.nested_dict_tools import type_spec
+from helpers.nested_dict_tools import type_spec, list2dict
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import cache_flow
 import networkx as nx
@@ -27,54 +27,29 @@ class Dict2Graph(Ant):
             yield dict_list
 
     def to_graph_dict(self, topics, fun=None):
-        from collections import Mapping
+        dd = list2dict(topics,key=lambda x: x['html_path'])
+        dig = nx.from_dict_of_dicts(dd)
 
-        dig = nx.DiGraph()
+        cross_nodes_2_i = {kk: i for i, kk in enumerate((k for (k, v) in (dd.items()) if v))}
+        rev_ddic= {kk: k for k, v in dd.items() for kk, vv in v.items()}
 
-        # Iterate through the layers
-        q = list(topics.items())
-        n = 0
-        while q:
-            v, dl = q.pop()
-            if isinstance(dl, (list, set)):
-                for l in dl:
-                    dig.add_edge(v, n)
-                    if isinstance(l, dict):
-                        attr = l
-                    else:
-                        attr = {'attr': l}
-                    dig.add_node(n, **attr)
-                    n += 1
-                continue
-            for nv, nd in dl.items():
-                dig.add_edge(v, nv)
-                if isinstance(nd, Mapping):
-                    q.append((nv, nd))
-
-        ddic = nx.to_dict_of_dicts(dig)
-        cross_nodes_2_i = {kk: i for i, kk in enumerate((k for (k, v) in (ddic.items()) if v))}
-        rev_ddic= {kk: k for k, v in ddic.items() for kk, vv in v.items()}
-
+        for k, v, attr in dig.edges(data=True):
+            dig.nodes[v].update(attr)
         levels = 6
         nodes = [{'id': k,
                   'name': dig.nodes[k]['attr'] if 'attr' in dig.nodes[k] else k,
                   'val': 2 ** (levels - 1) if v else 2 ** (levels - 2),
-                  'title': dig.nodes[k]['title'] if 'title' in dig.nodes[k] else None,
-                  #'color': dig.nodes[k]['color'] if 'color' in dig.nodes[k] else 'white',
+                  'title': dig.nodes[k]['title'].strip() if 'title' in dig.nodes[k] else None,
                   'group': cross_nodes_2_i[rev_ddic[k]] if k in rev_ddic else None,
-                  'path':  dig.nodes[k]['html_path'].replace(config.tex_data, "") if 'html_path' in dig.nodes[k] else None
+                  'path':  dig.nodes[k]['html_path'].replace(config.tex_data, "")
+                                if 'html_path' in dig.nodes[k] else None
                   }
 
-                 for k, v in ddic.items()] \
-                + [{'id': "ROOT", 'name': "root", 'color': 'red', 'val': 2 ** (levels)}]
+                 for k, attr in dig.nodes(data=True)] \
+                 + [{'id': "ROOT", 'name': "root", 'color': 'red', 'val': 2 ** (levels)}]
 
-        center_links = [{'source': "ROOT", 'target': k}
-                        for k, v in ddic.items() if list(v.items())]
-
-        links = [{'source': k, 'target': n}
-                 for k, v in ddic.items()
-                 for n in v if v] \
-                + center_links
+        center_links = [{'source': "ROOT", 'target': k} for k, v in dd.items() ]
+        links = [{'source': k, 'target': v} for k, v in dig.edges] + center_links
 
         d = {'nodes': nodes, 'links': links}
         return d

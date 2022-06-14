@@ -50,6 +50,12 @@ export default class ServerResource<T> {
         // Default options are marked with *
         console.log("URL", AppSettings.SAUSSAGE_END_START_PATH + this.route + this.id, callback)
 
+        let querystring = ""
+        if (typeof window !== "undefined") {
+            querystring = window?.location.search.substring(1)
+            console.log(querystring)
+        }
+
         var fetch_init = {
             method: method.toUpperCase(),
             mode: 'cors', // no-cors, *cors, same-origin
@@ -75,7 +81,7 @@ export default class ServerResource<T> {
         try {
             const response = await fetch(
                 // @ts-ignore
-                AppSettings.SAUSSAGE_END_START_PATH + this.route + this.id, fetch_init)
+                AppSettings.SAUSSAGE_END_START_PATH + this.route + this.id + (querystring ? "?" + querystring : ""), fetch_init)
 
 
             if (!response.ok) {

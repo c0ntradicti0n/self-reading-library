@@ -63,7 +63,7 @@ class Pager(PathSpec):
             try:
                 pdf_path, reading_order_path, _ = self.run_pdf2htmlEX(meta['html_path'], meta)
             except Exception as e:
-                logging.error("could not transpile pdf to html", exc_info=True)
+                self.logger.error("could not transpile pdf to html", exc_info=True)
                 continue
 
             # read the text as it is referenced in the html from the reading_order file
@@ -98,11 +98,11 @@ class Pager(PathSpec):
         last_annotated_token = 0
         while True:
             try:
-                last_annotated_token = ElmoPredict.q1.get(timeout=60)
+                last_annotated_token = ElmoPredict.q1[self.flags['service_id']].get(timeout=369)
             except Empty:
-                logging.error("Broke up with windowing thread")
+                self.logger.error("Left windowing thread, deadlock")
                 break
-            ElmoPredict.q1.task_done()
+            ElmoPredict.q1[self.flags['service_id']].task_done()
 
             try:
 
@@ -110,16 +110,16 @@ class Pager(PathSpec):
 
             except StopIteration as e:
                 self.logger.info("eof")
-                ElmoPredict.q2.put((None, None))
+                ElmoPredict.q2[self.flags['service_id']].put((None, None))
                 break
 
-            logging.info(" ".join([t for t in window]))
+            self.logger.info(" ".join([t for t in window]))
 
             if len(window) == 0:
                 self.logger.info("finishing?")
                 return
 
-            ElmoPredict.q2.put((window, {**window_meta, "i_word": i_word, **meta, 'doc_id': meta['pdf_path']}))
+            ElmoPredict.q2[self.flags['service_id']].put((window, {**window_meta, "i_word": i_word, **meta, 'doc_id': meta['pdf_path']}))
 
             # last_annotated_token = ElmoPredict.consumed_tokens_queue.get()
 
@@ -163,7 +163,7 @@ class Pager(PathSpec):
                     return
             else:
 
-                logging.info("...")
+                self.logger.info("...")
 
             window = []
             sentences_j = 0
@@ -181,14 +181,14 @@ class Pager(PathSpec):
                     sentences_j = j + 1
 
             if not window:
-                logging.info("Zero text, reset window")
+                self.logger.info("Zero text, reset window")
                 window = rest_text[:self.max_window]
 
             consumed_tokens = yield window, {}
 
             if consumed_tokens == 0 and loop_count > 0:
                 consumed_tokens = 123
-                logging.info("consuming more than 0 tokens")
+                self.logger.info("consuming more than 0 tokens")
 
             loop_count += 1
 

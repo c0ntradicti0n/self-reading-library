@@ -25,7 +25,7 @@ class ElmoTrain(PathSpec):
             path = f"{config.ELMO_DIFFERENCE_MODEL_PATH}/{train_size}_0_0"
 
             cmd_parts = ["./language/transformer/do/train_difference_cp.sh", self.elmo_config, path]
-            logging.info(" ".join(cmd_parts))
+            self.logger.info(" ".join(cmd_parts))
             # start the resource server with gunicorn, that it can recompile, when changed
             subprocess.check_call(cmd_parts,
                                   stdout=sys.stdout, stderr=subprocess.STDOUT)
