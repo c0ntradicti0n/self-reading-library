@@ -39,7 +39,7 @@ class ScienceTexScraper(PathSpec):
             yield from self.surf(enumerate(url))
 
     headers = {
-        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36'}
+        'User-Agent': 'Self-reading Library/1.0'}
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.logger.info("navigating backt to " + self.cwd)
@@ -73,7 +73,7 @@ class ScienceTexScraper(PathSpec):
                         links = []
                 except Exception:
                     logging.error(
-                        f"Connection error, maybe timeout, maybe headers, maybe bad connection, keeping trying", exc_info=True)
+                        f"Connection error on {url}, maybe timeout, maybe headers, maybe bad connection, keeping trying", exc_info=True)
                     links = []
                     time.sleep(40)
 
