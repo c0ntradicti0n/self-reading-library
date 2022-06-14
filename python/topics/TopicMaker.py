@@ -25,6 +25,9 @@ class TopicMaker:
             nltk.download('punkt')
             nltk.download('wordnet')
             self.nouns = {x.name().split('.', 1)[0] for x in wn.all_synsets('n')}
+            self.alphabet = [f"{chr(value)}" for value in range(ord('a'), ord('a') + 26)]
+            self.numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
+
             with open(nouns_file_path, 'w') as f:
                 f.write("\n".join(self.nouns))
         else:
@@ -114,7 +117,7 @@ class TopicMaker:
 
         g = mixture.GaussianMixture(
             n_components=min(X.shape[0] // 2, 10),
-            covariance_type="full",
+            covariance_type="tied",
             reg_covar=1e-1,
             n_init=20
         )
@@ -139,10 +142,10 @@ class TopicMaker:
         titled_clustered_documents = dict()
         for topic_id, text_ids in topic_2_docids.items():
             constructed_doc = "".join([w.title() for id in text_ids for w in texts[id]]
-                                       )
+                                       ).replace(".", "").replace(",", "")
             tr4w = TextRank4Keyword()
-            tr4w.analyze(constructed_doc, candidate_pos=['NOUN', 'PROPN'], window_size=4, lower=False)
-            keywords = tr4w.get_keywords(10)
+            tr4w.analyze(constructed_doc, window_size=4, lower=True, stopwords=['abstract', 'paper', *self.alphabet, *self.numbers])
+            keywords = tr4w.get_keywords(5)
 
             try:
                 titled_clustered_documents[tuple(keywords) if keywords else ("no keywords",)] = \

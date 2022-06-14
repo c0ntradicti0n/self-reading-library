@@ -28,7 +28,18 @@ class Dict2Graph(Ant):
 
     def to_graph_dict(self, topics, fun=None):
         dd = list2dict(topics,key=lambda x: x['html_path'])
-        dig = nx.from_dict_of_dicts(dd)
+        ddd = {"root":dd}
+        dig = nx.DiGraph()
+        q = list(ddd.items())
+        while q:
+            v, d = q.pop()
+            for nv, nd in d.items():
+                dig.add_edge(v, nv)
+                if isinstance(nd, dict):
+                    if 'doc_id' in nd:
+                        dig.nodes[nv].update(nd)
+                    else:
+                        q.append((nv, nd))
 
         cross_nodes_2_i = {kk: i for i, kk in enumerate((k for (k, v) in (dd.items()) if v))}
         rev_ddic= {kk: k for k, v in dd.items() for kk, vv in v.items()}
@@ -39,17 +50,19 @@ class Dict2Graph(Ant):
         nodes = [{'id': k,
                   'name': dig.nodes[k]['attr'] if 'attr' in dig.nodes[k] else k,
                   'val': 2 ** (levels - 1) if v else 2 ** (levels - 2),
-                  'title': dig.nodes[k]['title'].strip() if 'title' in dig.nodes[k] else None,
+                  'title': dig.nodes[k]['title'].strip().replace("\n", " ") if 'title' in dig.nodes[
+                      k] and config.hidden_folder not in dig.nodes[k]['title'] else (
+                      " ".join(dig.nodes[k]['used_text_boxes'][0][0][0].split(" ")[:20]) if "used_text_boxes" in dig.nodes[k] else None),
                   'group': cross_nodes_2_i[rev_ddic[k]] if k in rev_ddic else None,
                   'path':  dig.nodes[k]['html_path'].replace(config.tex_data, "")
                                 if 'html_path' in dig.nodes[k] else None
                   }
 
-                 for k, attr in dig.nodes(data=True)] \
-                 + [{'id': "ROOT", 'name': "root", 'color': 'red', 'val': 2 ** (levels)}]
+                 for k, attr in dig.nodes(data=True)]
+                 #+ [{'id': "ROOT", 'name': "root", 'color': 'red', 'val': 2 ** (levels)}]
 
-        center_links = [{'source': "ROOT", 'target': k} for k, v in dd.items() ]
-        links = [{'source': k, 'target': v} for k, v in dig.edges] + center_links
+        #center_links = [{'source': "ROOT", 'target': k} for k, v in dd.items() ]
+        links = [{'source': k, 'target': v} for k, v in dig.edges] #+ center_links
 
         d = {'nodes': nodes, 'links': links}
         return d
