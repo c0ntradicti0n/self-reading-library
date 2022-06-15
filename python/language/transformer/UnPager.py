@@ -60,8 +60,12 @@ class UnPager(PathSpec):
                 consumed_until_now = 0
 
 
-            consumed_until_now += meta['consumed_i2']
-            whole_annotation.append(annotation[:meta['consumed_i2']])
+            try:
+                consumed_until_now += meta['consumed_i2']
+                whole_annotation.append(annotation[:meta['consumed_i2']])
+            except:
+                self.logger.error("There was no determined consumption", exc_info=True)
+                whole_annotation.append(annotation)
 
             all_annotations.append(annotation)
             try:

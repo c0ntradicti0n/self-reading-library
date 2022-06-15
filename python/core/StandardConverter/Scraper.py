@@ -40,7 +40,20 @@ class Scraper(PathSpec):
         for url, m in i_url:
             if url.startswith('http') and regex.match(self.http_regex, url):
                 path = f"{config.hidden_folder}/pdfs/{urllib.parse.quote_plus(url)}.pdf"
-                os.system(f"chromium --headless --disable-gpu --print-to-pdf={path} {url}")
+                os.system(f"chromium  --headless \
+                                      --disable-gpu \
+                                      --disable-translate \
+                                      --disable-extensions \
+                                      --disable-background-networking \
+                                      --safebrowsing-disable-auto-update \
+                                      --disable-sync \
+                                      --metrics-recording-only \
+                                      --disable-default-apps \
+                                      --no-first-run \
+                                      --mute-audio \
+                                      --hide-scrollbars \
+                                      --disable-software-rasterizer "
+                                    f"--print-to-pdf={path} {url}")
                 yield path, m
             elif os.path.exists(url) and regex.match(self.file_regex, url)  is not None:
                 yield url, m
