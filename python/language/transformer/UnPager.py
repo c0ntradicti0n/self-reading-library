@@ -6,6 +6,7 @@ from listalign.helpers import alignment_table
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from listalign.word_pyalign import align
+import multiprocessing as mp
 
 
 @converter("reading_order.page.*", 'reading_order.*')
@@ -41,10 +42,19 @@ class UnPager(PathSpec):
                     l_b = [jw[1] if jw[1] else '~' for jw in part_annotation]
                     try:
                         assert l_b and l_a
-                        alignment, cigar = align(l_a, l_b)
+
+                        def foo(q, l_a, l_b):
+                            q.put(align(l_a, l_b))
+
+                        q = mp.Queue()
+                        p = mp.Process(target=foo, args=(q,l_a, l_b))
+                        p.start()
+                        alignment, cigar = q.get()
                     except:
                         self.logger.error("alignment failed")
-                        alignment = []
+                        continue
+
+
 
                     print(alignment_table(alignment, l_a, l_b, info_b=lambda i_b: part_annotation[i_b]))
 
