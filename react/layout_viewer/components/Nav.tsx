@@ -41,6 +41,9 @@ export default class Nav extends React.Component<Props, any> {
                             <input type="file" id="myfile" name="myfile"/>
                         </form>
                         <a href={"/library"}>Library</a>
+                        { ' '}
+                        <a style={{margin:"30px"}} href={"/difference?id=http://differencebetween.info"}>Random <i>differencebetween.info</i> article</a>
+
                     </div>
 
 

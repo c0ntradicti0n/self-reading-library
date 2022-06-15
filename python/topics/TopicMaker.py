@@ -16,6 +16,9 @@ class TopicMaker:
     weight_file = "https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x1024_128_2048cnn_1xhighway/elmo_2x1024_128_2048cnn_1xhighway_weights.hdf5"
 
     def __init__(self, nouns_file_path=None):
+
+        self.alphabet = [f"{chr(value)}" for value in range(ord('a'), ord('a') + 26)]
+        self.numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
         if not nouns_file_path:
             nouns_file_path = config.cache + "nouns.txt"
         if not os.path.isfile(nouns_file_path):
@@ -25,8 +28,6 @@ class TopicMaker:
             nltk.download('punkt')
             nltk.download('wordnet')
             self.nouns = {x.name().split('.', 1)[0] for x in wn.all_synsets('n')}
-            self.alphabet = [f"{chr(value)}" for value in range(ord('a'), ord('a') + 26)]
-            self.numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
 
             with open(nouns_file_path, 'w') as f:
                 f.write("\n".join(self.nouns))
@@ -105,8 +106,7 @@ class TopicMaker:
                     topics[list(topics)[i_group_label]] = sub_topics
             except TypeError as e:
                 logging.error(f"computing gaussian mixture {e}")
-                raise (e)
-                return topics
+                raise e
             except IndexError as e:
                 logging.error(f"computing subtopics with {e}")
                 return topics

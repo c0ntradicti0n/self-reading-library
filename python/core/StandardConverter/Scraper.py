@@ -30,7 +30,7 @@ class Scraper(PathSpec):
         if not os.path.isdir(self.save_dir):
             os.system(f"mkdir {config.tex_data}")
 
-    http_regex = r'(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})'
+    http_regex = r'(https?:\/\/(?:www\.|(?!www))?[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})'
     file_regex = rf'{config.tex_data}[-a-z0-9./]+\.pdf'
 
     @configurable_cache(
@@ -41,6 +41,7 @@ class Scraper(PathSpec):
             if url.startswith('http') and regex.match(self.http_regex, url):
                 path = f"{config.hidden_folder}/pdfs/{urllib.parse.quote_plus(url)}.pdf"
                 os.system(f"chromium --headless --disable-gpu --print-to-pdf={path} {url}")
+                yield path, m
             elif os.path.exists(url) and regex.match(self.file_regex, url)  is not None:
                 yield url, m
             else:
