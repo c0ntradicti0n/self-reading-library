@@ -1,3 +1,4 @@
+import collections
 import logging
 import os
 from collections import defaultdict
@@ -34,6 +35,8 @@ class TopicMaker:
         else:
             with open(nouns_file_path, 'r') as f:
                 self.nouns = [w.strip() for w in f.readlines()]
+
+        self.stop_words = ['abstract', 'paper', *self.alphabet, *[str(i) for i in range(1000)]]
 
     def test(self):
         self.nlp = spacy.load("en_core_web_trf")
@@ -76,26 +79,42 @@ class TopicMaker:
 
     def __call__(self, texts, meta, *args, **kwargs):
         self.nlp = spacy.load("en_core_web_trf")
-        embeddings = np.vstack([self.nlp(text[:config.TOPIC_TEXT_LENGTH])._.trf_data.tensors[1] for text in texts])
+
+        embeddingl = []
+        for text in texts:
+            try:
+                embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH])._.trf_data.tensors[1]
+                shape = embedding.shape
+            except Exception as e:
+                self.logger.error(f"could not create embedding {e}", exc_info=True)
+                embedding = np.random.random(shape)
+            embeddingl.append(embedding)
+
+        embeddings = np.vstack(embeddingl)
+
+        del embeddingl
+
         topics = self.topicize_recursively(embeddings, meta, texts)
+        #assert all(c == 1 for k, c in collections.Counter([xx['html_path'] for kk, vv in topics.items() for x in ([vv] if isinstance(vv, list) else list(vv.values())) for xx in x]).items())
         return topics, meta
 
     def topicize_recursively(self, embeddings, meta, texts, split_size=10, max_level=5, level=0):
-        print(f"Making Topics {level+1} of maximally {max_level+1}")
+        print(f"Making Topics {level + 1} of maximally {max_level + 1}")
         labels = self.cluster(embeddings=embeddings)
         topic_ids_2_doc_ids = self.labels2docs(texts=texts, labels=labels)
         keywords = self.make_keywords(topic_2_docids=topic_ids_2_doc_ids, texts=texts, lookup=meta)
-        topics = self.make_titles(keywords)
+        topics_titles = self.make_titles(keywords)
 
-        if max_level == level:
-            return topics
+        topics = {}
+
 
         for i_group_label, i_group in topic_ids_2_doc_ids.items():
             try:
                 group_embeddings = embeddings[i_group]
                 group_meta = [meta[i] for i in i_group]
                 group_texts = [texts[i] for i in i_group]
-                if len(i_group) > split_size:
+                if len(i_group) > split_size and level < max_level:
+
                     sub_topics = self.topicize_recursively(
                         group_embeddings,
                         group_meta,
@@ -103,7 +122,9 @@ class TopicMaker:
                         split_size,
                         max_level=max_level,
                         level=level + 1)
-                    topics[list(topics)[i_group_label]] = sub_topics
+                    topics[topics_titles[i_group_label]] = sub_topics
+                else:
+                    topics[topics_titles[i_group_label]] = group_meta
             except TypeError as e:
                 logging.error(f"computing gaussian mixture {e}")
                 raise e
@@ -116,10 +137,11 @@ class TopicMaker:
         X = embeddings
 
         g = mixture.GaussianMixture(
-            n_components=min(X.shape[0] // 2, 10),
+            n_components=min(int(X.shape[0] / 3 + 0.5), 10),
             covariance_type="tied",
             reg_covar=1e-1,
-            n_init=20
+            n_init=20,
+            max_iter=50
         )
 
         g.fit(X)
@@ -139,17 +161,19 @@ class TopicMaker:
         if not lookup:
             lookup = texts
 
-        titled_clustered_documents = dict()
+        titled_clustered_documents = {}
         for topic_id, text_ids in topic_2_docids.items():
-            constructed_doc = "".join([w.title() for id in text_ids for w in texts[id]]
-                                       ).replace(".", "").replace(",", "")
+            constructed_doc = " ".join([w  for t in [ texts[id] for id in text_ids ] for w in t.split() if w.lower() not in self.stop_words]).replace(".", "").replace(",", "")
+
+
             tr4w = TextRank4Keyword()
-            tr4w.analyze(constructed_doc, window_size=4, lower=True, stopwords=['abstract', 'paper', *self.alphabet, *self.numbers])
+            tr4w.analyze(constructed_doc, window_size=4, lower=True,
+                         stopwords=[])
             keywords = tr4w.get_keywords(5)
 
+            keywords = [k for k in keywords if len(k[0])>3]
             try:
-                titled_clustered_documents[tuple(keywords) if keywords else ("no keywords",)] = \
-                        [lookup[id] for id in text_ids]
+                titled_clustered_documents[topic_id] = keywords
             except Exception as e:
                 logging.error("Error making keywords", exc_info=True)
         return titled_clustered_documents
@@ -164,13 +188,7 @@ class TopicMaker:
         return np.array(out)
 
     def make_titles(self, keywords_to_texts):
-        keyword_to_headwords = {keys: [kw[0] for kw in keys]
-                 for keys, values in keywords_to_texts.items()}
-
-        titles_to_texts = {" ".join(headwords[:4]): keywords_to_texts[keywords]
-                           for keywords, headwords in keyword_to_headwords.items()}
-
-        return titles_to_texts
+        return { k: " ".join(k[0] for k in v[:4]) for k, v in keywords_to_texts.items()}
 
 
 if __name__ == "__main__":
@@ -178,4 +196,3 @@ if __name__ == "__main__":
     topics = tm(*tm.test())
     d2g = Dict2Graph
     print(list(d2g([topics]))[0][0][0])
-
