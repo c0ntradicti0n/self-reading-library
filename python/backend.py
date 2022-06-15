@@ -129,9 +129,9 @@ if __name__ == "__main__":
     ]
              )
 
-    layout = threading.Thread(target=layout_annotate_train_model)
+    layout = threading.Thread(target=layout_annotate_train_model, name="layout")
     layout.start()
-    difference_elmo = threading.Thread(target=annotate_difference_elmo)
+    difference_elmo = threading.Thread(target=annotate_difference_elmo, "difference")
     difference_elmo.start()
     """difference_sokrates = threading.Thread(target=annotate_difference_sokrates)
     difference_sokrates.start()
@@ -151,7 +151,7 @@ if __name__ == "__main__":
                 raise
 
 
-    fill_library_thread = threading.Thread(target=fill_library).start()
+    fill_library_thread = threading.Thread(target=fill_library, name="fill library").start()
 
     httpd = simple_server.make_server('0.0.0.0', PORT, api)
     httpd.serve_forever()

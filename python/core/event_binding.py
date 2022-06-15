@@ -202,7 +202,7 @@ class RestQueue:
         if self.work_on_upload:
             logging.info(f"starting thread! for {self.work_on_upload}")
 
-            t = threading.Thread(target=self.work_on_upload, args=(path,))
+            t = threading.Thread(target=self.work_on_upload, args=(path,), name="fill on upload")
             t.start()
 
         logging.info(f"Started task {self.work_on_upload} after upload")
@@ -318,7 +318,7 @@ if __name__ == "__main__":
                 print ("end...")
 
 
-    t = threading.Thread(target=worker)
+    t = threading.Thread(target=worker, name="test")
     t.start()
 
     rq = RestQueue(service_id="test")

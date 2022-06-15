@@ -88,7 +88,7 @@ class Pager(PathSpec):
             # start iterating on windows of this text
             generator = self.make_tokenized_windows(real_tokens)
             next(generator)
-            threading.Thread(target=self.window_thread, args=(generator, meta, i_word,)).start()
+            threading.Thread(target=self.window_thread, args=(generator, meta, i_word,), name="make text windows").start()
             meta['texts'] = texts
             yield _pdf_path, meta
 
