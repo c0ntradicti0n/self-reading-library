@@ -131,7 +131,7 @@ if __name__ == "__main__":
 
     layout = threading.Thread(target=layout_annotate_train_model, name="layout")
     layout.start()
-    difference_elmo = threading.Thread(target=annotate_difference_elmo, "difference")
+    difference_elmo = threading.Thread(target=annotate_difference_elmo, name="difference")
     difference_elmo.start()
     """difference_sokrates = threading.Thread(target=annotate_difference_sokrates)
     difference_sokrates.start()

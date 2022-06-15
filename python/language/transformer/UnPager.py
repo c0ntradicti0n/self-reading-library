@@ -24,12 +24,14 @@ class UnPager(PathSpec):
             annotation = meta['annotation']
             if not whole_doc_id:
                 whole_doc_id = meta["doc_id"]
-            if meta["doc_id"] != whole_doc_id:
+            if meta["doc_id"] != whole_doc_id :
                 if "chars_and_char_boxes" in meta:
                     del meta['chars_and_char_boxes']
 
                 if not "i_word" in whole_meta:
-                    self.logger.warning(f"finished prediction with {whole_meta}")
+                    self.logger.warning(f"Finished prediction with {whole_meta}")
+                    whole_doc_id = meta["doc_id"]
+                    whole_meta={**meta}
                     continue
                 l_a = [iw[1] if iw[1] else '*' for iw in whole_meta['i_word']]
 
