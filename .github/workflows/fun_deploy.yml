@@ -66,7 +66,6 @@ jobs:
               tar -xf ~/arXiv_pdf_9912_002.tar -C python/.layouteagle/pdfs
 
               cp -R ~/../cloud/minimal_cache/. python/.layouteagle/
-              cp -R  ./cache/cache/. ./LayoutEagle/python/.layouteagle/cache/
 
               mkdir python/.layouteagle/prediction
               ls python/.layouteagle/

@@ -1,4 +1,5 @@
 import logging
+import threading
 
 from helpers.cache_tools import configurable_cache
 from layout.imports import *
@@ -84,6 +85,8 @@ class Layout2ReadingOrder(PathSpec):
                 else:
                     pagenumber = page_number + 1
                     self.logger.info(f"Predicted {pagenumber=}/{len(dataset) - 1} with {box_predictions=}")
+                    for thread in threading.enumerate():
+                        print(thread.name)
 
                     prediction_meta = model_helpers.repaint_image_from_labels((prediction, meta))
                     prediction_meta[0]['human_image'].save(f"{config.PREDICTION_PATH}/boxes_{page_number}.png")

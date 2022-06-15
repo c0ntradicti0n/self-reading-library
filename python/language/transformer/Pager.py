@@ -98,7 +98,7 @@ class Pager(PathSpec):
         last_annotated_token = 0
         while True:
             try:
-                last_annotated_token = ElmoPredict.q1[self.flags['service_id']].get(timeout=369)
+                last_annotated_token = ElmoPredict.q1[self.flags['service_id']].get(timeout=60)
             except Empty:
                 self.logger.error("Left windowing thread, deadlock")
                 break

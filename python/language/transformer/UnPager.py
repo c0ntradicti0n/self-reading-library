@@ -19,7 +19,6 @@ class UnPager(PathSpec):
         whole_doc_id = None
         whole_annotation = []
         whole_meta = None
-        all_annotations = []
 
         for _pdf_path, meta in feature_meta:
             annotation = meta['annotation']
@@ -29,6 +28,9 @@ class UnPager(PathSpec):
                 if "chars_and_char_boxes" in meta:
                     del meta['chars_and_char_boxes']
 
+                if not "i_word" in whole_meta:
+                    self.logger.warning(f"finished prediction with {whole_meta}")
+                    continue
                 l_a = [iw[1] if iw[1] else '*' for iw in whole_meta['i_word']]
 
                 whole_meta["_i_to_i2"] = {}
@@ -67,7 +69,6 @@ class UnPager(PathSpec):
                 self.logger.error("There was no determined consumption", exc_info=True)
                 whole_annotation.append(annotation)
 
-            all_annotations.append(annotation)
             try:
                 whole_doc_id = meta["doc_id"]
             except Exception as e:
