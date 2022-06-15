@@ -107,7 +107,7 @@ class Pager(PathSpec):
                 ElmoPredict.q1[self.flags['service_id']].task_done()
             except Exception as e:
                 self.logger.error("Tasks were already done, retrying")
-                continue
+                break
 
             try:
 

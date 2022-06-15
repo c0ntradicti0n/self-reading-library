@@ -40,6 +40,7 @@ class UnPager(PathSpec):
                 for i_annotation, part_annotation in enumerate(whole_annotation):
                     l_b = [jw[1] if jw[1] else '~' for jw in part_annotation]
                     try:
+                        assert l_b and l_a
                         alignment, cigar = align(l_a, l_b)
                     except:
                         self.logger.error("alignment failed")
