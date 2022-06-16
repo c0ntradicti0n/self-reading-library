@@ -55,6 +55,7 @@ def apply(cls, f, gen, cache, filter_by_cache, append_cache, filename, **kwargs)
 
         should_yield = True
         if append_cache:
+            print("logging to file")
             should_yield = write_cache(path=filename, result=result, old_cache=cache)
 
         if should_yield:
