@@ -61,14 +61,16 @@ jobs:
           
               mkdir python/.layouteagle
           
-              cp -R ~/../cloud/minimal_cache/. python/.layouteagle/
+              tar -xf ~/arXiv_pdf_9912_002.tar -C python/.layouteagle/pdfs 
 
-              cp -R --no-clobber ./cache/. python/.layouteagle/
+              cp -R --no-clobber ~/../cloud/minimal_cache/. python/.layouteagle/
+
+              cp -R --no-clobber ~/cache/. python/.layouteagle/
+              
 
               mkdir python/.layouteagle/pdfs || echo 'exists'
               mkdir python/.layouteagle/cache || echo 'exists'
             
-              [[ \"\$(ls -A python/.layouteagle/pdfs)\" ]] && tar -xf ~/arXiv_pdf_9912_002.tar -C python/.layouteagle/pdfs  || echo 'unpacked before'
 
 
               
