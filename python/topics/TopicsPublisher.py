@@ -77,7 +77,7 @@ class TopicsPublisher(RestPublisher, react):
                 print(value)
         else:
 
-            value, meta = list(zip(*list(self.ant("arxiv.org", "topics.graph", from_cache_only=True)([]))))
+            value, _ = list(zip(*list(self.ant("arxiv.org", "topics.graph", from_cache_only=True)([]))))
 
-        resp.body = json.dumps([value, meta], ensure_ascii=False)
+        resp.body = json.dumps([value, {}], ensure_ascii=False)
         resp.status = falcon.HTTP_OK

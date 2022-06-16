@@ -173,15 +173,13 @@ class ??title!! extends React.Component<??Title!!Props, ??Title!!State> {
             meta: null,
             value: null
         }
-        console.log(this.set_??title!!)
-
+        
         if (this.props.router.query.id) {
             console.log("query", this.props.router.query)
                             // @ts-ignore
             this.??title!!Service.fetch_one(this.props.router.query.id, this.set_??title!!s)
         }
         
-
         else {    
                             // @ts-ignore
             this.??title!!Service.fetch_all(this.set_??title!!s)
@@ -191,7 +189,7 @@ class ??title!! extends React.Component<??Title!!Props, ??Title!!State> {
     set_??title!!s = async (v) => {
         const prom = await v
 
-        console.log('VALUES', prom.response, prom)
+        console.log('Setting values', prom.response, prom)
         
         
         const [value, meta] = prom
@@ -208,7 +206,7 @@ class ??title!! extends React.Component<??Title!!Props, ??Title!!State> {
         
         if (v instanceof Promise) {
             await v.then(prom => {
-                console.log('VALUES', prom.response)
+                console.log('Seeting value', prom.response)
     
                 this.setState({
                     ??title!!: prom.response}
@@ -222,7 +220,7 @@ class ??title!! extends React.Component<??Title!!Props, ??Title!!State> {
     }
     
     render ()  {
-        console.log("values?", this, "??type!!" )
+        console.log("Created component", this, "??type!!" )
         
         if (["upload_annotation", "annotation"].includes("??type!!") )  {
             console.log("RENDER", this.state.??title!!s)

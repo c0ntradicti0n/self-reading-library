@@ -59,9 +59,7 @@ class Dict2Graph(Ant):
                   }
 
                  for k, attr in dig.nodes(data=True)]
-                 #+ [{'id': "ROOT", 'name': "root", 'color': 'red', 'val': 2 ** (levels)}]
 
-        #center_links = [{'source': "ROOT", 'target': k} for k, v in dd.items() ]
         links = [{'source': k, 'target': v} for k, v in dig.edges] #+ center_links
 
         d = {'nodes': nodes, 'links': links}

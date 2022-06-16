@@ -48,7 +48,7 @@ export default class ServerResource<T> {
 
     request = async (method: String, data = {}, callback: Function, is_file = false) => {
         // Default options are marked with *
-        console.log("URL", AppSettings.SAUSSAGE_END_START_PATH + this.route + this.id, callback)
+        console.log("URL", AppSettings.SAUSSAGE_END_START_PATH + this.route + this.id)
 
         let querystring = ""
         if (typeof window !== "undefined") {
@@ -116,9 +116,8 @@ export default class ServerResource<T> {
     }
 
     fetch_all = async (callback) => {
-        console.log("FETCH ALL", this.fetch_allowed, callback)
+        console.log("Fetch all resources")
         if (this.fetch_allowed) {
-            console.log("fetching")
             return this.request("get", undefined, callback)
         }
     }

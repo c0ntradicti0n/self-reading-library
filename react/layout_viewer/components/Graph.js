@@ -48,7 +48,6 @@ class Graph extends React.Component {
 
         const data = this.props.data ? this.props.data : this.state.graph
 
-        console.log(data, "TATA data")
         data.links.forEach(link => {
             const a = data.nodes.find((n) => n.id == link.source)
             const b = data.nodes.find((n) => n.id == link.target)
