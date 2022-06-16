@@ -1,5 +1,7 @@
+import gc
 import logging
 import threading
+import tracemalloc
 
 from helpers.cache_tools import configurable_cache
 from layout.imports import *
@@ -8,15 +10,18 @@ from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from layout import model_helpers
 
+tracemalloc.start()
+
 
 @converter("feature", "reading_order")
 class Layout2ReadingOrder(PathSpec):
     def __init__(self, *args, num_labels=config.NUM_LABELS, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.model = None
         self.processor = None
         self.num_labels = num_labels
+
+    model = None
 
     @configurable_cache(
         filename=config.cache + os.path.basename(__file__),
@@ -30,6 +35,16 @@ class Layout2ReadingOrder(PathSpec):
         self.model_path = model_path
 
         for pdf_path, meta in x_meta:
+
+            print(gc.collect())
+
+            snapshot = tracemalloc.take_snapshot()
+            top_stats = snapshot.statistics('lineno')
+
+            print("[ Top 10 ]")
+            for stat in top_stats[:20]:
+                print(stat)
+
             try:
                 feature_df = meta['final_feature_df']
             except:
@@ -56,7 +71,7 @@ class Layout2ReadingOrder(PathSpec):
 
                 for k, v in encoded_inputs.items():
                     encoded_inputs[k] = v.to(config.DEVICE)
-                outputs = self.model(**encoded_inputs)
+                outputs = Layout2ReadingOrder.model(**encoded_inputs)
                 predictions = outputs.logits.argmax(-1).squeeze().tolist()
                 token_boxes = encoded_inputs.bbox.squeeze().tolist()
 
@@ -127,13 +142,13 @@ class Layout2ReadingOrder(PathSpec):
             yield pdf_path, meta
 
     def load_model(self):
-        if not self.model:
-            self.processor = model_helpers.PROCESSOR
-            self.model = model_helpers.MODEL
+        if not Layout2ReadingOrder.model:
+            Layout2ReadingOrder.processor = model_helpers.PROCESSOR
+            Layout2ReadingOrder.model = model_helpers.MODEL
 
-            self.model.load_state_dict(torch.load(self.model_path, map_location="cpu"))
-            self.model.eval()
-            self.model.to(config.DEVICE)
+            Layout2ReadingOrder.model.load_state_dict(torch.load(self.model_path, map_location="cpu"))
+            Layout2ReadingOrder.model.eval()
+            Layout2ReadingOrder.model.to(config.DEVICE)
 
     def sort_by_label(self, i_l):
         return [i for i, l in sorted(i_l, key=lambda x: config.TEXT_LABELS.index(x[1]))]

@@ -32,10 +32,10 @@ from layout.Layout2ReadingOrder import Layout2ReadingOrder
 from language.transformer.ElmoDifference import ElmoDifference, ElmoDifferenceQueueRest, elmo_difference_pipe, \
     elmo_difference_model_pipe, annotate_difference_elmo
 
-
-#from language.heuristic.heuristic_difference import HeurisiticalLogician
+# from language.heuristic.heuristic_difference import HeurisiticalLogician
 
 from hanging_threads import start_monitoring
+
 monitoring_thread = start_monitoring(seconds_frozen=30, test_interval=1000)
 
 
@@ -142,10 +142,14 @@ if __name__ == "__main__":
     def fill_library():
         x = None
         while not x:
+
             try:
-                x = list(forget_except(filling_pipe(itertools.islice((
+                gen = forget_except(filling_pipe(itertools.islice((
                     metaize(itertools.cycle(["http://export.arxiv.org/"]))
-                ), 100)), keys=["html_path"])),
+                ), 100)), keys=["html_path"])
+                for i in range(100):
+                    k = next(gen, None)
+                    del k
             except Exception:
                 logging.error("Getting first 100 threw", exc_info=True)
                 raise
