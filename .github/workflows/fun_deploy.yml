@@ -60,6 +60,8 @@ jobs:
               cd LayoutEagle
           
               mkdir python/.layouteagle
+              mkdir python/.layouteagle/pdfs || echo 'exists'
+
           
               tar -xf ~/arXiv_pdf_9912_002.tar -C python/.layouteagle/pdfs 
 
@@ -67,8 +69,6 @@ jobs:
 
               cp -R --no-clobber ~/cache/. python/.layouteagle/
               
-
-              mkdir python/.layouteagle/pdfs || echo 'exists'
               mkdir python/.layouteagle/cache || echo 'exists'
             
 
