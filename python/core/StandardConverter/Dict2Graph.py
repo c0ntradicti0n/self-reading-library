@@ -50,9 +50,9 @@ class Dict2Graph(Ant):
         nodes = [{'id': k,
                   'name': dig.nodes[k]['attr'] if 'attr' in dig.nodes[k] else k,
                   'val': 2 ** (levels - 1) if v else 2 ** (levels - 2),
-                  'title': (dig.nodes[k]['title'].strip().replace("\n", " ") if 'title' in dig.nodes[
+                  'title': (dig.nodes[k]['title'].strip().replace("\n", " ").title() if 'title' in dig.nodes[
                       k] and config.hidden_folder not in dig.nodes[k]['title'] else (
-                      " ".join(dig.nodes[k]['used_text_boxes'][0][0][0].split(" ")[:20]).replace("\n", "") if "used_text_boxes" in dig.nodes[k] else None)),
+                      " ".join(dig.nodes[k]['used_text_boxes'][0][0][0].split(" ")[:20]).replace("\n", "").title() if "used_text_boxes" in dig.nodes[k] else None)),
                   'group': cross_nodes_2_i[rev_ddic[k]] if k in rev_ddic else None,
                   'path':  dig.nodes[k]['html_path'].replace(config.tex_data, "")
                                 if 'html_path' in dig.nodes[k] else None

@@ -60,12 +60,16 @@ jobs:
               cd LayoutEagle
           
               mkdir python/.layouteagle
-              mkdir python/.layouteagle/pdfs
-              mkdir python/.layouteagle/cache
-            
-              tar -xf ~/arXiv_pdf_9912_002.tar -C python/.layouteagle/pdfs
+          
+              cp -R ./cache/. python/.layouteagle/
 
-              cp -R ~/../cloud/minimal_cache/. python/.layouteagle/
+              mkdir python/.layouteagle/pdfs || echo 'exists'
+              mkdir python/.layouteagle/cache || echo 'exists'
+            
+              [[ \"\$(ls -A python/.layouteagle/pdfs)\" ]] && tar -xf ~/arXiv_pdf_9912_002.tar -C python/.layouteagle/pdfs  || echo 'unpacked before'
+
+
+              
 
               mkdir python/.layouteagle/prediction
               ls python/.layouteagle/

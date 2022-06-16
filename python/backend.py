@@ -150,6 +150,7 @@ if __name__ == "__main__":
                 for i in range(100):
                     k = next(gen, None)
                     del k
+                break
             except Exception:
                 logging.error("Getting first 100 threw", exc_info=True)
                 raise
