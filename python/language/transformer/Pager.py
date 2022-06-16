@@ -75,7 +75,8 @@ class Pager(PathSpec):
             encoding = chardet.detect(content)['encoding']
             if not encoding:
                 encoding = "utf-8"
-            lines = content.decode(encoding, errors="ignore").split()
+            lines = [ww for w in re.split("[^:]\n", content.decode(encoding, errors="ignore")) for ww in w.split("\n") if ww]
+
             i_word = [self.match_reading_order_line(line) for line in lines if len(line) > 2]
 
             # use layout filtered text

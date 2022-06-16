@@ -29,7 +29,8 @@ def decompress_pickle(value):
     except:
         logging.error(f"corrupted cache file {value=}")
 
-
+    if not os.path.isdir(path):
+        os.mkdir(path)
 def unroll_cache(path, cache):
     for m in cache:
         yield m, decompress_pickle(read_cache_file(path, m))
@@ -51,16 +52,31 @@ def filter_ant_step(gen, cache, filter_by_cache, path):
 
 
 def apply(cls, f, gen, cache, filter_by_cache, append_cache, filename, **kwargs):
-    for result in f(cls, filter_ant_step(gen, cache, filter_by_cache, filename), **kwargs):
+    for result in yield_cache_instead_apply(cls, f,  filter_ant_step(gen, cache, filter_by_cache, filename), cache, filename, **kwargs):
+        print("logging to file")
+        write_cache(path=filename, result=result, old_cache=cache)
+
+        yield result
 
 
-        should_yield = True
-        if append_cache:
-            print("logging to file")
-            should_yield = write_cache(path=filename, result=result, old_cache=cache)
+def yield_cache_instead_apply(cls, f, gen, cache, filename, **kwargs):
+    cache_values_to_yield = []
+    def filter():
+        for value, m in gen:
+            if urllib.parse.quote_plus(value) in cache:
+                logging.info(f"{value} was in cache, yielding that one instead of applying")
+                cache_values_to_yield.append((value, decompress_pickle(read_cache_file(urllib.parse.quote_plus(value), m))))
+            if value in cache:
+                logging.info(f"{value} was in cache, yielding that one instead of applying")
+                cache_values_to_yield.append(
+                    (value, decompress_pickle(read_cache_file(filename, value))))
 
-        if should_yield:
-            yield result
+            else:
+                yield value, m
+    yield from f(cls, filter(), **kwargs)
+    yield from cache_values_to_yield
+
+
 
 
 def read_cache_file(path, value):
@@ -135,10 +151,12 @@ def configurable_cache(
 
             yield_cache = True if not _from_function_only else False
             yield_apply = not _from_cache_only and not _from_path_glob
-            append_cache = not _dont_append_to_cache and not _from_path_glob
+            append_cache = True #not _dont_append_to_cache and not _from_path_glob
             filter_by_cache = not _from_function_only
 
             if _from_path_glob:
+                if not os.path.isdir(filename):
+                    os.mkdir(filename)
                 if yield_cache:
                     if isinstance(_from_path_glob, str):
                         _from_path_glob = [_from_path_glob]
@@ -161,7 +179,7 @@ def configurable_cache(
                         source,
                         cache,
                         filter_by_cache,
-                        append_cache if filter_by_cache else False,
+                        append_cache,
                         filename,
                         **kwargs
                     )

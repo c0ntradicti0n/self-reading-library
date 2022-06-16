@@ -145,7 +145,7 @@ if __name__ == "__main__":
 
             try:
                 gen = forget_except(filling_pipe(itertools.islice((
-                    metaize(itertools.cycle(["http://export.arxiv.org/"]))
+                    metaize(itertools.cycle(["pdfs"]))
                 ), 100)), keys=["html_path"])
                 for i in range(100):
                     k = next(gen, None)
@@ -153,7 +153,7 @@ if __name__ == "__main__":
                 break
             except Exception:
                 logging.error("Getting first 100 threw", exc_info=True)
-                raise
+                break
 
 
     fill_library_thread = threading.Thread(target=fill_library, name="fill library").start()

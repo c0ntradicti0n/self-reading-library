@@ -211,13 +211,13 @@ class RestQueue:
         resp.status = falcon.HTTP_OK
 
     # ok or use one existing file
-    def on_post(self, req, resp, id=None):
+    def on_post(self, req, resp, id=None, **kwargs):
         print(req, resp)
 
         if (req.media):
             # fetching one document for annotation
             path = req.media
-            item = self.work_on_upload(path, req.params['id'])
+            item = self.work_on_upload(path, req.media)
             self.workbook[id] = item
             resp.body = json.dumps(item, ensure_ascii=False)
             resp.status = falcon.HTTP_OK
