@@ -53,6 +53,7 @@ def filter_ant_step(gen, cache, filter_by_cache, path):
 def apply(cls, f, gen, cache, filter_by_cache, append_cache, filename, **kwargs):
     for result in f(cls, filter_ant_step(gen, cache, filter_by_cache, filename), **kwargs):
 
+
         should_yield = True
         if append_cache:
             print("logging to file")
@@ -109,6 +110,7 @@ def write_cache(old_cache, path, result, overwrite_cache=False):
 
     with open(fpath, "wb") as f:
         f.write(compressed_pickle(meta))
+    print(f"wrote to {fpath}")
     return True
 
 
