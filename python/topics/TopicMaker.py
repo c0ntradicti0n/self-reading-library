@@ -4,6 +4,8 @@ import os
 from collections import defaultdict
 import nltk
 from sklearn import mixture
+from sklearn.manifold import TSNE
+
 from core import config
 from nltk.corpus import wordnet as wn
 import numpy as np
@@ -81,6 +83,7 @@ class TopicMaker:
         self.nlp = spacy.load("en_core_web_trf")
 
         embeddingl = []
+        logging.info(f"Making embeedings")
         for text in texts:
             try:
                 embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH])._.trf_data.tensors[1]
@@ -90,12 +93,21 @@ class TopicMaker:
                 embedding = np.random.random(shape)
             embeddingl.append(embedding)
 
+
+
         embeddings = np.vstack(embeddingl)
+
+        n_components = 50
+        logging.info(f"Reducing from {embeddings.shape} to {n_components} dimensions")
+
+        tsne = TSNE(n_components, method='exact')
+        tsne_result = tsne.fit_transform(embeddings)
+        logging.info(f"Reduced embeddings to {tsne_result.shape=}")
 
         del embeddingl
 
         topics = self.topicize_recursively(embeddings, meta, texts)
-        #assert all(c == 1 for k, c in collections.Counter([xx['html_path'] for kk, vv in topics.items() for x in ([vv] if isinstance(vv, list) else list(vv.values())) for xx in x]).items())
+
         return topics, meta
 
     def topicize_recursively(self, embeddings, meta, texts, split_size=10, max_level=5, level=0):
