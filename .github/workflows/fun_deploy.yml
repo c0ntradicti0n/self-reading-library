@@ -61,7 +61,9 @@ jobs:
           
               mkdir python/.layouteagle
           
-              cp -R ./cache/. python/.layouteagle/
+              cp -R ~/../cloud/minimal_cache/. python/.layouteagle/
+
+              cp -R --no-clobber ./cache/. python/.layouteagle/
 
               mkdir python/.layouteagle/pdfs || echo 'exists'
               mkdir python/.layouteagle/cache || echo 'exists'
