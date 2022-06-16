@@ -3,7 +3,6 @@ import os
 from pprint import pprint
 from time import sleep
 import logging
-from falcon_multipart.middleware import MultipartMiddleware
 from wsgiref import simple_server
 import threading
 from core import config
@@ -96,20 +95,14 @@ def create_app():
 
     os.system(f"kill $(lsof -t -i:{PORT}) || echo 'no running process on our port {PORT}, no killing needed'")
 
+    from falcon_multipart.middleware import MultipartMiddleware
+
     api = falcon.App(middleware=[
         cors.middleware,
         MultipartMiddleware()])
 
     for route, module in publishing.items():
         api.add_route(route, module)
-
-    return api
-
-
-if __name__ == "__main__":
-    api = create_app()
-
-    logging.debug(get_all_routes(api))
 
     ant = PathAnt()
 
@@ -138,7 +131,6 @@ if __name__ == "__main__":
     difference_gpt3 = threading.Thread(target=write_difference_gpt3)
     difference_gpt3.start()"""
 
-
     def fill_library():
         x = None
         while not x:
@@ -155,8 +147,17 @@ if __name__ == "__main__":
                 logging.error("Getting first 100 threw", exc_info=True)
                 break
 
+    threading.Thread(target=fill_library, name="fill library").start()
 
-    fill_library_thread = threading.Thread(target=fill_library, name="fill library").start()
+    return api
+
+
+if __name__ == "__main__":
+    api = create_app()
+
+    logging.debug(get_all_routes(api))
+
+
 
     httpd = simple_server.make_server('0.0.0.0', PORT, api)
     httpd.serve_forever()

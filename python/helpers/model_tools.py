@@ -42,7 +42,7 @@ def model_in_the_loop(model_dir, collection_path, on_train, service_id, on_predi
     loops = []
 
     while True:
-
+        print ("model_in_the_loopmodel_in_the_loopmodel_in_the_loopmodel_in_the_loopmodel_in_the_loopmodel_in_the_loopmodel_in_the_loopmodel_in_the_loop")
         TRAINING_RATE['service_id'] = service_id
         samples_files = os.listdir(collection_path)
 
@@ -65,6 +65,13 @@ def model_in_the_loop(model_dir, collection_path, on_train, service_id, on_predi
         if loops.count(training_rate) > 2:
             logging.info("Training did not change, staying prediction loop")
 
+        args = {'best_model_path': best_model_path,
+                'training_rate': training_rate,
+                'layout_model_path': config.layout_model_path
+                }
+
+        BEST_MODELS[service_id] = args
+
         logging.info(f"Having {training_rate = }")
         if training_rate < 0.8 or not full_model_path:
             # let's train
@@ -78,12 +85,7 @@ def model_in_the_loop(model_dir, collection_path, on_train, service_id, on_predi
             model_path = model_meta[0][0]
         else:
             # let's make more samples
-            args = {'best_model_path': best_model_path,
-                    'training_rate': training_rate,
-                    'layout_model_path': config.layout_model_path
-                    }
 
-            BEST_MODELS[service_id] = args
 
             logging.debug(f"Prediction args = {args=}")
 

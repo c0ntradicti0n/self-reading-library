@@ -1,5 +1,7 @@
 import itertools
 import os
+from pprint import pprint
+
 from core import config
 from layout.latex.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
 from helpers.cache_tools import configurable_cache
@@ -76,6 +78,7 @@ elmo_difference_model_pipe = ant(
 
 
 def annotate_uploaded_file(file, service_id):
+    pprint (BEST_MODELS)
     return next(
         elmo_difference_single_pipe(
             metaize((f for f in [file])),
