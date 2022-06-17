@@ -30,8 +30,8 @@ class ElmoDifference(PDF_AnnotatorTool):
     def __call__(self, labeled_paths, *args, **kwargs):
 
         try:
-            for doc_id, (css_str, meta) in enumerate(labeled_paths):
-
+            for doc_id, (_pdf_path, meta) in enumerate(labeled_paths):
+                css_str = meta['css']
                 html_path = meta['html_path']
                 output_html_path = html_path + ".difference.html"
                 with open(html_path, errors="ignore") as f:
@@ -43,7 +43,7 @@ class ElmoDifference(PDF_AnnotatorTool):
                 if "chars_and_char_boxes" in meta:
                     del meta['chars_and_char_boxes']
 
-                yield html_path, meta
+                yield _pdf_path, meta
         except StopIteration as e:
             raise e
 
@@ -81,7 +81,7 @@ def annotate_uploaded_file(file, service_id):
     pprint (BEST_MODELS)
     return next(
         elmo_difference_single_pipe(
-            metaize((f for f in [file])),
+            metaize([file]),
             difference_model_path=BEST_MODELS["difference"]['best_model_path'],
             service_id=service_id
         ), None

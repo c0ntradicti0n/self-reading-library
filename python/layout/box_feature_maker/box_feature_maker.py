@@ -59,8 +59,8 @@ class BoxFeatureMaker(PathSpec):
                 final_feature_df = self.compute_complex_coordination_data(final_feature_df)
                 page_numbers = final_feature_df.page_number
 
-                final_feature_df["doc_id"] = str(doc_id) + ".random" + str(random_i)
-                meta["doc_id"] = str(doc_id) + ".random" + str(random_i)
+                final_feature_df["doc_id"] = "id:" +  str(doc_id) + "." + str(random_i)
+                meta["doc_id"] = "id:" + str(doc_id) + "." + str(random_i)
                 meta['html_path'] = labeled_pdf_path
                 meta['chars_and_char_boxes'] = final_feature_df.chars_and_char_boxes
 

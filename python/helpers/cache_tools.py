@@ -3,6 +3,7 @@ import functools
 import json
 import logging
 import shutil
+import types
 import urllib
 import zlib
 from glob import glob
@@ -29,8 +30,7 @@ def decompress_pickle(value):
     except:
         logging.error(f"corrupted cache file {value=}")
 
-    if not os.path.isdir(path):
-        os.mkdir(path)
+
 def unroll_cache(path, cache):
     for m in cache:
         yield m, decompress_pickle(read_cache_file(path, m))
@@ -40,10 +40,9 @@ def filter_ant_step(gen, cache, filter_by_cache, path):
     try:
         for value, meta in gen:
 
-
             if not filter_by_cache:
                 yield value, meta
-            elif  str(value) not in cache \
+            elif str(value) not in cache \
                     and urllib.parse.quote_plus(str(value)) not in cache:
                 yield value, meta
 
@@ -52,31 +51,59 @@ def filter_ant_step(gen, cache, filter_by_cache, path):
 
 
 def apply(cls, f, gen, cache, filter_by_cache, append_cache, filename, **kwargs):
-    for result in yield_cache_instead_apply(cls, f,  filter_ant_step(gen, cache, filter_by_cache, filename), cache, filename, **kwargs):
+    for result in yield_cache_instead_apply(cls, f, filter_ant_step(gen, cache, filter_by_cache, filename), cache,
+                                            filename, **kwargs):
         print("logging to file")
         write_cache(path=filename, result=result, old_cache=cache)
 
         yield result
 
 
+def dig_generator_ground_for_next_value(gen):
+    gen_or_val = next(
+        (subgen for k, subgen in gen.gi_frame.f_locals.items() if isinstance(subgen, types.GeneratorType)),
+        gen.gi_frame)
+    if isinstance(gen_or_val, types.GeneratorType):
+        return dig_generator_ground_for_next_value(gen_or_val)
+    else:
+        val = gen_or_val.f_locals
+        if 'l' in val:
+            return val['l']
+
+
 def yield_cache_instead_apply(cls, f, gen, cache, filename, **kwargs):
-    cache_values_to_yield = []
-    def filter():
-        for value, m in gen:
-            if urllib.parse.quote_plus(value) in cache:
-                logging.info(f"{value} was in cache, yielding that one instead of applying")
-                cache_values_to_yield.append((value, decompress_pickle(read_cache_file(urllib.parse.quote_plus(value), m))))
-            if value in cache:
-                logging.info(f"{value} was in cache, yielding that one instead of applying")
-                cache_values_to_yield.append(
-                    (value, decompress_pickle(read_cache_file(filename, value))))
+    values_from_future = dig_generator_ground_for_next_value(gen)
 
-            else:
-                yield value, m
-    yield from f(cls, filter(), **kwargs)
-    yield from cache_values_to_yield
+    if values_from_future:
+        future_yield_values = [
+            (value, decompress_pickle(read_cache_file(filename, urllib.parse.quote_plus(value))))
+            for value in values_from_future if value in cache
+        ]
+    else:
+        future_yield_values = []
+    if future_yield_values:
+        yield from future_yield_values
 
+    if not values_from_future or len(future_yield_values) != len(values_from_future):
+        cache_values_to_yield = []
 
+        def filter():
+            for value, m in gen:
+                if urllib.parse.quote_plus(value) in cache:
+                    logging.info(f"{value} was in cache, yielding that one instead of applying")
+                    cache_values_to_yield.append(
+                        (value, decompress_pickle(read_cache_file(urllib.parse.quote_plus(value), m))))
+                if value in cache:
+                    logging.info(f"{value} was in cache, yielding that one instead of applying")
+                    cache_values_to_yield.append(
+                        (value, decompress_pickle(read_cache_file(filename, value))))
+                if value in future_yield_values:
+                    logging.info("value was yielded before from future cache")
+                else:
+                    yield value, m
+
+        yield from f(cls, filter(), **kwargs)
+        yield from ((k, v) for k, v in cache_values_to_yield if k not in future_yield_values)
 
 
 def read_cache_file(path, value):
@@ -151,7 +178,7 @@ def configurable_cache(
 
             yield_cache = True if not _from_function_only else False
             yield_apply = not _from_cache_only and not _from_path_glob
-            append_cache = True #not _dont_append_to_cache and not _from_path_glob
+            append_cache = True  # not _dont_append_to_cache and not _from_path_glob
             filter_by_cache = not _from_function_only
 
             if _from_path_glob:

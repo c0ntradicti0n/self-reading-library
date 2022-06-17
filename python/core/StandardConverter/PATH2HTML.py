@@ -19,7 +19,7 @@ class PATH2HTML(RestPublisher, react):
 
     def __call__(self, labeled_paths, *args, **kwargs):
         for path, meta in labeled_paths:
-            with open(path, "r") as f:
+            with open(meta['html_path'], "r") as f:
                 content = f.read()
             meta['html'] = content
             yield path, meta

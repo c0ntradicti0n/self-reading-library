@@ -49,8 +49,8 @@ class LabeledFeatureMaker(PDF_AnnotatorTool):
             for random_i, final_feature_df in enumerate(self.feature_fuzz(feature_df)):
                 final_feature_df = self.compute_complex_coordination_data(final_feature_df)
 
-                final_feature_df["doc_id"] = str(doc_id) + ".random" + str(random_i)
-                meta["doc_id"] = str(doc_id) + ".random" + str(random_i)
+                final_feature_df["doc_id"] = "id:" + str(doc_id) + "." + str(random_i)
+                meta["doc_id"] = "id:" + str(doc_id) + ".random" + str(random_i)
                 meta['html_path'] = labeled_html_path
                 min_max_scaler = MinMaxScaler()
                 x = final_feature_df[config.cols_to_use].values
