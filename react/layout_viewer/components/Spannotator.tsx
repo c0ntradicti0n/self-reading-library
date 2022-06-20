@@ -115,6 +115,7 @@ function valuetext(value) {
 
 export default function Spannotator({text, onClose}) {
     const [open, setOpen] = useState(true);
+    // @ts-ignore
     const [spanIndices, setSpanIndices] = useState<[string, number, number, string[]][]>(getSpans(annotation));
 
 
@@ -138,6 +139,7 @@ export default function Spannotator({text, onClose}) {
                 fullWidth
                 maxWidth={"xl"}
             >
+                {/*@ts-ignore*/}
                 <BootstrapDialogTitle id="customized-dialog-title" onClose={handleClose}>
                     Teach the difference
                 </BootstrapDialogTitle>

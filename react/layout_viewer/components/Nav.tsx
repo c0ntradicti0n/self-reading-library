@@ -38,6 +38,7 @@ export default class Nav extends React.Component<Props, any> {
                         <form onSubmit={(e) => {
                             console.log(e)
                             Router.push({
+                                // @ts-ignore
                                 pathname: '/difference/', query: {id: (e.target.elements.id as HTMLTextAreaElement).value}
                             })
                         }}>

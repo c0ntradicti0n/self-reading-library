@@ -70,6 +70,8 @@ def create_app():
             ElmoDifferenceQueueRest,
         '/difference/{id}':
             ElmoDifferenceQueueRest,
+        '/difference_annotation':
+            DifferencePublisher,
 
         # topics
         '/library':
