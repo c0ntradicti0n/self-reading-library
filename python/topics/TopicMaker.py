@@ -89,11 +89,9 @@ class TopicMaker:
                 embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH])._.trf_data.tensors[1]
                 shape = embedding.shape
             except Exception as e:
-                self.logger.error(f"could not create embedding {e}", exc_info=True)
+                logging.error(f"could not create embedding {e}", exc_info=True)
                 embedding = np.random.random(shape)
             embeddingl.append(embedding)
-
-
 
         embeddings = np.vstack(embeddingl)
 
@@ -118,7 +116,6 @@ class TopicMaker:
         topics_titles = self.make_titles(keywords)
 
         topics = {}
-
 
         for i_group_label, i_group in topic_ids_2_doc_ids.items():
             try:
@@ -175,15 +172,15 @@ class TopicMaker:
 
         titled_clustered_documents = {}
         for topic_id, text_ids in topic_2_docids.items():
-            constructed_doc = " ".join([w  for t in [ texts[id] for id in text_ids ] for w in t.split() if w.lower() not in self.stop_words]).replace(".", "").replace(",", "")
-
+            constructed_doc = " ".join([w for t in [texts[id] for id in text_ids] for w in t.split() if
+                                        w.lower() not in self.stop_words]).replace(".", "").replace(",", "")
 
             tr4w = TextRank4Keyword()
             tr4w.analyze(constructed_doc, window_size=4, lower=True,
                          stopwords=[])
             keywords = tr4w.get_keywords(5)
 
-            keywords = [k for k in keywords if len(k[0])>3]
+            keywords = [k for k in keywords if len(k[0]) > 3]
             try:
                 titled_clustered_documents[topic_id] = keywords
             except Exception as e:
@@ -200,7 +197,7 @@ class TopicMaker:
         return np.array(out)
 
     def make_titles(self, keywords_to_texts):
-        return { k: " ".join(k[0] for k in v[:4]) for k, v in keywords_to_texts.items()}
+        return {k: " ".join(k[0] for k in v[:4]) for k, v in keywords_to_texts.items()}
 
 
 if __name__ == "__main__":

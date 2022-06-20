@@ -2,6 +2,7 @@ import React from 'react';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/Button';
 import {Link} from "@mui/material";
+import Router from "next/router";
 
 interface Props {
     forward: () => any
@@ -33,16 +34,30 @@ export default class Nav extends React.Component<Props, any> {
                         justifyContent: 'center',
 
                     }}>
-                        <form onSubmit={(e) => (typeof (e.target as HTMLTextAreaElement).value === "string") ?
-                            this.props.goto(this.state.whereTo) : this.props.upload( (e.target as HTMLTextAreaElement).value)}>
-                            <input type="text" style={{
+
+                        <form onSubmit={(e) => {
+                            console.log(e)
+                            Router.push({
+                                pathname: '/difference/', query: {id: (e.target.elements.id as HTMLTextAreaElement).value}
+                            })
+                        }}>
+                        <input name="id" type="text" style={{
                                 margin: "10px"
                             }}/>
+                        </form>
+                        <form onSubmit={(e) => {
+                            console.log(e)
+                            Router.push({
+                                pathname: '/difference/', query: {id: (e.target as HTMLTextAreaElement).value}
+                            })
+                        }}>
+
                             <input type="file" id="myfile" name="myfile"/>
                         </form>
                         <a href={"/library"}>Library</a>
-                        { ' '}
-                        <a style={{margin:"30px"}} href={"/difference?id=http://differencebetween.info"}>Random <i>differencebetween.info</i> article</a>
+                        {' '}
+                        <a style={{margin: "30px"}}
+                           href={"/difference?id=http://differencebetween.info"}>Random <i>differencebetween.info</i> article</a>
 
                     </div>
 

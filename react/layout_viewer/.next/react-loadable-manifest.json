@@ -1,10 +1,12 @@
 {
-  "./dev/noop": [
-    {
-      "id": "./node_modules/next/dist/client/dev/noop.js",
-      "name": "./node_modules/next/dist/client/dev/noop.js",
-      "file": "static/chunks/0.js",
-      "publicPath": "static/chunks/0.js"
-    }
-  ]
+  "../components/Graph.js -> ../components/SpriteText.js": {
+    "id": "./components/SpriteText.js",
+    "files": []
+  },
+  "../components/Graph.js -> ./ForceGraph3d.js": {
+    "id": "./components/ForceGraph3d.js",
+    "files": [
+      "static/chunks/components_ForceGraph3d_js.js"
+    ]
+  }
 }

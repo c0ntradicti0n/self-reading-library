@@ -40,6 +40,9 @@ class Scraper(PathSpec):
         for url, m in i_url:
             if url.startswith('http') and regex.match(self.http_regex, url):
                 path = f"{config.hidden_folder}/pdfs/{urllib.parse.quote_plus(url)}.pdf"
+                path = path.replace("(", "")
+                path = path.replace(")", "")
+
 
                 if not os.path.exists(path):
                     os.system(f"chromium  --headless \

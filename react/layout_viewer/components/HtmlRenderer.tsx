@@ -2,6 +2,7 @@ import {Component} from "react";
 import Nav from "./Nav";
 import ServerResource from "../resources/GeneralResource";
 import {ThreeCircles, Triangle} from "react-loader-spinner";
+import SelectText from "./SelectText";
 
 interface Props {
     data: { value: any, meta: any }
@@ -15,7 +16,7 @@ class HtmlRenderer extends Component<Props> {
 
     render() {
         console.log("HtmlRenderer", this);
-        return <>
+        return <SelectText>
             <Nav
                 forward={() => this.props.service.ok(null, "", {}, () => window.location.reload())}
                 goto={(form_data) => this.props.service.fetch_one(form_data, () => console.log("will display content..."))}
@@ -49,7 +50,7 @@ class HtmlRenderer extends Component<Props> {
                     : <Triangle ariaLabel="loading-indicator"/>
                 }
             </div>
-        </>
+        </SelectText>
     }
 }
 
