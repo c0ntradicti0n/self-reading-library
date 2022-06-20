@@ -9,13 +9,13 @@ export const tagStrip = (t) => {
 export const getSpans = (annotation) => {
     let groups = annotation.reduce((acc, [w, t], i) => {
         if (acc.length === 0)
-            return [[tagStrip(t), 0, i]]
+            return [[tagStrip(t), 0, i+1, [w]]]
         let last = acc[acc.length -1]
         console.log(last)
         if (last[0] === tagStrip(t))
-            acc[acc.length - 1] = [tagStrip(t), last[1], i]
+            acc[acc.length - 1] = [tagStrip(t), last[1], i+1, [...last[3], w]]
         else
-            acc.push([tagStrip(t), i, i + 1])
+            acc.push([tagStrip(t), i, i + 1, [ w]])
         return acc
     }, [])
     console.log(groups)

@@ -27,7 +27,6 @@ const BootstrapDialog = sty(Dialog)(({theme}) => ({
 
 
 const annotation = [
-    ["word", "tag"],
     ["the", "B-SUBJ"],
     ["lazy", "I-SUBJ"],
     ["yellow", "I-SUBJ"],
@@ -36,8 +35,7 @@ const annotation = [
     ["on", "B-CONTRAST"],
     ["the", "B-CONTRAST"],
     ["wall", "B-CONTRAST"],
-    [".", ""],
-        ["word", "tag"],
+    [".", "O"],
     ["the", "B-SUBJ"],
     ["lazy", "I-SUBJ"],
     ["yellow", "I-SUBJ"],
@@ -117,7 +115,7 @@ function valuetext(value) {
 
 export default function Spannotator({text, onClose}) {
     const [open, setOpen] = useState(true);
-    const [spanIndices, setSpanIndices] = useState<[string, number, number][]>(getSpans(annotation));
+    const [spanIndices, setSpanIndices] = useState<[string, number, number, string[]][]>(getSpans(annotation));
 
 
     const handleClickOpen = () => {
@@ -152,8 +150,8 @@ export default function Spannotator({text, onClose}) {
                     </Typography>
                     <Typography gutterBottom>
 
-                        {spanIndices.map(([tag, i1, i2], i) =>
-                            <div>{tag}<Slider
+                        {spanIndices.map(([tag, i1, i2, ws], i) =>
+                            <div>{tag} {ws.join(" ")}<Slider
                                 aria-label="annotation"
                                 value={spanIndices[i].slice(1,3) as number[]}
                                 valueLabelDisplay="auto"
@@ -175,9 +173,23 @@ export default function Spannotator({text, onClose}) {
                                         value = (newValue);
                                     }
 
-                                    console.log(value)
+                                    // @ts-ignore
+                                    spanIndices[i] = [tag, ...value, annotation.slice(value[0], value[1]).map(([w, t]) => w)]
 
-                                    spanIndices[i] = [tag, ...value]
+                                    // @ts-ignore
+                                    for (let [j, span] of spanIndices.entries()) {
+                                        if (span[2] > value[0] && span[2] < value[1])
+                                            {
+                                                span[2] = value[0]
+                                                spanIndices[j] = span
+                                            }
+
+                                        if (span[1] < value[1] && span[1] > value[0])
+                                            {
+                                                span[1] = value[1]
+                                                spanIndices[j] = span
+                                            }
+                                    }
                                     setSpanIndices(spanIndices)
 
                                 }}

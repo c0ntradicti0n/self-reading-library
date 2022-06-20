@@ -12,6 +12,8 @@ import os
 import unittest
 import numpy
 
+from core import config
+
 logger = logging.getLogger(__file__)
 import _pickle as cPickle
 
@@ -76,8 +78,10 @@ def yield_cache_instead_apply(cls, f, gen, cache, filename, **kwargs):
 
     if values_from_future:
         future_yield_values = [
-            (value, decompress_pickle(read_cache_file(filename, urllib.parse.quote_plus(value))))
-            for value in values_from_future if value in cache
+            (value, decompress_pickle(read_cache_file(filename,
+                value if value.endswith(".pdf") else config.tex_data + urllib.parse.quote_plus(value) + ".pdf")))
+            for value in values_from_future if
+            value in cache or config.tex_data + urllib.parse.quote_plus(value) + ".pdf" in cache
         ]
     else:
         future_yield_values = []
