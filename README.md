@@ -11,10 +11,8 @@ This contains some NLP-Pipeline-Framework for Layout recognition, semantic  text
 * It employs Elmo to predict semantic tags within the texts  (A transformer model like Bert or GPT3 from AllenNLP)
 
 * It creates an interactive 3D-universe of Documentens representing the content of the "library". The documents are automatically clustered and the clusters are titled. 
-![internal pipeline workflow (created dynamically)](https://github.com/c0ntradicti0n/LayoutEagle/blob/master/universe.png?raw=true)
+![Library 3D view (created dynamically)](https://github.com/c0ntradicti0n/LayoutEagle/blob/master/universe.png?raw=true)
 * It brings a dynamic frontend, that hosts pages for backend components. The frontend services and page-components are dynamically built by a backend side configuration
-
-* It shows a Java "Bean" like concept of building dynamic pipelines. The approach is registering all components of the programm as nodes in a directed graph, as "converters" between input and output descriptions. To call the components we use "pipelines", that are dynamically built by asking the graph for the shortest connections. And from these pipelines we get callables, that call all the graph nodes represending the processing steps needed for producing the output. The longer the pipelines become, the more we save the spaghetti code, that could be produced by connecting these processing tools and they are reusable.
 
 ![internal pipeline workflow (created dynamically)](https://github.com/c0ntradicti0n/LayoutEagle/blob/master/python/workflow.png?raw=true)
 
@@ -36,13 +34,17 @@ We have had three trials on this:
 2. An algorithm, that uses a fine-tuned transformer-model (based on AllenAI transformer model ELMO), to match phrases that are similar to our handmade corpus
 3. An algorithm processing the text peaces with Open-AIs GPT3, that pushes the scientific text into GPT3 with the question "What differences are expressed in this text?"
 
+# Annotating differences in Documents
+
+
 
 # Combining the findings of "difference"-sentences
+... will come...
 
 # Topic modelling
+![Library 3D view (created dynamically)](https://github.com/c0ntradicti0n/LayoutEagle/blob/master/universe.png?raw=true)
 
 # Credits
-
 * [vasturiano](https://github.com/vasturiano/react-force-graph)
 * [arxive.org](https://github.com/vasturiano/react-force-graph)
 * [AllenNLP](https://allenai.org/allennlp)
@@ -50,3 +52,6 @@ We have had three trials on this:
 * [parasail](https://github.com/jeffdaily/parasail)
 * [layoutlmv2](https://huggingface.co/docs/transformers/model_doc/layoutlmv2)
 * [differencebetween.net](http://www.differencebetween.net/)
+* To authors of over 60000 npm packages!
+* To authors of 2000 Python packages!
+* To nature, god and friends!
