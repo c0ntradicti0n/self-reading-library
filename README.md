@@ -1,11 +1,19 @@
-# Layout Eagle
+# Self-reading library
 
-This contains some NLP-Pipeline for Layout recognition, semantic analysis, text to speech tool. 
+**Demo: [Self-reading library](http://141.5.100.77/)**
 
-* It brings a framework to connect a multitude of different tools without spaghetti-code and can be extended
+This contains some NLP-Pipeline-Framework for Layout recognition, semantic  text analysis and text to speech tool for audio-books putting together various tools. 
+
+* It brings a framework to connect a multitude of different tools with less spaghetti-code or sorted spaghettis.
+
 * It has a deep learning approach to learn layout structures (arbitrarily configurable by learning from tags, that are automaticallyh inserted into LateX files, that are compiled and used for learning layout analysis)
-* It employs Elmo (A transformer model like Bert or GPT3 from AllenNLP) to predict semantic tags within the texts
+
+* It employs Elmo to predict semantic tags within the texts  (A transformer model like Bert or GPT3 from AllenNLP)
+
+* It creates an interactive 3D-universe of Documentens representing the content of the "library". The documents are automatically clustered and the clusters are titled. 
+![internal pipeline workflow (created dynamically)](https://github.com/c0ntradicti0n/LayoutEagle/blob/master/universe.png?raw=true)
 * It brings a dynamic frontend, that hosts pages for backend components. The frontend services and page-components are dynamically built by a backend side configuration
+
 * It shows a Java "Bean" like concept of building dynamic pipelines. The approach is registering all components of the programm as nodes in a directed graph, as "converters" between input and output descriptions. To call the components we use "pipelines", that are dynamically built by asking the graph for the shortest connections. And from these pipelines we get callables, that call all the graph nodes represending the processing steps needed for producing the output. The longer the pipelines become, the more we save the spaghetti code, that could be produced by connecting these processing tools and they are reusable.
 
 ![internal pipeline workflow (created dynamically)](https://github.com/c0ntradicti0n/LayoutEagle/blob/master/python/workflow.png?raw=true)
@@ -33,3 +41,12 @@ We have had three trials on this:
 
 # Topic modelling
 
+# Credits
+
+* [vasturiano](https://github.com/vasturiano/react-force-graph)
+* [arxive.org](https://github.com/vasturiano/react-force-graph)
+* [AllenNLP](https://allenai.org/allennlp)
+* [pdf2htmlEX](https://pdf2htmlex.github.io/pdf2htmlEX/)
+* [parasail](https://github.com/jeffdaily/parasail)
+* [layoutlmv2](https://huggingface.co/docs/transformers/model_doc/layoutlmv2)
+* [differencebetween.net](http://www.differencebetween.net/)

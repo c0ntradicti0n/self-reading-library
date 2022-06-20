@@ -6,9 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-     "test": "jasmine"
+    "test": "jasmine"
   },
-
   "dependencies": {
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
@@ -19,6 +18,7 @@
     "drei": "0.0.60",
     "glob": "^7.1.6",
     "install": "^0.13.0",
+    "lodash": "^4.17.21",
     "next": "12",
     "npm": "^8.12.1",
     "postcss": "^8.3.11",

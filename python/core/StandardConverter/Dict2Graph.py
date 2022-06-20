@@ -54,7 +54,6 @@ class Dict2Graph(Ant):
                  for k, attr in dig.nodes(data=True)]
 
         links = [{'source': k, 'target': v} for k, v in dig.edges]
-
         d = {'nodes': nodes, 'links': links}
         return d
 

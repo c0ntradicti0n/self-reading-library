@@ -1,12 +1,1 @@
-{
-  "../components/Graph.js -> ../components/SpriteText.js": {
-    "id": "./components/SpriteText.js",
-    "files": []
-  },
-  "../components/Graph.js -> ./ForceGraph3d.js": {
-    "id": "./components/ForceGraph3d.js",
-    "files": [
-      "static/chunks/components_ForceGraph3d_js.js"
-    ]
-  }
-}
+{}
