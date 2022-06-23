@@ -3,6 +3,8 @@ import Nav from "./Nav";
 import ServerResource from "../resources/GeneralResource";
 import {ThreeCircles, Triangle} from "react-loader-spinner";
 import SelectText from "./SelectText";
+import DifferenceService from "../resources/DifferenceService";
+import Difference_AnnotationService from "../resources/Difference_AnnotationService";
 
 interface Props {
     data: { value: any, meta: any }
@@ -14,9 +16,11 @@ class HtmlRenderer extends Component<Props> {
         console.log("HtmlRenderer", this);
     }
 
+    differenceService = new Difference_AnnotationService()
+
     render() {
         console.log("HtmlRenderer", this);
-        return <SelectText>
+        return <SelectText meta={this.props.data.meta} service = {this.differenceService}>
             <Nav
                 forward={() => this.props.service.ok(null, "", {}, () => window.location.reload())}
                 goto={(form_data) => this.props.service.fetch_one(form_data, () => console.log("will display content..."))}

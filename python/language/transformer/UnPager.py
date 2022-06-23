@@ -1,5 +1,4 @@
 import copy
-import logging
 
 from listalign.helpers import alignment_table
 

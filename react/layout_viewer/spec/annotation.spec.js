@@ -1,4 +1,4 @@
-import {getSpans} from "../src/util/annotation.js";
+import {getSpans} from "../src/util/annotation.ts";
 
 
 describe("A suite is just a function", function() {

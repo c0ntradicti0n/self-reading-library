@@ -22,7 +22,7 @@ OUT_OF_THE_BOX = "OUT_OF_THE_BOX"
 class PathAnt:
     def __init__(self, necessary_paths={config.hidden_folder: ["tex_data", "cache", "log", "topics"]}):
         make_dirs_recursive(necessary_paths)
-        self.G = nx.DiGraph()
+        self.G = nx.MultiDiGraph()
 
         for _from, _to, functional_object in ____CONVERTERS____:
             self.add_edge(_from, _to, functional_object)
@@ -199,9 +199,15 @@ class PathAnt:
 
     def lookup(self, _from, _to, attr='functional_object'):
         try:
+            if 0 in self.G[_from][_to]:
+                return self.G[_from][_to][0][attr]
             return self.G[_from][_to][attr]
+        except KeyError as e:
+            print(self.G[_from][_to])
+            raise e
         except Exception as e:
             raise e
+
 
     def estimate_targeting_paths(self, intermediate_target):
         for possible_path in nx.single_target_shortest_path(self.G, intermediate_target).values():

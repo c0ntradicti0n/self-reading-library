@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import PropTypes from 'prop-types';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography';
 import {styled as sty} from '@mui/material/styles';
 import styled from 'styled-components'
 import {Slider} from "@mui/material";
-import {getSpans} from "../src/util/annotation.js"
+import {getSpans} from "../src/util/annotation"
 
 const BootstrapDialog = sty(Dialog)(({theme}) => ({
     '& .MuiDialogContent-root': {
@@ -113,11 +113,15 @@ function valuetext(value) {
 }
 
 
-export default function Spannotator({text, onClose}) {
+export default function SpanAnnotation({meta, text, onClose, service}) {
     const [open, setOpen] = useState(true);
     // @ts-ignore
-    const [spanIndices, setSpanIndices] = useState<[string, number, number, string[]][]>(getSpans(annotation));
-
+    const [spanIndices, setSpanIndices] = useState<[string, number, number, string[]][]>([]);
+    useEffect( () => {
+        (async () => {
+            await service.fetch_one([service.id, text, meta["pdf_path"]], (res) => setSpanIndices(getSpans(res)))
+        })()
+    }, [])
 
     const handleClickOpen = () => {
         setOpen(true);

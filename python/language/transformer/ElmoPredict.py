@@ -69,17 +69,7 @@ class ElmoPredict(PathSpec):
                     break
 
                 try:
-                    if not model:
-                        model = Model.load(config=self.config,
-                                                serialization_dir=self.flags['difference_model_path'])
-                        self.default_predictor = Predictor.from_path(self.flags['difference_model_path'])
-                        self.predictor = DifferenceTaggerPredictor(
-                            self.default_predictor._model,
-                            dataset_reader=self.default_predictor._dataset_reader
-                        )
-                    annotation = self.predictor.predict_json({"sentence": words})
-                    subj_annotation = [(t,w) for t, w in annotation if "SUBJ" in t]
-                    self.info(subj_annotation)
+                    annotation = self.predict(words)
                 except Exception as e:
                     self.logger.error("Faking annotation because of error " + str(e), stack_info=True)
                     annotation = [('O', w) for w in words]
@@ -114,6 +104,21 @@ class ElmoPredict(PathSpec):
                     raise
 
             self.init_queues()
+
+    def predict(self, words):
+        global model
+        if not model:
+            model = Model.load(config=self.config,
+                               serialization_dir=self.flags['difference_model_path'])
+            self.default_predictor = Predictor.from_path(self.flags['difference_model_path'])
+            self.predictor = DifferenceTaggerPredictor(
+                self.default_predictor._model,
+                dataset_reader=self.default_predictor._dataset_reader
+            )
+        annotation = self.predictor.predict_json({"sentence": words})
+        subj_annotation = [(t, w) for t, w in annotation if "SUBJ" in t]
+        self.info(subj_annotation)
+        return annotation
 
     def info(self, annotation):
         table = Texttable()

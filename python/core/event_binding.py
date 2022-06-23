@@ -92,10 +92,8 @@ class RestQueue:
         if not id in self.workbook or not self.workbook[id]:
             print ("get new")
             try:
-
                 self.workbook[id] = q[self.service_id].get(timeout=3)
             except Exception as e:
-                #print (f"{self.workbook=}")
                 logging.error("queue not ready")
 
         if id in self.workbook:

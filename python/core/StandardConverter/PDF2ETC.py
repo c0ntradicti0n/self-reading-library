@@ -40,7 +40,7 @@ class PDF2ETC(PDF_AnnotatorTool):
     def __call__(self, labeled_paths, *args, **kwargs):
         for doc_id, (pdf_path, meta) in enumerate(labeled_paths):
             html_path = pdf_path + outputs['html']
-            reading_order_path = pdf_path + "." + outputs['reading_order']
+            pdf2htmlEX_wordi_path = pdf_path + "." + outputs['reading_order']
             feat_path = pdf_path + "." + outputs['feat']
 
             self.logger.warning(f"working on {pdf_path}")
@@ -48,7 +48,7 @@ class PDF2ETC(PDF_AnnotatorTool):
 
             meta['pdf2htmlEX.html'] = html_path
             meta['pdf_path'] =  pdf_path
-            meta['reading_order_path'] = reading_order_path
+            meta['pdf2htmlEX_wordi_path'] = pdf2htmlEX_wordi_path
             meta['feat_path'] = feat_path
 
-            yield (html_path, reading_order_path, feat_path), meta
+            yield (html_path, pdf2htmlEX_wordi_path, feat_path), meta

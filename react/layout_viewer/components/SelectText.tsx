@@ -1,8 +1,10 @@
 import {Component} from "react";
-import Spannotator from "./Spannotator";
+import SpanAnnotation from "./SpanAnnotation";
+import ServerResource from "../resources/GeneralResource";
 
 interface Props {
-
+    service: ServerResource<any>,
+    meta:any
 }
 
 interface State {
@@ -20,7 +22,15 @@ class SelectText extends Component<Props, State> {
 
     return (
         <div onMouseUp={this.handleMouseUp}>
-            {this.state.selected && <Spannotator text={this.state.selected} onClose={() => this.setState({selected:null})}/>}
+            {
+                this.state.selected &&
+                <SpanAnnotation
+                    text={this.state.selected}
+                    onClose={() => this.setState({selected:null})}
+                    service={this.props.service}
+                    meta={this.props.meta}
+                />
+            }
                 {this.props.children}
 
             </div>)

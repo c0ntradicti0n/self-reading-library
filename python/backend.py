@@ -6,6 +6,7 @@ import logging
 from wsgiref import simple_server
 import threading
 from core import config
+from core.RestPublisher.AnnotationPublisher import DifferenceAnnotationPublisher
 from core.RestPublisher.DifferencePublisher import DifferencePublisher
 from core.StandardConverter import PATH2HTML
 from core.config import PORT
@@ -70,8 +71,10 @@ def create_app():
             ElmoDifferenceQueueRest,
         '/difference/{id}':
             ElmoDifferenceQueueRest,
-        '/difference_annotation':
+        '/difference':
             DifferencePublisher,
+        '/difference_annotation':
+            DifferenceAnnotationPublisher,
 
         # topics
         '/library':
@@ -82,6 +85,7 @@ def create_app():
             AnnotationQueueRest,
         '/upload_annotation/{id}':
             UploadAnnotationQueueRest,
+        '/layout': LayoutPublisher
     }
 
     from falcon_cors import CORS

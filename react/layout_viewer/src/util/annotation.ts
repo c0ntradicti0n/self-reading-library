@@ -6,8 +6,8 @@ export const tagStrip = (t) => {
     return t.slice(2)
 }
 
-export const getSpans = (annotation) => {
-    let groups = annotation.reduce((acc, [w, t], i) => {
+export const getSpans = (annotation)  => {
+    let groups :  [string, number, number, string[]][] = annotation.reduce((acc, [w, t], i) => {
         if (acc.length === 0)
             return [[tagStrip(t), 0, i+1, [w]]]
         let last = acc[acc.length -1]
@@ -19,7 +19,7 @@ export const getSpans = (annotation) => {
         return acc
     }, [])
     console.log(groups)
-    groups = groups.filter(([t, i1, i2]) => t.length > 2)
+    groups = groups.filter(([t, i1, i2]) => t.length > 2);
     return groups
 }
 

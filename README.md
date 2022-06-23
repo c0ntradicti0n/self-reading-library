@@ -1,4 +1,4 @@
-# Self-reading library
+# Self-Reading and teachable Library
 
 **Demo: [Self-reading library](http://141.5.100.77/)**
 
@@ -12,7 +12,8 @@ This contains some NLP-Pipeline-Framework for Layout recognition, semantic  text
 
 * It creates an interactive 3D-universe of Documentens representing the content of the "library". The documents are automatically clustered and the clusters are titled. 
 ![Library 3D view (created dynamically)](https://github.com/c0ntradicti0n/LayoutEagle/blob/master/universe.png?raw=true)
-* It brings a dynamic frontend, that hosts pages for backend components. The frontend services and page-components are dynamically built by a backend side configuration
+
+* It brings a dynamic frontend, that hosts pages for backend components. The frontend services and page-components are dynamically built by the backend!
 
 ![internal pipeline workflow (created dynamically)](https://github.com/c0ntradicti0n/LayoutEagle/blob/master/python/workflow.png?raw=true)
 
@@ -20,9 +21,6 @@ This contains some NLP-Pipeline-Framework for Layout recognition, semantic  text
 # Predicting layout of pdf-papers with or without column layout
 
 ![predicted layout sections](https://github.com/c0ntradicti0n/LayoutEagle/blob/master/documentation/layout-presentation/pics/equation-breaking-all-cols.png?raw=true)
-
-![alt text](https://github.com/c0ntradicti0n/LayoutEagle/blob/master/accuracy_epochs.png?raw=true)
-
 
 # Semantic search in scientific text for utterances expressing "differences"
 
@@ -34,15 +32,32 @@ We have had three trials on this:
 2. An algorithm, that uses a fine-tuned transformer-model (based on AllenAI transformer model ELMO), to match phrases that are similar to our handmade corpus
 3. An algorithm processing the text peaces with Open-AIs GPT3, that pushes the scientific text into GPT3 with the question "What differences are expressed in this text?"
 
+# Use documents from the web
+You can paste url in the frontend and the document will be taken into account by the self-reading library!
+You can teach with those documents in three ways:
+* Annotate the layout
+
+* Annotate some difference-utterances
+
+* The more documents, the more structured and overview-like will the topics become
+
+
+
 # Annotating differences in Documents
 
-
+coming soon
 
 # Combining the findings of "difference"-sentences
 ... will come...
 
 # Topic modelling
+Embeddings, vector representations of the "meaning" of the word, are clusters with Gaussian Clustering to thematically more or less consitent topics. And those clusters are given titles by some TF-IDF-method. 
+
 ![Library 3D view (created dynamically)](https://github.com/c0ntradicti0n/LayoutEagle/blob/master/universe.png?raw=true)
+
+# Audiobooks
+Create an audiobook from your favorite scientific paper and share it with the rest of the science world to have some great podcast from the machine!
+... will come ...
 
 # Credits
 * [vasturiano](https://github.com/vasturiano/react-force-graph)
