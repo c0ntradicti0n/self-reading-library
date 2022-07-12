@@ -1,10 +1,8 @@
 import os
 import sys
-import logging
 sys.path.append(".")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 import logging
-from helpers.nested_dict_tools import flatten
 
 os.environ["LD_LIBRARY_PATH"] = '/usr/local/cuda-11.0/targets/x86_64-linux/lib/'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -171,3 +169,4 @@ ELMO_DIFFERENCE_COLLECTION_PATH = hidden_folder + "elmo_difference_collection"
 PORT = 7789
 
 TOPIC_TEXT_LENGTH = 180
+spacy_model_name = 'en_core_web_trf'

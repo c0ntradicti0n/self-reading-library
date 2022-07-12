@@ -1,150 +1,158 @@
-import {AppSettings} from "../config/connection";
-import {getRandomArbitrary} from "../../layout_viewer/src/util/array";
+import { AppSettings } from "../config/connection";
+import { getRandomArbitrary } from "../../layout_viewer/src/util/array";
 
 export default class ServerResource<T> {
-    fetch_allowed: Boolean
-    read_allowed: Boolean
-    correct_allowed: Boolean
-    private route: string;
-    delete_allowed: Boolean
-    upload_allowed: Boolean
+  fetch_allowed: Boolean;
+  read_allowed: Boolean;
+  correct_allowed: Boolean;
+  private route: string;
+  delete_allowed: Boolean;
+  upload_allowed: Boolean;
 
-    id: string = ""
+  id: string = "";
 
-    constructor(
-        route: string,
-        fetch_allowed = true,
-        read_allowed = true,
-        upload_allowed = true,
-        correct_allowed = true,
-        delete_allowed = true,
-        add_id = false) {
-        this.route = route;
-        this.fetch_allowed = fetch_allowed
-        this.correct_allowed = fetch_allowed
-        this.read_allowed = read_allowed
-        this.correct_allowed = correct_allowed
-        this.upload_allowed = upload_allowed
-        this.delete_allowed = delete_allowed
+  constructor(
+    route: string,
+    fetch_allowed = true,
+    read_allowed = true,
+    upload_allowed = true,
+    correct_allowed = true,
+    delete_allowed = true,
+    add_id = false
+  ) {
+    this.route = route;
+    this.fetch_allowed = fetch_allowed;
+    this.correct_allowed = fetch_allowed;
+    this.read_allowed = read_allowed;
+    this.correct_allowed = correct_allowed;
+    this.upload_allowed = upload_allowed;
+    this.delete_allowed = delete_allowed;
 
-        if (add_id) {
-            let id
+    if (add_id) {
+      let id;
 
-            if (typeof window !== "undefined") {
-
-                if (!localStorage.getItem(route)) {
-                    id = getRandomArbitrary(100000, 999999).toString()
-                    localStorage.setItem(route, id)
-                } else {
-                    id = localStorage.getItem(route)
-                }
-                console.log(localStorage, route, localStorage.getItem(route))
-
-
-                this.id = "/" + id
-            }
+      if (typeof window !== "undefined") {
+        if (!localStorage.getItem(route)) {
+          id = getRandomArbitrary(100000, 999999).toString();
+          localStorage.setItem(route, id);
+        } else {
+          id = localStorage.getItem(route);
         }
+        console.log(localStorage, route, localStorage.getItem(route));
+
+        this.id = "/" + id;
+      }
+    }
+  }
+
+  request = async (
+    method: String,
+    data = {},
+    callback: Function,
+    is_file = false
+  ) => {
+    // Default options are marked with *
+    console.log(
+      "URL",
+      AppSettings.SAUSSAGE_END_START_PATH + this.route + this.id
+    );
+
+    let querystring = "";
+    if (typeof window !== "undefined") {
+      querystring = window?.location.search.substring(1);
+      console.log(querystring);
     }
 
-    request = async (method: String, data = {}, callback: Function, is_file = false) => {
-        // Default options are marked with *
-        console.log("URL", AppSettings.SAUSSAGE_END_START_PATH + this.route + this.id)
+    var fetch_init = {
+      method: method.toUpperCase(),
+      mode: "cors", // no-cors, *cors, same-origin
+      //cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: "same-origin", // include, *same-origin, omit
+      headers: {
+        ...(!is_file ? { "Content-Type": "application/json" } : {}),
+        "API-Key": "secret",
+        //'Cache-Control': 'no-cache'
+        origin: "localhost",
+      },
 
-        let querystring = ""
-        if (typeof window !== "undefined") {
-            querystring = window?.location.search.substring(1)
-            console.log(querystring)
-        }
-
-        var fetch_init = {
-            method: method.toUpperCase(),
-            mode: 'cors', // no-cors, *cors, same-origin
-            //cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-            credentials: 'same-origin', // include, *same-origin, omit
-            headers: {
-                ...(!is_file ? {'Content-Type': 'application/json'} : {}),
-                'API-Key': 'secret',
-                //'Cache-Control': 'no-cache'
-                'origin': "localhost"
-            },
-
-            //redirect: 'follow', // manual, *follow, error
-            //referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-            body: !is_file ? JSON.stringify(data) : data
-        }
-        if (method === "get") {
-            delete fetch_init.body
-        }
-
-        console.log(fetch_init)
-
-        try {
-            const response = await fetch(
-                // @ts-ignore
-                AppSettings.SAUSSAGE_END_START_PATH + this.route + this.id + (querystring ? "?" + querystring : ""), fetch_init)
-
-
-            if (!response.ok) {
-                throw response.statusText
-            }
-
-            let result = null
-            try {
-                result = await response.json()
-                console.log({result})
-
-            } catch (e) {
-                console.log("Did not get a json back", e)
-                result = null
-            }
-
-            try {
-                return callback(result)
-            } catch (e) {
-                console.log("no callback given")
-            }
-        } catch (e) {
-            console.error(e)
-        }
-
+      //redirect: 'follow', // manual, *follow, error
+      //referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+      body: !is_file ? JSON.stringify(data) : data,
+    };
+    if (method === "get") {
+      delete fetch_init.body;
     }
 
-    fetch_one = async (id, callback: Function) => {
-        if (this.fetch_allowed) {
-            return this.request("post", id, callback)
-        }
-    }
+    console.log(fetch_init);
 
-    fetch_all = async (callback) => {
-        console.log("Fetch all resources")
-        if (this.fetch_allowed) {
-            return this.request("get", undefined, callback)
-        }
-    }
+    try {
+      const response = await fetch(
+        // @ts-ignore
+        AppSettings.SAUSSAGE_END_START_PATH +
+          this.route +
+          this.id +
+          (querystring ? "?" + querystring : ""),
+        fetch_init
+      );
 
+      if (!response.ok) {
+        throw response.statusText;
+      }
 
-    // @ts-ignore
-    ok = async (id, url = '', data = {}, callback) => {
-        if (this.read_allowed) {
-            this.request("post", id, callback)
-        }
-    }
-    // @ts-ignore
-    change = async (json_path, value, callback) => {
-        if (this.upload_allowed) {
-            this.request("put", [json_path, value], callback)
-        }
-    }
+      let result = null;
+      try {
+        result = await response.json();
+        console.log({ result });
+      } catch (e) {
+        console.log("Did not get a json back", e);
+        result = null;
+      }
 
-    // @ts-ignore
-    upload = async (form_data, callback) => {
-        console.log("UPLOADING", form_data, this.upload_allowed)
-        if (this.upload_allowed) {
-            console.log(new FormData(form_data), new FormData(form_data).get("file"))
-            await this.request("patch", new FormData(form_data), callback, true)
-        }
+      try {
+        return callback(result);
+      } catch (e) {
+        console.log("no callback given");
+      }
+    } catch (e) {
+      console.error(e);
     }
-    /*
+  };
+
+  fetch_one = async (id, callback: Function) => {
+    if (this.fetch_allowed) {
+      return this.request("post", id, callback);
+    }
+  };
+
+  fetch_all = async (callback) => {
+    console.log("Fetch all resources");
+    if (this.fetch_allowed) {
+      return this.request("get", undefined, callback);
+    }
+  };
+
+  // @ts-ignore
+  ok = async (id, url = "", data = {}, callback) => {
+    if (this.read_allowed) {
+      this.request("post", id, callback);
+    }
+  };
+  // @ts-ignore
+  change = async (json_path, value, callback) => {
+    if (this.upload_allowed) {
+      this.request("put", [json_path, value], callback);
+    }
+  };
+
+  // @ts-ignore
+  upload = async (form_data, callback) => {
+    console.log("UPLOADING", form_data, this.upload_allowed);
+    if (this.upload_allowed) {
+      console.log(new FormData(form_data), new FormData(form_data).get("file"));
+      await this.request("patch", new FormData(form_data), callback, true);
+    }
+  };
+  /*
     async correct(url = '', data : T, id : String) {
         if (this.correct_allowed) {
             this.request(method="patch", data = data, id=id)
@@ -155,5 +163,4 @@ export default class ServerResource<T> {
             this.request(method="delete", data = data)
         }
     }*/
-
 }

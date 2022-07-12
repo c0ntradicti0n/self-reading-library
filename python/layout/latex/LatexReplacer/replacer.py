@@ -1,4 +1,4 @@
-from collections import Callable
+from collections.abc import Callable
 from typing import Dict, Tuple
 from core.pathant.PathSpec import PathSpec
 

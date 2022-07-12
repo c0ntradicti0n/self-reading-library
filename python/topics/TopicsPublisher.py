@@ -1,25 +1,19 @@
-import glob
 import json
 import logging
 import os
 import pickle
-from pprint import pprint
 
 import falcon
-import wordninja
 from regex import regex
 
 from core.RestPublisher.Resource import Resource
 from core.RestPublisher.RestPublisher import RestPublisher
 from core.RestPublisher.react import react
 from core.StandardConverter.Dict2Graph import Dict2Graph
-from helpers.list_tools import unique
 from topics.TopicMaker import TopicMaker
 from core import config
-from helpers.cache_tools import configurable_cache, uri_with_cache
-from helpers.nested_dict_tools import type_spec_iterable
 from core.pathant.Converter import converter
-from flask import jsonify, Blueprint
+from flask import Blueprint
 
 bp = Blueprint('blueprint', __name__, template_folder='templates')
 

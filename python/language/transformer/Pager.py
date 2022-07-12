@@ -6,7 +6,6 @@ import unicodedata
 from queue import Empty
 
 import chardet
-from pdfminer.high_level import extract_text
 from core import config
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
