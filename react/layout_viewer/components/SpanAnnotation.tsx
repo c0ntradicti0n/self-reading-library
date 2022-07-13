@@ -145,9 +145,7 @@ export default function SpanAnnotation({ meta, text, onClose, service }) {
         fullWidth
         maxWidth={"xl"}
       >
-        {/*@ts-ignore*/}
         <BootstrapDialogTitle
-          id="customized-dialog-title"
           onClose={handleClose}
         >
           Teach the difference
