@@ -1,7 +1,6 @@
 import * as React from "react";
 import Link from "next/link";
 import Head from "next/head";
-import Graph from "./Graph";
 import FlutterDashIcon from "@mui/icons-material/FlutterDash";
 import styled from "styled-components";
 import Url2Difference from "./Url2Difference";
