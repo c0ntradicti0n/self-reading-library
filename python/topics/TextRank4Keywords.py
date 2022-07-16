@@ -1,9 +1,17 @@
+import os
 from collections import OrderedDict
 import numpy as np
 import spacy
 from spacy.lang.en.stop_words import STOP_WORDS
 
-nlp = spacy.load('en_core_web_trf')
+from core.config import spacy_model_name
+
+try:
+    nlp = spacy.load(spacy_model_name)
+except OSError:
+    os.system(f'python -m spacy download {spacy_model_name}')
+    nlp = spacy.load(spacy_model_name)
+
 
 
 class TextRank4Keyword():

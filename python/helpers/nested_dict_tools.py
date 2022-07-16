@@ -1,4 +1,7 @@
-from collections import abc, Mapping, Collection
+try:
+    from collections.abc import Mapping
+except ImportError:
+    from collections import Mapping
 import numpy as np
 
 def get_dict_wo_key(dictionary, key):
