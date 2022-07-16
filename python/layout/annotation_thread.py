@@ -108,7 +108,7 @@ def layout_annotate_train_model():
         on_train=lambda args:
         list(
             model_pipe(metaize(args['samples_files']),
-                       collection_step=['training_rate']
+                       collection_step=args['training_rate']
                        )
         ),
         service_id='annotation',
