@@ -79,7 +79,7 @@ def model_in_the_loop(model_dir, collection_path, on_train, service_id, on_predi
             model_meta = on_train(
                 {
                     'samples_files': samples_files,
-                    'training_rate': samples_files
+                    'training_rate': len(samples_files)
                 })
             pprint(model_meta)
             model_path = model_meta[0][0]

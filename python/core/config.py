@@ -71,7 +71,7 @@ torch.cuda.empty_cache()
 try:
     free_gpu_cache()
 except Exception as e:
-    logging.error("No cuda available!", e)
+    logging.error("No cuda/gpu available!")
 
 feature_fuzz_ranges = (-0.02, 0.04, 0.02),
 sys.path.append(os.getcwd())
@@ -170,3 +170,4 @@ PORT = 7789
 
 TOPIC_TEXT_LENGTH = 180
 spacy_model_name = 'en_core_web_trf'
+audio_format = "ogg"
