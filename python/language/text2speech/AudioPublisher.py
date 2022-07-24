@@ -23,7 +23,6 @@ class AudioPublisher(RestPublisher, react):
             path="audiobook",
             route="audiobook",
             access={"fetch": True, "read": True, "upload": True, "correct": True, "delete": True}))
-        self.format = "ogg"
 
     @configurable_cache(
         filename=config.cache + os.path.basename(__file__),
