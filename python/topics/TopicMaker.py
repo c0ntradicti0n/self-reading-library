@@ -89,7 +89,7 @@ class TopicMaker:
                 embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH])._.trf_data.tensors[1]
                 shape = embedding.shape
             except Exception as e:
-                logging.error(f"could not create embedding {e}", exc_info=True)
+                logging.error(f"could not create embedding", exc_info=True)
                 embedding = np.random.random(shape)
             embeddingl.append(embedding)
 

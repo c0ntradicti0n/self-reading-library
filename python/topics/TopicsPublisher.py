@@ -17,7 +17,7 @@ bp = Blueprint('blueprint', __name__, template_folder='templates')
 topic_maker = TopicMaker()
 
 
-@converter("reading_order", "topics.dict")
+@converter("reading_order", "rest")
 class TopicsPublisher(RestPublisher, react):
     def __init__(self,
                  *args,

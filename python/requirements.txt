@@ -13,7 +13,7 @@ databases[postgresql]
 falcon
 falcon-cors
 falcon-multipart
-
+torchaudio
 networkx
 scipy
 traceback_with_variables
@@ -62,13 +62,13 @@ pyprover
 numpy-indexed
 pyxdameraulevenshtein
 editdistance
-
+speechbrain
 pandas
 suffix_trees
 openpyxl
 markov_clustering
 
-hdbscan
+#hdbscan
 addict
 cytoolz
 

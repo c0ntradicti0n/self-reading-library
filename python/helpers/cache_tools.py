@@ -74,7 +74,7 @@ def dig_generator_ground_for_next_value(gen):
 
 
 def yield_cache_instead_apply(cls, f, gen, cache, filename, **kwargs):
-    values_from_future = dig_generator_ground_for_next_value(gen)
+    values_from_future = [v for v in dig_generator_ground_for_next_value(gen) if v]
 
     if values_from_future:
         future_yield_values = [
@@ -93,18 +93,21 @@ def yield_cache_instead_apply(cls, f, gen, cache, filename, **kwargs):
 
         def filter():
             for value, m in gen:
-                if urllib.parse.quote_plus(value) in cache:
-                    logging.info(f"{value} was in cache, yielding that one instead of applying")
-                    cache_values_to_yield.append(
-                        (value, decompress_pickle(read_cache_file(urllib.parse.quote_plus(value), m))))
-                if value in cache:
-                    logging.info(f"{value} was in cache, yielding that one instead of applying")
-                    cache_values_to_yield.append(
-                        (value, decompress_pickle(read_cache_file(filename, value))))
-                if value in future_yield_values:
-                    logging.info("value was yielded before from future cache")
+                if value:
+                    if urllib.parse.quote_plus(value) in cache:
+                        logging.info(f"{value} was in cache, yielding that one instead of applying")
+                        cache_values_to_yield.append(
+                            (value, decompress_pickle(read_cache_file(urllib.parse.quote_plus(value), m))))
+                    if value in cache:
+                        logging.info(f"{value} was in cache, yielding that one instead of applying")
+                        cache_values_to_yield.append(
+                            (value, decompress_pickle(read_cache_file(filename, value))))
+                    if value in future_yield_values:
+                        logging.info("value was yielded before from future cache")
+                    else:
+                        yield value, m
                 else:
-                    yield value, m
+                    logging.error("Value in cache was None, discarding")
 
         yield from f(cls, filter(), **kwargs)
         yield from ((k, v) for k, v in cache_values_to_yield if k not in future_yield_values)

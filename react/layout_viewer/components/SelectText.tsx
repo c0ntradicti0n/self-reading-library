@@ -19,6 +19,7 @@ class SelectText extends Component<Props, State> {
   };
 
   render() {
+    console.log("SelectText", this)
     return (
       <div onMouseUp={this.handleMouseUp}>
         {this.state.selected && (
@@ -26,6 +27,7 @@ class SelectText extends Component<Props, State> {
             text={this.state.selected}
             onClose={() => this.setState({ selected: null })}
             service={this.props.service}
+            value={this.props.value}
             meta={this.props.meta}
           />
         )}

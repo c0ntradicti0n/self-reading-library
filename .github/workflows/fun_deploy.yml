@@ -72,15 +72,11 @@ jobs:
               mkdir python/.layouteagle/cache || echo 'exists'
             
 
-
-              
-
               mkdir python/.layouteagle/prediction
               ls python/.layouteagle/
 
               pip install wheel
               pip install torch
-              pip install -r ./python/requirements.txt
               pip install numpy --upgrade
               python -m spacy download en_core_web_trf
           
@@ -88,9 +84,20 @@ jobs:
               
               echo \" export class AppSettings {  public static SAUSSAGE_END_START_PATH = 'http://$SSH_HOST:443'   } \" > react/layout_viewer/config/connection.ts
               echo \"PORT=8443\" >> python/core/config.py
-
-
+              
           "
+
+      - name: InstallTtts
+        run: |
+            ssh staging '   
+                if [ [ ! -d ./tts ] ] ; then
+                  git clone git@github.com:c0ntradicti0n/tts.git 
+                  cd tts 
+                  python -m venv venv 
+                  . venv/bin/activate
+                  pip install -r requirements.txt
+                fi
+            '
       - name: StartServer
         run: |
             ssh staging '   screen -L  -Logfile backend_uwsgi.log -S backend -dm bash -c " . venv/bin/activate; cd LayoutEagle/python; until    uwsgi wsgi.ini ; do ; echo 'Server  crashed with exit code $?.  Respawning..' >&2; sleep 1; done    "  &  '
@@ -103,6 +110,9 @@ jobs:
         run: |
           ssh staging '    screen  -L  -Logfile frontend.log -S frontend -dm bash -c " sleep 120 ; cd LayoutEagle/react/layout_viewer_made/ ; yarn install; yarn add --dev typescript @types/node; yarn build ; yarn run start -p 8080 "   &  '
 
+      - name: StartWeb
+        run: |
+          ssh staging '    screen  -L  -Logfile frontend.log -S frontend -dm bash -c " sleep 110 ;     [ [ ! -d react/layout_viewer_made/public/pdfs ] ] && mkdir react/layout_viewer_made/public/pdfs &&  sudo mount --bind python/.layouteagle/pdfs/ react/layout_viewer_made/public/pdfs || echo mount_exists "   &  '
       - name: Glance at backend logs
         run: |
           ssh staging '              set -x ;  cat backend.log     '

@@ -1,6 +1,7 @@
 import random
 import threading
 import traceback
+from collections import defaultdict
 from queue import Queue, Empty
 import json
 from traceback_with_variables import Format, ColorSchemes, is_ipython_global, activate_by_import
@@ -12,6 +13,7 @@ logging.getLogger().setLevel(logging.INFO)
 import os
 import sys
 import logging
+
 sys.path.append("../")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from core import config
@@ -21,7 +23,6 @@ from jsonpath_ng import jsonpath, parse
 from pprint import pprint
 import falcon
 import threading
-
 
 q = {}
 d = {}
@@ -42,40 +43,43 @@ def encode_base64(image):
 
 
 def encode_df(df):
-    return None # df.to_dict()
+    return None  # df.to_dict()
 
 
 def round_double_list(bbox):
-    return [[round(c, 2 )for c in box] for box in bbox]
+    return [[round(c, 2) for c in box] for box in bbox]
 
 
-funs = {"image": lambda x: base64.b64encode(encode_base64(x)).decode('utf-8'),
-        "df": encode_df,
-        "bbox": round_double_list}
+funs = defaultdict(lambda x:x, {
+    "human_image": lambda x: base64.b64encode(encode_base64(x)).decode('utf-8'),
+    "image": lambda x: base64.b64encode(encode_base64(x)).decode('utf-8'),
+    "df": encode_df,
+    "bbox": round_double_list
+})
 
 
 def encode_some(k, v):
-    for s, f in funs.items():
-        if s in k:
-            return f(v)
-    else:
-        return v
+    return funs[k](v) if k in funs else v
 
 def encode(obj_meta):
     obj, meta = obj_meta
-    obj = {k: encode_some(k, v)
-           for k,v in obj.items()}
+    if isinstance(meta, dict):
+        meta = {
+            k: encode_some(k, v)
+            for k, v in meta.items()
+        }
     return (obj, meta)
 
 
 all_rest_queues = []
 
+
 class RestQueue:
     def __init__(
             self,
             service_id,
-            update_data = lambda x: x,
-            work_on_upload = None
+            update_data=lambda x: x,
+            work_on_upload=None
     ):
         global all_rest_queues
         all_rest_queues.append(self)
@@ -90,14 +94,14 @@ class RestQueue:
         print("get")
 
         if not id in self.workbook or not self.workbook[id]:
-            print ("get new")
+            print("get new")
             try:
                 self.workbook[id] = q[self.service_id].get(timeout=3)
             except Exception as e:
                 logging.error("queue not ready")
 
         if id in self.workbook:
-            print ("get old")
+            print("get old")
 
             return self.workbook[id]
         else:
@@ -114,28 +118,27 @@ class RestQueue:
         jsonpath_expr.find(item)
         jsonpath_expr.update(item, value)
 
-
     def ok(self, id):
         try:
-            print ("ok")
+            print("ok")
             self.workbook.get(id)
             item = self.workbook.pop(id)
             d[self.service_id].put_nowait(item)
             q[self.service_id].task_done()
         except Exception as e:
-            print ("ok, but end of gen")
+            print("ok, but end of gen")
 
             logging.error(f"could not remove ${id} from {self.workbook}")
             d[self.service_id].put_nowait(None)
 
     def discard(self, id):
         try:
-            print ("discarding")
+            print("discarding")
 
             item = self.workbook.pop(id)
             q[self.service_id].task_done()
         except Exception as e:
-            print ("discarding error")
+            print("discarding error")
 
             logging.error(f"could not remove ${id} from {self.workbook}")
 
@@ -145,8 +148,7 @@ class RestQueue:
     def get_specific(self, id):
         self.work_on_upload(id)
 
-
-    def on_get(self, req, resp, id=None): # get image
+    def on_get(self, req, resp, id=None):  # get image
         pprint(req)
 
         data = self.get(id)
@@ -157,7 +159,7 @@ class RestQueue:
         resp.body = json.dumps(data, ensure_ascii=False)
         resp.status = falcon.HTTP_OK
 
-    def on_put(self, req, resp, id = None):  # edit, update image
+    def on_put(self, req, resp, id=None):  # edit, update image
         pprint(req)
 
         result = req.media
@@ -170,20 +172,19 @@ class RestQueue:
         resp.body = json.dumps(item, ensure_ascii=False)
         resp.status = falcon.HTTP_OK
 
-    def on_patch(self, req, resp, id = None):
+    def on_patch(self, req, resp, id=None):
         pprint(req)
 
         form = req.get_media()
 
         file_part = req.get_param('file')
-        #pprint(file_part)
+        # pprint(file_part)
 
         # Read image as binary
 
         if not file_part.file:
             resp.media = {'status': 'missing file'}
             resp.status = falcon.HTTP_400
-
 
         raw = file_part.file.read()
         file_part.file.close()
@@ -217,10 +218,10 @@ class RestQueue:
             path = req.media
             item = self.work_on_upload(path, req.media)
             self.workbook[id] = item
-            resp.body = json.dumps(item, ensure_ascii=False)
+            resp.body = json.dumps(encode(item), ensure_ascii=False)
             resp.status = falcon.HTTP_OK
         elif req.params:
-            item =  self.work_on_upload(req.params['id'])
+            item = self.work_on_upload(req.params['id'])
             self.workbook[id] = item
             resp.body = json.dumps(item, ensure_ascii=False)
             resp.status = falcon.HTTP_OK
@@ -233,8 +234,14 @@ class RestQueue:
         self.discard(id)
 
 
-def queue_iter (service_id, gen):
+def queue_put(service_id, gen, single=False):
+    global q
 
+    for val in next(gen):
+        q[service_id].put_nowait(val)
+
+
+def queue_iter(service_id, gen, single=False):
     global q, d
 
     for i in range(5):
@@ -243,14 +250,16 @@ def queue_iter (service_id, gen):
             q[service_id].put_nowait(new_val)
 
         except Exception as e:
-            traceback.print_exc()
-            # or
-            print(sys.exc_info()[2])
-            logging.error(e, exc_info=True)
-            raise e
+            if not single:
+                traceback.print_exc()
+                # or
+                print(sys.exc_info()[2])
+                logging.error(e, exc_info=True)
+                raise e
+            else:
+                break
 
-    logging.info("Inserted first some samples in the queue")
-
+    logging.info(f"Inserted samples in the queue {service_id}")
 
     while True:
 
@@ -289,15 +298,13 @@ def queue_iter (service_id, gen):
 
 
 if __name__ == "__main__":
-    def fibonacciGenerator(min, max = 1000):
+    def fibonacciGenerator(min, max=1000):
         a = 0
         b = 1
-        for i in range (max):
+        for i in range(max):
             if i >= min:
                 yield b
             a, b = b, a + b
-
-
 
 
     def worker():
@@ -310,10 +317,10 @@ if __name__ == "__main__":
 
             try:
 
-                for e in queue_iter("test",fib):
-                    print (f"yielded {e}")
+                for e in queue_iter("test", fib):
+                    print(f"yielded {e}")
             except RuntimeError as e:
-                print ("end...")
+                print("end...")
 
 
     t = threading.Thread(target=worker, name="test")
@@ -330,7 +337,6 @@ if __name__ == "__main__":
     i = rq.get(id)
     rq.ok(id)
 
-
     i = rq.get(id)
     rq.ok(id)
     i = rq.get(id)
@@ -346,10 +352,3 @@ if __name__ == "__main__":
 
     i = rq.get(id)
     rq.ok(id)
-
-
-
-
-
-
-

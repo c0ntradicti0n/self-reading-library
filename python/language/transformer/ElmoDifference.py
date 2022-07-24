@@ -57,14 +57,6 @@ elmo_difference_pipe = ant(
 )
 
 elmo_difference_single_pipe = ant(
-    "arxiv.org", f"elmo.html", via='reading_order',
-    num_labels=config.NUM_LABELS,
-    layout_model_path=full_model_path,
-    from_function_only=True
-)
-
-
-elmo_difference_single_pipe = ant(
     "arxiv.org", f"elmo.html",
     num_labels=config.NUM_LABELS,
     layout_model_path=full_model_path,

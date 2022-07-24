@@ -77,13 +77,14 @@ upload_pipe = ant(
     "pdf", "annotation.collection",
     via="upload_annotation",
     num_labels=config.NUM_LABELS,
-    model_path=full_model_path
+    model_path=full_model_path,
+    from_function_only=True
 )
 
 
 def annotate_uploaded_file(path_to_pdf, id):
-    print(f"working on {path_to_pdf}")
-    return upload_pipe(metaize([path_to_pdf]))
+    print(f"Working on {path_to_pdf}")
+    return next(upload_pipe(metaize([path_to_pdf])), None)
 
 
 UploadAnnotationQueueRest = RestQueue(

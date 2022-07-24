@@ -16,6 +16,14 @@ from language.transformer import ElmoPredict
 import threading
 
 
+def preprocess_text(texts):
+    text = " ".join([word for t in texts for i, word in t])
+    text = text.replace('-\n', '')
+    text = unicodedata.normalize("NFKD", text)
+    real_tokens = split_punctuation(text, ".,:!?;")
+    return real_tokens
+
+
 @converter("reading_order", 'reading_order.page')
 class Pager(PathSpec):
     def __init__(self, *args, max_window=200, **kwargs):
@@ -79,7 +87,7 @@ class Pager(PathSpec):
             i_word = [self.match_reading_order_line(line) for line in lines if len(line) > 2]
 
             # use layout filtered text
-            real_tokens = Pager.preprocess_text(texts)
+            real_tokens = preprocess_text(texts)
 
             # start iterating on windows of this text
             generator = self.make_tokenized_windows(real_tokens)
@@ -87,13 +95,6 @@ class Pager(PathSpec):
             threading.Thread(target=self.window_thread, args=(generator, meta, i_word,), name="make text windows").start()
             meta['texts'] = texts
             yield _pdf_path, meta
-
-    def preprocess_text(cls, texts):
-        text = " ".join([word for t in texts for i, word in t])
-        text = text.replace('-\n', '')
-        text = unicodedata.normalize("NFKD", text)
-        real_tokens = split_punctuation(text, ".,:!?;")
-        return real_tokens
 
     def window_thread(self, generator, meta, i_word):
         i = 0

@@ -1,4 +1,3 @@
-
 import os
 
 from core.RestPublisher.Resource import Resource
@@ -8,16 +7,10 @@ from core.pathant.PathSpec import PathSpec
 
 from flask import jsonify, Blueprint
 
-
 bp = Blueprint('blueprint', __name__, template_folder='templates')
 
-class RestPublisher(PathSpec, react) :
-    """
 
-    publishes path-ant-path on a Representational State Transfer api with autocreated
-    javascript class for reading.... to CRUPD class
-    """
-
+class RestPublisher(PathSpec, react):
     def __call__(self, pipeline, arg):
         if not isinstance(arg[0], list) and not len(arg[0]) == 2:
             arg = [(a, {}) for a in arg]
@@ -25,44 +18,38 @@ class RestPublisher(PathSpec, react) :
             zip(
                 *list(pipeline(list(arg)))))
 
-
     # deliver paths
-    def on_post(self, *args, **kwargs): # get one
+    def on_post(self, *args, **kwargs):  # get one
         print(args, kwargs)
 
         source_node, what_to_put_first = self.answer_or_ask_neighbors(None)
         self.ant(source_node, self, what_to_put_first)
 
-        self.logger.error ("rest call on abstract publisher!")
+        self.logger.error("rest call on abstract publisher!")
         return jsonify(meta=self.meta), 200
 
-
-    def on_get(self, *args, **kwargs): # get all
+    def on_get(self, *args, **kwargs):  # get all
         print(args, kwargs)
-
-        source_node, what_to_put_first = self.answer_or_ask_neighbors(None)
-        self.ant(source_node, self, what_to_put_first)
-
-        self.logger.error ("rest call on abstract publisher!")
-        return jsonify({"BANANA": "YEAH"}), 200
+        self.logger.error("rest call on abstract publisher!")
+        return jsonify(meta=self.meta), 400
 
     # get html
     def on_post(self, i):
 
-        self.logger.error ("rest call on abstract publisher!")
+        self.logger.error("rest call on abstract publisher!")
         return jsonify(page=self.data[i]), 200
 
     # upload
     def on_put(self, file, meta_data):
 
-        self.logger.error ("rest call on abstract publisher!")
+        self.logger.error("rest call on abstract publisher!")
         with open(self.upload_docs + self.new_path(), "w") as f:
             f.write(file)
 
     # correction
     def on_patch(self, text, location, annotation):
 
-        self.logger.error ("rest call on abstract publisher!")
+        self.logger.error("rest call on abstract publisher!")
         with open(self.upload_docs + self.new_annotation(), "w") as f:
             raise NotImplementedError()
 
@@ -70,15 +57,13 @@ class RestPublisher(PathSpec, react) :
     def on_delete(self, i):
         self.data.pop(i)
         self.meta.pop(i)
-        self.logger.error ("rest call on abstract publisher!")
-
-
+        self.logger.error("rest call on abstract publisher!")
 
     def __init__(self,
                  *args,
                  port=7770,
-                 url = "localhost",
-                 resource : Resource = None,
+                 url="localhost",
+                 resource: Resource = None,
                  **kwargs):
 
         react.__init__(self, *args, **kwargs)
@@ -93,7 +78,8 @@ class RestPublisher(PathSpec, react) :
         self.logger.warning(f"Creating service for {self.resource.title}")
 
         with open("/".join([self.npm_resources, self.resource.Title + "Service.ts"]), "w") as f:
-            f.write(self.server_resource_code.format(**self.resource, port = self.port, url=self.url, **self.resource.access))
+            f.write(
+                self.server_resource_code.format(**self.resource, port=self.port, url=self.url, **self.resource.access))
 
         self.logger.warning(f"Creating components for {self.resource.title}")
 
@@ -104,16 +90,14 @@ class RestPublisher(PathSpec, react) :
         self.logger.warning(f"Creating page for {self.resource.title}")
 
         with open("/".join([self.npm_pages, self.resource.title + ".tsx"]), "w") as f:
-            f.write(self.page_code.format(**self.resource, port = self.port, url=self.url, **self.resource.access))
-
+            f.write(self.page_code.format(**self.resource, port=self.port, url=self.url, **self.resource.access))
 
     def __iter__(self, incoming):
         if not self.contents:
             self.contents = list(incoming)
 
-
     server_resource_code = \
-"""
+        """
 import ServerResource from './GeneralResource'
 
 export default class ??Title!!Service extends ServerResource<any> {
@@ -132,7 +116,6 @@ export default class ??Title!!Service extends ServerResource<any> {
 
 """.replace("{", "{{").replace("}", "}}").replace("??", r"{").replace("!!", "}")
 
-
     page_code = """
 import React from 'react'
 import Router from 'next/router'
@@ -140,6 +123,8 @@ import { withRouter } from "next/router";
 import ??title!!Service from '../resources/??Title!!Service'
 import HtmlRenderer from './../components/HtmlRenderer'
 import BoxAnnotator from './../components/BoxAnnotator'
+import DownloadFile from './../components/DownloadFile'
+
 import dynamic from 'next/dynamic'
 const Graph = dynamic(
     () => import('./../components/Graph.js'),
@@ -176,12 +161,12 @@ class ??title!! extends React.Component<??Title!!Props, ??Title!!State> {
         
         if (this.props.router.query.id) {
             console.log("query", this.props.router.query)
-                            // @ts-ignore
+        // @ts-ignore
             this.??title!!Service.fetch_one(this.props.router.query.id, this.set_??title!!s)
         }
         
         else {    
-                            // @ts-ignore
+        // @ts-ignore
             this.??title!!Service.fetch_all(this.set_??title!!s)
         }
     }
@@ -206,7 +191,7 @@ class ??title!! extends React.Component<??Title!!Props, ??Title!!State> {
         
         if (v instanceof Promise) {
             await v.then(prom => {
-                console.log('Seeting value', prom.response)
+                console.log('Set value', prom.response)
     
                 this.setState({
                     ??title!!: prom.response}
@@ -223,7 +208,6 @@ class ??title!! extends React.Component<??Title!!Props, ??Title!!State> {
         console.log("Created component", this, "??type!!" )
         
         if (["upload_annotation", "annotation"].includes("??type!!") )  {
-            console.log("RENDER", this.state.??title!!s)
             return (<>
                 <BoxAnnotator 
                     superState={this.state} 
@@ -233,21 +217,24 @@ class ??title!! extends React.Component<??Title!!Props, ??Title!!State> {
             </>)
         }
         
-                            // @ts-ignore
+        // @ts-ignore
+        if ("??type!!" === "download")  {
+            return <DownloadFile data={this.state.value} />
+        }
+        
+        // @ts-ignore
         if ("??type!!" === "text")  {
-            console.log("RENDER", this.state.??title!!s)
             return (<>
                 {JSON.stringify(this.state)} 
             </>)
         }
         
-                            // @ts-ignore
+        // @ts-ignore
         if ("??type!!" === "graph" && this.state.value)  
             return <Graph data={this.state.value}/>
         
-                            // @ts-ignore
+        // @ts-ignore
         if ("??type!!" === "html") {
-            console.log({html:this.state})
             return <HtmlRenderer 
                 data={this.state}
                 service={this.??title!!Service}
@@ -258,7 +245,11 @@ class ??title!! extends React.Component<??Title!!Props, ??Title!!State> {
 } 
     
 export default withRouter(??title!!)    
-    """.replace("{", "{{").replace("}", "}}").replace("??", r"{").replace("!!", "}")
+    """ \
+        .replace("{", "{{") \
+        .replace("}", "}}") \
+        .replace("??", r"{") \
+        .replace("!!", "}")
 
     components = {
         "??Title!!Container": """
@@ -274,17 +265,15 @@ export default withRouter(??title!!)
     }
 
     def write_components(self, param):
-        written_componens= []
+        written_componens = []
         for component, code in self.components.items():
             with open("/".join([self.npm_resources, self.resource.title + ".s"]), "w") as f:
                 f.write(code.format(**self.resource, port=self.port, url=self.url, **self.resource.access))
                 written_componens.append(component)
 
 
-
-
-
 import unittest
+
 
 class TestPaperPublisher(unittest.TestCase):
 
@@ -304,4 +293,3 @@ class TestPaperPublisher(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

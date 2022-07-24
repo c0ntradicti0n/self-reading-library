@@ -1,16 +1,38 @@
 .modal-size {
-  position: absolute;
-  width: 80%;
-  height: 80%;
+    position: absolute;
+    width: 80%;
+    height: 80%;
 
-  top: 50%;
-  left: 50%;
-  right: auto;
-  bottom: auto;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
 
-  transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
 }
 
+#page-container {
+    width: 75%
+}
+
+span.tag {
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 0px;
+    padding: 5px;
+
+}
+
+span.span_CONTRAST {
+    background-color: rgba(210, 57, 233, 0.75);
+    box-shadow: 0 0 0 0px rgba(210, 57, 233, 0.75);
+}
+
+span.span_SUBJECT {
+    background-color: #fbe54e;
+    box-shadow: 0 0 0 0px rgba(251, 237, 78, 0.92);
+
+}
 
 .App {
     text-align: center;

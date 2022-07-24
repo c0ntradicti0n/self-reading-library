@@ -21,7 +21,7 @@ class HtmlRenderer extends Component<Props> {
   render() {
     console.log("HtmlRenderer", this);
     return (
-      <SelectText meta={this.props.data.meta} service={this.differenceService}>
+      <SelectText meta={this.props.data.meta} value={this.props.data.value?.value} service={this.differenceService}>
         <Nav
           forward={() =>
             this.props.service.ok(null, "", {}, () => window.location.reload())
@@ -36,7 +36,10 @@ class HtmlRenderer extends Component<Props> {
               console.log("will display content...")
             )
           }
+          data={this.props.data}
         />
+
+
 
         <div
           style={{

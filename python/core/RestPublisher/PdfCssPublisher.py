@@ -23,10 +23,6 @@ class PdfCssPublisher(RestPublisher):
 
     def on_get(self, req, resp, id=None):
         print (f"Annotating {self.kind}")
-
-        pprint(req)
-        pprint(resp)
-
         self.html_pipeline = self.ant("pdf", "htm")
 
         try:

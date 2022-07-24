@@ -2,13 +2,16 @@ from core.pathant.Converter import converter
 from core.RestPublisher.RestPublisher import RestPublisher
 from core.RestPublisher.RestPublisher import Resource
 from core.RestPublisher.react import react
-from core.event_binding import queue_iter, RestQueue
+from core.event_binding import queue_iter, RestQueue, queue_put
 from layout.model_helpers import repaint_image_from_labels
 import logging
 
 
 
-AnnotationQueueRest = RestQueue(service_id="annotation", update_data=repaint_image_from_labels)
+AnnotationQueueRest = RestQueue(
+    service_id="annotation",
+    update_data=repaint_image_from_labels
+)
 
 
 
@@ -27,8 +30,21 @@ class Annotator(RestPublisher, react):
 
     def __call__(self, prediction_metas, *args, **kwargs):
         for prediction_meta, meta in prediction_metas:
-            try:
-                for _p_m in queue_iter(service_id="annotation", gen=(p_m for p_m in prediction_meta)):
-                    yield _p_m
-            except RuntimeError as e:
-                logging.error("annotating next document", e)
+
+            if 'from_function_only' in self.flags and self.flags['from_function_only']:
+                queue_put(
+                    service_id="annotation",
+                    gen=(p_m for p_m in meta['layout_predictions'])
+                )
+
+                yield from meta['layout_predictions']
+            else:
+                try:
+                    for _p_m in queue_iter(
+                            service_id="annotation",
+                            gen=(p_m for p_m in prediction_meta),
+                            single=self.flags['from_function_only'] if 'from_function_only' in self.flags else False
+                     ):
+                        yield _p_m
+                except RuntimeError as e:
+                    logging.error("annotating next document", e)

@@ -111,7 +111,8 @@ export default class ServerResource<T> {
       try {
         return callback(result);
       } catch (e) {
-        console.log("no callback given");
+        console.log("no callback given?", e);
+
       }
     } catch (e) {
       console.error(e);
@@ -141,6 +142,14 @@ export default class ServerResource<T> {
   change = async (json_path, value, callback) => {
     if (this.upload_allowed) {
       this.request("put", [json_path, value], callback);
+    }
+  };
+
+  // @ts-ignore
+  save = async (id, data = {}, callback) => {
+    console.log("save", id, data)
+    if (this.upload_allowed) {
+      this.request("put", [id, data], callback);
     }
   };
 

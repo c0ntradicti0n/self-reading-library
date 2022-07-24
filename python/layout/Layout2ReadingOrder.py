@@ -4,6 +4,7 @@ import threading
 import tracemalloc
 
 from helpers.cache_tools import configurable_cache
+from helpers.hash_tools import hashval
 from layout.imports import *
 from core import config
 from core.pathant.Converter import converter
@@ -11,7 +12,8 @@ from core.pathant.PathSpec import PathSpec
 from layout import model_helpers
 
 tracemalloc.start()
-
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 @converter("feature", "reading_order")
 class Layout2ReadingOrder(PathSpec):
@@ -59,7 +61,7 @@ class Layout2ReadingOrder(PathSpec):
                 df.loc[:, df.columns != 'chars_and_char_boxes']
             )
 
-            for page_number in range(len(dataset) - 1):
+            for page_number in range(len(dataset)):
                 example = dataset[page_number:page_number + 1]
 
                 self.load_model()
@@ -92,49 +94,65 @@ class Layout2ReadingOrder(PathSpec):
                 prediction['image'] = Image.open(example['image_path'][0][0])
                 prediction['page_number'] = page_number
 
+                del prediction['df']['chars_and_char_boxes']
+                prediction['df_path'] = f"{config.tex_data}--{hashval(pdf_path)}-{page_number}.df"
+                table = pa.Table.from_pandas(prediction['df'])
+                pq.write_table(table, prediction['df_path'])
+
                 if "ignore_incomplete" in self.flags:
                     if len(box_predictions) != len(example['text'][0]):
                         print(len(box_predictions), box_predictions, len(example['text'][0]), example['text'][0])
                         self.logger.error(f"predicted less labels than textfields on the page, continuing!")
-                        continue
-                else:
-                    pagenumber = page_number + 1
-                    self.logger.info(f"Predicted {pagenumber=}/{len(dataset) - 1} with {box_predictions=}")
-                    for thread in threading.enumerate():
-                        print(thread.name)
 
-                    prediction_meta = model_helpers.repaint_image_from_labels((prediction, meta))
-                    prediction_meta[0]['human_image'].save(f"{pdf_path}.{page_number}.layout_prediction.png")
-                    #prediction_meta[0]['human_image'].save(f"{os.path.dirname(meta['html_path'])}/layout_boxes_{page_number}.png")
 
-                    predictions_metas_per_document.append(prediction_meta)
+                pagenumber = page_number + 1
+                self.logger.info(f"Predicted {pagenumber=}/{len(dataset)} with {box_predictions=}")
+                for thread in threading.enumerate():
+                    print(thread.name)
+
+
+                prediction_meta = model_helpers.repaint_image_from_labels((prediction, meta))
+                prediction_meta[0]['human_image'].save(f"{pdf_path}.{page_number}.layout_prediction.png")
+
+
+                predictions_metas_per_document.append((pdf_path, prediction))
 
             annotation = predictions_metas_per_document
 
+            df['LABEL'] = [prediction['labels'] for id, prediction in annotation]
+
             try:
-                title = [[(i, l) for i, l in enumerate(an[0]['labels']) if l in config.TITLE] for an in annotation]
-                used_titles = [annotation[0][0]['df']['text'].tolist()[0][i] for i, h in title[0]]
-                used_titles = used_titles[0] if len(used_titles) > 1 else meta['html_path']
+                title_texts = [_t for _t in [[(i, tag) for i, tag in enumerate(l)  if tag in config.TITLE] for l in df['LABEL']] if _t]
+                used_titles = [df['text'].tolist()[0][i] for i, h in title_texts[0]]
+                used_titles = (used_titles[0] if len(used_titles) > 0 else meta['html_path']).replace("\n", " ")
             except:
                 logging.error("Failure setting title", exc_info=True)
                 used_titles = meta["html_path"]
             meta['title'] = used_titles
 
             used_label_is = [
-                self.sort_by_label([(i, l) for i, l in enumerate(an[0]['labels']) if l in config.TEXT_LABELS]) for an in
+                self.sort_by_label([(i, l) for i, l in enumerate(an[1]['labels']) if l in config.TEXT_LABELS]) for an in
                 annotation]
-            used_texts = [[annotation[i][0]['df']['text'].tolist()[0][ull] for ull in ul] for i, ul in
+            used_texts = [[annotation[i][1]['df']['text'].tolist()[0][ull] for ull in ul] for i, ul in
                           enumerate(used_label_is)]
-            used_boxes = [[annotation[i][0]['bbox'][ull] for ull in ul] for i, ul in enumerate(used_label_is)]
+            used_boxes = [[annotation[i][1]['bbox'][ull] for ull in ul] for i, ul in enumerate(used_label_is)]
 
             sorted_texts = self.sort_by_box(used_texts, used_boxes)
 
             meta['used_text_boxes'] = sorted_texts
 
             enumerated_texts = self.enumerate_words(sorted_texts)
+
+            del df['chars_and_char_boxes']
+            meta['df_path'] = config.tex_data + hashval(pdf_path) + ".df"
+            meta['layout_predictions'] = annotation
+            for id, prediction in meta['layout_predictions']:
+                del prediction['df']
+            table = pa.Table.from_pandas(df)
+            pq.write_table(table, meta['df_path'])
             if 'df' in meta:
                 del meta['df']
-            del meta['chars_and_char_boxes']
+
             del meta['final_feature_df']
 
             meta['enumerated_texts'] = enumerated_texts

@@ -46,27 +46,30 @@ class ElmoPredict(PathSpec):
             q1[self.flags['service_id']].put(0)
 
             while True:
-                try:
+                if "words" in meta:
+                    words = meta['words']
+                else:
                     try:
-                        words, meta = q2[self.flags['service_id']].get(timeout=9)
-                        q2[self.flags['service_id']].task_done()
+                        try:
+                            words, meta = q2[self.flags['service_id']].get(timeout=9)
+                            q2[self.flags['service_id']].task_done()
 
-                    except StopIteration:
-                        self.logger.info("Finished predicting (on stop of queue)")
-                        self.init_quees()
+                        except StopIteration:
+                            self.logger.info("Finished predicting (on stop of queue)")
+                            self.init_quees()
+                            break
+                    except Empty:
+                        self.logger.info("Text windowing stopped with length 0 of window 0")
+
                         break
-                except Empty:
-                    self.logger.info("Text windowing stopped with length 0 of window 0")
 
-                    break
-
-                if words is None:
-                    self.logger.info("Finished predicting (on words is None)")
-                    m = {}
-                    m['doc_id'] = "finito"
-                    m['annotation'] = []
-                    yield pdf_path, m
-                    break
+                    if words is None:
+                        self.logger.info("Finished predicting (on words is None)")
+                        m = {}
+                        m['doc_id'] = "finito"
+                        m['annotation'] = []
+                        yield pdf_path, m
+                        break
 
                 try:
                     annotation = self.predict(words)
@@ -75,33 +78,38 @@ class ElmoPredict(PathSpec):
                     annotation = [('O', w) for w in words]
                     consumed_tokens
 
-                try:
+                if "words" in meta:
+                    meta['annotation'] = annotation
+                    yield pdf_path, meta
+                    break
+                else:
                     try:
-                        # rfind of not "O"
-                        consumed_tokens = next(i for i, (tag, word) in list(enumerate(annotation))[::-1] if tag != 'O')
-                    except StopIteration as e:
-                        consumed_tokens = len(words)
+                        try:
+                            # rfind of not "O"
+                            consumed_tokens = next(i for i, (tag, word) in list(enumerate(annotation))[::-1] if tag != 'O')
+                        except StopIteration as e:
+                            consumed_tokens = len(words)
 
-                    if consumed_tokens == 0:
-                        consumed_tokens = 100
-                        self.logger.info("empty prediction")
-                    q1[self.flags['service_id']].put(consumed_tokens)
+                        if consumed_tokens == 0:
+                            consumed_tokens = 100
+                            self.logger.info("empty prediction")
+                        q1[self.flags['service_id']].put(consumed_tokens)
 
-                    yield pdf_path, {
-                        **meta,
-                        'annotation': annotation,
-                        'CSS': self.CSS,
-                        "consumed_i2": consumed_tokens,
-                    }
+                        yield pdf_path, {
+                            **meta,
+                            'annotation': annotation,
+                            'CSS': self.CSS,
+                            "consumed_i2": consumed_tokens,
+                        }
 
-                    q1[self.flags['service_id']].put(consumed_tokens)
+                        q1[self.flags['service_id']].put(consumed_tokens)
 
 
 
-                except Exception as e:
-                    self.logger.error(e.__repr__())
-                    self.logger.error("Could not process " + str(words), e)
-                    raise
+                    except Exception as e:
+                        self.logger.error(e.__repr__())
+                        self.logger.error("Could not process " + str(words), e)
+                        raise
 
             self.init_queues()
 

@@ -54,40 +54,22 @@ export default class BoxAnnotator extends Component<any> {
     console.log(this.props);
 
     let cols;
-    if (this.props.superState.value)
+    if (this.props.superState.meta)
       cols = zip([
-        this.props.superState.value.bbox,
-        this.props.superState.value.labels,
+        this.props.superState.meta.bbox,
+        this.props.superState.meta.labels,
       ]);
 
     return (
       <div style={{ fontSize: "1em !important" }}>
-        <div style={{ fontSize: "1em !important" }}>
-          <form
-            onSubmit={(e) => {
-              console.log("submit", e, e.target);
-              this.props.service.upload(e.target);
-            }}
-            style={{ fontSize: "1em" }}
-          >
-            <input
-              type="file"
-              name="file"
-              multiple
-              style={{ fontSize: "2em" }}
-            />
-            <button type="submit" style={{ fontSize: "1em" }}>
-              Upload
-            </button>
-          </form>
-        </div>
-        <h4> {this.props.superState?.meta?.html_path}</h4>
+
+        <h4> {this.props.superState?.value}</h4>
         <div className="container" style={{ position: "absolute" }}>
-          {this.props.superState?.value?.human_image ? (
+          {this.props.superState?.meta?.human_image ? (
             <img
               src={
                 "data:image/jpeg;charset=utf-8;base64," +
-                this.props.superState?.value?.human_image
+                this.props.superState?.meta?.human_image
               }
             />
           ) : null}

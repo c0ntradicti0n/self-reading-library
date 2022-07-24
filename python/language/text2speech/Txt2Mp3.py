@@ -1,59 +1,54 @@
 import os
-from pprint import pprint
 
 from ant import Ant
 from core import config
+
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import cache_flow
-
-import torchaudio
-from speechbrain.pretrained import Tacotron2
-from speechbrain.pretrained import HIFIGAN
-
-# Intialize TTS (tacotron2) and Vocoder (HiFIGAN)
-tacotron2 = Tacotron2.from_hparams(source="speechbrain/tts-tacotron2-ljspeech", savedir="tmpdir_tts")
-hifi_gan = HIFIGAN.from_hparams(source="speechbrain/tts-hifigan-ljspeech", savedir="tmpdir_vocoder")
+from helpers.cache_tools import configurable_cache
+from language.transformer.Pager import preprocess_text
 
 
-@converter('reading_order.page', 'mp3')
+def generate_audio(id, text):
+    out_path = id + ".ogg"
+
+    with open(f"{id}.txt", "w") as f:
+        f.write(text)
+
+    os.system(f". ../tts/venv/bin/activate &&  python ../tts/tts.py -i {id}.txt {id}.ogg ")
+
+    return out_path
+
+
+@converter('reading_order', 'audio')
 class Txt2Mp3(Ant):
     def __init__(self, debug=True, *args, n=15, **kwargs):
         super().__init__(*args, cached=cache_flow.iterate, **kwargs)
         self.n = n
         self.debug = debug
 
+    @configurable_cache(
+        filename=config.cache + os.path.basename(__file__),
+    )
     def __call__(self, iterator, *args, **kwargs):
         for id, meta in iterator:
-            text = meta["text"]
-            path = meta["html_path"]
-            audio_path = f'{path}.{config.audio_format}'
+            text = " ".join(preprocess_text(meta["enumerated_texts"])).replace("/n", " ") + "\n"
 
-            # Running the TTS
-            mel_output, mel_length, alignment = tacotron2.encode_text(text)
+            audio_path = generate_audio(id, text)
 
-            # Running Vocoder (spectrogram-to-waveform)
-            waveforms = hifi_gan.decode_batch(mel_output)
-
-            # Save the waverform
-            torchaudio.save(audio_path, waveforms.squeeze(1), 22050)
-
-            yield
-
+            meta["audio_path"] = audio_path
+            yield id, meta
 
 
 if __name__ == "__main__":
-    from core.pathant.PathAnt import PathAnt
-    from layout.model_helpers import find_best_model
-    from helpers.list_tools import metaize
-
-    ant = PathAnt()
-    print (ant.graph())
-    model_path = model_pat=find_best_model()[0]
-    pipe = ant("pdf", "mp3")
-    res = list(pipe(metaize(["./../test/glue.pdf"]), model_path=model_path))
-    pprint(res)
-    os.popen(f"mplayer {res[0][0]}").read()
-
-
-
-
+    list(
+        Txt2Mp3(
+            [
+                ("test",
+                 {
+                     "text": "Emissions data from three companies, Bit Digital, Greenidge and Stronghold, indicated their operations create 1.6m tons of CO2 annually, an amount produced by nearly 360,000 cars. Their environmental impact is significant despite industry claims about clean energy use and climate commitments, the lawmakers wrote.\n"
+                 }
+                 )
+            ]
+        )
+    )

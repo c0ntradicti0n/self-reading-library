@@ -457,7 +457,7 @@ which  WDT  I-WDT  I-CONTRAST
 the  DT  I-DT  I-CONTRAST
 scientist  NN  I-NN  I-CONTRAST
 alone  RB  I-RB  I-CONTRAST
-possesses  VBZ  I-VBZ  I-CONTRAST
+possesses  VBZ  I-VBZ  I-CONTRPCTAST
 )  RRB  I-RRB  I-CONTRAST
 .  PCT  O  O
 A  DT  O  O
