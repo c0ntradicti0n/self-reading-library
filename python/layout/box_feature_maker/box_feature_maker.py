@@ -74,7 +74,7 @@ class BoxFeatureMaker(PathSpec):
 
                     image_dict[page_number] = image_path
 
-                    basewidth = 2500
+                    basewidth = config.basewidth
                     wpercent = (basewidth / float(pil.size[0]))
                     hsize = int((float(pil.size[1]) * float(wpercent)))
                     pil = pil.resize((basewidth, hsize), Image.ANTIALIAS)

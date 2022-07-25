@@ -15,6 +15,13 @@
     width: 75%
 }
 
+#annotation_canvas {
+    width: 50%;
+}
+@font-face {
+  font-family: 'keys';
+  src: local('keys'), url(../public/fonts/212_Keyboard.otf) format('opentype');
+}
 span.tag {
     padding-left: 10px;
     padding-right: 10px;

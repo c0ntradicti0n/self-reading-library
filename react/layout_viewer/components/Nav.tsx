@@ -31,17 +31,19 @@ export default class Nav extends React.Component<Props, any> {
     };
 
     render() {
+        console.log("Nav", this.props)
+        const id = this.props.data?.value?.value ?? this.props.data?.value
         return (
             <NAV>
                 <h3>Other interactive formats</h3>
                 <div>
-                    <DownloadFile id={this.props.data?.value?.value} kind="audiobook">Audiobook</DownloadFile>
+                    <DownloadFile id={id} kind="audiobook">Audiobook</DownloadFile>
                 </div>
                 <div>
-                    <DownloadFile id={this.props.data?.value?.value} kind="pdf">PDF</DownloadFile>
+                    <DownloadFile id={id} kind="pdf">PDF</DownloadFile>
                 </div>
                 <div>
-                    <Button href={"/upload_annotation?id=" + this.props?.data?.value?.value} >Improve layout recognition</Button>
+                    <Button href={"/upload_annotation?id=" + id} >Improve layout recognition</Button>
                 </div>
                 <h3>Navigate to other document</h3>
 

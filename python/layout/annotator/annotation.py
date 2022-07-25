@@ -33,7 +33,7 @@ class Annotator(RestPublisher, react):
 
             if 'from_function_only' in self.flags and self.flags['from_function_only']:
                 queue_put(
-                    service_id="annotation",
+                    service_id=self.flags['service_id'],
                     gen=(p_m for p_m in meta['layout_predictions'])
                 )
 

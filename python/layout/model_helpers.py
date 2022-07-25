@@ -126,7 +126,7 @@ def resize(image, basesize):
 
 
 def repaint_image_from_labels(data_meta):
-    data, meta = data_meta
+    id, data = data_meta
     labels = data['labels']
     bbox = data['bbox']
     _image = data['image']
@@ -140,4 +140,4 @@ def repaint_image_from_labels(data_meta):
         draw.text((box[0] + 10, box[1] + 10), actual_label, fill=config.label2color[actual_label], font=font)
 
     data['human_image'] = image
-    return (data, meta)
+    return (id, data)

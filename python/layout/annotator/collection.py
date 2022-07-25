@@ -1,3 +1,4 @@
+import logging
 import unittest
 from core.pathant.PathSpec import PathSpec
 from core.pathant.Converter import converter
@@ -25,12 +26,18 @@ class Annotator(PathSpec):
 
     def __call__(self, annotation_metas, *args, **kwargs):
         for id, meta in annotation_metas:
-            df = pq.read_table(meta['df_path']).to_pandas()
-            hash = bas64encode(id) + "_" + str(df['page_number'][0][0])
-            if not os.path.isdir(config.COLLECTION_PATH):
-                os.mkdir(config.COLLECTION_PATH)
-            path = config.COLLECTION_PATH + hash + ".pickle"
-            pd.to_pickle(df, path)
-            meta['collection_path'] = path
-            yield id, meta
+
+
+            try:
+                df = pq.read_table(meta['df_path']).to_pandas()
+                hash = bas64encode(id) + "_" + str(list(df['page_number'])[0][0])
+                if not os.path.isdir(config.COLLECTION_PATH):
+                    os.mkdir(config.COLLECTION_PATH)
+                path = config.COLLECTION_PATH + hash + ".pickle"
+                pd.to_pickle(df, path)
+                meta['collection_path'] = path
+                yield id, meta
+            except Exception as e:
+                logging.error("Error when preparing pagewise layout annotation", exc_info=True)
+
 

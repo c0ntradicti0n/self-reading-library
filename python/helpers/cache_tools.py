@@ -30,7 +30,7 @@ def decompress_pickle(value):
         rvalue = cPickle.loads(data=pvalue)
         return rvalue
     except:
-        logging.error(f"corrupted cache file {value=}")
+        logging.error(f"corrupted cache file {value=}", exc_info=True)
 
 
 def unroll_cache(path, cache):
@@ -71,10 +71,15 @@ def dig_generator_ground_for_next_value(gen):
         val = gen_or_val.f_locals
         if 'l' in val:
             return val['l']
+        else:
+            return []
 
 
 def yield_cache_instead_apply(cls, f, gen, cache, filename, **kwargs):
-    values_from_future = [v for v in dig_generator_ground_for_next_value(gen) if v]
+    try:
+        values_from_future = [v for v in dig_generator_ground_for_next_value(gen) if v]
+    except Exception as e:
+        raise e
 
     if values_from_future:
         future_yield_values = [

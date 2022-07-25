@@ -8,7 +8,7 @@ from helpers.cache_tools import configurable_cache
 from core.pathant.Converter import converter
 from core.pathant.parallel import paraloop
 from core.pathant.PathAnt import PathAnt
-from core.event_binding import RestQueue
+from core.event_binding import RestQueue, queue_put
 from helpers.model_tools import model_in_the_loop, BEST_MODELS
 from helpers.list_tools import metaize, forget_except
 from layout.annotation_thread import full_model_path
@@ -70,14 +70,13 @@ elmo_difference_model_pipe = ant(
 
 
 def annotate_uploaded_file(file, service_id):
-    pprint (BEST_MODELS)
-    return next(
-        elmo_difference_single_pipe(
-            metaize([file]),
-            difference_model_path=BEST_MODELS["difference"]['best_model_path'],
-            service_id=service_id
-        ), None
+    result = elmo_difference_single_pipe(
+        metaize([file]),
+        difference_model_path=BEST_MODELS["difference"]['best_model_path'],
+        service_id=service_id
     )
+    queue_put(service_id, result)
+    return result
 
 
 ElmoDifferenceQueueRest = RestQueue(

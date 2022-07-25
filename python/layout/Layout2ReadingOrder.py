@@ -111,8 +111,8 @@ class Layout2ReadingOrder(PathSpec):
                     print(thread.name)
 
 
-                prediction_meta = model_helpers.repaint_image_from_labels((prediction, meta))
-                prediction_meta[0]['human_image'].save(f"{pdf_path}.{page_number}.layout_prediction.png")
+                prediction_meta = model_helpers.repaint_image_from_labels((pdf_path, prediction))
+                prediction_meta[1]['human_image'].save(f"{pdf_path}.{page_number}.layout_prediction.png")
 
 
                 predictions_metas_per_document.append((pdf_path, prediction))

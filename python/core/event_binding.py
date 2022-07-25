@@ -1,13 +1,8 @@
-import random
-import threading
 import traceback
 from collections import defaultdict
 from queue import Queue, Empty
 import json
-from traceback_with_variables import Format, ColorSchemes, is_ipython_global, activate_by_import
 import logging
-
-from helpers.list_tools import metaize
 
 logging.getLogger().setLevel(logging.INFO)
 import os
@@ -42,18 +37,16 @@ def encode_base64(image):
     return byte_object
 
 
-def encode_df(df):
-    return None  # df.to_dict()
-
 
 def round_double_list(bbox):
     return [[round(c, 2) for c in box] for box in bbox]
 
 
 funs = defaultdict(lambda x:x, {
+    "layout_predictions": lambda x: None,
+    "df": lambda x: None,
     "human_image": lambda x: base64.b64encode(encode_base64(x)).decode('utf-8'),
     "image": lambda x: base64.b64encode(encode_base64(x)).decode('utf-8'),
-    "df": encode_df,
     "bbox": round_double_list
 })
 
@@ -91,17 +84,17 @@ class RestQueue:
     workbook = {}
 
     def get(self, id):
-        print("get")
+
 
         if not id in self.workbook or not self.workbook[id]:
-            print("get new")
+            logging.info("Get new")
             try:
-                self.workbook[id] = q[self.service_id].get(timeout=3)
+                self.workbook[id] = q[id].get(timeout=3)
             except Exception as e:
-                logging.error("queue not ready")
+                logging.error("Queue not ready")
 
         if id in self.workbook:
-            print("get old")
+            print("Get old")
 
             return self.workbook[id]
         else:
@@ -120,7 +113,7 @@ class RestQueue:
 
     def ok(self, id):
         try:
-            print("ok")
+            logging.info(f"Ok {id}")
             self.workbook.get(id)
             item = self.workbook.pop(id)
             d[self.service_id].put_nowait(item)
@@ -142,15 +135,7 @@ class RestQueue:
 
             logging.error(f"could not remove ${id} from {self.workbook}")
 
-    def delete(self, id):
-        self.workbook.pop(id)
-
-    def get_specific(self, id):
-        self.work_on_upload(id)
-
     def on_get(self, req, resp, id=None):  # get image
-        pprint(req)
-
         data = self.get(id)
         if not data:
             resp.status = falcon.HTTP_300
@@ -211,33 +196,34 @@ class RestQueue:
 
     # ok or use one existing file
     def on_post(self, req, resp, id=None, **kwargs):
-        print(req, resp)
-
-        if (req.media):
-            # fetching one document for annotation
-            path = req.media
-            item = self.work_on_upload(path, req.media)
-            self.workbook[id] = item
-            resp.body = json.dumps(encode(item), ensure_ascii=False)
-            resp.status = falcon.HTTP_OK
-        elif req.params:
-            item = self.work_on_upload(req.params['id'])
-            self.workbook[id] = item
-            resp.body = json.dumps(item, ensure_ascii=False)
-            resp.status = falcon.HTTP_OK
+        if (isinstance(req.media, str)):
+            doc_id = req.media
+            logging.info(
+                f"Annotate new document {doc_id=} {id=}"
+            )
+            init_queues(id)
+            self.work_on_upload(doc_id, service_id=id)
         else:
-            # annotation positive
+            logging.info(
+                f"Add annotation to collection {id=}"
+            )
             self.ok(id)
+
+        self.get(id)
+        resp.body = json.dumps(encode(self.workbook[id]), ensure_ascii=False)
+        resp.status = falcon.HTTP_OK
+
+
 
     def on_delete(self, req, resp, id=None):
         print(req, resp)
         self.discard(id)
 
 
-def queue_put(service_id, gen, single=False):
+def queue_put(service_id, gen):
     global q
 
-    for val in next(gen):
+    for val in gen:
         q[service_id].put_nowait(val)
 
 

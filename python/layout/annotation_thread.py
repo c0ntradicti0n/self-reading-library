@@ -82,9 +82,9 @@ upload_pipe = ant(
 )
 
 
-def annotate_uploaded_file(path_to_pdf, id):
-    print(f"Working on {path_to_pdf}")
-    return next(upload_pipe(metaize([path_to_pdf])), None)
+def annotate_uploaded_file(path_to_pdf, service_id=None):
+    print(f"Working on {path_to_pdf} {service_id}")
+    return list(upload_pipe(metaize([path_to_pdf]), service_id=service_id))
 
 
 UploadAnnotationQueueRest = RestQueue(

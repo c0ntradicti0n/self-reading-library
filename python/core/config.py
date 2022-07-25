@@ -97,6 +97,7 @@ tex_source = "http://arxiv.org"
 INDEX_WRAP_TAG_NAME = 'z'
 wordlist = '../pdfetc2txt/wordlist.txt'
 reader_width = 700
+basewidth = 2500
 
 reader_height = numpy.sqrt(2) * reader_width
 
