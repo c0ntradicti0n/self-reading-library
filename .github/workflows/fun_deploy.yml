@@ -98,19 +98,15 @@ jobs:
                   pip install -r requirements.txt
                 fi
             '
-      - name: StartServer
+      - name: StartBackend
         run: |
-            ssh staging '   screen -L  -Logfile backend_uwsgi.log -S backend -dm bash -c " . venv/bin/activate; cd LayoutEagle/python; until    uwsgi wsgi.ini ; do ; echo 'Server  crashed with exit code $?.  Respawning..' >&2; sleep 1; done    "  &  '
-
-      - name: StartBack
-        run: |
-          ssh staging '   screen -L  -Logfile backend.log -S backend -dm bash -c " . venv/bin/activate; cd LayoutEagle/python; python3 backend.py"  &  '
+          ssh staging '   screen -L  -Logfile backend.log -S backend -dm bash -c " . venv/bin/activate; cd LayoutEagle/python; uwsgi --http 0.0.0.0:443 --module wsgi:application --threads 10 "  &  '
           
-      - name: StartWeb
+      - name: StartFrontend
         run: |
           ssh staging '    screen  -L  -Logfile frontend.log -S frontend -dm bash -c " sleep 120 ; cd LayoutEagle/react/layout_viewer_made/ ; yarn install; yarn add --dev typescript @types/node; yarn build ; yarn run start -p 8080 "   &  '
 
-      - name: StartWeb
+      - name: StartMountLink
         run: |
           ssh staging '    screen  -L  -Logfile frontend.log -S frontend -dm bash -c " sleep 110 ;     [ [ ! -d react/layout_viewer_made/public/pdfs ] ] && mkdir react/layout_viewer_made/public/pdfs &&  sudo mount --bind python/.layouteagle/pdfs/ react/layout_viewer_made/public/pdfs || echo mount_exists "   &  '
       - name: Glance at backend logs

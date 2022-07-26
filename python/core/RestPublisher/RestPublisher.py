@@ -1,3 +1,4 @@
+import logging
 import os
 
 from core.RestPublisher.Resource import Resource
@@ -66,7 +67,10 @@ class RestPublisher(PathSpec, react):
                  resource: Resource = None,
                  **kwargs):
 
-        react.__init__(self, *args, **kwargs)
+        try:
+            react.__init__(self, *args, **kwargs)
+        except:
+            logging.error("Could not create react app", exc_info=True)
         PathSpec.__init__(self, *args, **kwargs)
         assert resource and isinstance(resource, Resource)
         self.url = url
@@ -77,10 +81,12 @@ class RestPublisher(PathSpec, react):
 
         self.logger.warning(f"Creating service for {self.resource.title}")
 
-        with open("/".join([self.npm_resources, self.resource.Title + "Service.ts"]), "w") as f:
-            f.write(
-                self.server_resource_code.format(**self.resource, port=self.port, url=self.url, **self.resource.access))
-
+        try:
+            with open("/".join([self.npm_resources, self.resource.Title + "Service.ts"]), "w") as f:
+                f.write(
+                    self.server_resource_code.format(**self.resource, port=self.port, url=self.url, **self.resource.access))
+        except:
+            logging.error(f"Could not create javascript resource file {self.resource.Title}")
         self.logger.warning(f"Creating components for {self.resource.title}")
 
         self.write_components("/".join([self.npm_components, self.resource.title + ".tsx"]))
@@ -89,9 +95,11 @@ class RestPublisher(PathSpec, react):
 
         self.logger.warning(f"Creating page for {self.resource.title}")
 
-        with open("/".join([self.npm_pages, self.resource.title + ".tsx"]), "w") as f:
-            f.write(self.page_code.format(**self.resource, port=self.port, url=self.url, **self.resource.access))
-
+        try:
+            with open("/".join([self.npm_pages, self.resource.title + ".tsx"]), "w") as f:
+                f.write(self.page_code.format(**self.resource, port=self.port, url=self.url, **self.resource.access))
+        except:
+            logging.error(f"Could not write {self.resource.title}.tsx")
     def __iter__(self, incoming):
         if not self.contents:
             self.contents = list(incoming)
@@ -267,10 +275,12 @@ export default withRouter(??title!!)
     def write_components(self, param):
         written_componens = []
         for component, code in self.components.items():
-            with open("/".join([self.npm_resources, self.resource.title + ".s"]), "w") as f:
-                f.write(code.format(**self.resource, port=self.port, url=self.url, **self.resource.access))
-                written_componens.append(component)
-
+            try:
+                with open("/".join([self.npm_resources, self.resource.title + ".s"]), "w") as f:
+                    f.write(code.format(**self.resource, port=self.port, url=self.url, **self.resource.access))
+                    written_componens.append(component)
+            except:
+                logging.error(f"Could not write { self.resource.title }")
 
 import unittest
 

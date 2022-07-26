@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import pickle
 import falcon
@@ -53,7 +54,8 @@ class TopicsPublisher(RestPublisher, react):
 
         yield self.topics, text_ids
 
-    def on_get(self, req, resp):  # get all
+    def on_get(self, req, resp):
+        logging.info("Computing topics")
         documents = list(self.ant("feature", "reading_order", from_cache_only=True)([]))
 
         path = config.topics_dump + f"_{len(documents)}"
@@ -61,14 +63,11 @@ class TopicsPublisher(RestPublisher, react):
             with open(path, mode="rb") as f:
                 d2g = Dict2Graph
                 topics, meta = pickle.load(f)
-                print("TOPICS")
-
-                print(topics)
                 value = list(d2g([topics]))[0][0][0]
-                print(value)
         else:
 
             value, _ = list(zip(*list(self.ant("arxiv.org", "topics.graph", from_cache_only=True)([]))))
 
+        logging.info("computed topics")
         resp.body = json.dumps([value, {}], ensure_ascii=False)
         resp.status = falcon.HTTP_OK

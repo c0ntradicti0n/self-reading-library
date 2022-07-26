@@ -8,7 +8,6 @@ os.environ["LD_LIBRARY_PATH"] = '/usr/local/cuda-11.0/targets/x86_64-linux/lib/'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ['TOKENIZERS_PARALLELISM'] = 'true'
 from traceback_with_variables import activate_by_import
-
 from traceback_with_variables import Format, ColorSchemes, is_ipython_global
 
 fmt = Format(
@@ -167,7 +166,7 @@ EPOCHS_LAYOUT = 84
 PDF_UPLOAD_DIR = hidden_folder + "/pdf_upload/"
 ELMO_DIFFERENCE_MODEL_PATH = hidden_folder + "elmo_difference_models"
 ELMO_DIFFERENCE_COLLECTION_PATH = hidden_folder + "elmo_difference_collection"
-PORT = 7789
+PORT = 6000
 
 TOPIC_TEXT_LENGTH = 180
 spacy_model_name = 'en_core_web_trf'

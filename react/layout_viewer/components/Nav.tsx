@@ -36,7 +36,7 @@ export default class Nav extends React.Component<Props, any> {
             <NAV>
                 <h3>Other interactive formats</h3>
                 <div>
-                    <DownloadFile id={id} kind="audiobook">Audiobook</DownloadFile>
+                    <DownloadFile id={id} kind="audiobook">/ Create Audiobook</DownloadFile>
                 </div>
                 <AudiobookPlayer id={shortId} />
                 <div>

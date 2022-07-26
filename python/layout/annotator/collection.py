@@ -13,7 +13,7 @@ import uuid
 from itertools import islice
 
 from helpers.hash_tools import bas64encode
-from python.core import config
+from core import config
 import types
 from pprint import pprint
 import os
