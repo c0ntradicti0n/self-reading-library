@@ -18,10 +18,40 @@
 #annotation_canvas {
     width: 50%;
 }
+
 @font-face {
-  font-family: 'keys';
-  src: local('keys'), url(../public/fonts/212_Keyboard.otf) format('opentype');
+    font-family: 'keys';
+    src: local('keys'), url(../public/fonts/212_Keyboard.otf) format('opentype');
 }
+
+
+@keyframes color-change {
+    0% {
+        color: red;
+    }
+    33% {
+        color: blue;
+    }
+    66% {
+        color: yellow;
+    }
+    100% {
+        color: red;
+    }
+}
+
+@keyframes background-color-change {
+    0% {
+        background-color: white;
+    }
+    50% {
+        background-color: black;
+    }
+    100% {
+        background-color: white;
+    }
+}
+
 span.tag {
     padding-left: 10px;
     padding-right: 10px;

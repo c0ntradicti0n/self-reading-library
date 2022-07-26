@@ -22,7 +22,7 @@ export class ServerResource<T> {
 
   request = async (method: String, url = "", data = {}) => {
     // Default options are marked with *
-    const response = await fetch(AppSettings.SAUSSAGE_END_START_PATH + url, {
+    const response = await fetch(AppSettings.BACKEND_HOST + url, {
       method: method.toUpperCase(),
       mode: "no-cors", // no-cors, *cors, same-origin
       cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached

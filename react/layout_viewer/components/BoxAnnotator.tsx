@@ -111,7 +111,7 @@ export default class BoxAnnotator extends Component<any> {
                             console.log("will display content...")
                         )
                     }
-                    data={this.props.data}
+                    data={this.props.superState}
                 />
                 <div className="container" style={{position: "absolute"}}>
                     {this.props.superState?.meta?.human_image ? (

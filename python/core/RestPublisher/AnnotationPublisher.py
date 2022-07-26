@@ -54,15 +54,15 @@ class DifferenceAnnotationPublisher(RestPublisher):
 
     def on_post(self, req, resp, id=None):
         print(f"Annotating {self.kind}")
-        id, text, pdf_path = req.media
+        doc_id, text, pdf_path = req.media
         pipeline = self.ant(
-            "feature", "reading_order.page.difference",
+            "arxiv.org", "reading_order.page.difference",
             via="reading_order.filter_align_text",
             from_function_only=True
         )
         result = list(
             pipeline(
-                metaize([id]),
+                metaize([doc_id]),
                 filter_text=text,
                 service_id=__file__,
                 difference_model_path=BEST_MODELS["difference"]['best_model_path'],

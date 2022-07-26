@@ -35,10 +35,12 @@ def decompress_pickle(value):
 
 def unroll_cache(path, cache):
     for m in cache:
-        yield m, decompress_pickle(read_cache_file(path, m))
+        uncompressed = decompress_pickle(read_cache_file(path, m))
+        if uncompressed:
+            yield m, uncompressed
 
 
-def filter_ant_step(gen, cache, filter_by_cache, path):
+def filter_ant_step(gen, cache, filter_by_cache):
     try:
         for value, meta in gen:
 
@@ -53,8 +55,18 @@ def filter_ant_step(gen, cache, filter_by_cache, path):
 
 
 def apply(cls, f, gen, cache, filter_by_cache, append_cache, filename, **kwargs):
-    for result in yield_cache_instead_apply(cls, f, filter_ant_step(gen, cache, filter_by_cache, filename), cache,
-                                            filename, **kwargs):
+    for result in yield_cache_instead_apply(
+            cls,
+            f,
+            filter_ant_step(
+                gen,
+                cache,
+                filter_by_cache
+            ),
+            cache,
+            filename,
+            **kwargs
+    ):
         print("logging to file")
         write_cache(path=filename, result=result, old_cache=cache)
 
@@ -77,14 +89,20 @@ def dig_generator_ground_for_next_value(gen):
 
 def yield_cache_instead_apply(cls, f, gen, cache, filename, **kwargs):
     try:
-        values_from_future = [v for v in dig_generator_ground_for_next_value(gen) if v]
+        incoming_gen = dig_generator_ground_for_next_value(gen)
+        if not "itertools.cycle" in str(incoming_gen):
+            values_from_future = [v for v in incoming_gen if v]
+        else:
+            values_from_future = []
     except Exception as e:
         raise e
 
     if values_from_future:
         future_yield_values = [
             (value, decompress_pickle(read_cache_file(filename,
-                value if value.endswith(".pdf") else config.tex_data + urllib.parse.quote_plus(value) + ".pdf")))
+                                                      value if value.endswith(
+                                                          ".pdf") else config.tex_data + urllib.parse.quote_plus(
+                                                          value) + ".pdf")))
             for value in values_from_future if
             value in cache or config.tex_data + urllib.parse.quote_plus(value) + ".pdf" in cache
         ]
@@ -112,7 +130,7 @@ def yield_cache_instead_apply(cls, f, gen, cache, filename, **kwargs):
                     else:
                         yield value, m
                 else:
-                    logging.error("Value in cache was None, discarding")
+                    logging.error("Value in cache was None, retrying")
 
         yield from f(cls, filter(), **kwargs)
         yield from ((k, v) for k, v in cache_values_to_yield if k not in future_yield_values)

@@ -54,7 +54,7 @@ export default class ServerResource<T> {
     // Default options are marked with *
     console.log(
       "URL",
-      AppSettings.SAUSSAGE_END_START_PATH + this.route + this.id
+      AppSettings.BACKEND_HOST + this.route + this.id
     );
 
     let querystring = "";
@@ -88,7 +88,7 @@ export default class ServerResource<T> {
     try {
       const response = await fetch(
         // @ts-ignore
-        AppSettings.SAUSSAGE_END_START_PATH +
+        AppSettings.BACKEND_HOST +
           this.route +
           this.id +
           (querystring ? "?" + querystring : ""),

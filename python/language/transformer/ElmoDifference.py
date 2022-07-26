@@ -87,7 +87,7 @@ ElmoDifferenceQueueRest = RestQueue(
 
 def on_predict(args):
     gen = forget_except(elmo_difference_pipe(
-        metaize(itertools.cycle(["http://export.arxiv.org/"])),
+        metaize(["http://export.arxiv.org/"]*100),
         difference_model_path=args['best_model_path'],
         service_id="difference"
     ), keys=['html_path', 'css', 'html'])

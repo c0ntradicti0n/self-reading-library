@@ -153,7 +153,7 @@ def create_app():
 
             try:
                 gen = forget_except(filling_pipe(itertools.islice((
-                    metaize(itertools.cycle(["pdfs"]))
+                    metaize(["pdfs"]*200)
                 ), 200)), keys=["html_path"])
                 for i in range(100):
                     k = next(gen, None)

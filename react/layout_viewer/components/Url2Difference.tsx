@@ -1,5 +1,6 @@
 import React from 'react';
 import Router from "next/router";
+import {Button} from "@mui/material";
 
 
 export default class Url2Difference extends React.Component {
@@ -15,6 +16,7 @@ export default class Url2Difference extends React.Component {
             <input name="id" type="text" style={{
                     margin: "10px"
                 }}/>
+                <Button type="submit">Go!</Button>
             </form>
         )
     }

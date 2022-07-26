@@ -62,7 +62,7 @@ class BoxFeatureMaker(PathSpec):
                 final_feature_df["doc_id"] = "id:" +  str(doc_id) + "." + str(random_i)
                 meta["doc_id"] = "id:" + str(doc_id) + "." + str(random_i)
                 meta['html_path'] = labeled_pdf_path
-                meta['chars_and_char_boxes'] = final_feature_df.chars_and_char_boxes
+                #meta['chars_and_char_boxes'] = final_feature_df.chars_and_char_boxes
 
                 final_feature_df['page_number'] = page_numbers
 

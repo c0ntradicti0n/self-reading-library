@@ -138,6 +138,10 @@ class RestQueue:
     def on_get(self, req, resp, id=None):  # get image
         data = self.get(id)
         if not data:
+            logging.info(f"No file prepared for {id}, getting default")
+            data = self.get(self.service_id)
+
+        if not data:
             resp.status = falcon.HTTP_300
             return
         data = encode(data)

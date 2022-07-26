@@ -2,6 +2,8 @@ import React from "react";
 import Button from "@mui/material/Button";
 import Router from "next/router";
 import Url2Difference from "./Url2Difference";
+import AudiobookPlayer from "./AudiobookPlayer";
+
 import DownloadFile from "./DownloadFile"
 import styled from "styled-components";
 
@@ -26,21 +28,19 @@ const NAV = styled.div`
 
 
 export default class Nav extends React.Component<Props, any> {
-    state = {
-        whereTo: "",
-    };
-
     render() {
         console.log("Nav", this.props)
         const id = this.props.data?.value?.value ?? this.props.data?.value
+        const shortId = id?.replace(".layouteagle/", "")
         return (
             <NAV>
                 <h3>Other interactive formats</h3>
                 <div>
                     <DownloadFile id={id} kind="audiobook">Audiobook</DownloadFile>
                 </div>
+                <AudiobookPlayer id={shortId} />
                 <div>
-                    <DownloadFile id={id} kind="pdf">PDF</DownloadFile>
+                    <Button href={shortId}>Original PDF</Button>
                 </div>
                 <div>
                     <Button href={"/upload_annotation?id=" + id} >Improve layout recognition</Button>

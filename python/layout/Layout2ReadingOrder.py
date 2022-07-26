@@ -15,6 +15,7 @@ tracemalloc.start()
 import pyarrow as pa
 import pyarrow.parquet as pq
 
+
 @converter("feature", "reading_order")
 class Layout2ReadingOrder(PathSpec):
     def __init__(self, *args, num_labels=config.NUM_LABELS, **kwargs):
@@ -29,7 +30,7 @@ class Layout2ReadingOrder(PathSpec):
         filename=config.cache + os.path.basename(__file__),
     )
     def __call__(self, x_meta, *args, **kwargs):
-        if  'model_path' not in self.flags and  'layout_model_path' not in self.flags:
+        if 'model_path' not in self.flags and 'layout_model_path' not in self.flags:
             raise Exception(
                 f"layout model path must be set via pipeline flags, these are the keywords in the call args, {self.flags=}")
         model_path = self.flags['model_path'] if 'model_path' in self.flags else self.flags['layout_model_path']
@@ -93,6 +94,7 @@ class Layout2ReadingOrder(PathSpec):
                 prediction['df'] = df.iloc[page_number:page_number + 1]
                 prediction['image'] = Image.open(example['image_path'][0][0])
                 prediction['page_number'] = page_number
+                prediction['text'] = prediction['df']['text'].tolist()[0]
 
                 del prediction['df']['chars_and_char_boxes']
                 prediction['df_path'] = f"{config.tex_data}--{hashval(pdf_path)}-{page_number}.df"
@@ -104,16 +106,20 @@ class Layout2ReadingOrder(PathSpec):
                         print(len(box_predictions), box_predictions, len(example['text'][0]), example['text'][0])
                         self.logger.error(f"predicted less labels than textfields on the page, continuing!")
 
-
                 pagenumber = page_number + 1
                 self.logger.info(f"Predicted {pagenumber=}/{len(dataset)} with {box_predictions=}")
                 for thread in threading.enumerate():
                     print(thread.name)
 
-
                 prediction_meta = model_helpers.repaint_image_from_labels((pdf_path, prediction))
-                prediction_meta[1]['human_image'].save(f"{pdf_path}.{page_number}.layout_prediction.png")
 
+                human_image_path = f"{pdf_path}.{page_number}.layout_prediction.png"
+                prediction_meta[1]['human_image'].save(human_image_path)
+                prediction_meta[1]['human_image_path'] = human_image_path
+                prediction_meta[1]['image_path'] =  example['image_path'][0][0]
+                del prediction_meta[1]['human_image']
+                del prediction_meta[1]['image']
+                del prediction_meta[1]['df']
 
                 predictions_metas_per_document.append((pdf_path, prediction))
 
@@ -122,7 +128,9 @@ class Layout2ReadingOrder(PathSpec):
             df['LABEL'] = [prediction['labels'] for id, prediction in annotation]
 
             try:
-                title_texts = [_t for _t in [[(i, tag) for i, tag in enumerate(l)  if tag in config.TITLE] for l in df['LABEL']] if _t]
+                title_texts = [_t for _t in
+                               [[(i, tag) for i, tag in enumerate(l) if tag in config.TITLE] for l in df['LABEL']] if
+                               _t]
                 used_titles = [df['text'].tolist()[0][i] for i, h in title_texts[0]]
                 used_titles = (used_titles[0] if len(used_titles) > 0 else meta['html_path']).replace("\n", " ")
             except:
@@ -133,7 +141,7 @@ class Layout2ReadingOrder(PathSpec):
             used_label_is = [
                 self.sort_by_label([(i, l) for i, l in enumerate(an[1]['labels']) if l in config.TEXT_LABELS]) for an in
                 annotation]
-            used_texts = [[annotation[i][1]['df']['text'].tolist()[0][ull] for ull in ul] for i, ul in
+            used_texts = [[annotation[i][1]['text'][ull] for ull in ul] for i, ul in
                           enumerate(used_label_is)]
             used_boxes = [[annotation[i][1]['bbox'][ull] for ull in ul] for i, ul in enumerate(used_label_is)]
 
@@ -146,8 +154,6 @@ class Layout2ReadingOrder(PathSpec):
             del df['chars_and_char_boxes']
             meta['df_path'] = config.tex_data + hashval(pdf_path) + ".df"
             meta['layout_predictions'] = annotation
-            for id, prediction in meta['layout_predictions']:
-                del prediction['df']
             table = pa.Table.from_pandas(df)
             pq.write_table(table, meta['df_path'])
             if 'df' in meta:
@@ -156,6 +162,9 @@ class Layout2ReadingOrder(PathSpec):
             del meta['final_feature_df']
 
             meta['enumerated_texts'] = enumerated_texts
+
+            print(gc.collect())
+
             yield pdf_path, meta
 
     def load_model(self):
@@ -187,5 +196,3 @@ class Layout2ReadingOrder(PathSpec):
             all_enumeration.append(enumeration)
 
         return all_enumeration
-
-
