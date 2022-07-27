@@ -100,7 +100,7 @@ jobs:
             '
       - name: StartBackend
         run: |
-          ssh staging '   screen -L  -Logfile backend.log -S backend -dm bash -c " . venv/bin/activate; cd LayoutEagle/python; uwsgi --http 0.0.0.0:443 --module wsgi:application --threads 10 "  &  '
+          ssh staging '   screen -L  -Logfile backend.log -S backend -dm bash -c " . venv/bin/activate; cd LayoutEagle/python; uwsgi --http 0.0.0.0:9999 --module wsgi:application --threads 10 "  &  '
           
       - name: StartFrontend
         run: |
