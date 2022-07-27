@@ -104,7 +104,7 @@ jobs:
           
       - name: StartFrontend
         run: |
-          ssh staging '    screen  -L  -Logfile frontend.log -S frontend -dm bash -c " sleep 120 ; cd LayoutEagle/react/layout_viewer_made/ ; yarn install; yarn add --dev typescript @types/node; yarn build ; yarn run start -p 8080 "   &  '
+          ssh staging '    screen  -L  -Logfile frontend.log -S frontend -dm bash -c " sleep 120 ; cd LayoutEagle/react/layout_viewer_made/ ; yarn install; yarn add --dev typescript @types/node; yarn build ; yarn run start -p 3000 "   &  '
 
       - name: StartMountLink
         run: |
