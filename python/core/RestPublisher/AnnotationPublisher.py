@@ -62,7 +62,7 @@ class DifferenceAnnotationPublisher(RestPublisher):
         )
         result = list(
             pipeline(
-                metaize([doc_id]),
+                metaize([doc_id if doc_id else pdf_path]),
                 filter_text=text,
                 service_id=__file__,
                 difference_model_path=BEST_MODELS["difference"]['best_model_path'],

@@ -22,8 +22,6 @@ class HtmlRenderer extends Component<Props> {
         console.log("HtmlRenderer", this);
         return (
             <div>
-                <h2>Read and mark text</h2>
-
                 <SelectText
                     meta={this.props.data.meta}
                     value={this.props.data.value?.value}

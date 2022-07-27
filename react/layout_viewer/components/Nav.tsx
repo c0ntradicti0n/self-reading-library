@@ -34,25 +34,29 @@ export default class Nav extends React.Component<Props, any> {
         const shortId = id?.replace(".layouteagle/", "")
         return (
             <NAV>
-                <h3>Other interactive formats</h3>
+                <h3>Interactive formats</h3>
+                <div>
+                    <Button href={"/difference?id=" + id}>Read annotated paper</Button>
+                </div>
                 <div>
                     <DownloadFile id={id} kind="audiobook">/ Create Audiobook</DownloadFile>
                 </div>
-                <AudiobookPlayer id={shortId} />
+                <AudiobookPlayer id={shortId}/>
                 <div>
                     <Button href={shortId}>Original PDF</Button>
                 </div>
                 <div>
-                    <Button href={"/upload_annotation?id=" + id} >Improve layout recognition</Button>
+                    <Button href={"/upload_annotation?id=" + id}>Improve layout recognition</Button>
                 </div>
+
                 <h3>Navigate to other document</h3>
 
-                <h5>Random</h5>
+                <h5>Next random document</h5>
                 <div>
                     <Button
                         onClick={() => this.props.forward()}
                     >
-                    I have read it
+                        I have read it
                     </Button>
                 </div>
 
