@@ -9,6 +9,7 @@
     "test": "jasmine"
   },
   "dependencies": {
+
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
     "@mui/icons-material": "^5.8.2",
@@ -32,12 +33,13 @@
     "react-pro-sidebar": "^0.6.0",
     "react-three-fiber": "4.2.12",
     "three": "^0.140.2",
-    "three-spritetext": "^1.5.2"
+    "three-spritetext": "^1.5.2",
+    "react-h5-audio-player": "^3.8.4",
+    "@types/node": "^14.0.27"
   },
   "devDependencies": {
     "@loadable/component": "^5.13.0",
     "@types/loadable__component": "^5.13.0",
-    "@types/node": "^14.0.27",
     "@types/react-loadable": "^5.5.3",
     "@typescript-eslint/eslint-plugin": "^5.30.6",
     "@typescript-eslint/parser": "^5.30.6",

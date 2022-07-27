@@ -84,7 +84,7 @@ jobs:
           
               cp python/tokenization_layoutvm2_fast.py ../venv/lib/python3.8/site-packages/transformers/models/layoutlmv2/tokenization_layoutlmv2_fast.py
               
-              echo \" export class AppSettings {  public static BACKEND_HOST = 'http://$SSH_HOST:9999'   } \" > react/layout_viewer/config/connection.ts
+              echo \" export class AppSettings {  public static BACKEND_HOST = 'https://self-reading-library.science/api'   } \" > react/layout_viewer/config/connection.ts
               echo \"PORT=9999\" >> python/core/config.py
               kill $(lsof -t -i:9999) || echo 'backend not running'
           "
@@ -111,7 +111,6 @@ jobs:
               sleep 110
               cd LayoutEagle/react/layout_viewer_made/ 
               yarn install
-              yarn add --dev typescript @types/node
               yarn run build
               screen  -L  -Logfile frontend.log -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer_made/ ;  export PUBLIC_URL=self-reading-library.science; yarn run start "   &  '
 
