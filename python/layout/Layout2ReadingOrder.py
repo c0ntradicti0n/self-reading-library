@@ -171,7 +171,7 @@ class Layout2ReadingOrder(PathSpec):
         if not Layout2ReadingOrder.model:
             Layout2ReadingOrder.processor = model_helpers.PROCESSOR
             Layout2ReadingOrder.model = model_helpers.MODEL
-
+            logging.info(f"Loading {self.model_path}")
             Layout2ReadingOrder.model.load_state_dict(torch.load(self.model_path, map_location="cpu"))
             Layout2ReadingOrder.model.eval()
             Layout2ReadingOrder.model.to(config.DEVICE)

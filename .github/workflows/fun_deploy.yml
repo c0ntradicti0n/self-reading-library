@@ -109,7 +109,7 @@ jobs:
 
       - name: StartMountLink
         run: |
-          ssh staging '    screen  -L  -Logfile frontend.log -S frontend -dm bash -c "   [[ ! -d react/layout_viewer/public/pdfs ]] && mkdir react/layout_viewer/public/pdfs &&  sudo mount --bind python/.layouteagle/pdfs/ react/layout_viewer/public/pdfs || echo mount_exists "   &  '
+          ssh staging '    screen  -L  -Logfile mount.log -S frontend -dm bash -c "   [[ ! -d LayoutEagle/react/layout_viewer/public/pdfs ]] && mkdir LayoutEagle/react/layout_viewer/public/pdfs &&  sudo mount --bind LayoutEagle/python/.layouteagle/pdfs/ LayoutEagle/react/layout_viewer/public/pdfs || echo mount_exists "   &  '
       - name: Glance at backend logs
         run: |
           ssh staging '              set -x ;  cat backend.log     '
