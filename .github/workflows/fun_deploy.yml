@@ -49,6 +49,7 @@ jobs:
               rm -rf *.log
               rm -rf ./cache
               cp -R ./LayoutEagle/python/.layouteagle ./cache
+              sudo umount LayoutEagle/react/layout_viewer/public/pdfs | echo 'already unmounted'
               rm -rf LayoutEagle
               git clone https://github.com/c0ntradicti0n/LayoutEagle.git 
                         
@@ -66,7 +67,7 @@ jobs:
           
               tar -xf ~/arXiv_pdf_9912_002.tar -C python/.layouteagle/pdfs 
 
-              cp -R --no-clobber ~/../minimal_cache/. python/.layouteagle/
+              cp -R --no-clobber ../minimal_cache/. python/.layouteagle/
 
               cp -R --no-clobber ~/cache/. python/.layouteagle/
               
