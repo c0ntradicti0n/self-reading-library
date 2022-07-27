@@ -93,7 +93,7 @@ jobs:
                 if [[ ! -d ./tts ]] ; then
                   git clone https://github.com/c0ntradicti0n/tts.git
                   cd tts 
-                  python -m venv venv 
+                  python3 -m venv venv
                   . venv/bin/activate
                   pip install -r requirements.txt
                 fi
