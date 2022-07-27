@@ -87,7 +87,7 @@ jobs:
               
               echo \" export class AppSettings {  public static BACKEND_HOST = 'http://$SSH_HOST:9999'   } \" > react/layout_viewer/config/connection.ts
               echo \"PORT=9999\" >> python/core/config.py
-              kill -9 $(lsof -t -i:9999)
+              kill -9 $(lsof -t -i:9999) || echo 'backend not running'
           "
 
       - name: InstallTtts
