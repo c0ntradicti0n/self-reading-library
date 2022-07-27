@@ -107,11 +107,15 @@ jobs:
           
       - name: StartFrontend
         run: |
-          ssh staging '  sleep 110;  screen  -L  -Logfile frontend.log -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer_made/ ; yarn install; yarn add --dev typescript @types/node; yarn build; yarn run next export ; export PUBLIC_URL=self-reading-library.science;  yarn run start -p 3000 "   &  '
+          ssh staging '  
+              
+              sleep 110
+              cd LayoutEagle/react/layout_viewer_made/ 
+              yarn install
+              yarn add --dev typescript @types/node
+              yarn run build
+              screen  -L  -Logfile frontend.log -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer_made/ ;  export PUBLIC_URL=self-reading-library.science; yarn run start "   &  '
 
-      - name: StartMountLink
-        run: |
-          ssh staging '    screen  -L  -Logfile mount.log -S frontend -dm bash -c "   [[ ! -d LayoutEagle/react/layout_viewer_made/public/pdfs ]] && mkdir LayoutEagle/react/layout_viewer/public/pdfs &&  sudo mount --bind LayoutEagle/python/.layouteagle/pdfs/ LayoutEagle/react/layout_viewer/public/pdfs || echo mount_exists "   &  '
       - name: Glance at backend logs
         run: |
           ssh staging '              set -x ;  cat backend.log     '

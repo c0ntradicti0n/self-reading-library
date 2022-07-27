@@ -106,9 +106,6 @@ def create_app():
         log_level="DEBUG"
     )
 
-    os.system(f"kill $(lsof -t -i:{PORT}) || echo 'no running process on our port {PORT}, no killing needed'")
-
-
     from falcon_multipart.middleware import MultipartMiddleware
 
     api = falcon.App(middleware=[
