@@ -85,7 +85,7 @@ jobs:
           
               cp python/tokenization_layoutvm2_fast.py ../venv/lib/python3.8/site-packages/transformers/models/layoutlmv2/tokenization_layoutlmv2_fast.py
               
-              echo \" export class AppSettings {  public static BACKEND_HOST = 'http://$SSH_HOST:9999'   } \" > react/layout_viewer_made/config/connection.ts
+              echo \" export class AppSettings {  public static BACKEND_HOST = 'http://$SSH_HOST:9999'   } \" > react/layout_viewer/config/connection.ts
               echo \"PORT=9999\" >> python/core/config.py
               kill -9 $(lsof -t -i:9999)
           "
@@ -107,7 +107,7 @@ jobs:
           
       - name: StartFrontend
         run: |
-          ssh staging '    screen  -L  -Logfile frontend.log -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer_made/ ; yarn install; yarn add --dev typescript @types/node; yarn build; yarn run next export ; export PUBLIC_URL=self-reading-library.science;  yarn run start -p 3000 "   &  '
+          ssh staging '  sleep 110;  screen  -L  -Logfile frontend.log -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer_made/ ; yarn install; yarn add --dev typescript @types/node; yarn build; yarn run next export ; export PUBLIC_URL=self-reading-library.science;  yarn run start -p 3000 "   &  '
 
       - name: StartMountLink
         run: |
