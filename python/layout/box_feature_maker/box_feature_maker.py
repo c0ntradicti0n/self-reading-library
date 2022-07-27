@@ -119,7 +119,6 @@ class BoxFeatureMaker(PathSpec):
                                                     isinstance(char, LTChar)]
                         except AttributeError:
                             _text = text.replace('\n', '\/n')
-                            logging.error(f"Could not get box for '{_text}'")
                             continue
                         label = determine_layout_label_from_text(text)
                         number_of_lines = len(element._objs) if hasattr(element, "_objs") else 0

@@ -39,13 +39,12 @@ class Layout2ReadingOrder(PathSpec):
 
         for pdf_path, meta in x_meta:
 
-            print(gc.collect())
 
             snapshot = tracemalloc.take_snapshot()
             top_stats = snapshot.statistics('lineno')
 
             print("[ Top 10 ]")
-            for stat in top_stats[:20]:
+            for stat in top_stats[:10]:
                 print(stat)
 
             try:
@@ -163,7 +162,7 @@ class Layout2ReadingOrder(PathSpec):
 
             meta['enumerated_texts'] = enumerated_texts
 
-            print(gc.collect())
+            gc.collect()
 
             yield pdf_path, meta
 

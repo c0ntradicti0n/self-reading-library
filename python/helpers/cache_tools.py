@@ -67,7 +67,6 @@ def apply(cls, f, gen, cache, filter_by_cache, append_cache, filename, **kwargs)
             filename,
             **kwargs
     ):
-        print("logging to file")
         write_cache(path=filename, result=result, old_cache=cache)
 
         yield result
@@ -142,7 +141,6 @@ def read_cache_file(path, value):
             content = f.read()
             return content
     except Exception as e:
-        logger.warning("Value was not encoded!")
         with open(path + "/" + urllib.parse.quote_plus(value), 'rb') as f:
             content = f.read()
         return content
@@ -183,7 +181,6 @@ def write_cache(old_cache, path, result, overwrite_cache=False):
 
     with open(fpath, "wb") as f:
         f.write(compressed_pickle(meta))
-    print(f"wrote to {fpath}")
     return True
 
 
