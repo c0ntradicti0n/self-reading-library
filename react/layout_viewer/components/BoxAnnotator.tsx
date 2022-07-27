@@ -51,6 +51,23 @@ export default class BoxAnnotator extends Component<any> {
         NONE: "out of scope",
     }
 
+    TAG_COLOR = {
+        'c1': 'blue',
+        'c2': 'green',
+        'c3': 'orange',
+        'NONE': 'violet',
+        'none': 'violet',
+        'None': 'violet',
+        'other': 'yellow',
+        null: 'violet',
+        'pn': 'yellow',
+        'h': 'red',
+        'wh': 'purple',
+        'fg': 'brown',
+        'fn': 'grey',
+        'tb': 'beige'
+    }
+
     state = {
         next_key: null,
     };
@@ -94,6 +111,7 @@ export default class BoxAnnotator extends Component<any> {
                 this.props.superState.meta.labels,
             ]);
 
+        // @ts-ignore
         return (
             <div style={{fontSize: "1em !important", display: "flex"}}>
                 <h2>Improve Layout</h2>
@@ -180,15 +198,30 @@ export default class BoxAnnotator extends Component<any> {
                     <div>
                         <table style={{width: "10%"}}
                         >
-                            <tr><td>KEY</td><td>TAG</td></tr>
-                            {Object.entries(this.KEYS).map(([k, v], i) => <tr>
+                            <tr>
+                                <td>KEY</td>
+                                <td>TAG</td>
+                            </tr>
+                            {Object.entries(this.KEYS).map(([k, v], i) => <tr
+                                    onClick={() => this.setState({next_key: this.KEYS[k]})}
+                                >
                                     <td key={i + "_1"}
                                         style={{
-                                            border: "1px", fontFamily: "keys", fontSize: "4em"
+                                            border: "1px", fontFamily: "keys", fontSize: "4em",
+                                            verticalAlign: "bottom"
                                         }}
-                                        onClick={() => this.setState({next_key: this.KEYS[k]})}
                                     >{this.KEY_TRANSLATE[k]}</td>
-                                    <td key={i + "_2"}>{this.TAG_TRANSLATE[v]} </td>
+                                    <td key={i + "_2"}
+                                        style={{
+                                            verticalAlign: "top"
+                                        }}>
+                                        <div style={{
+                                            backgroundColor: this.TAG_COLOR[v] as string,
+                                            border: "10px solid " + this.TAG_COLOR[v],
+                                            display: "block", borderRadius: "7px",
+
+                                        }}> {this.TAG_TRANSLATE[v]} </div>
+                                    </td>
 
                                 </tr>
                             )
