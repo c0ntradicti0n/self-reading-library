@@ -60,7 +60,10 @@ class ElmoPredict(PathSpec):
                             break
                     except Empty:
                         self.logger.info("Text windowing stopped with length 0 of window 0")
-
+                        m = {}
+                        m['doc_id'] = "finito"
+                        m['annotation'] = []
+                        yield pdf_path, m
                         break
 
                     if words is None:
