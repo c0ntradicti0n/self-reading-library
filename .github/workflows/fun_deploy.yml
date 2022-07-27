@@ -82,15 +82,15 @@ jobs:
           
               cp python/tokenization_layoutvm2_fast.py ../venv/lib/python3.8/site-packages/transformers/models/layoutlmv2/tokenization_layoutlmv2_fast.py
               
-              echo \" export class AppSettings {  public static BACKEND_HOST = 'http://$SSH_HOST:443'   } \" > react/layout_viewer/config/connection.ts
-              echo \"PORT=8443\" >> python/core/config.py
+              echo \" export class AppSettings {  public static BACKEND_HOST = 'http://$SSH_HOST:9999'   } \" > react/layout_viewer/config/connection.ts
+              echo \"PORT=9999\" >> python/core/config.py
               
           "
 
       - name: InstallTtts
         run: |
             ssh staging '   
-                if [ [ ! -d ./tts ] ] ; then
+                if [[ ! -d ./tts ]] ; then
                   git clone git@github.com:c0ntradicti0n/tts.git 
                   cd tts 
                   python -m venv venv 
@@ -126,4 +126,4 @@ jobs:
       - name: RestTest
         run: |
           echo $(curl http://$SSH_HOST:80) 
-          echo $(curl -k https://$SSH_HOST:443)
+          echo $(curl -k https://$SSH_HOST:9999)

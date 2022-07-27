@@ -132,7 +132,7 @@ export default class BoxAnnotator extends Component<any> {
                                 top: (row[0][1] / 2500 * scale).toString() + "px",
                                 width: ((row[0][2] - row[0][0]) / 2500 * scale).toString() + "px",
                                 height: ((row[0][3] - row[0][1]) / 2500 * scale).toString() + "px",
-                                border: "1px solid black",
+                                //border: "1px solid black",
                                 zIndex: Math.ceil(
                                     9000000 - (row[0][2] - row[0][0]) * (row[0][3] - row[0][1])
                                 ),
