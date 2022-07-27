@@ -91,7 +91,7 @@ jobs:
         run: |
             ssh staging '   
                 if [[ ! -d ./tts ]] ; then
-                  git clone git@github.com:c0ntradicti0n/tts.git 
+                  git clone https://github.com/c0ntradicti0n/tts.git
                   cd tts 
                   python -m venv venv 
                   . venv/bin/activate
