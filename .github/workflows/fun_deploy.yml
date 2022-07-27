@@ -86,7 +86,7 @@ jobs:
               
               echo \" export class AppSettings {  public static BACKEND_HOST = 'https://self-reading-library.science/api'   } \" > react/layout_viewer/config/connection.ts
               echo \"PORT=9999\" >> python/core/config.py
-              killall uwsgi || echo 'backend not running'
+              killall -9 uwsgi || echo 'backend not running'
           "
 
       - name: InstallTtts
