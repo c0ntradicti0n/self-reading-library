@@ -50,7 +50,6 @@ jobs:
               rm -rf ./cache
               cp -R ./LayoutEagle/python/.layouteagle ./cache
               kill -9 $(lsof -t -i:9999) || echo 'backend not running'
-              sudo umount LayoutEagle/react/layout_viewer_made/public/pdfs | echo 'already unmounted'
               rm -rf LayoutEagle
               git clone https://github.com/c0ntradicti0n/LayoutEagle.git 
                         
@@ -87,7 +86,7 @@ jobs:
               
               echo \" export class AppSettings {  public static BACKEND_HOST = 'http://$SSH_HOST:9999'   } \" > react/layout_viewer/config/connection.ts
               echo \"PORT=9999\" >> python/core/config.py
-              kill -9 $(lsof -t -i:9999) || echo 'backend not running'
+              kill $(lsof -t -i:9999) || echo 'backend not running'
           "
 
       - name: InstallTtts

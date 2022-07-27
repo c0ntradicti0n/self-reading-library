@@ -93,7 +93,7 @@ def create_app(*args, **kwargs):
     )
     logging.info(f"STARTING APP  {args=}; {kwargs=}")
 
-    os.system(f"kill $(lsof -t -i:{PORT}) || echo 'no running process on our port {PORT}, no killing needed'")
+    #os.system(f"kill $(lsof -t -i:{PORT}) || echo 'no running process on our port {PORT}, no killing needed'")
     logging.info(f"STARTING APP  {args=}; {kwargs=}")
 
     from falcon_multipart.middleware import MultipartMiddleware
