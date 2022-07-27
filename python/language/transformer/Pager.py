@@ -157,6 +157,8 @@ class Pager(PathSpec):
         #
         windowing = True
         start_i2 = 0
+        sentence_marks = [0] + [i + 1 for i, w in enumerate(real_tokens)                 if SENTENCE_END_REGEX.match(w)]
+
 
         consumed_tokens = 0
         loop_count = 0
@@ -176,6 +178,7 @@ class Pager(PathSpec):
 
             window = []
             sentences_j = 0
+            start_i2 = min(sentence_marks, key=lambda _m: abs(_m - start_i2))
             rest_text = real_tokens[start_i2: start_i2 + 300]
 
             if len(rest_text) == 0:

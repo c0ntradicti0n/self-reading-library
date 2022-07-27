@@ -107,8 +107,6 @@ class Layout2ReadingOrder(PathSpec):
 
                 pagenumber = page_number + 1
                 self.logger.info(f"Predicted {pagenumber=}/{len(dataset)} with {box_predictions=}")
-                for thread in threading.enumerate():
-                    print(thread.name)
 
                 prediction_meta = model_helpers.repaint_image_from_labels((pdf_path, prediction))
 
