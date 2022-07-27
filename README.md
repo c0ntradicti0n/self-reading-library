@@ -1,6 +1,8 @@
-# Self-Reading and teachable Library
+# The AI-reading support framework: A self-reading library
 
-**Demo: [Self-reading library](http://141.5.100.77/)**
+**Demo: [Self-reading library](https://self-reading-library.science/)**
+
+Did you ever went to the library and asked yourself, why they don't read all those books and tell you about the important stuff - instead of allowing you read?
 
 This contains some NLP-Pipeline-Framework for Layout recognition, semantic  text analysis and text to speech tool for audio-books putting together various tools. 
 

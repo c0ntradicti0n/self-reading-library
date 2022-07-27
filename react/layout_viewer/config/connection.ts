@@ -1,4 +1,4 @@
 
 export class AppSettings {
-    public static BACKEND_HOST = "http://localhost:7789"
+    public static BACKEND_HOST = "http://localhost:9999"
 }
