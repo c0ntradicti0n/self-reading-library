@@ -49,7 +49,8 @@ jobs:
               rm -rf *.log
               rm -rf ./cache
               cp -R ./LayoutEagle/python/.layouteagle ./cache
-              sudo umount LayoutEagle/react/layout_viewer/public/pdfs | echo 'already unmounted'
+              kill -9 $(lsof -t -i:9999) || echo 'backend not running'
+              sudo umount LayoutEagle/react/layout_viewer_made/public/pdfs | echo 'already unmounted'
               rm -rf LayoutEagle
               git clone https://github.com/c0ntradicti0n/LayoutEagle.git 
                         
@@ -84,9 +85,9 @@ jobs:
           
               cp python/tokenization_layoutvm2_fast.py ../venv/lib/python3.8/site-packages/transformers/models/layoutlmv2/tokenization_layoutlmv2_fast.py
               
-              echo \" export class AppSettings {  public static BACKEND_HOST = 'http://$SSH_HOST:9999'   } \" > react/layout_viewer/config/connection.ts
+              echo \" export class AppSettings {  public static BACKEND_HOST = 'http://$SSH_HOST:9999'   } \" > react/layout_viewer_made/config/connection.ts
               echo \"PORT=9999\" >> python/core/config.py
-              
+              kill -9 $(lsof -t -i:9999)
           "
 
       - name: InstallTtts
@@ -106,11 +107,11 @@ jobs:
           
       - name: StartFrontend
         run: |
-          ssh staging '    screen  -L  -Logfile frontend.log -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer/ ; yarn install; yarn add --dev typescript @types/node; yarn build ; export PUBLIC_URL=self-reading-library.science; yarn run start -p 3000 "   &  '
+          ssh staging '    screen  -L  -Logfile frontend.log -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer_made/ ; yarn install; yarn add --dev typescript @types/node; yarn build; yarn run next export ; export PUBLIC_URL=self-reading-library.science;  yarn run start -p 3000 "   &  '
 
       - name: StartMountLink
         run: |
-          ssh staging '    screen  -L  -Logfile mount.log -S frontend -dm bash -c "   [[ ! -d LayoutEagle/react/layout_viewer/public/pdfs ]] && mkdir LayoutEagle/react/layout_viewer/public/pdfs &&  sudo mount --bind LayoutEagle/python/.layouteagle/pdfs/ LayoutEagle/react/layout_viewer/public/pdfs || echo mount_exists "   &  '
+          ssh staging '    screen  -L  -Logfile mount.log -S frontend -dm bash -c "   [[ ! -d LayoutEagle/react/layout_viewer_made/public/pdfs ]] && mkdir LayoutEagle/react/layout_viewer/public/pdfs &&  sudo mount --bind LayoutEagle/python/.layouteagle/pdfs/ LayoutEagle/react/layout_viewer/public/pdfs || echo mount_exists "   &  '
       - name: Glance at backend logs
         run: |
           ssh staging '              set -x ;  cat backend.log     '

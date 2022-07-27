@@ -52,7 +52,7 @@ export default class Index extends React.Component {
 
                         <ul>
                             <li>PDF-Readerlike view on your papapers</li>
-                            <li>Put markup for <span className="span_SUBJECT">concepts, beeing different</span>
+                            <li>Put markup for <span className="span_SUBJECT">concepts, beeing different </span>
                                 and <span
                                     className="span_CONTRAST"> phrases, explaining something, that makes them different, here we call them "contrasts".</span>
                             </li>
