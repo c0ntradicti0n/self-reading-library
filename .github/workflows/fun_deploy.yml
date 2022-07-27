@@ -38,6 +38,7 @@ jobs:
           SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
           SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
 
+
       - name: Deploy
         env:
           SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
@@ -104,7 +105,7 @@ jobs:
           
       - name: StartFrontend
         run: |
-          ssh staging '    screen  -L  -Logfile frontend.log -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer/ ; yarn install; yarn add --dev typescript @types/node; yarn build ; yarn run start -p 3000 "   &  '
+          ssh staging '    screen  -L  -Logfile frontend.log -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer/ ; yarn install; yarn add --dev typescript @types/node; yarn build ; export PUBLIC_URL=self-reading-library.science; yarn run start -p 3000 "   &  '
 
       - name: StartMountLink
         run: |
