@@ -65,7 +65,7 @@ jobs:
           
               tar -xf ~/arXiv_pdf_9912_002.tar -C python/.layouteagle/pdfs 
 
-              cp -R --no-clobber ~/../cloud/minimal_cache/. python/.layouteagle/
+              cp -R --no-clobber ~/../minimal_cache/. python/.layouteagle/
 
               cp -R --no-clobber ~/cache/. python/.layouteagle/
               
