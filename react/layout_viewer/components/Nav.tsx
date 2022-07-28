@@ -15,7 +15,8 @@ interface Props {
 }
 
 const NAV = styled.div`
-  margin-left: auto; 
+  position: fixed;
+    margin-left: 70%;
   margin-right: 0;
   align: left;
   background: #fff !important;

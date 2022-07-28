@@ -12,7 +12,8 @@
 }
 
 #page-container {
-    width: 75%
+    width: 75%;
+    overflow: visible !important;
 }
 
 #annotation_canvas {
