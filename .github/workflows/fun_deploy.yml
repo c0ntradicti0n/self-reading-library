@@ -92,6 +92,7 @@ jobs:
       - name: InstallTtts
         run: |
             ssh staging '   
+                cd LayoutEagle
                 if [[ ! -d ./tts ]] ; then
                   git clone https://github.com/c0ntradicti0n/tts.git
                   cd tts 

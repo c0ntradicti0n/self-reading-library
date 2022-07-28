@@ -30,7 +30,7 @@ rapidfuzz
 parasail
 spacy
 spacy-transformers
-allennlp
+allennlp==2.10.0
 swalign
 nltk
 Cython
