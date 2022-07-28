@@ -117,7 +117,7 @@ class ElmoPredict(PathSpec):
 
     def predict(self, words):
         global model
-        if not model:
+        if not model or not self.predictor:
             model = Model.load(config=self.config,
                                serialization_dir=self.flags['difference_model_path'])
             self.default_predictor = Predictor.from_path(self.flags['difference_model_path'])
