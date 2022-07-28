@@ -40,6 +40,10 @@ export default class Nav extends React.Component<Props, any> {
                         <img style={{width: "5vw", borderRadius: "60px"}} src="/logo.jpeg"/>
                     </Button>
                 </div>
+                <div>
+                    <Button href="/library">Universe of documents</Button>
+
+                </div>
 
                 <h3>Interactive formats</h3>
                 <div>
