@@ -35,6 +35,12 @@ export default class Nav extends React.Component<Props, any> {
         const shortId = id?.replace(".layouteagle/", "")
         return (
             <NAV>
+                <div>
+                    <Button style={{marginLeft: "3vw"}} href="https://self-reading-library.science">
+                        <img style={{width: "5vw", borderRadius: "60px"}} src="/logo.jpeg"/>
+                    </Button>
+                </div>
+
                 <h3>Interactive formats</h3>
                 <div>
                     <Button href={"/difference?id=" + id}>Read annotated paper</Button>
