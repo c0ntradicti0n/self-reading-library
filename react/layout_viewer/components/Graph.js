@@ -137,10 +137,10 @@ class Graph extends React.Component {
 
   render() {
     return (
-      <div style={{backgroundColor:"black", width: "100vw", height:"100vh"}}>
+      <div style={{backgroundColor:"black", width: "100vw", height:"100vh"}}>      <div style={{backgroundColor:"black", width: "100vw", height:"100vh"}}>
         <ul style={{fontWeight: "bold", position: "absolute", zIndex:10000, backgroundColor: "#000", borderRadius:"7px", color: "#ddd", }}>
-          <li>Click left to focus</li>
-          <li>Click right to navigate to that document</li>
+          <li>Click left to navigate to document</li>
+          <li>Use mouse wheel or both mouse buttons to fly</li>
         </ul>
 
         <ForwardedRefForceGraph3D
