@@ -34,11 +34,11 @@ from language.transformer.ElmoDifference import ElmoDifference, ElmoDifferenceQu
     elmo_difference_model_pipe, annotate_difference_elmo
 from language.text2speech.Txt2Mp3 import Txt2Mp3
 
-# from language.heuristic.heuristic_difference import HeurisiticalLogician
+#from language.heuristic.heuristic_difference import HeurisiticalLogician
 
-#from hanging_threads import start_monitoring
+from hanging_threads import start_monitoring
 
-#monitoring_thread = start_monitoring(seconds_frozen=30, test_interval=1000)
+monitoring_thread = start_monitoring(seconds_frozen=30, test_interval=1000)
 
 
 def get_all_routes(api):

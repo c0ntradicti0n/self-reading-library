@@ -86,19 +86,18 @@ class RestQueue:
     def get(self, id):
 
 
-        if not id in self.workbook or not self.workbook[id]:
+        try:
+            self.workbook[id] = q[id].get(timeout=3)
             logging.info("Get new")
-            try:
-                self.workbook[id] = q[id].get(timeout=3)
-            except Exception as e:
-                logging.error("Queue not ready")
 
-        if id in self.workbook:
-            print("Get old")
+        except Exception as e:
+            logging.error("Queue not ready, give old thing")
+            if id in self.workbook:
+                return self.workbook[id]
+            else:
+                return None
 
-            return self.workbook[id]
-        else:
-            return None
+
 
     def change(self, item, path, value):
         self.apply(item, path, value)
