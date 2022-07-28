@@ -1,3 +1,5 @@
+from PIL.Image import Resampling
+
 from layout.imports import *
 from core import config
 import random
@@ -119,9 +121,8 @@ def unnormalize_box(bbox, width, height):
 def resize(image, basesize):
     wpercent = (basesize / float(image.size[0]))
     hsize = int((float(image.size[1]) * float(wpercent)))
-    img = image.resize((basesize, hsize), Image.ANTIALIAS)
+    img = image.resize((basesize, hsize), Resampling.LANCZOS)
     img = img.filter(ImageFilter.GaussianBlur(4))
-
     return img
 
 

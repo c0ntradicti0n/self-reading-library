@@ -6,6 +6,7 @@ import pandas
 import numpy
 import random
 
+from PIL.Image import Resampling
 from pdfminer.psparser import PSEOF
 from sklearn.preprocessing import MinMaxScaler
 import scipy.spatial as spatial
@@ -77,7 +78,7 @@ class BoxFeatureMaker(PathSpec):
                     basewidth = config.basewidth
                     wpercent = (basewidth / float(pil.size[0]))
                     hsize = int((float(pil.size[1]) * float(wpercent)))
-                    pil = pil.resize((basewidth, hsize), Image.ANTIALIAS)
+                    pil = pil.resize((basewidth, hsize), Resampling.LANCZOS)
 
                     pil.save(image_path)
 

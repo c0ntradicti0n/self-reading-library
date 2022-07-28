@@ -119,7 +119,7 @@ def yield_cache_instead_apply(cls, f, gen, cache, filename, **kwargs):
                     if urllib.parse.quote_plus(value) in cache:
                         logging.info(f"{value} was in cache, yielding that one instead of applying")
                         cache_values_to_yield.append(
-                            (value, decompress_pickle(read_cache_file(urllib.parse.quote_plus(value), m))))
+                            (value, decompress_pickle(read_cache_file('', urllib.parse.quote_plus(value, '')))))
                     if value in cache:
                         logging.info(f"{value} was in cache, yielding that one instead of applying")
                         cache_values_to_yield.append(
@@ -137,10 +137,11 @@ def yield_cache_instead_apply(cls, f, gen, cache, filename, **kwargs):
 
 def read_cache_file(path, value):
     try:
-        with open(path + "/" + value, 'rb') as f:
+        with open((path + "/" if path else '') + value, 'rb') as f:
             content = f.read()
             return content
     except Exception as e:
+        print(e)
         with open(path + "/" + urllib.parse.quote_plus(value), 'rb') as f:
             content = f.read()
         return content
@@ -150,7 +151,16 @@ def read_cache(path):
     if os.path.isfile(path):
         raise IOError(f"cache {path=} is a file, but should be a dict")
     if not os.path.isdir(path):
-        os.mkdir(path)
+        if not os.path.isdir(config.cache):
+            try:
+                os.mkdir(config.cache)
+            except:
+                logging.warning(f"Could not create cache dir {config.cache} (probably race conditions)")
+
+        try:
+            os.mkdir(path)
+        except:
+            logging.warning(f"Could not create cache dir {path} (probably race conditions)")
         return []
 
     contents = os.listdir(path)
@@ -210,7 +220,10 @@ def configurable_cache(
 
             if _from_path_glob:
                 if not os.path.isdir(filename):
-                    os.mkdir(filename)
+                    try:
+                        os.mkdir(filename)
+                    except:
+                        logging.error(f"Could not create cache file for {filename} (race conditions)")
                 if yield_cache:
                     if isinstance(_from_path_glob, str):
                         _from_path_glob = [_from_path_glob]

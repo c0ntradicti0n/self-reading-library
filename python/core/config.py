@@ -160,8 +160,8 @@ FEATURES = Features({
     'labels': Sequence(ClassLabel(names=LABELS + [max(LABELS) + 1]))
 })
 NUM_LABELS = len(LABELS)
-PROCESSOR_PICKLE = f"processor_module{NUM_LABELS}.pickle"
-MODEL_PICKLE = f"model_module{NUM_LABELS}.pickle"
+PROCESSOR_PICKLE = hidden_folder + f"processor_module{NUM_LABELS}.pickle"
+MODEL_PICKLE = hidden_folder + "model_module{NUM_LABELS}.pickle"
 EPOCHS_LAYOUT = 84
 PDF_UPLOAD_DIR = hidden_folder + "/pdf_upload/"
 ELMO_DIFFERENCE_MODEL_PATH = hidden_folder + "elmo_difference_models"

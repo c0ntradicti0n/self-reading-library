@@ -1,6 +1,8 @@
 import { AppSettings } from "../config/connection";
 import { getRandomArbitrary } from "../../layout_viewer/src/util/array";
 
+
+
 export default class ServerResource<T> {
   fetch_allowed: Boolean;
   read_allowed: Boolean;
@@ -40,7 +42,8 @@ export default class ServerResource<T> {
         }
         console.log(localStorage, route, localStorage.getItem(route));
 
-        this.id = "/" + id;
+        // @ts-ignore
+        this.id = "/" + id + window.tabId;
       }
     }
   }
@@ -161,15 +164,4 @@ export default class ServerResource<T> {
       await this.request("patch", new FormData(form_data), callback, true);
     }
   };
-  /*
-    async correct(url = '', data : T, id : String) {
-        if (this.correct_allowed) {
-            this.request(method="patch", data = data, id=id)
-        }
-    }
-    async hide(url = '', data = {}) {
-        if (this.delete_allowed) {
-            this.request(method="delete", data = data)
-        }
-    }*/
 }

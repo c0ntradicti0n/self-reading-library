@@ -87,7 +87,7 @@ class RestQueue:
 
 
         try:
-            self.workbook[id] = q[id].get(timeout=3)
+            self.workbook[id] = q[id].get(timeout=60)
             logging.info("Get new")
 
         except Exception as e:

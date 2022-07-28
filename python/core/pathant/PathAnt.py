@@ -45,10 +45,7 @@ class PathAnt:
                     if match(_to2, _from1):
                         self.add_edge(_to2, regex.sub(_from1 + '$', _to1, _to2), functional_object1)
                 except Exception as e:
-                    logging.error(f"_to1 = {_to1}")
-                    logging.error(
-                        f"failing to compare {_to1} and {_to2} and {_from1} and {_from2} as regexes because {e}")
-
+                   pass
     def realize_node(self, node):
         os.system(f"mkdir {node.dir}")
 

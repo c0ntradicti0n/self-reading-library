@@ -21,14 +21,14 @@ class Tex2Pdf(PathSpec):
 
     @configurable_cache(config.cache + os.path.basename(__file__))
     def __call__(self, arg_meta, *args, **kwargs):
-        for path, meta in arg_meta:
-            if path.endswith('.tex'):
-                if pdf_path := self.compiles(path):
+        for doc_id, meta in arg_meta:
+            if doc_id.endswith('.tex'):
+                if pdf_path := self.compiles(doc_id):
                     yield pdf_path, meta
-            elif path.endswith('.pdf'):
-                yield path, meta
+            elif doc_id.endswith('.pdf'):
+                yield doc_id, meta
             else:
-                self.logger.error("dont know how to handle file " + path)
+                self.logger.error("dont know how to handle file " + doc_id)
 
     def compiles(self, tex_file_path, n=1, clean=False):
         path, filename, extension, filename_without_extension = get_path_filename_extension(tex_file_path)

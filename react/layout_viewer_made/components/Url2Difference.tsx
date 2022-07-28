@@ -16,7 +16,7 @@ export default class Url2Difference extends React.Component {
             <input name="id" type="text" style={{
                     margin: "10px"
                 }}/>
-                <Button type="submit">Go!</Button>
+                <Button type="submit">Go</Button>
             </form>
         )
     }

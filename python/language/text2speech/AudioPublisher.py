@@ -31,7 +31,7 @@ class AudioPublisher(RestPublisher, react):
         yield from id_meta_mp3
 
     def on_post(self, req, resp, id=None):
-        id = req.media["id"]
+        id = req.media
         pipeline = self.ant(
             "feature", "audio",
             from_function_only=True,

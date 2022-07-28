@@ -78,7 +78,8 @@ class UnPager(PathSpec):
                 consumed_until_now += meta['consumed_i2']
                 whole_annotation.append(annotation[:meta['consumed_i2']])
             except:
-                self.logger.error("There was no determined consumption", exc_info=True)
+                if not meta["doc_id"] == 'finito':
+                    self.logger.error("There was no determined consumption", exc_info=True)
                 whole_annotation.append(annotation)
 
             try:

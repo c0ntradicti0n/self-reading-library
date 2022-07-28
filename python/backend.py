@@ -54,16 +54,65 @@ def get_all_routes(api):
     [get_children(node) for node in api._router._roots]
     return routes_list
 
+def run_extra_threads():
+    from layout.annotation_thread import layout_annotate_train_model
+    ant = PathAnt()
+
+    filling_pipe = ant(
+        "arxiv.org", f"reading_order",
+        num_labels=config.NUM_LABELS,
+        layout_model_path=full_model_path
+    )
+
+    ant.info("workflow.png", pipelines_to_highlight=[
+        elmo_difference_pipe,
+        sample_pipe,
+        model_pipe,
+        upload_pipe,
+        elmo_difference_model_pipe,
+        filling_pipe
+    ]
+             )
+
+    layout = threading.Thread(target=layout_annotate_train_model, name="layout")
+    layout.start()
+    difference_elmo = threading.Thread(target=annotate_difference_elmo, name="difference")
+    difference_elmo.start()
+    """difference_sokrates = threading.Thread(target=annotate_difference_sokrates)
+    difference_sokrates.start()
+    difference_gpt3 = threading.Thread(target=write_difference_gpt3)
+    difference_gpt3.start()"""
+
+    os.system("mount --bind python/.layouteagle/pdfs/ react/layout_viewer_made/public/ || echo 'link exists probably yet'")
+
+
+    def fill_library():
+        x = None
+        while not x:
+
+            try:
+                gen = forget_except(filling_pipe(itertools.islice((
+                    metaize(["pdfs"]*200)
+                ), 200)), keys=["html_path"])
+                for i in range(100):
+                    k = next(gen, None)
+                    del k
+                break
+            except Exception:
+                logging.error("Getting first 100 threw", exc_info=True)
+                break
+
+    threading.Thread(target=fill_library, name="fill library").start()
 
 def create_app():
+    import falcon
+    import threading
     logging.info(f"STARTING APP")
 
 
     from language.transformer.ElmoDifference import ElmoDifferenceQueueRest
-    import falcon
-    import threading
+
     from core.RestPublisher.LayoutPublisher import LayoutPublisher
-    from layout.annotation_thread import layout_annotate_train_model
 
     publishing = {
         '/ant':
@@ -115,54 +164,7 @@ def create_app():
     for route, module in publishing.items():
         api.add_route(route, module)
 
-    ant = PathAnt()
-
-    filling_pipe = ant(
-        "arxiv.org", f"reading_order",
-        num_labels=config.NUM_LABELS,
-        layout_model_path=full_model_path
-    )
-
-    ant.info("workflow.png", pipelines_to_highlight=[
-        elmo_difference_pipe,
-        sample_pipe,
-        model_pipe,
-        upload_pipe,
-        elmo_difference_model_pipe,
-        filling_pipe
-    ]
-             )
-
-    layout = threading.Thread(target=layout_annotate_train_model, name="layout")
-    layout.start()
-    difference_elmo = threading.Thread(target=annotate_difference_elmo, name="difference")
-    difference_elmo.start()
-    """difference_sokrates = threading.Thread(target=annotate_difference_sokrates)
-    difference_sokrates.start()
-    difference_gpt3 = threading.Thread(target=write_difference_gpt3)
-    difference_gpt3.start()"""
-
-    os.system("mount --bind python/.layouteagle/pdfs/ react/layout_viewer_made/public/ || echo 'link exists probably yet'")
-
-
-    def fill_library():
-        x = None
-        while not x:
-
-            try:
-                gen = forget_except(filling_pipe(itertools.islice((
-                    metaize(["pdfs"]*200)
-                ), 200)), keys=["html_path"])
-                for i in range(100):
-                    k = next(gen, None)
-                    del k
-                break
-            except Exception:
-                logging.error("Getting first 100 threw", exc_info=True)
-                break
-
-    threading.Thread(target=fill_library, name="fill library").start()
-
+    run_extra_threads()
     logging.info (f"API: {api}")
     return api
 

@@ -31,7 +31,7 @@ class Scraper(PathSpec):
             os.system(f"mkdir {config.tex_data}")
 
     http_regex = r'(https?:\/\/(?:www\.|(?!www))?[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})'
-    file_regex = rf'{config.tex_data}[-a-z%A-Z0-9./]+\.pdf'
+    file_regex = '([-a-z%A-Z0-9./]+)+\.pdf'
 
     @configurable_cache(
         config.cache + os.path.basename(__file__), from_path_glob=config.hidden_folder + "/pdfs/**/*.pdf"

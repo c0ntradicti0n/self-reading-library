@@ -18,26 +18,9 @@ class TopicMaker:
     options_file = "https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x1024_128_2048cnn_1xhighway/elmo_2x1024_128_2048cnn_1xhighway_options.json"
     weight_file = "https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x1024_128_2048cnn_1xhighway/elmo_2x1024_128_2048cnn_1xhighway_weights.hdf5"
 
-    def __init__(self, nouns_file_path=None):
-
+    def __init__(self):
         self.alphabet = [f"{chr(value)}" for value in range(ord('a'), ord('a') + 26)]
         self.numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
-        if not nouns_file_path:
-            nouns_file_path = config.cache + "nouns.txt"
-        if not os.path.isfile(nouns_file_path):
-            logging.warning("NLTK Download")
-
-            nltk.download('stopwords')
-            nltk.download('punkt')
-            nltk.download('wordnet')
-            self.nouns = {x.name().split('.', 1)[0] for x in wn.all_synsets('n')}
-
-            with open(nouns_file_path, 'w') as f:
-                f.write("\n".join(self.nouns))
-        else:
-            with open(nouns_file_path, 'r') as f:
-                self.nouns = [w.strip() for w in f.readlines()]
-
         self.stop_words = ['abstract', 'paper', *self.alphabet, *[str(i) for i in range(1000)]]
 
     def test(self):
