@@ -120,7 +120,7 @@ class Graph extends React.Component {
     ctx.fill();
   };
 
-  handleClick = (node) => {
+  handleFocus = (node) => {
     // Aim at node from outside it
     const distance = 40;
     const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
@@ -137,8 +137,8 @@ class Graph extends React.Component {
 
   render() {
     return (
-      <div>
-        <ul>
+      <div style={{backgroundColor:"black", width: "100vw", height:"100vh"}}>
+        <ul style={{fontWeight: "bold", position: "absolute", zIndex:10000, backgroundColor: "#000", borderRadius:"7px", color: "#ddd", }}>
           <li>Click left to focus</li>
           <li>Click right to navigate to that document</li>
         </ul>
@@ -162,14 +162,14 @@ class Graph extends React.Component {
             obj.add(sprite);
             return obj;
           }}
-          onNodeClick={(node) => this.handleClick(node)}
-          onNodeRightClick={(node) => {
+          onNodeClick={(node) => {
             console.log(node);
             Router.push({
               pathname: "/difference/",
               query: { id: node.name },
             });
           }}
+          onNodeRightClick={(node) => console.log("click right")}
           autoPauseRedraw={false}
           linkWidth={(link) => (this.state.highlightLinks.has(link) ? 5 : 1)}
           linkDirectionalParticles={4}
