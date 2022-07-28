@@ -82,7 +82,7 @@ class Pager(PathSpec):
             encoding = chardet.detect(content)['encoding']
             if not encoding:
                 encoding = "utf-8"
-            lines = [ww for w in re.split("[^:]\n", content.decode(encoding, errors="ignore")) for ww in w.split("\n") if ww]
+            lines = [ww for w in re.split("(?![^:])\n", content.decode(encoding, errors="ignore"))  for ww in w.split("\n") if ww]
 
             i_word = [self.match_reading_order_line(line) for line in lines if len(line) > 2]
 
@@ -157,7 +157,8 @@ class Pager(PathSpec):
         #
         windowing = True
         start_i2 = 0
-        sentence_marks = [0] + [i + 1 for i, w in enumerate(real_tokens)                 if SENTENCE_END_REGEX.match(w)]
+        sentence_marks = [0] + [i + 1 for i, w in enumerate(real_tokens)
+                if SENTENCE_END_REGEX.match(w)]
 
 
         consumed_tokens = 0
@@ -176,21 +177,14 @@ class Pager(PathSpec):
 
                 self.logger.info("...")
 
-            window = []
-            sentences_j = 0
             start_i2 = min(sentence_marks, key=lambda _m: abs(_m - start_i2))
             rest_text = real_tokens[start_i2: start_i2 + 300]
 
             if len(rest_text) == 0:
                 return
 
-            for j, w in enumerate(rest_text):
-                window.append(w)
-                if len(window) > self.max_window:
-                    window = window[:sentences_j]
-                    break
-                if SENTENCE_END_REGEX.match(w):
-                    sentences_j = j + 1
+            j = min(sentence_marks, key=lambda _m: abs(_m - self.max_window))
+            window = rest_text[:j]
 
             if not window:
                 self.logger.info("Zero text, reset window")

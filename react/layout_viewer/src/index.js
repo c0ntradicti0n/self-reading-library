@@ -5,8 +5,11 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 
 if (window) {
+
+  console.log(window)
   window.addEventListener("beforeunload", function (e) {
     window.sessionStorage.tabId = window.tabId;
+    console.log("beforeunload", window)
 
     return null;
   });
@@ -18,6 +21,8 @@ if (window) {
     } else {
       window.tabId = Math.floor(Math.random() * 1000000);
     }
+    console.log("load", window)
+
 
     return null;
   });

@@ -251,24 +251,37 @@ export default function SpanAnnotation({value, meta, text, onClose, service}) {
                                             }
                                             }></Button>
                                             <b>{tag}</b>
-                                            <br />
-                                            {ws.map((w, iii) => <span key={iii}
-                                                                      className={"tag span_" + tag}>{w}</span>)}
-                                            <Slider
-                                                aria-label="annotation"
-                                                value={spanIndices[i].slice(1, 3) as number[]}
-                                                valueLabelDisplay="auto"
-                                                onChange={(event, newValue, activeThumb) => {
-                                                    console.log("changing slider", event, newValue, activeThumb)
-                                                    setSpanIndices(adjustSpanValue(newValue, activeThumb, spanIndices, i, tag, annotation));
-                                                }}
-                                                step={1}
-                                                marks
-                                                min={0}
-                                                max={annotation.length}
-                                                disableSwap
-                                                getAriaValueText={valuetext}
-                                            />
+                                            <br/>
+                                            <div style={{
+                                                marginRight: "0px",
+                                                marginLeft: "0px"
+
+                                            }}>
+                                                <div style={{
+                                                    wordWrap: "break-word",
+                                                    whiteSpace: "normal",
+                                                    width: "80vw"
+                                                }}>
+                                                    {ws.map((w, iii) => <span key={iii}
+                                                                              className={"tag span_" + tag}>{w}</span>)}
+                                                </div>
+                                                <Slider
+
+                                                    aria-label="annotation"
+                                                    value={spanIndices[i].slice(1, 3) as number[]}
+                                                    valueLabelDisplay="auto"
+                                                    onChange={(event, newValue, activeThumb) => {
+                                                        console.log("changing slider", event, newValue, activeThumb)
+                                                        setSpanIndices(adjustSpanValue(newValue, activeThumb, spanIndices, i, tag, annotation));
+                                                    }}
+                                                    step={1}
+                                                    marks
+                                                    min={0}
+                                                    max={annotation.length}
+                                                    disableSwap
+                                                    getAriaValueText={valuetext}
+                                                />
+                                            </div>
                                         </div>
                                     ))}
                                 </Typography>

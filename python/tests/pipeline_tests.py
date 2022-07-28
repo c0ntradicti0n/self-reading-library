@@ -19,7 +19,7 @@ import unittest
 
 
 class TestRest(unittest.TestCase):
-    TEST_PDF = '.layouteagle/pdfs/9912/math9912149.pdf'
+    TEST_PDF = '.layouteagle/pdfs/9912/math-ph9912012.pdf'
 
     def make_rest_args(self, *args):
         Req = namedtuple("req", ['media'])
