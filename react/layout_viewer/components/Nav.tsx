@@ -2,9 +2,8 @@ import React from "react";
 import Button from "@mui/material/Button";
 import Router from "next/router";
 import Url2Difference from "./Url2Difference";
-import AudiobookPlayer from "./AudiobookPlayer";
+import Audiobook from "./Audiobook";
 
-import DownloadFile from "./DownloadFile"
 import styled from "styled-components";
 
 interface Props {
@@ -50,9 +49,9 @@ export default class Nav extends React.Component<Props, any> {
                     <Button href={"/difference?id=" + id}>Read annotated paper</Button>
                 </div>
                 <div>
-                    <DownloadFile id={id} kind="audiobook">/ Create Audiobook</DownloadFile>
+
+                    <Audiobook id={id} kind="audiobook" />
                 </div>
-                <AudiobookPlayer id={shortId}/>
                 <div>
                     <Button href={shortId}>Original PDF</Button>
                 </div>

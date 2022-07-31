@@ -62,11 +62,7 @@ export default class Layout extends React.Component {
                             <img src="/read_it.jpeg"/>
                         </Lib>
                     </ul>
-                    {/*this.props.pages?.map((page, index) =>
-                    <> <Link href={"/" + page} key={index}>
-                        <a>{page}</a>
-                    </Link> {' '} </>)
-                */}
+
 
                     {this.props.children}
 

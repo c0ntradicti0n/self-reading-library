@@ -171,3 +171,4 @@ PORT = 9999
 TOPIC_TEXT_LENGTH = 180
 spacy_model_name = 'en_core_web_trf'
 audio_format = "ogg"
+audio_path = hidden_folder + "audio"

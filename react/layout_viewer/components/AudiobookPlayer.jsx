@@ -5,7 +5,7 @@ import React from "react";
 export default class AudiobookPlayer extends React.Component {
     render() {
         return <AudioPlayer
-            src={ this.props.id?.replace(".layouteagle/", "") + ".ogg"}
+            src={ this.props.id?.replace(".layouteagle/", "") }
             onPlay={e => console.log("onPlay")}
         />
     }

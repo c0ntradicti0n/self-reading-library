@@ -8,6 +8,7 @@ import random
 
 from regex import regex
 
+from helpers.hash_tools import hashval
 from helpers.list_tools import metaize, unique
 import requests
 import time
@@ -39,26 +40,13 @@ class Scraper(PathSpec):
     def __call__(self, i_url):
         for url, m in i_url:
             if url.startswith('http') and regex.match(self.http_regex, url):
-                path = f"{config.hidden_folder}/pdfs/{urllib.parse.quote_plus(url)}.pdf"
+                path = f"{config.hidden_folder}/pdfs/{hashval(url)}.pdf"
                 path = path.replace("(", "")
                 path = path.replace(")", "")
-
+                m['url'] = url
 
                 if not os.path.exists(path):
-                    os.system(f"chromium  --headless \
-                                          --disable-gpu \
-                                          --disable-translate \
-                                          --disable-extensions \
-                                          --disable-background-networking \
-                                          --safebrowsing-disable-auto-update \
-                                          --disable-sync \
-                                          --metrics-recording-only \
-                                          --disable-default-apps \
-                                          --no-first-run \
-                                          --mute-audio \
-                                          --hide-scrollbars \
-                                          --disable-software-rasterizer "
-                                        f"--print-to-pdf={path} {url}")
+                    os.system(f"wkhtmltopdf  {url} {path}")
                 yield path, m
             elif os.path.exists(url) and regex.match(self.file_regex, url)  is not None:
                 yield url, m

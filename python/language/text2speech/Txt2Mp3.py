@@ -1,3 +1,4 @@
+import logging
 import os
 
 from ant import Ant
@@ -10,12 +11,16 @@ from language.transformer.Pager import preprocess_text
 
 
 def generate_audio(id, text):
-    out_path = id + ".ogg"
+    out_path = config.audio_path + id.replace(config.hidden_folder, "") + f".{config.audio_format}"
 
+    try:
+        os.makedirs(os.path.dirname(out_path))
+    except:
+        logging.error(f"Could not make audio directory {out_path}")
     with open(f"{id}.txt", "w") as f:
         f.write(text)
 
-    os.system(f". ../tts/venv/bin/activate &&  python ../tts/tts.py -i {id}.txt {id}.ogg ")
+    os.system(f". ../tts/venv/bin/activate &&  python ../tts/tts.py -i {id}.txt {out_path}.ogg ")
 
     return out_path
 

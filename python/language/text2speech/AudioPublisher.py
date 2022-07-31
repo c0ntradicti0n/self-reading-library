@@ -1,3 +1,4 @@
+import json
 import os
 from pprint import pprint
 
@@ -38,8 +39,12 @@ class AudioPublisher(RestPublisher, react):
             layout_model_path=config.layout_model_path
         )
         id, meta = list(pipeline(metaize([id])))[0]
-        with open(meta["audio_path"], 'rb') as f:
-            resp.data = f.read()
-        resp.headers["Content-Type"] = "application/octet-stream"
-        resp.headers["Content-Disposition"] = f'attachment; filename="{os.path.basename(meta["audio_path"])}'
-        resp.status = falcon.HTTP_OK
+
+        if os.path.exists(meta["audio_path"]):
+            resp.status = falcon.HTTP_OK
+            resp.body = json.dumps(
+                meta["audio_path"].replace(config.hidden_folder, ""),
+                ensure_ascii=False
+            )
+        else:
+            resp.status = falcon.HTTP_404

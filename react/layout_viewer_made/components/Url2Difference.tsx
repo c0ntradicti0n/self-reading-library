@@ -10,7 +10,7 @@ export default class Url2Difference extends React.Component {
                 console.log(e)
                 Router.push({
                     // @ts-ignore
-                    pathname: '/difference/', query: {id: (e.target.elements.id as HTMLTextAreaElement).value}
+                    pathname: '/difference', query: {id: (e.target.elements.id as HTMLTextAreaElement).value}
                 })
             }}>
             <input name="id" type="text" style={{
