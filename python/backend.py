@@ -5,6 +5,9 @@ from time import sleep
 import logging
 from wsgiref import simple_server
 import threading
+
+import uwsgidecorators
+
 from core import config
 from core.RestPublisher.AnnotationPublisher import DifferenceAnnotationPublisher
 from core.RestPublisher.DifferencePublisher import DifferencePublisher
@@ -76,10 +79,18 @@ def run_extra_threads():
              ]
              )
 
-    layout = threading.Thread(target=layout_annotate_train_model, name="layout")
-    # layout.start()
-    difference_elmo = threading.Thread(target=annotate_difference_elmo, name="difference")
-    difference_elmo.start()
+    if __name__ == "__main__":
+        layout = threading.Thread(target=layout_annotate_train_model, name="layout")
+        # layout.start()
+        difference_elmo = threading.Thread(target=annotate_difference_elmo, name="difference")
+        difference_elmo.start()
+    else:
+
+        @uwsgidecorators.postfork
+        @uwsgidecorators.thread
+        def _():
+            annotate_difference_elmo()
+
 
     def fill_library():
         x = None

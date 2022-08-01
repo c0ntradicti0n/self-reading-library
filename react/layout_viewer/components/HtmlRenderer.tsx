@@ -5,6 +5,7 @@ import {ThreeCircles, Triangle} from "react-loader-spinner";
 import SelectText from "./SelectText";
 import DifferenceService from "../resources/DifferenceService";
 import Difference_AnnotationService from "../resources/Difference_AnnotationService";
+import {AppSettings} from "../config/connection";
 
 interface Props {
     data: { value: any; meta: any };
@@ -42,7 +43,7 @@ class HtmlRenderer extends Component<Props> {
 
     componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<{}>, snapshot?: any) {
         if (this.props.data.value != this.state.id) {
-            let htmlContent = httpGet("/" + this.props.data.value.replace(".layouteagle/", "") + ".html")
+            let htmlContent = httpGet(AppSettings.FRONTEND_HOST + "/" + this.props.data.value.replace(".layouteagle/", "") + ".html")
             this.setState({id: this.props.data.value, htmlContent})
         }
     }

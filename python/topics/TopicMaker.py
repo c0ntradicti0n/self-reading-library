@@ -78,7 +78,7 @@ class TopicMaker:
 
         embeddings = np.vstack(embeddingl)
 
-        n_components = 50
+        n_components = 3
         logging.info(f"Reducing from {embeddings.shape} to {n_components} dimensions")
 
         tsne = TSNE(n_components, method='exact')
@@ -86,8 +86,9 @@ class TopicMaker:
         logging.info(f"Reduced embeddings to {tsne_result.shape=}")
 
         del embeddingl
+        del embeddings
 
-        topics = self.topicize_recursively(embeddings, meta, texts)
+        topics = self.topicize_recursively(tsne_result, meta, texts)
 
         return topics, meta
 
@@ -131,7 +132,7 @@ class TopicMaker:
         g = mixture.GaussianMixture(
             n_components=min(int(X.shape[0] / 3 + 0.5), 10),
             covariance_type="tied",
-            reg_covar=1e-1,
+            reg_covar=1e-6,
             n_init=20,
             max_iter=50
         )
