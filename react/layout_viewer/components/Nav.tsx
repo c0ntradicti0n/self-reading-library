@@ -60,14 +60,6 @@ export default class Nav extends React.Component<Props, any> {
 
                 <h3>Navigate to other document</h3>
 
-                <h5>Next random document</h5>
-                <div>
-                    <Button
-                        onClick={() => this.props.forward()}
-                    >
-                        I have read it
-                    </Button>
-                </div>
 
                 <h5>Read custom page here, paste URL</h5>
                 <div>
