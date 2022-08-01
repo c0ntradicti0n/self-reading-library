@@ -86,7 +86,7 @@ def dig_generator_ground_for_next_value(gen):
             return []
 
 
-def yield_cache_instead_apply(cls, f, gen, cache, filename, **kwargs):
+def yield_cache_instead_apply(cls, f, gen, cache, cache_folder, **kwargs):
     try:
         incoming_gen = dig_generator_ground_for_next_value(gen)
         if not "itertools.cycle" in str(incoming_gen):
@@ -98,7 +98,7 @@ def yield_cache_instead_apply(cls, f, gen, cache, filename, **kwargs):
 
     if values_from_future:
         future_yield_values = [
-            (value, decompress_pickle(read_cache_file(filename,
+            (value, decompress_pickle(read_cache_file(cache_folder,
                                                       value if value.endswith(
                                                           ".pdf") else config.tex_data + urllib.parse.quote_plus(
                                                           value) + ".pdf")))
@@ -119,12 +119,13 @@ def yield_cache_instead_apply(cls, f, gen, cache, filename, **kwargs):
                     if urllib.parse.quote_plus(value) in cache:
                         logging.info(f"{value} was in cache, yielding that one instead of applying")
                         cache_values_to_yield.append(
-                            (value, decompress_pickle(read_cache_file('', urllib.parse.quote_plus(value, '')))))
-                    if value in cache:
+                            (value, decompress_pickle(read_cache_file(cache_folder, urllib.parse.quote_plus(value, '')))))
+                    elif value in cache:
                         logging.info(f"{value} was in cache, yielding that one instead of applying")
                         cache_values_to_yield.append(
-                            (value, decompress_pickle(read_cache_file(filename, value))))
-                    if value in future_yield_values:
+                            (value, decompress_pickle(read_cache_file(cache_folder, value))))
+
+                    elif value in future_yield_values:
                         logging.info("value was yielded before from future cache")
                     else:
                         yield value, m
@@ -136,6 +137,7 @@ def yield_cache_instead_apply(cls, f, gen, cache, filename, **kwargs):
 
 
 def read_cache_file(path, value):
+
     try:
         with open((path + "/" if path else '') + value, 'rb') as f:
             content = f.read()
@@ -145,6 +147,7 @@ def read_cache_file(path, value):
         with open(path + "/" + urllib.parse.quote_plus(value), 'rb') as f:
             content = f.read()
         return content
+
 
 
 def read_cache(path):
@@ -166,7 +169,7 @@ def read_cache(path):
     contents = os.listdir(path)
 
     new_cache = [
-        urllib.parse.unquote_plus(key) for key in contents
+        key for key in contents
     ]
 
     return new_cache
@@ -217,6 +220,7 @@ def configurable_cache(
             yield_apply = not _from_cache_only and not _from_path_glob
             append_cache = True  # not _dont_append_to_cache and not _from_path_glob
             filter_by_cache = not _from_function_only
+            cache = read_cache(filename)
 
             if _from_path_glob:
                 if not os.path.isdir(filename):
@@ -232,10 +236,9 @@ def configurable_cache(
                         logging.info(f"Found nothing via glob {_from_path_glob} from {os.getcwd()}")
                     yield from [(p, {}) for p in cache]
                 else:
-                    yield from apply(cls, original_func, source, [], filter_by_cache, append_cache, filename, **kwargs)
+                    yield from apply(cls, original_func, source, cache, filter_by_cache, append_cache, filename, **kwargs)
 
             else:
-                cache = read_cache(filename)
 
                 if yield_cache:
                     yield from unroll_cache(filename, cache)

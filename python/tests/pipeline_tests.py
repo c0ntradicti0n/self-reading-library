@@ -13,6 +13,8 @@ os.system(f"rm -rf {core.config.cache}")
 from backend import *
 
 run_extra_threads()
+time.sleep(10)
+
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 import unittest
@@ -20,6 +22,7 @@ import unittest
 
 class TestRest(unittest.TestCase):
     TEST_PDF = '.layouteagle/pdfs/9912/math-ph9912012.pdf'
+    TEST_URL ="https://www.differencebetween.com/what-is-the-difference-between-care-and-concern/"
 
     def make_rest_args(self, *args):
         Req = namedtuple("req", ['media'])
@@ -37,8 +40,23 @@ class TestRest(unittest.TestCase):
         ElmoDifferenceQueueRest.on_post(*rest_vals)
         self.check_result(*rest_vals)
 
-    def test_layout(self):
+    def test_layout1(self):
         rest_vals = self.make_rest_args(self.TEST_PDF)
+        UploadAnnotationQueueRest.on_post(*rest_vals)
+        self.check_result(*rest_vals)
+
+    def test_layout2(self):
+        rest_vals = self.make_rest_args(self.TEST_PDF)
+        UploadAnnotationQueueRest.on_post(*rest_vals)
+        self.check_result(*rest_vals)
+
+    def test_layout_scrape_web1(self):
+        rest_vals = self.make_rest_args(self.TEST_URL)
+        UploadAnnotationQueueRest.on_post(*rest_vals)
+        self.check_result(*rest_vals)
+
+    def test_layout_scrape_web2(self):
+        rest_vals = self.make_rest_args(self.TEST_URL)
         UploadAnnotationQueueRest.on_post(*rest_vals)
         self.check_result(*rest_vals)
 

@@ -40,7 +40,11 @@ class Scraper(PathSpec):
     def __call__(self, i_url):
         for url, m in i_url:
             if url.startswith('http') and regex.match(self.http_regex, url):
-                path = f"{config.hidden_folder}/pdfs/{hashval(url)}.pdf"
+                id = hashval(url)+".pdf"
+                path = f"{config.hidden_folder}pdfs/{id}"
+                if os.path.exists(path):
+                    yield path, m
+
                 path = path.replace("(", "")
                 path = path.replace(")", "")
                 m['url'] = url

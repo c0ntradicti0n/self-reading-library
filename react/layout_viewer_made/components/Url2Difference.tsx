@@ -8,12 +8,11 @@ export default class Url2Difference extends React.Component {
         return (
             <form onSubmit={(e) => {
                 console.log(e)
-                Router.push({
-                    // @ts-ignore
-                    pathname: '/difference', query: {id: (e.target.elements.id as HTMLTextAreaElement).value}
-                })
+                // @ts-ignore
+                Router.push('/difference?id=' + (e.target.elements.id as HTMLTextAreaElement).value
+                )
             }}>
-            <input name="id" type="text" style={{
+                <input name="id" type="text" style={{
                     margin: "10px"
                 }}/>
                 <Button type="submit">Go</Button>

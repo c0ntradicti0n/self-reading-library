@@ -70,7 +70,7 @@ torch.cuda.empty_cache()
 try:
     free_gpu_cache()
 except Exception as e:
-    logging.error("No cuda/gpu available!")
+    logging.info("No gpu available!", exc_info=True)
 
 feature_fuzz_ranges = (-0.02, 0.04, 0.02),
 sys.path.append(os.getcwd())

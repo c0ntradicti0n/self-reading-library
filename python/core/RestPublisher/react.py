@@ -23,8 +23,6 @@ class react:
 
         installing = not os.path.isdir(npm_project)
 
-        cwd = os.getcwd()
-
         if installing:
             parts = ["yarn", "create", "next-app", npm_project,  "--example", "with-three-js"]
             subprocess.check_call(parts, stdout=sys.stdout,
@@ -43,13 +41,13 @@ class react:
                                                                                                 target=npm_project)
             self.logger.warning(f"Setting up sync")
             os.popen (r"rsync -r {source}/* {target}".format(source=patch_project, target=npm_project))
-            print (command)
-            print (shlex.split(command))
+            logging.debug (command)
+            logging.debug (shlex.split(command))
             p = os.popen(command)
             sleep(2)
             sync_is_running = True
 
-        self.logger.warning(f"Installing app to {npm_project}")
+        self.logger.warning(f"Hot-Installing app to {npm_project}")
 
 
 

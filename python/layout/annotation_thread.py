@@ -1,4 +1,5 @@
 import itertools
+import logging
 
 from layout.model_helpers import repaint_image_from_labels
 from core.event_binding import RestQueue
@@ -74,7 +75,7 @@ model_pipe = ant(
 )
 
 upload_pipe = ant(
-    "pdf", "annotation.collection",
+    "arxiv.org", "annotation.collection",
     via="upload_annotation",
     num_labels=config.NUM_LABELS,
     model_path=full_model_path,
@@ -83,8 +84,8 @@ upload_pipe = ant(
 
 
 def annotate_uploaded_file(path_to_pdf, service_id=None):
-    print(f"Working on {path_to_pdf} {service_id}")
-    return list(upload_pipe(metaize([path_to_pdf]), service_id=service_id))
+    logging.info(f"Working on {path_to_pdf} {service_id}")
+    return next(upload_pipe(metaize([path_to_pdf]), service_id=service_id), None)
 
 
 UploadAnnotationQueueRest = RestQueue(

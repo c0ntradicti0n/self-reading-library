@@ -30,7 +30,7 @@ export default class Audiobook extends React.Component {
         return <>{
             this.state.exists
                 ? <AudiobookPlayer id={this.state.audioPath}></AudiobookPlayer>
-                : <div>Creating your audiobook</div>
+                : <div>Creating your audiobook...</div>
         }</>
     }
 }
