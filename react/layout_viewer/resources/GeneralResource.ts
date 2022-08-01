@@ -68,8 +68,6 @@ export default class ServerResource<T> {
 
     var fetch_init = {
       method: method.toUpperCase(),
-      mode: "cors",
-      credentials: "same-origin",
       headers: {
         ...(!is_file ? { "Content-Type": "application/json" } : {}),
         "API-Key": "secret",

@@ -6,7 +6,6 @@ import logging
 from wsgiref import simple_server
 import threading
 
-import uwsgidecorators
 
 from core import config
 from core.RestPublisher.AnnotationPublisher import DifferenceAnnotationPublisher
@@ -85,6 +84,7 @@ def run_extra_threads():
         difference_elmo = threading.Thread(target=annotate_difference_elmo, name="difference")
         difference_elmo.start()
     else:
+        import uwsgidecorators
 
         @uwsgidecorators.postfork
         @uwsgidecorators.thread

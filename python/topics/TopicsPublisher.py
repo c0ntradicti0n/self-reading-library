@@ -35,9 +35,11 @@ class TopicsPublisher(RestPublisher, react):
     reading_order_regex = regex.compile(" *\d+:(.*)")
 
     def __call__(self, documents):
+        print ("started")
         documents = list(documents)
 
         html_paths_json_paths_txt_paths, metas = list(zip(*documents))
+        print ("started2")
 
         texts = [
             " ".join("\n".join([tb[0]
@@ -46,6 +48,7 @@ class TopicsPublisher(RestPublisher, react):
                                ).split()[:10])
             for meta in metas
         ]
+        print ("started3")
 
         self.topics, text_ids = topic_maker(texts, meta=metas)
 
@@ -57,7 +60,7 @@ class TopicsPublisher(RestPublisher, react):
     def on_get(self, req, resp):
         logging.info("Computing topics")
         documents = list(self.ant("feature", "reading_order", from_cache_only=True)([]))
-
+        print (documents[:1])
         path = config.topics_dump + f"_{len(documents)}"
         if os.path.exists(path):
             with open(path, mode="rb") as f:
@@ -65,6 +68,7 @@ class TopicsPublisher(RestPublisher, react):
                 topics, meta = pickle.load(f)
                 value = list(d2g([topics]))[0][0][0]
         else:
+            logging.info("recreate")
 
             value, _ = list(zip(*list(self.ant("arxiv.org", "topics.graph", from_cache_only=True)([]))))
 

@@ -63,13 +63,20 @@ class TopicMaker:
         return texts, [{"text": text} for text in texts]
 
     def __call__(self, texts, meta, *args, **kwargs):
-        self.nlp = spacy.load("en_core_web_trf")
+        print("a")
+
+
+        self.nlp = spacy.load("en_core_web_md")
+        print("o")
 
         embeddingl = []
         logging.info(f"Making embeedings")
-        for text in texts:
+        for i, text in enumerate(texts):
+            print(i)
+
             try:
-                embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH])._.trf_data.tensors[1]
+                embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH]).vector
+                #embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH])._.trf_data.tensors[1]                #embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH])._.trf_data.tensors[1]
                 shape = embedding.shape
             except Exception as e:
                 logging.error(f"could not create embedding", exc_info=True)

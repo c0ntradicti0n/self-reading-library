@@ -136,6 +136,7 @@ def yield_cache_instead_apply(cls, f, gen, cache, cache_folder, **kwargs):
                         yield value, m
                 else:
                     logging.error("Value in cache was None, retrying")
+                    yield value, m
 
         yield from f(cls, filter(), **kwargs)
         yield from ((k, v) for k, v in cache_values_to_yield if k not in future_yield_values)
