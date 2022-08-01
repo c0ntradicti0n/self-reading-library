@@ -22,28 +22,27 @@ class HtmlRenderer extends Component<Props> {
         console.log("HtmlRenderer", this);
         return (
             <div>
+                <Nav
+                    forward={() =>
+                        this.props.service.ok(null, "", {}, () => window.location.reload())
+                    }
+                    goto={(form_data) =>
+                        this.props.service.fetch_one(form_data, () =>
+                            console.log("will display content...")
+                        )
+                    }
+                    upload={(form_data) =>
+                        this.props.service.upload(new FormData(form_data), () =>
+                            console.log("will display content...")
+                        )
+                    }
+                    data={this.props.data}
+                />
                 <SelectText
                     meta={this.props.data.meta}
                     value={this.props.data.value?.value}
                     service={this.differenceService}
                 >
-
-                    <Nav
-                        forward={() =>
-                            this.props.service.ok(null, "", {}, () => window.location.reload())
-                        }
-                        goto={(form_data) =>
-                            this.props.service.fetch_one(form_data, () =>
-                                console.log("will display content...")
-                            )
-                        }
-                        upload={(form_data) =>
-                            this.props.service.upload(new FormData(form_data), () =>
-                                console.log("will display content...")
-                            )
-                        }
-                        data={this.props.data}
-                    />
 
 
                     <div

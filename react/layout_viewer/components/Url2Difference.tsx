@@ -4,19 +4,16 @@ import {Button} from "@mui/material";
 
 
 export default class Url2Difference extends React.Component {
+    state = {
+        url: null
+    }
     render() {
         return (
-            <form onSubmit={(e) => {
-                console.log(e)
-
-                // @ts-ignore
-                Router.push('/difference?id=' + (e.target.elements.id as HTMLTextAreaElement).value
-                )
-            }}>
-                <input name="id" type="text" style={{
+            <form  >
+            <input onChange={(e) => this.setState({url: e.target.value})} name="id" type="text" style={{
                     margin: "10px"
                 }}/>
-                <Button type="submit">Go</Button>
+                <Button href={"/difference?id=" +this.state.url } type="submit">Go</Button>
             </form>
         )
     }

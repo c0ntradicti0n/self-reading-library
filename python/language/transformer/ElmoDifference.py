@@ -3,6 +3,7 @@ import os
 from pprint import pprint
 
 from core import config
+from helpers import hash_tools
 from layout.latex.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
 from helpers.cache_tools import configurable_cache
 from core.pathant.Converter import converter
@@ -69,11 +70,12 @@ elmo_difference_model_pipe = ant(
 )
 
 
-def annotate_uploaded_file(file, service_id):
+def annotate_uploaded_file(file, service_id, url):
     result = [next(elmo_difference_single_pipe(
-        metaize([file]),
+        metaize([file], ),
         difference_model_path=BEST_MODELS["difference"]['best_model_path'],
-        service_id=service_id
+        service_id=service_id,
+        url = url
     ), None)]
     queue_put(service_id, result)
     return result

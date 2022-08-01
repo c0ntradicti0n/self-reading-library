@@ -102,8 +102,11 @@ def yield_cache_instead_apply(cls, f, gen, cache, cache_folder, **kwargs):
                                                       value if value.endswith(
                                                           ".pdf") else config.tex_data + urllib.parse.quote_plus(
                                                           value) + ".pdf")))
-            for value in values_from_future if
-            value in cache or config.tex_data + urllib.parse.quote_plus(value) + ".pdf" in cache
+            for value in values_from_future
+            if
+                value in cache
+                or urllib.parse.quote_plus(value) in cache
+                or config.tex_data + urllib.parse.quote_plus(value) + ".pdf" in cache
         ]
     else:
         future_yield_values = []
@@ -115,6 +118,8 @@ def yield_cache_instead_apply(cls, f, gen, cache, cache_folder, **kwargs):
 
         def filter():
             for value, m in gen:
+                if value in [k for k, v in cache_values_to_yield]:
+                    continue
                 if value:
                     if urllib.parse.quote_plus(value) in cache:
                         logging.info(f"{value} was in cache, yielding that one instead of applying")

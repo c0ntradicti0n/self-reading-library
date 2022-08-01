@@ -38,22 +38,26 @@ class Scraper(PathSpec):
         config.cache + os.path.basename(__file__), from_path_glob=config.hidden_folder + "/pdfs/**/*.pdf"
     )
     def __call__(self, i_url):
-        for url, m in i_url:
-            if url.startswith('http') and regex.match(self.http_regex, url):
-                id = hashval(url)+".pdf"
-                path = f"{config.hidden_folder}pdfs/{id}"
+        for id, meta in i_url:
+            if "url" in self.flags and self.flags['url']:
+                url = self.flags['url']
+            else:
+                url = None
+
+            if url and url.startswith('http') and regex.match(self.http_regex, url):
+                path = id
                 if os.path.exists(path):
-                    yield path, m
+                    yield path, meta
 
                 path = path.replace("(", "")
                 path = path.replace(")", "")
-                m['url'] = url
+                meta['url'] = self.flags['url']
 
                 if not os.path.exists(path):
                     os.system(f"wkhtmltopdf  {url} {path}")
-                yield path, m
-            elif os.path.exists(url) and regex.match(self.file_regex, url)  is not None:
-                yield url, m
+                yield id, meta
+            elif os.path.exists(id) and regex.match(self.file_regex, id)  is not None:
+                yield id, meta
             else:
-                logging.error(f"{url} is not a valid url/path")
+                logging.error(f"{id} is not a valid url/path")
 

@@ -167,8 +167,7 @@ PDF_UPLOAD_DIR = hidden_folder + "/pdf_upload/"
 ELMO_DIFFERENCE_MODEL_PATH = hidden_folder + "elmo_difference_models"
 ELMO_DIFFERENCE_COLLECTION_PATH = hidden_folder + "elmo_difference_collection"
 PORT = 9999
-
 TOPIC_TEXT_LENGTH = 180
 spacy_model_name = 'en_core_web_trf'
-audio_format = "ogg"
-audio_path = hidden_folder + "audio"
+audio_format = ".ogg"
+audio_path = hidden_folder + "audio/"

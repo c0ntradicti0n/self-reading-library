@@ -35,32 +35,32 @@ class TestRest(unittest.TestCase):
         assert resp.status == falcon.HTTP_OK
         print(resp)
 
-    def test_difference(self):
+    def xtest_difference(self):
         rest_vals = self.make_rest_args(self.TEST_PDF)
         ElmoDifferenceQueueRest.on_post(*rest_vals)
         self.check_result(*rest_vals)
 
-    def test_layout1(self):
+    def test_layout11(self):
         rest_vals = self.make_rest_args(self.TEST_PDF)
         UploadAnnotationQueueRest.on_post(*rest_vals)
         self.check_result(*rest_vals)
 
-    def test_layout2(self):
+    def test_layout12(self):
         rest_vals = self.make_rest_args(self.TEST_PDF)
         UploadAnnotationQueueRest.on_post(*rest_vals)
         self.check_result(*rest_vals)
 
-    def test_layout_scrape_web1(self):
+    def test_layout01_scrape_web1(self):
         rest_vals = self.make_rest_args(self.TEST_URL)
         UploadAnnotationQueueRest.on_post(*rest_vals)
         self.check_result(*rest_vals)
 
-    def test_layout_scrape_web2(self):
+    def test_layout02_scrape_web2(self):
         rest_vals = self.make_rest_args(self.TEST_URL)
         UploadAnnotationQueueRest.on_post(*rest_vals)
         self.check_result(*rest_vals)
 
-    def test_audio(self):
+    def xtest_audio(self):
         rest_vals = self.make_rest_args(self.TEST_PDF)
         AudioPublisher.on_post(*rest_vals)
         self.check_result(*rest_vals)
@@ -71,7 +71,7 @@ class TestRest(unittest.TestCase):
         TopicsPublisher.on_get(*rest_vals)
         self.check_result(*rest_vals)
 
-    def test_annotation(self):
+    def xtest_annotation(self):
         rest_vals = self.make_rest_args(self.TEST_PDF, """It is a result of Bourgain [1, 2] that M1 may become O(N2/3
 ) and it is very easy to construct a collection
 λj which gives M2 = O(N1/2

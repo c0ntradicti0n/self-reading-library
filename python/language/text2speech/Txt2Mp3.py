@@ -11,7 +11,7 @@ from language.transformer.Pager import preprocess_text
 
 
 def generate_audio(id, text):
-    out_path = config.audio_path + id.replace(config.hidden_folder, "") + f".{config.audio_format}"
+    out_path = config.audio_path + id.replace(config.hidden_folder, "") + config.audio_format
 
     try:
         os.makedirs(os.path.dirname(out_path))

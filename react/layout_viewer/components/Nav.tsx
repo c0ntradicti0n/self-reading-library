@@ -19,7 +19,6 @@ const NAV = styled.div`
   margin-right: 0;
   align: left;
   background: #fff !important;
-  z-index: 10000;
   width: 17%;
   column-count: 1;
   flex-flow: column wrap;

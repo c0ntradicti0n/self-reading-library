@@ -21,7 +21,7 @@ const BootstrapDialog = sty(Dialog)(({theme}) => ({
         wordWrap: "normal",
         display: "flex",
         flex: "1 1 auto",
-        flexWrap: "wrap",
+        flexWrap: "wrap"
     },
     "& .MuiDialogActions-root": {
         padding: theme.spacing(1),

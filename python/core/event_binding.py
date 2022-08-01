@@ -4,6 +4,8 @@ from queue import Queue, Empty
 import json
 import logging
 
+from helpers import hash_tools
+
 logging.getLogger().setLevel(logging.INFO)
 import os
 import sys
@@ -201,11 +203,15 @@ class RestQueue:
     def on_post(self, req, resp, id=None, **kwargs):
         if (isinstance(req.media, str)):
             doc_id = req.media
+            is_url = doc_id.startswith("http")
+            url = doc_id if is_url else None
+            doc_id = f"{config.hidden_folder}pdfs/{hash_tools.hashval(doc_id)}.pdf" if is_url else doc_id
+
             logging.info(
-                f"Annotate new document {doc_id=} {id=}"
+                f"Annotate new document {doc_id=} {id=} {url=}"
             )
             init_queues(id)
-            self.work_on_upload(doc_id, service_id=id)
+            self.work_on_upload(doc_id, service_id=id, url=url)
         else:
             logging.info(
                 f"Add annotation to collection {id=}"
