@@ -50,6 +50,9 @@ jobs:
               rm -rf ./cache
               cp -R ./LayoutEagle/python/.layouteagle ./cache
               kill -9 $(lsof -t -i:9999) || echo 'backend not running'
+              killall -9 uwsgi || echo 'backend not running'
+              killall -9 python || echo 'backend not running'
+
               rm -rf LayoutEagle
               git clone https://github.com/c0ntradicti0n/LayoutEagle.git 
                         
@@ -89,7 +92,7 @@ jobs:
               killall -9 uwsgi || echo 'backend not running'
           "
 
-      - name: InstallTtts
+      - name: InstallTts
         run: |
             ssh staging '   
                 cd LayoutEagle

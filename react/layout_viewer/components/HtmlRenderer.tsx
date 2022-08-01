@@ -11,15 +11,47 @@ interface Props {
     service: ServerResource<any>;
 }
 
+
+function httpGet(theUrl) {
+    let xmlhttp;
+
+    if (window.XMLHttpRequest) { // code for IE7+, Firefox, Chrome, Opera, Safari
+        xmlhttp = new XMLHttpRequest();
+    }
+
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            return xmlhttp.responseText;
+        }
+    }
+    xmlhttp.open("GET", theUrl, false);
+    xmlhttp.send();
+
+    return xmlhttp.response;
+}
+
 class HtmlRenderer extends Component<Props> {
+    state = {
+        htmlContent: null,
+        id: null
+    }
+
     componentDidMount() {
         console.log("HtmlRenderer", this);
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<{}>, snapshot?: any) {
+        if (this.props.data.value != this.state.id) {
+            let htmlContent = httpGet("/" + this.props.data.value.replace(".layouteagle/", "") + ".html")
+            this.setState({id: this.props.data.value, htmlContent})
+        }
     }
 
     differenceService = new Difference_AnnotationService();
 
     render() {
-        console.log("HtmlRenderer", this);
+        console.log("HtmlRenderer", this, this.props.data.value);
+        console.log(this.state.htmlContent)
         return (
             <div>
                 <Nav
@@ -72,9 +104,9 @@ class HtmlRenderer extends Component<Props> {
                                 innerCircleColor="grey"
                             />
                         )}
-                        {this.props.data.meta?.html ? (
+                        {this.state.htmlContent ? (
                             <div
-                                dangerouslySetInnerHTML={{__html: this.props.data.meta.html}}
+                                dangerouslySetInnerHTML={{__html: this.state.htmlContent}}
                             />
                         ) : (
                             <Triangle ariaLabel="loading-indicator"/>

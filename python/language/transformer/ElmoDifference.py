@@ -71,12 +71,12 @@ elmo_difference_model_pipe = ant(
 
 
 def annotate_uploaded_file(file, service_id, url):
-    result = [next(elmo_difference_single_pipe(
+    result = forget_except([next(elmo_difference_single_pipe(
         metaize([file], ),
         difference_model_path=BEST_MODELS["difference"]['best_model_path'],
         service_id=service_id,
         url = url
-    ), None)]
+    ), None)], keys=["css"])
     queue_put(service_id, result)
     return result
 
