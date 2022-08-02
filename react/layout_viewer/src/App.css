@@ -25,6 +25,14 @@
     src: local('keys'), url(../public/fonts/212_Keyboard.otf) format('opentype');
 }
 
+div.c.x1 {
+}
+
+div.t {
+      z-index:300 !important;
+}
+
+
 
 @keyframes color-change {
     0% {

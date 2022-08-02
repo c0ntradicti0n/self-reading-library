@@ -133,7 +133,7 @@ function adjustSpanValue(newValue: number | number[] | number[], activeThumb: nu
         if (activeThumb === 0) {
             const clamped = Math.min(
                 newValue[0],
-                100 - minDistance
+                annotation.length - minDistance
             );
             value = [clamped, clamped + minDistance];
         } else {
@@ -156,12 +156,12 @@ function adjustSpanValue(newValue: number | number[] | number[], activeThumb: nu
     for (let [j, span] of [...spanIndices.entries()].reverse()) {
         span = spanIndices[j]
         console.log(spanIndices, span)
-        if (span[2] > value[0] && span[2] < value[1] && i > j) {
+        if (span[2] > value[0] && span[2] <= value[1] && i > j) {
             span[2] = value[0];
             spanIndices[j] = span;
         }
 
-        if (span[1] < value[1] && span[1] > value[0] && j > i) {
+        if (span[1] < value[1] && span[1] >= value[0] && j > i) {
             span[1] = value[1];
             spanIndices[j] = span;
         }
@@ -223,12 +223,22 @@ export default function SpanAnnotation({value, meta, text, onClose, service}) {
                 Open dialog
             </Button>
             <BootstrapDialog
-                onClose={handleCloseDiscard}
+                onClose={(e) => {
+                    console.log("HELLLOOO!!!!", e)
+
+                    handleCloseDiscard()
+                }}
                 aria-labelledby="customized-dialog-title"
                 open={open}
                 fullWidth
                 maxWidth={"xxl"}
-            >
+                onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    console.log("stop it!")
+
+                }}>
+                >
                 <BootstrapDialogTitle
                     onClose={handleCloseDiscard}
                 >
@@ -238,13 +248,37 @@ export default function SpanAnnotation({value, meta, text, onClose, service}) {
 
                     {
                         (!annotation) ? <ThreeDots/> :
-                            <>
+                            <div onClick={(e) => {
+                                e.stopPropagation()
+                                e.preventDefault()
+                                console.log("stop it! click")
+
+                            }}
+                                 onMouseUp={(e) => {
+                                     e.stopPropagation()
+                                     e.preventDefault()
+                                     console.log("stop it! up")
+
+                                 }}
+                                 onChange={(e) => {
+                                     e.stopPropagation()
+                                     e.preventDefault()
+                                     console.log("stop it! change")
+
+                                 }}
+                                 onBlur={(e) => {
+                                     e.stopPropagation()
+                                     e.preventDefault()
+                                     console.log("stop it! blur")
+
+                                 }}
+                            >
                                 <Typography gutterBottom>
                                     <AnnotationTable annotation={annotation} spans={spanIndices}></AnnotationTable>
                                 </Typography>
                                 <Typography gutterBottom>
                                     {spanIndices.map(([tag, i1, i2, ws], i) => (
-                                        <div>
+                                        <div key={i}>
                                             <Button startIcon="minus" onClick={() => {
                                                 spanIndices.splice(i, 1)
                                                 setSpanIndices([...spanIndices])
@@ -265,6 +299,7 @@ export default function SpanAnnotation({value, meta, text, onClose, service}) {
                                                     {ws.map((w, iii) => <span key={iii}
                                                                               className={"tag span_" + tag}>{w}</span>)}
                                                 </div>
+
                                                 <Slider
 
                                                     aria-label="annotation"
@@ -273,7 +308,18 @@ export default function SpanAnnotation({value, meta, text, onClose, service}) {
                                                     onChange={(event, newValue, activeThumb) => {
                                                         console.log("changing slider", event, newValue, activeThumb)
                                                         setSpanIndices(adjustSpanValue(newValue, activeThumb, spanIndices, i, tag, annotation));
+                                                        event.stopPropagation();
+                                                        event.stopImmediatePropagation();
+                                                        console.log("stop it!")
+                                                        return false
+
                                                     }}
+                                                    onMouseUp={(event) => {
+                                                        event.stopPropagation();
+                                                        event.stopPropagation();
+                                                        console.log("stop it!")
+                                                    }
+                                                    }
                                                     step={1}
                                                     marks
                                                     min={0}
@@ -283,6 +329,7 @@ export default function SpanAnnotation({value, meta, text, onClose, service}) {
                                                 />
                                             </div>
                                         </div>
+
                                     ))}
                                 </Typography>
                                 <Button startIcon="add" onClick={() => {
@@ -312,7 +359,7 @@ export default function SpanAnnotation({value, meta, text, onClose, service}) {
                                     setSpanIndices([...newSpanIndices])
                                 }
                                 }></Button>
-                            </>
+                            </div>
 
                     }
                 </DialogContent>

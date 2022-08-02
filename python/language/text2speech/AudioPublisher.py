@@ -39,12 +39,17 @@ class AudioPublisher(RestPublisher, react):
             layout_model_path=config.layout_model_path
         )
         id, meta = list(pipeline(metaize([id])))[0]
-
-        if os.path.exists(meta["audio_path"]):
+        compute_path = f"{id}.audiobook"
+        os.system(f"touch  {compute_path}")
+        if os.path.exists(meta["audio_path"]) and not os.path.exists(compute_path):
             resp.status = falcon.HTTP_OK
             resp.body = json.dumps(
                 meta["audio_path"].replace(config.hidden_folder, ""),
                 ensure_ascii=False
             )
         else:
-            resp.status = falcon.HTTP_404
+            if os.path.exists(compute_path):
+                resp.status = falcon.HTTP_404
+                resp.headers["Retry-After"] = 20
+            else:
+                resp.status = falcon.HTTP_404

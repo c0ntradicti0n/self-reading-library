@@ -56,7 +56,7 @@ class Scraper(PathSpec):
                 if not os.path.exists(path):
                     os.system(f"wkhtmltopdf  {url} {path}")
                 yield id, meta
-            elif os.path.exists(id) and regex.match(self.file_regex, id)  is not None:
+            elif  os.path.exists(id) and regex.match(self.file_regex, id)  is not None:
                 yield id, meta
             else:
                 logging.error(f"{id} is not a valid url/path")

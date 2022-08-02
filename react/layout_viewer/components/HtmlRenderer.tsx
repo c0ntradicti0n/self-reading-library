@@ -73,7 +73,7 @@ class HtmlRenderer extends Component<Props> {
                 />
                 <SelectText
                     meta={this.props.data.meta}
-                    value={this.props.data.value?.value}
+                    value={this.props.data.value}
                     service={this.differenceService}
                 >
 
