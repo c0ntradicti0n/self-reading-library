@@ -3,7 +3,6 @@ import Nav from "./Nav";
 import ServerResource from "../resources/GeneralResource";
 import {ThreeCircles, Triangle} from "react-loader-spinner";
 import SelectText from "./SelectText";
-import DifferenceService from "../resources/DifferenceService";
 import Difference_AnnotationService from "../resources/Difference_AnnotationService";
 import {AppSettings} from "../config/connection";
 
