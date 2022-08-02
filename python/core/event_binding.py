@@ -3,6 +3,7 @@ from collections import defaultdict
 from queue import Queue, Empty
 import json
 import logging
+from PIL import Image
 
 from helpers import hash_tools
 
@@ -25,10 +26,11 @@ q = {}
 d = {}
 
 
-def init_queues(service_id):
+def init_queues(service_id, id):
     global q
     global d
     q[service_id] = Queue()
+    q[id] = Queue()
     d[service_id] = Queue()
 
 
@@ -39,25 +41,30 @@ def encode_base64(image):
     return byte_object
 
 
-
 def round_double_list(bbox):
     return [[round(c, 2) for c in box] for box in bbox]
 
 
-funs = defaultdict(lambda x:x, {
+funs = defaultdict(lambda x: x, {
     "layout_predictions": lambda x: None,
     "df": lambda x: None,
     "human_image": lambda x: base64.b64encode(encode_base64(x)).decode('utf-8'),
     "image": lambda x: base64.b64encode(encode_base64(x)).decode('utf-8'),
-    "bbox": round_double_list
+
+    "bbox": lambda x: round_double_list(x)
 })
 
 
 def encode_some(k, v):
-    return funs[k](v) if k in funs else v
+    return funs[k]((v)) if k in funs else v
+
 
 def encode(obj_meta):
     obj, meta = obj_meta
+    if "human_image_path" in meta and not 'human_image' in meta:
+        meta['human_image'] = Image.open(meta['human_image_path'])
+    if "image_path" in meta and not 'image' in meta:
+        meta['image'] = Image.open(meta['image_path'])
     if isinstance(meta, dict):
         meta = {
             k: encode_some(k, v)
@@ -79,7 +86,7 @@ class RestQueue:
         global all_rest_queues
         all_rest_queues.append(self)
         self.service_id = service_id
-        init_queues(service_id)
+        init_queues(service_id, None)
         self.update_data = update_data
         self.work_on_upload = work_on_upload
 
@@ -87,9 +94,8 @@ class RestQueue:
 
     def get(self, id):
 
-
         try:
-            self.workbook[id] = q[id].get(timeout=60)
+            self.workbook[id] = q[id].get(timeout=10)
             logging.info("Get new")
 
         except Exception as e:
@@ -98,8 +104,6 @@ class RestQueue:
                 return self.workbook[id]
             else:
                 return None
-
-
 
     def change(self, item, path, value):
         self.apply(item, path, value)
@@ -118,7 +122,7 @@ class RestQueue:
             self.workbook.get(id)
             item = self.workbook.pop(id)
             d[self.service_id].put_nowait(item)
-            q[self.service_id].task_done()
+            q[id].task_done()
         except Exception as e:
             print("ok, but end of gen")
 
@@ -137,7 +141,7 @@ class RestQueue:
             logging.error(f"could not remove ${id} from {self.workbook}")
 
     def on_get(self, req, resp, id=None):  # get image
-        data = self.get(id)
+        data = self.workbook.get(id)
         if not data:
             logging.info(f"No file prepared for {id}, getting default")
             data = self.get(self.service_id)
@@ -157,18 +161,13 @@ class RestQueue:
         item = self.workbook[id]
 
         item = self.change(item, path, value)
-
-        item = encode(item)
-        resp.body = json.dumps(item, ensure_ascii=False)
+        resp.body = json.dumps(encode(item), ensure_ascii=False)
         resp.status = falcon.HTTP_OK
 
     def on_patch(self, req, resp, id=None):
         pprint(req)
 
-        form = req.get_media()
-
         file_part = req.get_param('file')
-        # pprint(file_part)
 
         # Read image as binary
 
@@ -210,18 +209,22 @@ class RestQueue:
             logging.info(
                 f"Annotate new document {doc_id=} {id=} {url=}"
             )
-            init_queues(id)
+            init_queues(self.service_id, id)
             self.work_on_upload(doc_id, service_id=id, url=url)
         else:
             logging.info(
                 f"Add annotation to collection {id=}"
             )
+
             self.ok(id)
 
         self.get(id)
-        resp.body = json.dumps(encode(self.workbook[id]), ensure_ascii=False)
-        resp.status = falcon.HTTP_OK
-
+        if  self.workbook.get(id):
+            resp.body = json.dumps(encode(self.workbook[id]), ensure_ascii=False)
+            resp.status = falcon.HTTP_OK
+        else:
+            resp.status = falcon.HTTP_OK
+            resp.body = json.dumps({})
 
 
     def on_delete(self, req, resp, id=None):

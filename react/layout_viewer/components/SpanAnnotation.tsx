@@ -155,7 +155,6 @@ function adjustSpanValue(newValue: number | number[] | number[], activeThumb: nu
 
     for (let [j, span] of [...spanIndices.entries()].reverse()) {
         span = spanIndices[j]
-        console.log(spanIndices, span)
         if (span[2] > value[0] && span[2] <= value[1] && i > j) {
             span[2] = value[0];
             spanIndices[j] = span;
@@ -179,7 +178,6 @@ function adjustSpanValue(newValue: number | number[] | number[], activeThumb: nu
 export default function SpanAnnotation({value, meta, text, onClose, service}) {
     const [open, setOpen] = useState(true);
     const [annotation, setAnnotation] = useState(null);
-    const [corredted_text, setText] = useState(null);
 
     // @ts-ignore
     const [spanIndices, setSpanIndices] = useState<[string, number, number, string[]][]>([]);
@@ -188,9 +186,6 @@ export default function SpanAnnotation({value, meta, text, onClose, service}) {
             await service.fetch_one([value, text, meta["pdf_path"]], (res) => {
                     setAnnotation(res)
                     setSpanIndices(getSpans(res))
-                    const words = (res.map(([word, tag]) => word))
-                    console.log(words)
-                    setText(words.join(" "))
                 }
             );
         })();
@@ -213,21 +208,41 @@ export default function SpanAnnotation({value, meta, text, onClose, service}) {
 
     const handleCloseDiscard = () => {
         setOpen(false);
+        console.log("close discard")
         onClose();
     };
 
 
     console.log(spanIndices)
-    return (<div>
+    return (<div onClick={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            console.log("stop it! click")
+
+        }}
+                 onMouseUp={(e) => {
+                     e.stopPropagation()
+                     e.preventDefault()
+                     console.log("stop it! up")
+
+                 }}
+                 onChange={(e) => {
+                     e.stopPropagation()
+                     e.preventDefault()
+                     console.log("stop it! change")
+
+                 }}
+                 onBlur={(e) => {
+                     e.stopPropagation()
+                     e.preventDefault()
+                     console.log("stop it! blur")
+
+                 }}
+        >
             <Button variant="outlined" onClick={handleClickOpen}>
                 Open dialog
             </Button>
             <BootstrapDialog
-                onClose={(e) => {
-                    console.log("HELLLOOO!!!!", e)
-
-                    handleCloseDiscard()
-                }}
                 aria-labelledby="customized-dialog-title"
                 open={open}
                 fullWidth
@@ -239,40 +254,14 @@ export default function SpanAnnotation({value, meta, text, onClose, service}) {
 
                 }}>
                 >
-                <BootstrapDialogTitle
-                    onClose={handleCloseDiscard}
-                >
+                <BootstrapDialogTitle>
                     Teach the difference
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
 
                     {
                         (!annotation) ? <ThreeDots/> :
-                            <div onClick={(e) => {
-                                e.stopPropagation()
-                                e.preventDefault()
-                                console.log("stop it! click")
-
-                            }}
-                                 onMouseUp={(e) => {
-                                     e.stopPropagation()
-                                     e.preventDefault()
-                                     console.log("stop it! up")
-
-                                 }}
-                                 onChange={(e) => {
-                                     e.stopPropagation()
-                                     e.preventDefault()
-                                     console.log("stop it! change")
-
-                                 }}
-                                 onBlur={(e) => {
-                                     e.stopPropagation()
-                                     e.preventDefault()
-                                     console.log("stop it! blur")
-
-                                 }}
-                            >
+                            <>
                                 <Typography gutterBottom>
                                     <AnnotationTable annotation={annotation} spans={spanIndices}></AnnotationTable>
                                 </Typography>
@@ -359,7 +348,7 @@ export default function SpanAnnotation({value, meta, text, onClose, service}) {
                                     setSpanIndices([...newSpanIndices])
                                 }
                                 }></Button>
-                            </div>
+                            </>
 
                     }
                 </DialogContent>

@@ -2,6 +2,8 @@ import React, {Component} from "react";
 import {zip, pairwise} from "../src/util/array";
 import {Button} from "@mui/material";
 import Nav from "./Nav";
+import Url2Difference from "./Url2Difference";
+import Router from "next/router";
 
 export default class BoxAnnotator extends Component<any> {
     LABELS = ["NONE", "c1", "c2", "c3", "wh", "h", "pn", "fn", "fg", "tb"];
@@ -16,6 +18,7 @@ export default class BoxAnnotator extends Component<any> {
         Digit2: "c2",
         Digit3: "c3",
         Digit0: "wh",
+        DigitW: "wh",
 
         KeyN: "pn",
         KeyH: "h",
@@ -70,6 +73,7 @@ export default class BoxAnnotator extends Component<any> {
 
     state = {
         next_key: null,
+        finished: false
     };
 
     componentDidMount() {
@@ -93,9 +97,13 @@ export default class BoxAnnotator extends Component<any> {
 
         var next_key = this.KEYS[event.code];
 
-        if (!next_key) console.log("unknown keycode", event.code);
-
-        if (next_key) this.setState({next_key});
+        if (!next_key) {
+            console.log("unknown keycode", event.code);
+        }
+        if (next_key) {
+            this.setState({next_key});
+            event.preventDefault();
+        }
     };
 
     render() {
@@ -114,7 +122,6 @@ export default class BoxAnnotator extends Component<any> {
         // @ts-ignore
         return (
             <div style={{fontSize: "1em !important", display: "flex"}}>
-                <h2>Improve Layout</h2>
                 <Nav
                     forward={() =>
                         this.props.service.ok(null, "", {}, () => window.location.reload())
@@ -131,105 +138,133 @@ export default class BoxAnnotator extends Component<any> {
                     }
                     data={this.props.superState}
                 />
-                <div className="container" style={{position: "absolute"}}>
-                    {this.props.superState?.meta?.human_image ? (
-                        <img
-                            id="annotation_canvas"
-                            src={
-                                "data:image/jpeg;charset=utf-8;base64," +
-                                this.props.superState?.meta?.human_image
-                            }
-                        />
-                    ) : null}
-
-                    {cols?.map((row, i) => (
-                        <div
-                            style={{
-                                position: "absolute",
-                                left: (row[0][0] / 2500 * scale).toString() + "px",
-                                top: (row[0][1] / 2500 * scale).toString() + "px",
-                                width: ((row[0][2] - row[0][0]) / 2500 * scale).toString() + "px",
-                                height: ((row[0][3] - row[0][1]) / 2500 * scale).toString() + "px",
-                                //border: "1px solid black",
-                                zIndex: Math.ceil(
-                                    9000000 - (row[0][2] - row[0][0]) * (row[0][3] - row[0][1])
-                                ),
-                            }}
-                            onClick={() => {
-                                console.log("row", i);
-                                let label;
-                                if (this.state.next_key) {
-                                    label = this.state.next_key;
-                                } else {
-                                    label = this.LABEL_SWITCH[row[1]];
+                {this.state.finished ?
+                    <div><h2>We have annotated the whole document! <Button
+                        onClick={(e) => {
+                            console.log(e);
+                            Router.push({
+                                pathname: "/difference/",
+                                query: {id: this.props.superState?.value},
+                            });
+                        }}>Return to document!</Button></h2></div>
+                    :
+                    <div className="container" style={{position: "absolute"}}>
+                        {this.props.superState?.meta?.human_image ? (
+                            <img
+                                id="annotation_canvas"
+                                src={
+                                    "data:image/jpeg;charset=utf-8;base64," +
+                                    this.props.superState?.meta?.human_image
                                 }
-                                console.log({label, ls: this.LABEL_SWITCH});
-                                if (label)
-                                    this.props.service.change(
-                                        "[1].labels.[" + i + "]",
-                                        label,
-                                        this.props.setFullState
-                                    );
-                            }}
-                        ></div>
-                    ))}
+                            />
+                        ) : null}
 
-                    {cols ? (
-                        <>
-                            <Button
-                                style={{backgroundColor: "#DEF"}}
-                                onClick={() => {
-                                    this.props.service.ok([
-                                        this.props.superState.value,
-                                        this.props.superState.meta,
-                                    ]);
-                                    this.props.service.fetch_all(this.props.setFullState);
+                        {cols?.map((row, i) => (
+                            <div
+                                style={{
+                                    position: "absolute",
+                                    left: (row[0][0] / 2500 * scale).toString() + "px",
+                                    top: (row[0][1] / 2500 * scale).toString() + "px",
+                                    width: ((row[0][2] - row[0][0]) / 2500 * scale).toString() + "px",
+                                    height: ((row[0][3] - row[0][1]) / 2500 * scale).toString() + "px",
+                                    //border: "1px solid black",
+                                    zIndex: Math.ceil(
+                                        9000000 - (row[0][2] - row[0][0]) * (row[0][3] - row[0][1])
+                                    ),
                                 }}
+                                onClick={() => {
+                                    console.log("row", i);
+                                    let label;
+                                    if (this.state.next_key) {
+                                        label = this.state.next_key;
+                                    } else {
+                                        label = this.LABEL_SWITCH[row[1]];
+                                    }
+                                    console.log({label, ls: this.LABEL_SWITCH});
+                                    if (label)
+                                        this.props.service.change(
+                                            "[1].labels.[" + i + "]",
+                                            label,
+                                            this.props.setFullState
+                                        );
+                                }}
+                            ></div>
+                        ))}
+
+                        {cols ? (
+                            <>
+                                <Button
+                                    style={{backgroundColor: "#DEF"}}
+                                    onClick={() => {
+                                        ;(async () => {
+                                            console.log("ok")
+                                            await this.props.service.ok([
+                                                this.props.superState.value,
+                                                this.props.superState.meta,
+                                            ], "", {}, async (val) => {
+                                                console.log(await val)
+                                                if (!Object.keys(val).length) {
+                                                    this.setState({finished: true})
+
+                                                }
+
+
+                                                console.log("get new")
+
+                                                this.props.service.fetch_all((val) =>
+                                                    this.props.setFullState(val));
+
+                                            })
+                                        })();
+
+                                    }}>
+                                    OK
+                                </Button>
+                                <Button
+                                    style={{backgroundColor: "#FED"}}
+
+                                    onClick={this.props.service.discard}>Discard</Button>
+                            </>
+                        ) : null}
+
+                        <div>
+                            <table style={{width: "10%"}}
                             >
-                                OK
-                            </Button>
-                            <Button
-                                style={{backgroundColor: "#FED"}}
-
-                                onClick={this.props.service.discard}>Discard</Button>
-                        </>
-                    ) : null}
-
-                    <div>
-                        <table style={{width: "10%"}}
-                        >
-                            <tr>
-                                <td>KEY</td>
-                                <td>TAG</td>
-                            </tr>
-                            {Object.entries(this.KEYS).map(([k, v], i) => <tr
-                                    onClick={() => this.setState({next_key: this.KEYS[k]})}
-                                >
-                                    <td key={i + "_1"}
-                                        style={{
-                                            border: "1px", fontFamily: "keys", fontSize: "4em",
-                                            verticalAlign: "bottom"
-                                        }}
-                                    >{this.KEY_TRANSLATE[k]}</td>
-                                    <td key={i + "_2"}
-                                        style={{
-                                            verticalAlign: "top"
-                                        }}>
-                                        <div style={{
-                                            backgroundColor: this.TAG_COLOR[v] as string,
-                                            border: "10px solid " + this.TAG_COLOR[v],
-                                            display: "block", borderRadius: "7px",
-
-                                        }}> {this.TAG_TRANSLATE[v]} </div>
-                                    </td>
-
+                                <tr>
+                                    <td> KEY</td>
+                                    <td>TAG</td>
                                 </tr>
-                            )
-                            }
-                        </table>
+                                {Object.entries(this.KEYS).map(([k, v], i) => <tr
+                                        onClick={() => this.setState({next_key: this.KEYS[k]})}
+                                    >
+                                        <td key={i + "_1"}
+                                            style={{
+                                                border: "1px", fontFamily: "keys", fontSize: "4em",
+                                                verticalAlign: "bottom"
+                                            }}
+                                        >{this.KEY_TRANSLATE[k]}</td>
+                                        <td key={i + "_2"}
+                                            style={{
+                                                verticalAlign: "top"
+                                            }}>
+                                            <div style={{
+                                                backgroundColor: this.TAG_COLOR[v] as string,
+                                                border: "10px solid " + this.TAG_COLOR[v],
+                                                display: "block", borderRadius: "7px",
+
+                                            }}> {this.TAG_TRANSLATE[v]} </div>
+                                        </td>
+
+                                    </tr>
+                                )
+                                }
+                            </table>
+                        </div>
+
                     </div>
-                </div>
+                }
             </div>
-        );
+        )
+            ;
     }
 }
