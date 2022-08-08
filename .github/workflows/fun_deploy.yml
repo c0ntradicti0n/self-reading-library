@@ -84,7 +84,7 @@ jobs:
               pip install torch
               pip install numpy --upgrade
               python -m spacy download en_core_web_trf
-          
+           
               cp python/tokenization_layoutvm2_fast.py ../venv/lib/python3.8/site-packages/transformers/models/layoutlmv2/tokenization_layoutlmv2_fast.py
               
               echo \" export class AppSettings {  public static BACKEND_HOST = 'https://self-reading-library.science/api' ; public static FRONTEND_HOST = 'https://self-reading-library.science';  } \" > react/layout_viewer/config/connection.ts
