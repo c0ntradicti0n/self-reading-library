@@ -13,20 +13,28 @@ export default class Audiobook extends React.Component {
     componentDidUpdate() {
     }
 
+    componentWillUnmount() {
+        clearInterval(this.intervalId)
+    }
+
     componentDidMount() {
         this.service = new AudiobookService()
 
-        ;(async () => {
-            const exists = await this.service.exists(this.props.id,
-                (res) => {
-                    console.log(res)
+        this.intervalId = window.setInterval(this.existsCall, 5000);
 
-                    this.setState({exists: true, id: this.props.id, audioPath: res})
-                    console.log(res)
-                })
-            console.log(exists)
-            this.setState({exists})
-        })()
+
+    }
+
+    existsCall = async () => {
+        const exists = await this.service.exists(this.props.id,
+            (res) => {
+                console.log(res)
+
+                this.setState({exists: true, id: this.props.id, audioPath: res})
+                console.log(res)
+            })
+        console.log(exists)
+        this.setState({exists})
     }
 
     load = async () => {

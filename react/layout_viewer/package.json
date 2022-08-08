@@ -2,7 +2,7 @@
   "name": "with-three-js",
   "version": "0.1.0",
   "private": true,
-    "license": "GPL 3",
+  "license": "GPL 3",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,13 +10,13 @@
     "test": "jasmine"
   },
   "dependencies": {
-
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
     "@mui/icons-material": "^5.8.2",
     "@mui/material": "^5.8.2",
     "@react-three/drei": "^9.7.1",
     "@react-three/fiber": "^8.0.13",
+    "@types/node": "^14.0.27",
     "drei": "0.0.60",
     "glob": "^7.1.6",
     "install": "^0.13.0",
@@ -28,15 +28,14 @@
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-force-graph": "^1.36.5",
+    "react-h5-audio-player": "^3.8.4",
     "react-json-to-table": "^0.1.7",
     "react-loadable": "^5.5.0",
     "react-loader-spinner": "^6.0.0-0",
     "react-pro-sidebar": "^0.6.0",
     "react-three-fiber": "4.2.12",
     "three": "^0.140.2",
-    "three-spritetext": "^1.5.2",
-    "react-h5-audio-player": "^3.8.4",
-    "@types/node": "^14.0.27"
+    "three-spritetext": "^1.5.2"
   },
   "devDependencies": {
     "@loadable/component": "^5.13.0",
@@ -44,7 +43,7 @@
     "@types/react-loadable": "^5.5.3",
     "@typescript-eslint/eslint-plugin": "^5.30.6",
     "@typescript-eslint/parser": "^5.30.6",
-    "eslint": "^8.19.0",
+    "eslint": "^8.21.0",
     "eslint-plugin-react": "^7.30.1",
     "jasmine": "^4.2.1",
     "next-transpile-modules": "3.3.0",
