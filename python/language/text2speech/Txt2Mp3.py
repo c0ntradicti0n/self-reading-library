@@ -11,7 +11,7 @@ from language.transformer.Pager import preprocess_text
 
 
 def generate_audio(id, text):
-    out_path = config.audio_path + id.replace(config.hidden_folder, "") + config.audio_format
+    out_path = get_audio_path(id)
 
     try:
         os.makedirs(os.path.dirname(out_path))
@@ -22,6 +22,11 @@ def generate_audio(id, text):
 
     os.system(f". ../tts/venv/bin/activate &&  python ../tts/tts.py -i {id}.txt {out_path}.ogg ")
 
+    return out_path
+
+
+def get_audio_path(id):
+    out_path = config.audio_path + id.replace(config.hidden_folder, "") + config.audio_format
     return out_path
 
 

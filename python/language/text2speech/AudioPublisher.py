@@ -11,6 +11,7 @@ from core.RestPublisher.react import react
 from core.pathant.Converter import converter
 from helpers.cache_tools import configurable_cache
 from helpers.list_tools import metaize
+from language.text2speech.Txt2Mp3 import get_audio_path
 
 
 @converter("audio", "rest")
@@ -30,6 +31,14 @@ class AudioPublisher(RestPublisher, react):
     )
     def __call__(self, id_meta_mp3):
         yield from id_meta_mp3
+
+    def on_get(self, req, resp, id=None):
+        id = id if id else req.params["id"]
+        audio_path = get_audio_path(id)
+        if os.path.exists(audio_path):
+            resp.status = falcon.HTTP_OK
+        else:
+            resp.status = falcon.HTTP_404
 
     def on_post(self, req, resp, id=None):
         id = req.media

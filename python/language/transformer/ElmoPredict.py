@@ -9,8 +9,8 @@ from queue import Queue, Empty
 q2 = {}
 q1 = {}
 
-
 model = None
+
 
 class ElmoPredict(PathSpec):
     def __init__(self, *args, elmo_config=None, train_output_dir, **kwargs):
@@ -79,6 +79,7 @@ class ElmoPredict(PathSpec):
                 except Exception as e:
                     self.logger.error("Faking annotation because of error " + str(e), stack_info=True)
                     annotation = [('O', w) for w in words]
+                    raise
 
                 if "words" in meta:
                     meta['annotation'] = annotation
@@ -88,7 +89,8 @@ class ElmoPredict(PathSpec):
                     try:
                         try:
                             # rfind of not "O"
-                            consumed_tokens = next(i for i, (tag, word) in list(enumerate(annotation))[::-1] if tag != 'O')
+                            consumed_tokens = next(
+                                i for i, (tag, word) in list(enumerate(annotation))[::-1] if tag != 'O')
                         except StopIteration as e:
                             consumed_tokens = len(words)
 
@@ -118,8 +120,10 @@ class ElmoPredict(PathSpec):
     def predict(self, words):
         global model
         if not model or not self.predictor:
-            model = Model.load(config=self.config,
-                               serialization_dir=self.flags['difference_model_path'])
+            model = Model.load(
+                config=Params.from_file(params_file=self.elmo_config),
+                serialization_dir=self.flags['difference_model_path']
+            )
             self.default_predictor = Predictor.from_path(self.flags['difference_model_path'])
             self.predictor = DifferenceTaggerPredictor(
                 self.default_predictor._model,

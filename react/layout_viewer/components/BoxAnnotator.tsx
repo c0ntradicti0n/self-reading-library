@@ -18,7 +18,7 @@ export default class BoxAnnotator extends Component<any> {
         Digit2: "c2",
         Digit3: "c3",
         Digit0: "wh",
-        DigitW: "wh",
+        KeyW: "wh",
 
         KeyN: "pn",
         KeyH: "h",

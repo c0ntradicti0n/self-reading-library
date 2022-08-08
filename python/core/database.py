@@ -7,18 +7,17 @@ import pandas
 
 # Threadsafe/processsafe replacement for queues, that will not sync in forked processes
 from core import config
-from python.helpers.cache_tools import compressed_pickle, decompress_pickle
+from helpers.cache_tools import compressed_pickle, decompress_pickle
 
 ibis.options.interactive = True
 
 class Queue:
     def __init__(self, service_id):
         self.row_id = None
-        self.service_id = service_id
+        self.service_id = self.id2tablename(service_id)
         self.connection = ibis.postgres.connect(
             url='postgresql://python:python@localhost:5432/postgres'
         )
-        print (self.connection.list_tables())
 
         sc = ibis.schema([
             ('doc_id', 'string'),
@@ -28,11 +27,16 @@ class Queue:
         ])
 
         try:
-            self.table = self.connection.table(service_id)
+            self.table = self.connection.table(self.service_id)
 
         except:
-            self.connection.create_table(service_id, schema=sc)
-            self.table = self.connection.table(service_id)
+            self.connection.create_table(self.service_id, schema=sc)
+            self.table = self.connection.table(self.service_id)
+
+        #self.print()
+
+    def id2tablename(self, id):
+        return f"queue{id}".lower()
 
     def timeout(self, f, timeout=None):
         # Database polling until value appeared or not
@@ -41,12 +45,11 @@ class Queue:
             try:
                 result = f()
             except Exception as e:
-                print (e)
                 time.sleep(1)
 
                 continue
 
-        print (f"got {result}")
+        #print (f"got {result}")
         return result
 
     def get(self, id, timeout=None):
@@ -58,8 +61,11 @@ class Queue:
         return decompress_pickle(item.iloc[0]['value'])
 
     def print(self):
-        print(self.connection.table("test").limit(10000).execute())
-
+        for table in self.connection.list_tables():
+            self.print_table(table)
+    def print_table(self):
+        print(f"TABLE {self.service_id}")
+        print(self.connection.table(self.service_id).limit(10000).execute())
 
     def task_done(self, id=None):
         self.connection.con.execute(f"DELETE from {self.service_id} where row_id = '{self.row_id if not id else id}'")
@@ -78,7 +84,15 @@ class Queue:
 
 
 if __name__ == "__main__":
+    doc_id = "1123_123"
+
+    q = Queue("123_234")
+    q.put(doc_id, ("bla", {"k": "v"}))
+    q.get(doc_id)
+    q.task_done(doc_id)
+
     doc_id = "abcd"
+
     q = Queue("test")
     q.queue_done("None")
     q.queue_done(doc_id)

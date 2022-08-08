@@ -11,28 +11,49 @@ export default class Audiobook extends React.Component {
     }
 
     componentDidUpdate() {
+    }
+
+    componentDidMount() {
         this.service = new AudiobookService()
+
+        ;(async () => {
+            const exists = await this.service.exists(this.props.id,
+                (res) => {
+                    console.log(res)
+
+                    this.setState({exists: true, id: this.props.id, audioPath: res})
+                    console.log(res)
+                })
+            console.log(exists)
+            this.setState({exists})
+        })()
     }
 
     load = async () => {
         console.log(this, this.props, this.props.id)
         if (this.props.id && this.state.id != this.props.id) {
-            console.log("Request audiobook")
+            console.log("Request audiobook for", this.props.id)
 
             await this.service.fetch_one(this.props.id,
-                (res) => this.setState({exists: true, id: this.props.id, audioPath: res})
-            )
+                (res) => {
+                    console.log(res)
+
+                    this.setState({exists: true, id: this.props.id, audioPath: res})
+                    console.log(res)
+                })
         }
+
+
     }
 
     render() {
         console.log(this)
         return <>
-            <Button onClick={this.load}>Create Audiobook</Button>
             {
-            this.state.exists
-                ? <AudiobookPlayer id={this.state.audioPath}></AudiobookPlayer>
-                : <div>Creating your audiobook...</div>
-        }</>
+                this.state.exists
+                    ? <AudiobookPlayer id={this.state.audioPath}></AudiobookPlayer>
+                    : <Button onClick={this.load}>Create (new) Audiobook</Button>
+
+            }</>
     }
 }

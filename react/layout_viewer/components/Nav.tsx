@@ -23,6 +23,7 @@ const NAV = styled.div`
   column-count: 1;
   flex-flow: column wrap;
   padding: 3%;
+  z-index: 10000;
 `;
 
 

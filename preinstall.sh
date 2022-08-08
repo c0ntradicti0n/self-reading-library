@@ -12,3 +12,10 @@ curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt install nodejs
 
 sudo apt-get install --reinstall libpq-dev
+
+git clone https://github.com/c0ntradicti0n/tts.git
+cd tts
+python -m venv venv
+. venv/bin/activate
+pip install -r tts/requirements.txt
+cd ..

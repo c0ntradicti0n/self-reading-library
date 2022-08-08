@@ -246,14 +246,15 @@ export default function SpanAnnotation({value, meta, text, onClose, service}) {
                 aria-labelledby="customized-dialog-title"
                 open={open}
                 fullWidth
-                maxWidth={"xxl"}
+                maxWidth={"xl"}
+                style={{marginRight:"30%"}}
                 onClick={(e) => {
                     e.preventDefault()
                     e.stopPropagation()
                     console.log("stop it!")
 
                 }}>
-                >
+
                 <BootstrapDialogTitle>
                     Teach the difference
                 </BootstrapDialogTitle>

@@ -35,7 +35,7 @@ rapidfuzz
 parasail
 spacy
 spacy-transformers
-allennlp==2.10.0
+allennlp==2.8.0
 swalign
 nltk
 Cython
@@ -70,7 +70,7 @@ cytoolz
 gputil
 flask
 sklearn
-transformers
+transformers==4.10.1
 diff_match_patch
 python-Levenshtein
 pycallgraph

@@ -80,7 +80,6 @@ logging_config = '/home/finn/PycharmProjects/LayoutEagle/python/config/logging.y
 model_config = "elmo_lstm3_feedforward4_crf_straight.json"
 jobs = 32
 max_time_per_call = 30
-# "elmo_multi_head_self_attention_crf_straight_fitter.config"
 parse_pdf2htmlEX = True
 n_layout_training_documents = 500
 max_windows_per_text = 100
