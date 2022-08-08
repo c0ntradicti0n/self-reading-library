@@ -1,10 +1,10 @@
 import traceback
 from collections import defaultdict
-from queue import Queue, Empty
 import json
 import logging
 from PIL import Image
 
+from core.database import Queue
 from helpers import hash_tools
 
 logging.getLogger().setLevel(logging.INFO)
@@ -29,9 +29,9 @@ d = {}
 def init_queues(service_id, id):
     global q
     global d
-    q[service_id] = Queue()
-    q[id] = Queue()
-    d[service_id] = Queue()
+    q[service_id] = Queue(service_id + "_q")
+    q[id] = Queue(id)
+    d[service_id] = Queue(service_id + "_d")
 
 
 def encode_base64(image):
@@ -86,7 +86,7 @@ class RestQueue:
         global all_rest_queues
         all_rest_queues.append(self)
         self.service_id = service_id
-        init_queues(service_id, None)
+        init_queues(service_id, service_id)
         self.update_data = update_data
         self.work_on_upload = work_on_upload
 
@@ -95,11 +95,11 @@ class RestQueue:
     def get(self, id):
 
         try:
-            self.workbook[id] = q[id].get(timeout=10)
+            self.workbook[id] = q[id].get(id, timeout=10)
             logging.info("Get new")
 
         except Exception as e:
-            logging.error("Queue not ready, give old thing")
+            logging.error("Queue not ready, give old thing", exc_info=True)
             if id in self.workbook:
                 return self.workbook[id]
             else:
@@ -121,13 +121,12 @@ class RestQueue:
             logging.info(f"Ok {id}")
             self.workbook.get(id)
             item = self.workbook.pop(id)
-            d[self.service_id].put_nowait(item)
+            d[self.service_id].put(id, item)
             q[id].task_done()
         except Exception as e:
             print("ok, but end of gen")
 
             logging.error(f"could not remove ${id} from {self.workbook}")
-            d[self.service_id].put_nowait(None)
 
     def discard(self, id):
         try:
@@ -236,7 +235,7 @@ def queue_put(service_id, gen):
     global q
 
     for val in gen:
-        q[service_id].put_nowait(val)
+        q[service_id].put(service_id, val)
 
 
 def queue_iter(service_id, gen, single=False):
@@ -245,7 +244,7 @@ def queue_iter(service_id, gen, single=False):
     for i in range(5):
         try:
             new_val = next(gen)
-            q[service_id].put_nowait(new_val)
+            q[service_id].put(service_id, new_val)
 
         except Exception as e:
             if not single:
@@ -263,16 +262,16 @@ def queue_iter(service_id, gen, single=False):
 
         try:
             logging.debug("Getting iterator")
-            r = d[service_id].get(timeout=3)
+            r = d[service_id].get(service_id, timeout=3)
             logging.info("Got iterator item")
 
             if r:
                 d[service_id].task_done()
             logging.info("Task done")
 
-        except Empty:
+        except Exception as e:
             r = None
-            logging.debug("Pulse")
+            logging.debug("Pulse", exc_info=True)
 
         if r:
             logging.debug("Yielding")
@@ -284,7 +283,7 @@ def queue_iter(service_id, gen, single=False):
                 logging.debug("Inserting some new sample in the queue")
                 try:
                     new_val = next(gen)
-                    q[service_id].put_nowait(new_val)
+                    q[service_id].put(service_id, new_val)
 
                 except Exception as e:
                     traceback.print_exc()

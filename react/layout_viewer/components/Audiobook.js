@@ -1,6 +1,7 @@
 import * as React from "react";
 import AudiobookService from "../resources/AudiobookService"
 import AudiobookPlayer from "../components/AudiobookPlayer"
+import {Button} from "@mui/material";
 
 export default class Audiobook extends React.Component {
     state = {
@@ -11,7 +12,6 @@ export default class Audiobook extends React.Component {
 
     componentDidUpdate() {
         this.service = new AudiobookService()
-        this.load()
     }
 
     load = async () => {
@@ -27,7 +27,9 @@ export default class Audiobook extends React.Component {
 
     render() {
         console.log(this)
-        return <>{
+        return <>
+            <Button onClick={this.load}>Create Audiobook</Button>
+            {
             this.state.exists
                 ? <AudiobookPlayer id={this.state.audioPath}></AudiobookPlayer>
                 : <div>Creating your audiobook...</div>

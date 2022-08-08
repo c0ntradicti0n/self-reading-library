@@ -27,7 +27,7 @@ def compressed_pickle(value):
 def decompress_pickle(value):
     try:
         pvalue = zlib.decompress(value)
-        rvalue = cPickle.loads(data=pvalue)
+        rvalue = cPickle.loads(pvalue)
         return rvalue
     except:
         logging.error(f"corrupted cache file {value=}", exc_info=True)

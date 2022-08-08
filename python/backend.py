@@ -78,18 +78,10 @@ def run_extra_threads():
              ]
              )
 
-    if __name__ == "__main__":
-        layout = threading.Thread(target=layout_annotate_train_model, name="layout")
-        # layout.start()
-        difference_elmo = threading.Thread(target=annotate_difference_elmo, name="difference")
-        difference_elmo.start()
-    else:
-        import uwsgidecorators
-
-        @uwsgidecorators.postfork
-        @uwsgidecorators.thread
-        def _():
-            annotate_difference_elmo()
+    layout = threading.Thread(target=layout_annotate_train_model, name="layout")
+    # layout.start()
+    difference_elmo = threading.Thread(target=annotate_difference_elmo, name="difference")
+    difference_elmo.start()
 
 
     def fill_library():
@@ -108,7 +100,7 @@ def run_extra_threads():
                 logging.error("Getting first 100 threw", exc_info=True)
                 break
 
-    # threading.Thread(target=fill_library, name="fill library").start()
+    threading.Thread(target=fill_library, name="fill library").start()
 
 
 def create_app():
