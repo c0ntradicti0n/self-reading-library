@@ -2,6 +2,8 @@ import * as React from "react";
 import AudiobookService from "../resources/AudiobookService"
 import AudiobookPlayer from "../components/AudiobookPlayer"
 import {Button} from "@mui/material";
+import {Audio} from 'react-loader-spinner'
+
 
 export default class Audiobook extends React.Component {
     state = {
@@ -26,15 +28,16 @@ export default class Audiobook extends React.Component {
     }
 
     existsCall = async () => {
-        const exists = await this.service.exists(this.props.id,
+        await this.service.exists(this.props.id,
             (res) => {
                 console.log(res)
 
-                this.setState({exists: true, id: this.props.id, audioPath: res})
+                this.setState({exists: true, id: this.props.id, audioPath: res.audio_path})
                 console.log(res)
+                clearInterval(this.intervalId)
+
             })
-        console.log(exists)
-        this.setState({exists})
+
     }
 
     load = async () => {
@@ -56,12 +59,15 @@ export default class Audiobook extends React.Component {
 
     render() {
         console.log(this)
-        return <>
-            {
-                this.state.exists
-                    ? <AudiobookPlayer id={this.state.audioPath}></AudiobookPlayer>
-                    : <Button onClick={this.load}>Create (new) Audiobook</Button>
+        return <div>
+            {this.state.exists === null ? <Audio height="80"/> :
+                (
+                    this.state.exists
+                        ? <AudiobookPlayer id={this.state.audioPath}></AudiobookPlayer>
+                        : <Button onClick={this.load}>Create (new) Audiobook</Button>
 
-            }</>
+                )
+            }
+        </div>
     }
 }

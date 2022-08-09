@@ -112,7 +112,7 @@ export default class ServerResource<T> {
                 result = await response.json();
                 console.log({result});
             } catch (e) {
-                console.log("Did not get a json back", e);
+                console.log("Did not get a json back", e, result);
                 result = null;
             }
 

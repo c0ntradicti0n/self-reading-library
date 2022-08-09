@@ -35,6 +35,14 @@ class AudioPublisher(RestPublisher, react):
     def on_get(self, req, resp, id=None):
         id = id if id else req.params["id"]
         audio_path = get_audio_path(id)
+        json.dumps(
+            {"audio_path": audio_path.replace(config.hidden_folder, "")},
+            ensure_ascii=False
+        )
+        resp.body = json.dumps(
+            {"audio_path": audio_path.replace(config.hidden_folder, "")},
+            ensure_ascii=False
+        )
         if os.path.exists(audio_path):
             resp.status = falcon.HTTP_OK
         else:
