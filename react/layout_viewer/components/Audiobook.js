@@ -22,10 +22,8 @@ export default class Audiobook extends React.Component {
 
     componentDidMount() {
         this.service = new AudiobookService()
-
+        this.existsCall()
         this.intervalId = window.setInterval(this.existsCall, 5000);
-
-
     }
 
     existsCall = async () => {

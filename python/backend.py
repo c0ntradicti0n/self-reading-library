@@ -79,7 +79,7 @@ def run_extra_threads():
              )
 
     layout = threading.Thread(target=layout_annotate_train_model, name="layout")
-    # layout.start()
+    layout.start()
     difference_elmo = threading.Thread(target=annotate_difference_elmo, name="difference")
     difference_elmo.start()
 
