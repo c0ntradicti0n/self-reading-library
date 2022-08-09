@@ -59,20 +59,15 @@ class TopicMaker:
 
         texts = list(map(lambda d: list(nps(d)), paragraphs(doc)))
 
-        print(texts[:3])
         return texts, [{"text": text} for text in texts]
 
     def __call__(self, texts, meta, *args, **kwargs):
-        print("a")
-
-
         self.nlp = spacy.load("en_core_web_md")
-        print("o")
 
         embeddingl = []
         logging.info(f"Making embeedings")
         for i, text in enumerate(texts):
-            print(i)
+            logging.info(f"Text no. {i}")
 
             try:
                 embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH]).vector
@@ -100,7 +95,7 @@ class TopicMaker:
         return topics, meta
 
     def topicize_recursively(self, embeddings, meta, texts, split_size=10, max_level=5, level=0):
-        print(f"Making Topics {level + 1} of maximally {max_level + 1}")
+        logging.info(f"Making Topics {level + 1} of maximally {max_level + 1}")
         labels = self.cluster(embeddings=embeddings)
         topic_ids_2_doc_ids = self.labels2docs(texts=texts, labels=labels)
         keywords = self.make_keywords(topic_2_docids=topic_ids_2_doc_ids, texts=texts, lookup=meta)

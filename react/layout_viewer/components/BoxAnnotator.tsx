@@ -3,6 +3,7 @@ import {zip, pairwise} from "../src/util/array";
 import {Button} from "@mui/material";
 import Nav from "./Nav";
 import Router from "next/router";
+import {Watch} from "react-loader-spinner";
 
 export default class BoxAnnotator extends Component<any> {
     LABELS = ["NONE", "c1", "c2", "c3", "wh", "h", "pn", "fn", "fg", "tb"];
@@ -211,7 +212,7 @@ export default class BoxAnnotator extends Component<any> {
                                             );
                                     }}
                                 ></div>
-                            )) : <div>Image size not computed</div>
+                            )) : <Watch ariaLabel="Waiting for image" />
                         }
 
                         {cols ? (
