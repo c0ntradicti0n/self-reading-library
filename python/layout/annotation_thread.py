@@ -1,7 +1,7 @@
 import itertools
 import logging
 
-from layout.model_helpers import repaint_image_from_labels
+from layout.model_helpers import repaint_image_from_labels, changed_labels
 from core.event_binding import RestQueue
 from core.StandardConverter.Scraper import Scraper
 from layout.box_feature_maker.box_feature_maker import BoxFeatureMaker
@@ -89,7 +89,7 @@ def annotate_uploaded_file(path_to_pdf, service_id=None, url=None):
 
 
 UploadAnnotationQueueRest = RestQueue(
-    update_data=repaint_image_from_labels,
+    update_data=changed_labels,
     service_id="upload_annotation",
     work_on_upload=annotate_uploaded_file
 )

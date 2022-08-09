@@ -69,20 +69,25 @@ class BoxFeatureMaker(PathSpec):
 
                 images = convert_from_path(labeled_pdf_path)
                 image_dict = {}
+                size_dict = {}
 
                 for page_number, pil in enumerate(images):
                     image_path = f'{labeled_pdf_path}.{page_number}.jpg'
 
                     image_dict[page_number] = image_path
 
-                    basewidth = config.basewidth
-                    wpercent = (basewidth / float(pil.size[0]))
-                    hsize = int((float(pil.size[1]) * float(wpercent)))
-                    pil = pil.resize((basewidth, hsize), Resampling.LANCZOS)
+                    w = config.basewidth
+                    wpercent = (w / float(pil.size[0]))
+                    h = int((float(pil.size[1]) * float(wpercent)))
+                    pil = pil.resize((w, h), Resampling.LANCZOS)
+
+                    size_dict [page_number] = (w,h,)
 
                     pil.save(image_path)
 
                 final_feature_df['image_path'] = final_feature_df.page_number.map(image_dict)
+                final_feature_df['image_size'] = final_feature_df.page_number.map(size_dict)
+
                 meta['final_feature_df'] = final_feature_df
                 yield labeled_pdf_path, meta
 

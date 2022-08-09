@@ -17,7 +17,8 @@
 }
 
 #annotation_canvas {
-    width: 50%;
+    width: 50vw !important;
+    height: 100vh !important;
 }
 
 @font-face {

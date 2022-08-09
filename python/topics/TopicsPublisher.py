@@ -8,6 +8,7 @@ from core.RestPublisher.Resource import Resource
 from core.RestPublisher.RestPublisher import RestPublisher
 from core.RestPublisher.react import react
 from core.StandardConverter.Dict2Graph import Dict2Graph
+from helpers.list_tools import forget_except
 from topics.TopicMaker import TopicMaker
 from core import config
 from core.pathant.Converter import converter
@@ -36,7 +37,7 @@ class TopicsPublisher(RestPublisher, react):
 
     def __call__(self, documents):
         print ("started")
-        documents = list(documents)
+        documents = list(forget_except(documents, keys=[]))
 
         html_paths_json_paths_txt_paths, metas = list(zip(*documents))
         print ("started2")
@@ -49,6 +50,8 @@ class TopicsPublisher(RestPublisher, react):
             for meta in metas
         ]
         print ("started3")
+
+        metas = forget_except(metas, )
 
         self.topics, text_ids = topic_maker(texts, meta=metas)
 

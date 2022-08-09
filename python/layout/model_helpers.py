@@ -6,6 +6,7 @@ import random
 import pickle
 from regex import regex
 
+
 def compute_bbox(examples):
     bbox = list(list(zip(*b)) for b in zip(examples['x0'], examples['y0'], examples['x1'], examples['y1']))
 
@@ -60,6 +61,7 @@ def post_process_df(feature_df):
 
     return feature_df
 
+
 if os.path.isfile(config.PROCESSOR_PICKLE):
     with open(config.PROCESSOR_PICKLE, "rb") as f:
         PROCESSOR = pickle.load(f)
@@ -74,7 +76,7 @@ if os.path.isfile(config.MODEL_PICKLE):
 else:
     MODEL = LayoutLMv2ForTokenClassification.from_pretrained(
         'microsoft/layoutlmv2-base-uncased',
-         num_labels=config.NUM_LABELS
+        num_labels=config.NUM_LABELS
     )
     with open(config.MODEL_PICKLE, "wb") as f:
         pickle.dump(MODEL, f)
@@ -84,15 +86,16 @@ def preprocess_data(training=False):
     def _preprocess(examples, **kwargs):
         global PROCESSOR
 
-        words = [[" ".join(word.split()[:4] #+ word.split()[-2:]
-                           )  for word in text] for text in examples['text']]
+        words = [[" ".join(word.split()[:4]  # + word.split()[-2:]
+                           ) for word in text] for text in examples['text']]
 
         boxes = compute_bbox(examples)
 
-        word_labels = ([[0] * (len(examples['label'][0]))]) if not training else [[config.label2id[l] for l in L] for L in examples['LABEL']]
+        word_labels = ([[0] * (len(examples['label'][0]))]) if not training else [[config.label2id[l] for l in L] for L
+                                                                                  in examples['LABEL']]
 
         if training:
-            print (f"{word_labels = }")
+            print(f"{word_labels = }")
 
         images = [Image.open(path[0]).convert("RGB") for path in examples['image_path']]
 
@@ -102,11 +105,8 @@ def preprocess_data(training=False):
                                    padding="max_length", truncation=True, return_overflowing_tokens=False, **kwargs)
 
         return encoded_inputs
+
     return _preprocess
-
-
-
-
 
 
 def unnormalize_box(bbox, width, height):
@@ -142,3 +142,7 @@ def repaint_image_from_labels(data_meta):
 
     data['human_image'] = image
     return (id, data)
+
+def changed_labels(data_meta):
+    id, data = data_meta
+    return (id, {"labels": data['labels']})

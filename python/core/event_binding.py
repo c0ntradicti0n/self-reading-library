@@ -107,9 +107,8 @@ class RestQueue:
 
     def change(self, item, path, value):
         self.apply(item, path, value)
-        item = self.update_data(item)
-        self.workbook[id] = item
-        return item
+        values = self.update_data(item)
+        return values
 
     def apply(self, item, path, value):
         jsonpath_expr = parse(path)

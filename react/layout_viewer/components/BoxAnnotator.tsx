@@ -2,7 +2,6 @@ import React, {Component} from "react";
 import {zip, pairwise} from "../src/util/array";
 import {Button} from "@mui/material";
 import Nav from "./Nav";
-import Url2Difference from "./Url2Difference";
 import Router from "next/router";
 
 export default class BoxAnnotator extends Component<any> {
@@ -73,7 +72,10 @@ export default class BoxAnnotator extends Component<any> {
 
     state = {
         next_key: null,
-        finished: false
+        finished: false,
+        imgOriginalSize: null,
+        imgRenderSize: null,
+        labels: null
     };
 
     componentDidMount() {
@@ -84,6 +86,25 @@ export default class BoxAnnotator extends Component<any> {
 
     componentWillUnmount() {
         document.removeEventListener("keydown", this.key, true);
+    }
+
+    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<{}>, snapshot?: any) {
+
+        console.log(this);
+        if (this.props.superState?.meta?.image && (!this.state.imgOriginalSize || window.innerHeight != this.state.imgRenderSize?.height)) {
+            const width = window.innerWidth
+            const scaleW = width * 0.5
+            const height = window.innerHeight
+            const scaleH = height
+
+            let im = new Image;
+            im.src = "data:image/jpeg;charset=utf-8;base64," +
+                this.props.superState?.meta?.image;
+            im.onload = () => this.setState({
+                imgOriginalSize: {width: im.width, height: im.height},
+                imgRenderSize: {width: scaleW, height: scaleH}
+            })
+        }
     }
 
     key = (event) => {
@@ -107,16 +128,11 @@ export default class BoxAnnotator extends Component<any> {
     };
 
     render() {
-        console.log(this.props);
-        const width = window.innerWidth
-        const scale = width * 0.5 * 0.994
-
-
         let cols;
         if (this.props.superState.meta)
             cols = zip([
                 this.props.superState.meta.bbox,
-                this.props.superState.meta.labels,
+                this.state.labels ?? this.props.superState.meta.labels,
             ]);
 
         // @ts-ignore
@@ -149,47 +165,54 @@ export default class BoxAnnotator extends Component<any> {
                         }}>Return to document!</Button></h2></div>
                     :
                     <div className="container" style={{position: "absolute"}}>
-                        {this.props.superState?.meta?.human_image ? (
+                        {this.props.superState?.meta?.image ? (
                             <img
                                 id="annotation_canvas"
                                 src={
                                     "data:image/jpeg;charset=utf-8;base64," +
-                                    this.props.superState?.meta?.human_image
+                                    this.props.superState?.meta?.image
                                 }
                             />
                         ) : null}
 
-                        {cols?.map((row, i) => (
-                            <div
-                                style={{
-                                    position: "absolute",
-                                    left: (row[0][0] / 2500 * scale).toString() + "px",
-                                    top: (row[0][1] / 2500 * scale).toString() + "px",
-                                    width: ((row[0][2] - row[0][0]) / 2500 * scale).toString() + "px",
-                                    height: ((row[0][3] - row[0][1]) / 2500 * scale).toString() + "px",
-                                    //border: "1px solid black",
-                                    zIndex: Math.ceil(
-                                        9000000 - (row[0][2] - row[0][0]) * (row[0][3] - row[0][1])
-                                    ),
-                                }}
-                                onClick={() => {
-                                    console.log("row", i);
-                                    let label;
-                                    if (this.state.next_key) {
-                                        label = this.state.next_key;
-                                    } else {
-                                        label = this.LABEL_SWITCH[row[1]];
-                                    }
-                                    console.log({label, ls: this.LABEL_SWITCH});
-                                    if (label)
-                                        this.props.service.change(
-                                            "[1].labels.[" + i + "]",
-                                            label,
-                                            this.props.setFullState
-                                        );
-                                }}
-                            ></div>
-                        ))}
+                        {this.state.imgOriginalSize ?
+                            cols?.map((row, i) => (
+                                <div
+                                    style={{
+                                        position: "absolute",
+                                        left: (row[0][0] / this.state.imgOriginalSize.width * this.state.imgRenderSize.width).toString() + "px",
+                                        top: (row[0][1] / this.state.imgOriginalSize.height * this.state.imgRenderSize.height - this.state.imgRenderSize.height * 0.003).toString() + "px",
+                                        width: ((row[0][2] - row[0][0]) / this.state.imgOriginalSize.width * this.state.imgRenderSize.width * 1.02).toString() + "px",
+                                        height: ((row[0][3] - row[0][1]) / this.state.imgOriginalSize.height * this.state.imgRenderSize.height + this.state.imgRenderSize.height * 0.003).toString() + "px",
+                                        //border: "1px solid black",
+                                        zIndex: Math.ceil(
+                                            9000000 - (row[0][2] - row[0][0]) * (row[0][3] - row[0][1])
+                                        ),
+                                        opacity: "0.5",
+                                        background: this.TAG_COLOR[row[1]]
+                                    }}
+                                    onClick={() => {
+                                        console.log("row", i);
+                                        let label;
+                                        if (this.state.next_key) {
+                                            label = this.state.next_key;
+                                        } else {
+                                            label = this.LABEL_SWITCH[row[1]];
+                                        }
+                                        console.log({label, ls: this.LABEL_SWITCH});
+                                        if (label)
+                                            this.props.service.change(
+                                                "[1].labels.[" + i + "]",
+                                                label,
+                                                (res) => {
+                                                    console.log(res)
+                                                    this.setState({labels: res[1].labels})
+                                                }
+                                            );
+                                    }}
+                                ></div>
+                            )) : <div>Image size not computed</div>
+                        }
 
                         {cols ? (
                             <>

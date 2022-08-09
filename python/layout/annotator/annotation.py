@@ -3,14 +3,14 @@ from core.RestPublisher.RestPublisher import RestPublisher
 from core.RestPublisher.RestPublisher import Resource
 from core.RestPublisher.react import react
 from core.event_binding import queue_iter, RestQueue, queue_put
-from layout.model_helpers import repaint_image_from_labels
+from layout.model_helpers import repaint_image_from_labels, changed_labels
 import logging
 
 
 
 AnnotationQueueRest = RestQueue(
     service_id="annotation",
-    update_data=repaint_image_from_labels
+    update_data=changed_labels
 )
 
 
