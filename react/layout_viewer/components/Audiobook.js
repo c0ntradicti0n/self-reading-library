@@ -8,6 +8,7 @@ import {Audio} from 'react-loader-spinner'
 export default class Audiobook extends React.Component {
     state = {
         exists: null,
+        checked: null,
         id: null,
         audioPath: null
     }
@@ -37,7 +38,7 @@ export default class Audiobook extends React.Component {
                 clearInterval(this.intervalId)
 
             })
-
+        this.setState({checked: true})
     }
 
     load = async () => {
@@ -60,7 +61,7 @@ export default class Audiobook extends React.Component {
     render() {
         console.log(this)
         return <div>
-            {this.state.exists === null ? <Audio height="80"/> :
+            {this.state.checked === null ? <Audio height="80"/> :
                 (
                     this.state.exists
                         ? <AudiobookPlayer id={this.state.audioPath}></AudiobookPlayer>
