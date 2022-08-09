@@ -11,7 +11,7 @@ from helpers import os_tools
 @converter("annotation.collection", "model")
 class Training(PathSpec):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, num_labels = config.NUM_LABELS, **kwargs)
+        super().__init__(*args, num_labels=config.NUM_LABELS, **kwargs)
 
     def __call__(self, x_meta, *args, **kwargs):
         if 'collection_step' not in self.flags:
@@ -20,7 +20,7 @@ class Training(PathSpec):
             self.collection_step = self.flags['collection_step']
 
         df_paths_meta = list(x_meta)
-        feature_dfs = [ path_meta[0] for path_meta in df_paths_meta]
+        feature_dfs = [path_meta[0] for path_meta in df_paths_meta]
         model_path = f"{config.TEXT_BOX_MODEL_PATH}/{self.collection_step}"
 
         if os.path.exists(model_path):
@@ -28,15 +28,18 @@ class Training(PathSpec):
 
         os.makedirs(model_path)
 
-        feature_df = pandas.concat( [
-            pandas_tools.load_pandas_file(
-                p
-            ) for p in feature_dfs])
+        feature_df = pandas.concat(
+            [
+                df for p in feature_dfs
+                if (df := pandas_tools.load_pandas_file(
+                        config.COLLECTION_PATH + p
+                    )) is not None
+            ]
+        )
 
         print("LABEL", feature_df["LABEL"].tolist())
 
-
-        #df = model_helpers.post_process_df(feature_df)
+        feature_df = feature_df[feature_df.image_path.map(lambda path: not os.path.exists(path[0]))]
 
         dataset = Dataset.from_pandas(feature_df)
 
@@ -75,12 +78,13 @@ class Training(PathSpec):
                 image = image.convert("RGB")
                 width, height = image.size
                 draw = ImageDraw.Draw(image)
-                for word, box, label in zip(example['text'][0], model_helpers.compute_bbox(example)[0], example['LABEL'][0]):
+                for word, box, label in zip(example['text'][0], model_helpers.compute_bbox(example)[0],
+                                            example['LABEL'][0]):
                     actual_label = label
                     box = model_helpers.unnormalize_box(box, width, height)
                     draw.rectangle(box, outline=config.label2color[actual_label], width=2)
-                    draw.text((box[0] + 10, box[1] - 10), actual_label, fill=config.label2color[actual_label], font=font)
-                #image.save(f"boxes_unpredicted_{x}.jpg")
+                    draw.text((box[0] + 10, box[1] - 10), actual_label, fill=config.label2color[actual_label],
+                              font=font)
 
             batch = next(iter(train_dataloader))
 
@@ -155,13 +159,12 @@ class Training(PathSpec):
 
                 f1 = final_score['overall_f1']
                 n_samples = len(feature_df)
-                print (f"{dataset.shape = }")
+                print(f"{dataset.shape = }")
                 path = f"{config.TEXT_BOX_MODEL_PATH}_{str(n_samples)}_{str(f1).replace('.', ',')}_{epoch}"
                 f1_to_new_model_paths[f1] = path
 
                 torch.save(model.state_dict(),
                            path)
-
 
         best_model_path = max(f1_to_new_model_paths.items(), key=lambda x: x[0])[1]
         yield best_model_path, df_paths_meta

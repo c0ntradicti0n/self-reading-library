@@ -1,3 +1,5 @@
+import logging
+
 import numpy
 import pandas
 
@@ -16,5 +18,8 @@ def unpack_list_column(column_name, df, prefix='', suffix=''):
 
 
 def load_pandas_file(feature_path):
-    return pandas.read_pickle(feature_path)
-
+    try:
+        return pandas.read_pickle(feature_path)
+    except:
+        logging.warning("Could not read pandas pickle!")
+        return None
