@@ -3,8 +3,8 @@ import Nav from "./Nav";
 import ServerResource from "../resources/GeneralResource";
 import { ThreeCircles, Triangle } from "react-loader-spinner";
 import SelectText from "./SelectText";
-import Difference_AnnotationService from "../src/resources/Difference_AnnotationService";
 import { AppSettings } from "../../config/connection";
+import Difference_AnnotationService from "../resources/Difference_AnnotationService";
 
 interface Props {
   data: { value: any; meta: any };

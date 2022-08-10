@@ -14,9 +14,10 @@ def generate_audio(id, text):
     out_path = get_audio_path(id)
 
     try:
-        os.makedirs(os.path.dirname(out_path))
+        os.makedirs(os.path.dirname(out_path), exist_ok=True)
     except:
         logging.error(f"Could not make audio directory {out_path}", exc_info=True)
+
     with open(f"{id}.txt", "w") as f:
         f.write(text)
 

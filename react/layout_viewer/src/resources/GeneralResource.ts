@@ -76,13 +76,15 @@ export default class ServerResource<T> {
     method: String,
     data = {},
     callback: Function,
-    is_file = false
+    is_file = false,
+    query: string = null
   ) => {
     // Default options are marked with *
     console.log("URL", AppSettings.BACKEND_HOST + this.route + this.id);
 
     let querystring = "";
-    if (typeof window !== "undefined") {
+    if (query) querystring = query;
+    else if (typeof window !== "undefined") {
       querystring = window?.location.search.substring(1);
       console.log(querystring);
     }
@@ -140,7 +142,7 @@ export default class ServerResource<T> {
   exists = async (id, callback: Function) => {
     console.log("Fetch all resources");
     if (this.fetch_allowed) {
-      return this.request("get", undefined, callback);
+      return this.request("get", undefined, callback, null, "id=" + id);
     }
   };
 

@@ -11,7 +11,7 @@ class react:
     def __init__(self, *args,
                  npm_project = "../react/layout_viewer_made",
                  patch_project="../react/layout_viewer",
-                 npm_resources = "resources",
+                 npm_resources = "src/resources",
                  **kwargs):
         global sync_is_running
         self.logger = logging.getLogger(str(self) + __name__)

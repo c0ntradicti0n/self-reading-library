@@ -20,13 +20,14 @@ cd fontforge
 mkdir build
 cd build
 
-cmake -j4
+cmake ..
+make
 sudo make install
 
-cd ../../../
+cd ../../
 
 git clone https://github.com/pdf2htmlEX/pdf2htmlEX.git
 cd pdf2htmlEX
 
-cp ../../fontforge/fontforge/*.* ../../pdf2htmlEX/src/
-cp ../../fontforge/build/inc/*.* ../../pdf2htmlEX/src
+cp -r ../fontforge/fontforge/*.* ../../pdf2htmlEX/src/
+cp -r ../../fontforge/build/inc/*.* ../../pdf2htmlEX/src

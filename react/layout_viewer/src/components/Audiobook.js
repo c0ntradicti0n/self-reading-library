@@ -26,6 +26,7 @@ export default class Audiobook extends React.Component {
     }
 
     existsCall = async () => {
+        console.log ("ID", this.props.id)
         await this.service.exists(this.props.id, (res) => {
             console.log(res);
 

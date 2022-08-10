@@ -1,3 +1,4 @@
+import itertools
 import logging
 import os
 
@@ -84,7 +85,7 @@ class RestPublisher(PathSpec, react):
                 f.write(
                     self.server_resource_code.format(**self.resource, port=self.port, url=self.url, **self.resource.access))
         except:
-            logging.error(f"Could not create javascript resource file {self.resource.Title}")
+            logging.error(f"Could not create javascript resource file {self.resource.Title}", exc_info=True)
 
         self.write_components("/".join([self.npm_components, self.resource.title + ".tsx"]))
 
@@ -92,7 +93,7 @@ class RestPublisher(PathSpec, react):
             with open("/".join([self.npm_pages, self.resource.title + ".tsx"]), "w") as f:
                 f.write(self.page_code.format(**self.resource, port=self.port, url=self.url, **self.resource.access))
         except:
-            logging.error(f"Could not write {self.resource.title}.tsx")
+            logging.error(f"Could not write {self.resource.title}.tsx", exc_info=True)
 
 
     def __iter__(self, incoming):
@@ -123,14 +124,14 @@ export default class ??Title!!Service extends ServerResource<any> {
 import React from 'react'
 import Router from 'next/router'
 import { withRouter } from "next/router";
-import ??title!!Service from '../resources/??Title!!Service'
-import HtmlRenderer from './../components/HtmlRenderer'
-import BoxAnnotator from './../components/BoxAnnotator'
-import DownloadFile from './../components/DownloadFile'
+import ??title!!Service from '../src/resources/??Title!!Service'
+import HtmlRenderer from './../src/components/HtmlRenderer'
+import BoxAnnotator from './../src/components/BoxAnnotator'
+import DownloadFile from './../src/components/DownloadFile'
 
 import dynamic from 'next/dynamic'
 const Graph = dynamic(
-    () => import('./../components/Graph.js'),
+    () => import('./../src/components/Graph.js'),
     {
         loading: () => <p>...</p>,
         ssr: false
@@ -271,11 +272,11 @@ export default withRouter(??title!!)
         written_componens = []
         for component, code in self.components.items():
             try:
-                with open("/".join([self.npm_resources, self.resource.title + ".s"]), "w") as f:
+                with open("/".join([self.npm_resources, self.resource.title + ".ts"]), "w") as f:
                     f.write(code.format(**self.resource, port=self.port, url=self.url, **self.resource.access))
                     written_componens.append(component)
             except:
-                logging.error(f"Could not write { self.resource.title }")
+                logging.error(f"Could not write { self.resource.title }", exc_info=True)
 
 import unittest
 
