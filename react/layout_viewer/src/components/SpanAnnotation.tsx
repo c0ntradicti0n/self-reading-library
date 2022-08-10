@@ -10,8 +10,14 @@ import CloseIcon from "@mui/icons-material/Close";
 import Typography from "@mui/material/Typography";
 import { styled as sty } from "@mui/material/styles";
 import { Slider } from "@mui/material";
-import { getSpans } from "../util/annotation";
 import { ThreeDots } from "react-loader-spinner";
+import {
+  addSpan,
+  adjustSpanValue,
+  getSpans,
+  popSpan,
+  spans2annotation,
+} from "../helpers/span_tools";
 
 const BootstrapDialog = sty(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -27,7 +33,27 @@ const BootstrapDialog = sty(Dialog)(({ theme }) => ({
     padding: theme.spacing(1),
   },
 }));
-const minDistance = 1;
+
+export function AnnotationTable(props: {
+  annotation: string[][];
+  spans: [string, number, number, string[]][];
+}) {
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap" }}>
+      {props.annotation.map(([word, tag], index) => {
+        let span_no =
+          props.spans.find(
+            ([, begin, end]) => index >= begin && index < end
+          )?.[0] ?? "O";
+        return (
+          <span key={index} className={"tag span_" + span_no}>
+            {word}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
 
 const BootstrapDialogTitle = (props) => {
   const { children, onClose, ...other } = props;
@@ -57,106 +83,6 @@ BootstrapDialogTitle.propTypes = {
   children: PropTypes.node,
   onClose: PropTypes.func.isRequired,
 };
-
-function AnnotationTable(props: {
-  annotation: string[][];
-  spans: [string, number, number, string[]][];
-}) {
-  return (
-    <div style={{ display: "flex", flexWrap: "wrap" }}>
-      {props.annotation.map(([word, tag], index) => {
-        let span_no =
-          props.spans.find(
-            ([, begin, end]) => index >= begin && index < end
-          )?.[0] ?? "O";
-        return (
-          <span key={index} className={"tag span_" + span_no}>
-            {word}
-          </span>
-        );
-      })}
-    </div>
-  );
-}
-
-const spans2annotation = (annotation, spans) => {
-  return annotation.map(([word, tag], index) => {
-    let [_tag, begin, end] = spans.find(
-      ([, begin, end]) => index >= begin && index < end
-    ) ?? [null, null, null, null];
-    if (tag == null) return [word, "O"];
-    let prefix = "";
-    if (index === begin) prefix = "B-";
-    if (index === end - 1) prefix = "L-";
-    if (index === begin && index === end - 1) prefix = "U-";
-    if (index > begin && index < end - 1) prefix = "I-";
-    return [word, prefix + _tag];
-  });
-};
-
-function valuetext(value) {
-  return `${value}°C`;
-}
-
-function adjustSpanValue(
-  newValue: number | number[],
-  activeThumb: number,
-  spanIndices: [string, number, number, string[]][],
-  i: number,
-  tag: string,
-  annotation: [string, string]
-) {
-  if (!Array.isArray(newValue)) {
-    return;
-  }
-  let value: number[];
-
-  if (newValue[1] - newValue[0] < minDistance) {
-    if (activeThumb === 0) {
-      const clamped = Math.min(newValue[0], annotation.length - minDistance);
-      value = [clamped, clamped + minDistance];
-    } else {
-      const clamped = Math.max(newValue[1], minDistance);
-      value = [clamped - minDistance, clamped];
-    }
-  } else {
-    value = newValue;
-  }
-
-  // @ts-ignore
-  spanIndices[i] = [
-    tag,
-    ...value,
-    // @ts-ignore
-    annotation.slice(value[0], value[1]).map(([w]) => w),
-  ];
-
-  // @ts-ignore
-
-  for (let [j, span] of [...spanIndices.entries()].reverse()) {
-    span = spanIndices[j];
-    if (span[2] > value[0] && span[2] <= value[1] && i > j) {
-      span[2] = value[0];
-      spanIndices[j] = span;
-    }
-
-    if (span[1] < value[1] && span[1] >= value[0] && j > i) {
-      span[1] = value[1];
-      spanIndices[j] = span;
-    }
-  }
-
-  // @ts-ignore
-  spanIndices = spanIndices.map(([tag, begin, end]) => [
-    tag,
-    begin,
-    end,
-    // @ts-ignore
-
-    annotation.slice(begin, end).map(([w]) => w),
-  ]);
-  return spanIndices;
-}
 
 export default function SpanAnnotation({
   value,
@@ -244,7 +170,9 @@ export default function SpanAnnotation({
           console.log("stop it!");
         }}
       >
-        <BootstrapDialogTitle onClose={() => console.log("Closing dialogue")}>Teach the difference</BootstrapDialogTitle>
+        <BootstrapDialogTitle onClose={() => console.log("Closing dialogue")}>
+          Teach the difference
+        </BootstrapDialogTitle>
         <DialogContent dividers>
           {!annotation ? (
             <ThreeDots />
@@ -262,8 +190,7 @@ export default function SpanAnnotation({
                     <Button
                       startIcon="minus"
                       onClick={() => {
-                        spanIndices.splice(i, 1);
-                        setSpanIndices([...spanIndices]);
+                        popSpan(spanIndices, i, setSpanIndices);
                       }}
                     ></Button>
                     <b>{tag}</b>
@@ -332,58 +259,7 @@ export default function SpanAnnotation({
               <Button
                 startIcon="add"
                 onClick={() => {
-                  const tagOccurrences = spanIndices.reduce(
-                    (acc, e) => acc.set(e[0], (acc.get(e[0]) || 0) + 1),
-                    new Map()
-                  );
-                  console.log(tagOccurrences);
-                  // @ts-ignore
-                  let incompleteTags = [...tagOccurrences.entries()].filter(
-                    ([, v]) => v < 2
-                  );
-                  console.log(incompleteTags);
-
-                  if (
-                    incompleteTags.every(
-                      (val, i, arr) => val === arr[0] && val < 2
-                    )
-                  )
-                    incompleteTags = [
-                      ["SUBJECT", 0],
-                      ["CONTRAST", 0],
-                    ];
-                  console.log(incompleteTags);
-
-                  let newSpanIndices = spanIndices;
-                  const averageSpanLength =
-                    annotation.length /
-                    (spanIndices.length + incompleteTags.length);
-                  console.log(
-                    averageSpanLength,
-                    annotation.length,
-                    spanIndices.length + incompleteTags.length,
-                    spanIndices.length,
-                    incompleteTags.length
-                  );
-                  incompleteTags.forEach(([k, v], i) => {
-                    let newSpan = [
-                      annotation.length -
-                        (incompleteTags.length - i) * averageSpanLength,
-                      annotation.length -
-                        (incompleteTags.length - i - 1) * averageSpanLength,
-                    ];
-                    console.log("newSpan", newSpan);
-                    return adjustSpanValue(
-                      newSpan,
-                      0,
-                      newSpanIndices,
-                      newSpanIndices.length,
-                      k,
-                      annotation
-                    );
-                  });
-                  console.log(newSpanIndices);
-                  setSpanIndices([...newSpanIndices]);
+                  setSpanIndices(addSpan(spanIndices, annotation));
                 }}
               ></Button>
             </>

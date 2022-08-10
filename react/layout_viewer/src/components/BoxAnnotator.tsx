@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {pairwise, zip} from "../util/array";
+import {pairwise, zip} from "../helpers/array";
 import {Button} from "@mui/material";
 import Nav from "./Nav";
 import Router from "next/router";
