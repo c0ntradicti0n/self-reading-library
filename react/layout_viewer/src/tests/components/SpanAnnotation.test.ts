@@ -1,26 +1,26 @@
-import { addSpan, adjustSpanValue, getSpans } from "../../helpers/span_tools";
+import { addSpan, adjustSpanValue, spans2annotation, annotation2spans } from "../../helpers/span_tools";
 
 const testAnnotation: [string, string][] = [
   ["the", "B-SUBJ"],
   ["lazy", "I-SUBJ"],
   ["yellow", "I-SUBJ"],
-  ["socks", "I-SUBJ"],
+  ["socks", "L-SUBJ"],
   ["glued", "B-CONTRAST"],
-  ["on", "B-CONTRAST"],
-  ["the", "B-CONTRAST"],
+  ["on", "I-CONTRAST"],
+  ["the", "I-CONTRAST"],
   ["wall", "L-CONTRAST"],
   [".", "O"],
   ["the", "B-SUBJ"],
   ["lazy", "I-SUBJ"],
   ["yellow", "I-SUBJ"],
-  ["socks", "I-SUBJ"],
+  ["socks", "L-SUBJ"],
   ["glued", "B-CONTRAST"],
-  ["on", "B-CONTRAST"],
-  ["the", "B-CONTRAST"],
+  ["on", "I-CONTRAST"],
+  ["the", "I-CONTRAST"],
   ["wall", "L-CONTRAST"],
   [".", ""],
 ];
-const testSpans = getSpans(testAnnotation);
+const testSpans = annotation2spans(testAnnotation);
 
 
 const testAnnotationNoSubj: [string, string][] = [
@@ -29,20 +29,20 @@ const testAnnotationNoSubj: [string, string][] = [
   ["yellow", "I-SUBJ"],
   ["socks", "I-SUBJ"],
   ["glued", "B-CONTRAST"],
-  ["on", "B-CONTRAST"],
-  ["the", "B-CONTRAST"],
+  ["on", "I-CONTRAST"],
+  ["the", "I-CONTRAST"],
   ["wall", "L-CONTRAST"],
   [".", "O"],
   ["lazy", "O"],
   ["yellow", "O"],
   ["socks", "O"],
   ["glued", "B-CONTRAST"],
-  ["on", "B-CONTRAST"],
-  ["the", "B-CONTRAST"],
+  ["on", "I-CONTRAST"],
+  ["the", "I-CONTRAST"],
   ["wall", "L-CONTRAST"],
   [".", ""],
 ];
-const testSpansNoSubj = getSpans(testAnnotationNoSubj);
+const testSpansNoSubj = annotation2spans(testAnnotationNoSubj);
 
 console.log(testSpans);
 
@@ -56,6 +56,12 @@ it("adjustSpan", () => {
     testAnnotation
   );
   console.log(result);
+
+});
+
+it("annotation == span2annotation(annotation2span(annotation))", () => {
+  const result = spans2annotation(testAnnotation, annotation2spans(testAnnotation))
+  expect(result).toEqual(testAnnotation)
 
 });
 
