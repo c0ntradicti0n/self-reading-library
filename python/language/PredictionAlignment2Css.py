@@ -1,11 +1,12 @@
 import logging
 import os
-from collections import defaultdict, Counter
+
+import pandas as pd
 
 from config import config
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
-import pandas as pd
+
 
 @converter("reading_order.*", 'css.*')
 class PredictionAlignment2Css(PathSpec):
@@ -23,13 +24,12 @@ class PredictionAlignment2Css(PathSpec):
             else:
                 attributes.append((key, value))
 
-
         for key, value in children:
             self.write_css(selector + (key,), value, output)
 
     def window_overlap(self, i1, i2, j1, j2):
         if i1 >= j1 and i2 <= j2:
-            return (i1,i2)
+            return (i1, i2)
         else:
             return None
 
@@ -42,7 +42,7 @@ class PredictionAlignment2Css(PathSpec):
             try:
                 for _i1, (i_annotation, _i2) in meta["_i_to_i2"].items():
                     if _i1 not in i_to_tag or i_to_tag[_i1] == "O":
-                        #if _i2 < len(tags):
+                        # if _i2 < len(tags):
                         i_to_tag[_i1] = annotation[i_annotation][_i2]
             except Exception as e:
                 logging.error(e, exc_info=True)
@@ -87,7 +87,7 @@ class PredictionAlignment2Css(PathSpec):
     def parse_to_css(self, css_obj, meta):
         try:
             return "\n".join([
-f""".z{hex(i)[2:]} {{
+                f""".z{hex(i)[2:]} {{
     {meta["CSS"][annotation[0]]}
     }}
     

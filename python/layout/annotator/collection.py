@@ -4,9 +4,9 @@ from PIL import Image
 
 from core.pathant.PathSpec import PathSpec
 from core.pathant.Converter import converter
-from core.RestPublisher.RestPublisher import RestPublisher
-from core.RestPublisher.RestPublisher import Resource
-from core.RestPublisher.react import react
+from core.rest.RestPublisher import RestPublisher
+from core.rest.RestPublisher import Resource
+from core.rest.react import react
 import pandas as pd
 
 from helpers.hash_tools import bas64encode

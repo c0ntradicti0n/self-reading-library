@@ -10,7 +10,7 @@ from more_itertools import pairwise
 
 from config import config
 from helpers.list_tools import flatten_optional_list_pair, flatten_optional_list_triple
-from core.StandardConverter.Dict2Graph import Dict2Graph
+from core.standard_converter.Dict2Graph import Dict2Graph
 from helpers.os_tools import make_dirs_recursive
 from core.pathant.MatchDescription import match, list_or_values
 from core.pathant.Pipeline import Pipeline

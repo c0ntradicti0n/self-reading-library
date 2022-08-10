@@ -3,17 +3,17 @@ import logging
 
 from layout.model_helpers import changed_labels
 from core.event_binding import RestQueue
-from core.StandardConverter.Scraper import Scraper
+from core.standard_converter.Scraper import Scraper
 from layout.box_feature_maker.box_feature_maker import BoxFeatureMaker
-from core.StandardConverter.HTML2PDF import HTML2PDF
-from core.StandardConverter.PDF2ETC import PDF2ETC
-from core.StandardConverter.PDF2HTML import PDF2HTML
-from core.StandardConverter.Dict2Graph import Dict2Graph
+from core.standard_converter.HTML2PDF import HTML2PDF
+from core.standard_converter.PDF2ETC import PDF2ETC
+from core.standard_converter.PDF2HTML import PDF2HTML
+from core.standard_converter.Dict2Graph import Dict2Graph
 from language.PredictionAlignment2Css import PredictionAlignment2Css
 from core.pathant.PathAnt import PathAnt
 from language.transformer.Pager import Pager
 from language.transformer.UnPager import UnPager
-from core.StandardConverter.Tex2Pdf import Tex2Pdf
+from core.standard_converter.Tex2Pdf import Tex2Pdf
 from layout.annotator import annotation, collection
 from layout.training import training
 from layout.upload_annotation.upload_annotation import UploadAnnotator

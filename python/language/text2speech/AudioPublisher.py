@@ -4,9 +4,9 @@ import os
 import falcon
 
 from config import config
-from core.RestPublisher.Resource import Resource
-from core.RestPublisher.RestPublisher import RestPublisher
-from core.RestPublisher.react import react
+from core.rest.Resource import Resource
+from core.rest.RestPublisher import RestPublisher
+from core.rest.react import react
 from core.pathant.Converter import converter
 from helpers.cache_tools import configurable_cache
 from helpers.list_tools import metaize

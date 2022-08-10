@@ -4,10 +4,10 @@ import os
 import pickle
 import falcon
 from regex import regex
-from core.RestPublisher.Resource import Resource
-from core.RestPublisher.RestPublisher import RestPublisher
-from core.RestPublisher.react import react
-from core.StandardConverter.Dict2Graph import Dict2Graph
+from core.rest.Resource import Resource
+from core.rest.RestPublisher import RestPublisher
+from core.rest.react import react
+from core.standard_converter.Dict2Graph import Dict2Graph
 from helpers.list_tools import forget_except
 from topics.TopicMaker import TopicMaker
 from config import config

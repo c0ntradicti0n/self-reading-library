@@ -1,7 +1,7 @@
 import unittest
 
 class Mak(unittest.TestCase):
-    from core.StandardConverter.Scraper.Scraper import Scraper
+    from core.standard_converter.Scraper.Scraper import Scraper
     from core.LatexReplacer.latex_replacer import LatexReplacer
     from core.LayoutReader.labeled_feature_maker import PDF_AnnotatorTool
     from core.LayoutReader.feature_label_assigner import PDF_AnnotatorTool

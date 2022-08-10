@@ -1,4 +1,4 @@
-from core.RestPublisher.PdfCssPublisher import PdfCssPublisher
+from core.rest.PdfCssPublisher import PdfCssPublisher
 from core.pathant.Converter import converter
 
 @converter("html", "rest_difference")

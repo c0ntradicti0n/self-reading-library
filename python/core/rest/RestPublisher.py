@@ -1,8 +1,8 @@
 import logging
 import os
 
-from core.RestPublisher.Resource import Resource
-from core.RestPublisher.react import react
+from core.rest.Resource import Resource
+from core.rest.react import react
 from core.pathant.PathAnt import PathAnt
 from core.pathant.PathSpec import PathSpec
 

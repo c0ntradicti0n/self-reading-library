@@ -10,7 +10,7 @@ from config import config
 from nltk.corpus import wordnet as wn
 import numpy as np
 import spacy
-from core.StandardConverter.Dict2Graph import Dict2Graph
+from core.standard_converter.Dict2Graph import Dict2Graph
 from topics.TextRank4Keywords import TextRank4Keyword
 
 

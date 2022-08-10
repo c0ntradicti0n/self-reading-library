@@ -1,7 +1,7 @@
 from core.pathant.Converter import converter
-from core.RestPublisher.RestPublisher import RestPublisher
-from core.RestPublisher.RestPublisher import Resource
-from core.RestPublisher.react import react
+from core.rest.RestPublisher import RestPublisher
+from core.rest.RestPublisher import Resource
+from core.rest.react import react
 from core.event_binding import queue_iter
 from config import config
 import logging

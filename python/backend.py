@@ -73,7 +73,7 @@ def create_app():
 
     from language.transformer.ElmoDifference import ElmoDifferenceQueueRest
 
-    from core.RestPublisher.LayoutPublisher import LayoutPublisher
+    from core.rest.LayoutPublisher import LayoutPublisher
 
     publishing = {
         '/ant':

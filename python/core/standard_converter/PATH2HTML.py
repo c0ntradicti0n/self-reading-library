@@ -1,6 +1,6 @@
-from core.RestPublisher.Resource import Resource
-from core.RestPublisher.RestPublisher import RestPublisher
-from core.RestPublisher.react import react
+from core.rest.Resource import Resource
+from core.rest.RestPublisher import RestPublisher
+from core.rest.react import react
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 

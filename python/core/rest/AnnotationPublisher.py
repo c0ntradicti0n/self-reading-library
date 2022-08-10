@@ -3,8 +3,8 @@ import falcon
 import nltk
 
 from config import config
-from core.RestPublisher.Resource import Resource
-from core.RestPublisher.RestPublisher import RestPublisher
+from core.rest.Resource import Resource
+from core.rest.RestPublisher import RestPublisher
 from core.pathant.Converter import converter
 from helpers.hash_tools import bas64encode, hashval
 from helpers.list_tools import metaize

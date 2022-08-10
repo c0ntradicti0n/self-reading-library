@@ -1,8 +1,8 @@
 import json
 
 from config import config
-from core.RestPublisher.Resource import Resource
-from core.RestPublisher.RestPublisher import RestPublisher
+from core.rest.Resource import Resource
+from core.rest.RestPublisher import RestPublisher
 
 
 class PdfCssPublisher(RestPublisher):
