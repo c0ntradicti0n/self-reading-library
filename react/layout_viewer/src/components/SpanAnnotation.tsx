@@ -10,7 +10,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import Typography from "@mui/material/Typography";
 import { styled as sty } from "@mui/material/styles";
 import { Slider } from "@mui/material";
-import { getSpans } from "../src/util/annotation";
+import { getSpans } from "../util/annotation";
 import { ThreeDots } from "react-loader-spinner";
 
 const BootstrapDialog = sty(Dialog)(({ theme }) => ({
@@ -27,28 +27,6 @@ const BootstrapDialog = sty(Dialog)(({ theme }) => ({
     padding: theme.spacing(1),
   },
 }));
-
-const test_annotation = [
-  ["the", "B-SUBJ"],
-  ["lazy", "I-SUBJ"],
-  ["yellow", "I-SUBJ"],
-  ["socks", "I-SUBJ"],
-  ["glued", "B-CONTRAST"],
-  ["on", "B-CONTRAST"],
-  ["the", "B-CONTRAST"],
-  ["wall", "B-CONTRAST"],
-  [".", "O"],
-  ["the", "B-SUBJ"],
-  ["lazy", "I-SUBJ"],
-  ["yellow", "I-SUBJ"],
-  ["socks", "I-SUBJ"],
-  ["glued", "B-CONTRAST"],
-  ["on", "B-CONTRAST"],
-  ["the", "B-CONTRAST"],
-  ["wall", "gutterBottomB-CONTRAST"],
-  [".", ""],
-];
-
 const minDistance = 1;
 
 const BootstrapDialogTitle = (props) => {
@@ -89,7 +67,7 @@ function AnnotationTable(props: {
       {props.annotation.map(([word, tag], index) => {
         let span_no =
           props.spans.find(
-            ([tag, begin, end, text]) => index >= begin && index < end
+            ([, begin, end]) => index >= begin && index < end
           )?.[0] ?? "O";
         return (
           <span key={index} className={"tag span_" + span_no}>
@@ -102,9 +80,9 @@ function AnnotationTable(props: {
 }
 
 const spans2annotation = (annotation, spans) => {
-  const new_annotation = annotation.map(([word, tag], index) => {
-    let [_tag, begin, end, text] = spans.find(
-      ([tag, begin, end, text]) => index >= begin && index < end
+  return annotation.map(([word, tag], index) => {
+    let [_tag, begin, end] = spans.find(
+      ([, begin, end]) => index >= begin && index < end
     ) ?? [null, null, null, null];
     if (tag == null) return [word, "O"];
     let prefix = "";
@@ -114,7 +92,6 @@ const spans2annotation = (annotation, spans) => {
     if (index > begin && index < end - 1) prefix = "I-";
     return [word, prefix + _tag];
   });
-  return new_annotation;
 };
 
 function valuetext(value) {
@@ -122,7 +99,7 @@ function valuetext(value) {
 }
 
 function adjustSpanValue(
-  newValue: number | number[] | number[],
+  newValue: number | number[],
   activeThumb: number,
   spanIndices: [string, number, number, string[]][],
   i: number,
@@ -132,7 +109,7 @@ function adjustSpanValue(
   if (!Array.isArray(newValue)) {
     return;
   }
-  let value: number[] = null;
+  let value: number[];
 
   if (newValue[1] - newValue[0] < minDistance) {
     if (activeThumb === 0) {
@@ -151,7 +128,7 @@ function adjustSpanValue(
     tag,
     ...value,
     // @ts-ignore
-    annotation.slice(value[0], value[1]).map(([w, t]) => w),
+    annotation.slice(value[0], value[1]).map(([w]) => w),
   ];
 
   // @ts-ignore
@@ -170,13 +147,13 @@ function adjustSpanValue(
   }
 
   // @ts-ignore
-  spanIndices = spanIndices.map(([tag, begin, end, words]) => [
+  spanIndices = spanIndices.map(([tag, begin, end]) => [
     tag,
     begin,
     end,
     // @ts-ignore
 
-    annotation.slice(begin, end).map(([w, t]) => w),
+    annotation.slice(begin, end).map(([w]) => w),
   ]);
   return spanIndices;
 }
@@ -267,7 +244,7 @@ export default function SpanAnnotation({
           console.log("stop it!");
         }}
       >
-        <BootstrapDialogTitle>Teach the difference</BootstrapDialogTitle>
+        <BootstrapDialogTitle onClose={() => console.log("Closing dialogue")}>Teach the difference</BootstrapDialogTitle>
         <DialogContent dividers>
           {!annotation ? (
             <ThreeDots />
@@ -339,7 +316,6 @@ export default function SpanAnnotation({
                         }}
                         onMouseUp={(event) => {
                           event.stopPropagation();
-                          event.stopPropagation();
                           console.log("stop it!");
                         }}
                         step={1}
@@ -356,14 +332,14 @@ export default function SpanAnnotation({
               <Button
                 startIcon="add"
                 onClick={() => {
-                  const tagOccurences = spanIndices.reduce(
+                  const tagOccurrences = spanIndices.reduce(
                     (acc, e) => acc.set(e[0], (acc.get(e[0]) || 0) + 1),
                     new Map()
                   );
-                  console.log(tagOccurences);
+                  console.log(tagOccurrences);
                   // @ts-ignore
-                  let incompleteTags = [...tagOccurences.entries()].filter(
-                    ([k, v]) => v < 2
+                  let incompleteTags = [...tagOccurrences.entries()].filter(
+                    ([, v]) => v < 2
                   );
                   console.log(incompleteTags);
 

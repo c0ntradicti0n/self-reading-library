@@ -39,7 +39,7 @@ export default class Layout extends React.Component {
             name="viewport"
             content="initial-scale=1.0, width=device-width"
           />
-          <link rel="icon" href="/favicon.ico" />
+          <link rel="icon" href="/react/layout_viewer/public/favicon.ico" />
           <style>
             @import
             url('https://fonts.googleapis.com/css2?family=Roboto+Serif:ital,opsz,wght@0,8..144,300;0,8..144,400;1,8..144,300&display=swap');
@@ -59,7 +59,7 @@ export default class Layout extends React.Component {
             <Lib>
               Read a webpage for me:
               <Url2Difference />
-              <img src="/read_it.jpeg" />
+              <img src="/react/layout_viewer/public/read_it.jpeg" />
             </Lib>
           </ul>
 
@@ -69,7 +69,7 @@ export default class Layout extends React.Component {
             Some source of papers:{" "}
             <Button href={"http://arxiv.org"}>http://arxiv.org</Button>
             <br />
-            <img src="/source_of_papers.jpeg" />
+            <img src="/react/layout_viewer/public/source_of_papers.jpeg" />
           </Lib>
           <Lib>
             Some other websites featuring <i> differences </i>

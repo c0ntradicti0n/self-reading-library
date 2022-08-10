@@ -15,7 +15,7 @@ const ForwardedRefForceGraph3D = React.forwardRef((props, ref) => (
 
 // two for the text items... don't think, one of them is superflouus
 // THIS IS THE TRICK: ONE IMPORT FOR SSR, ONE FOR THE 3D GRAPH ON CLIENT-SIDE
-const SpriteText2 = dynamic(() => import("../components/SpriteText.js"));
+const SpriteText2 = dynamic(() => import("./SpriteText.js"));
 
 class Graph extends React.Component {
   myRef = React.createRef();

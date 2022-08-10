@@ -40,7 +40,7 @@ export default class Nav extends React.Component<Props, any> {
           >
             <img
               style={{ width: "5vw", borderRadius: "60px" }}
-              src="/logo.jpeg"
+              src="/react/layout_viewer/public/logo.jpeg"
             />
           </Button>
         </div>

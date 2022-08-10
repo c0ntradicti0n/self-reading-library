@@ -1,5 +1,5 @@
-import { AppSettings } from "../config/connection";
-import { getRandomArbitrary } from "../../layout_viewer/src/util/array";
+import { AppSettings } from "../../config/connection";
+import { getRandomArbitrary } from "../util/array";
 
 const cyrb53 = function (str, seed = 0) {
   let h1 = 0xdeadbeef ^ seed,

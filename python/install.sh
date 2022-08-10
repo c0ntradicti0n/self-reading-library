@@ -4,7 +4,7 @@ wget https://poppler.freedesktop.org/poppler-0.89.0.tar.xz
 
 tar -xf poppler-0.89.0.tar.xz
 
-cd poppler/poppler-0.89.0/
+cd poppler-0.89.0/
 mkdir build
 cd build
 cmake ..

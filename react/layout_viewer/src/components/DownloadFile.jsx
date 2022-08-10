@@ -1,6 +1,6 @@
 import * as React from "react";
 import Button from "@mui/material/Button";
-import { AppSettings } from "../config/connection";
+import { AppSettings } from "../../config/connection";
 
 export default class DownloadFile extends React.Component {
   render() {

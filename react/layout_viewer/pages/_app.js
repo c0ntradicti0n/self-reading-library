@@ -2,7 +2,7 @@ import React from "react";
 import App from "next/app";
 import * as glob from "glob";
 import "../src/App.css";
-import NoSSR from "../components/NoSSR";
+import NoSSR from "../src/components/NoSSR";
 
 class MyApp extends App {
     // Only uncomment this method if you have blocking data requirements for

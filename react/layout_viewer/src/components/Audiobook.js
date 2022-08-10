@@ -1,6 +1,6 @@
 import * as React from "react";
 import AudiobookService from "../resources/AudiobookService";
-import AudiobookPlayer from "../components/AudiobookPlayer";
+import AudiobookPlayer from "./AudiobookPlayer";
 import {Button} from "@mui/material";
 import {Audio} from "react-loader-spinner";
 
