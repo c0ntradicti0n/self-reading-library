@@ -1,12 +1,14 @@
 from helpers.os_tools import get_path_filename_extension
 from config import config
-from layout.latex.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
 from helpers.cache_tools import configurable_cache
 from core.pathant.Converter import converter
 import os
 
+from core.pathant.PathSpec import PathSpec
+
+
 @converter(["labeled.pdf", "pdf"], "htm")
-class PDF2HTML(PDF_AnnotatorTool):
+class PDF2HTML(PathSpec):
     def __init__(self, debug=True, *args, n=15, **kwargs):
         super().__init__(*args, **kwargs)
         self.n = n

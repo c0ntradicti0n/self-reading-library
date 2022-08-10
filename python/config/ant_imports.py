@@ -8,7 +8,7 @@ from core.pathant.ConfigRest import ConfigRest
 from core.layout_eagle import LayoutEagle
 from core.standard_converter.Scraper import Scraper
 from core.standard_converter.HTML2PDF import HTML2PDF
-from core.standard_converter.PDF2HTML import PDF2HTML
+#from core.standard_converter.PDF2HTML import PDF2HTML
 from helpers.list_tools import metaize, forget_except
 from helpers.model_tools import TRAINING_RATE
 from language.text2speech.AudioPublisher import AudioPublisher

@@ -21,17 +21,10 @@ from scipy.spatial import distance_matrix
 
 from config import config
 from helpers.list_tools import threewise
-from layout.latex.LayoutReader.trueformatupmarker import TrueFormatUpmarker
 
-
-class PDF_AnnotatorTool(TrueFormatUpmarker):
-    replacement_mapping_tag2tag = {
-        "div": "z"
-    }
-
+class PDF_AnnotatorTool():
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, replacements=self.replacement_mapping_tag2tag, **kwargs)
-        self.cwd = os.getcwd()
+        pass
 
     def __call__(self, pdf_paths, **kwargs):
         for pdf_path in pdf_paths:

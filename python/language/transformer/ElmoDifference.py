@@ -1,7 +1,6 @@
 import os
-
+from core.pathant.PathSpec import PathSpec
 from config import config
-from layout.latex.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
 from helpers.cache_tools import configurable_cache
 from core.pathant.Converter import converter
 from core.pathant.PathAnt import PathAnt
@@ -15,7 +14,7 @@ from allennlp_models.tagging.models import crf_tagger
 
 
 @converter('css.difference', "elmo.css_html.difference")
-class ElmoDifference(PDF_AnnotatorTool):
+class ElmoDifference(PathSpec):
     def __init__(self, debug=True, *args, n=15, **kwargs):
         super().__init__(*args, **kwargs)
         self.n = n
