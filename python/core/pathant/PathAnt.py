@@ -8,7 +8,7 @@ import pylab
 import matplotlib
 from more_itertools import pairwise
 
-from core import config
+from config import config
 from helpers.list_tools import flatten_optional_list_pair, flatten_optional_list_triple
 from core.StandardConverter.Dict2Graph import Dict2Graph
 from helpers.os_tools import make_dirs_recursive

@@ -14,7 +14,7 @@ from layout.latex.LatexReplacer.replacer import SoupReplacer
 from helpers.os_tools import get_path_filename_extension
 from regex import regex
 
-from core import config
+from config import config
 from core.pathant.Converter import converter
 from core.pathant.parallel import paraloop
 

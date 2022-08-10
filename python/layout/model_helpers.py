@@ -1,10 +1,8 @@
 from PIL.Image import Resampling
 
 from layout.imports import *
-from core import config
-import random
+from config import config
 import pickle
-from regex import regex
 
 
 def compute_bbox(examples):

@@ -14,10 +14,10 @@ import logging
 
 sys.path.append("../")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from core import config
+from config import config
 import base64
 import io
-from jsonpath_ng import jsonpath, parse
+from jsonpath_ng import parse
 from pprint import pprint
 import falcon
 import threading
@@ -148,7 +148,7 @@ class RestQueue:
             resp.status = falcon.HTTP_300
             return
         data = encode(data)
-        resp.body = json.dumps(data, ensure_ascii=False)
+        resp.text = json.dumps(data, ensure_ascii=False)
         resp.status = falcon.HTTP_OK
 
     def on_put(self, req, resp, id=None):  # edit, update image
@@ -159,7 +159,7 @@ class RestQueue:
         item = self.workbook[id]
 
         item = self.change(item, path, value)
-        resp.body = json.dumps(encode(item), ensure_ascii=False)
+        resp.text = json.dumps(encode(item), ensure_ascii=False)
         resp.status = falcon.HTTP_OK
 
     def on_patch(self, req, resp, id=None):
@@ -218,11 +218,11 @@ class RestQueue:
 
         self.get(id)
         if  self.workbook.get(id):
-            resp.body = json.dumps(encode(self.workbook[id]), ensure_ascii=False)
+            resp.text = json.dumps(encode(self.workbook[id]), ensure_ascii=False)
             resp.status = falcon.HTTP_OK
         else:
             resp.status = falcon.HTTP_OK
-            resp.body = json.dumps({})
+            resp.text = json.dumps({})
 
 
     def on_delete(self, req, resp, id=None):

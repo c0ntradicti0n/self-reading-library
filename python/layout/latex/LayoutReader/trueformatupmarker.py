@@ -12,7 +12,7 @@ import more_itertools
 import numpy
 from regex import regex
 
-from core import config
+from config import config
 from layout.latex.LatexReplacer.replacer import SoupReplacer
 from layout.latex.LayoutReader.pdf import Pdf
 

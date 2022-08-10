@@ -1,7 +1,7 @@
 from layout.imports import *
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
-from core import config
+from config import config
 import pandas
 from helpers import pandas_tools
 from layout import model_helpers
@@ -32,7 +32,7 @@ class Training(PathSpec):
             [
                 df for p in feature_dfs
                 if (df := pandas_tools.load_pandas_file(
-                        config.COLLECTION_PATH + p
+                config.COLLECTION_PATH + p
                     )) is not None
             ]
         )

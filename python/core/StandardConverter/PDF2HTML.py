@@ -1,5 +1,5 @@
 from helpers.os_tools import get_path_filename_extension
-from core import config
+from config import config
 from layout.latex.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
 from helpers.cache_tools import configurable_cache
 from core.pathant.Converter import converter

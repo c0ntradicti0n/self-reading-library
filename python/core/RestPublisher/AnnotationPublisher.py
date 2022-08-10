@@ -1,10 +1,8 @@
-import base64
-import hashlib
 import json
 import falcon
 import nltk
 
-from core import config
+from config import config
 from core.RestPublisher.Resource import Resource
 from core.RestPublisher.RestPublisher import RestPublisher
 from core.pathant.Converter import converter
@@ -70,7 +68,7 @@ class DifferenceAnnotationPublisher(RestPublisher):
             )
         )[0]
         annotation = [(word, tag) for tag, word in result[1]['annotation']]
-        resp.body = json.dumps(annotation)
+        resp.text = json.dumps(annotation)
         resp.status = falcon.HTTP_OK
 
     def on_put(self, req, resp, id=None):

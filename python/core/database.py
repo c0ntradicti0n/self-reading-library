@@ -6,7 +6,6 @@ import ibis
 import pandas
 
 # Threadsafe/processsafe replacement for queues, that will not sync in forked processes
-from core import config
 from helpers.cache_tools import compressed_pickle, decompress_pickle
 
 ibis.options.interactive = True

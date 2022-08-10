@@ -1,6 +1,7 @@
 from core.pathant.Converter import converter
 from language.transformer.ElmoTrain import ElmoTrain
-from core import config
+from config import config
+
 
 @converter(None, 'elmo_model.difference')
 class ElmoDifferenceTrain(ElmoTrain):

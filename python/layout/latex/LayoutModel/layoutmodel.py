@@ -2,7 +2,6 @@ import itertools
 import os
 import pickle
 from typing import Dict
-import joblib
 import pandas
 import numpy as np
 import tensorflow as tf
@@ -11,13 +10,12 @@ import tensorflow as tf
 tf.get_logger().setLevel('ERROR')
 
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import Normalizer
 from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.python.keras.utils.np_utils import to_categorical
 import logging
 import pprint
 from helpers.list_tools import Lookup
-from core import config
+from config import config
 from core.pathant.PathSpec import PathSpec
 
 
@@ -142,7 +140,7 @@ class LayoutModeler(PathSpec):
         gen = feature_generator()
         x_y = next(gen)
         feature_columns = \
-            [tf.feature_column.numeric_column(str(i)) for i in range(0, len(config.cols_to_use))] +\
+            [tf.feature_column.numeric_column(str(i)) for i in range(0, len(config.cols_to_use))] + \
             [tf.feature_column.numeric_column("cat" + str(i)) for i in range(len(config.cols_to_use), len(x_y[0]))]
 
 

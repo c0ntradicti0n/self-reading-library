@@ -1,7 +1,7 @@
 import itertools
 import pandas
 
-from core import config
+from config import config
 from helpers.cache_tools import configurable_cache
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
@@ -9,7 +9,7 @@ from core.pathant.PathSpec import PathSpec
 
 @converter(["assigned.feature"], "features")
 class Feature2Features(PathSpec):
-    def __init__(self, *args,  n=config.n_layout_training_documents, pandas_path=config.collected_features_path, **kwargs):
+    def __init__(self, *args, n=config.n_layout_training_documents, pandas_path=config.collected_features_path, **kwargs):
         super().__init__(*args, **kwargs)
         self.pandas_path = pandas_path
         self.n = n

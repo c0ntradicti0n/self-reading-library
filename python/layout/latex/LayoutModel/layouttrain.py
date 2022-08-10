@@ -1,8 +1,7 @@
 import os
 
-import logging
 from core.pathant.Converter import converter
-from core import config
+from config import config
 from layout.latex.LayoutModel.layoutmodel import LayoutModeler
 
 

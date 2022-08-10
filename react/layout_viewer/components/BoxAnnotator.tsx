@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {zip, pairwise} from "../src/util/array";
+import {pairwise, zip} from "../src/util/array";
 import {Button} from "@mui/material";
 import Nav from "./Nav";
 import Router from "next/router";
@@ -38,7 +38,7 @@ export default class BoxAnnotator extends Component<any> {
         KeyN: "N",
         KeyH: "H",
         Space: "w",
-    }
+    };
 
     TAG_TRANSLATE = {
         fn: "footnote",
@@ -52,59 +52,67 @@ export default class BoxAnnotator extends Component<any> {
         pn: "page number",
         h: "header",
         NONE: "out of scope",
-    }
+    };
 
     TAG_COLOR = {
-        'c1': 'blue',
-        'c2': 'green',
-        'c3': 'orange',
-        'NONE': 'violet',
-        'none': 'violet',
-        'None': 'violet',
-        'other': 'yellow',
-        null: 'violet',
-        'pn': 'yellow',
-        'h': 'red',
-        'wh': 'purple',
-        'fg': 'brown',
-        'fn': 'grey',
-        'tb': 'beige'
-    }
+        c1: "blue",
+        c2: "green",
+        c3: "orange",
+        NONE: "violet",
+        none: "violet",
+        None: "violet",
+        other: "yellow",
+        null: "violet",
+        pn: "yellow",
+        h: "red",
+        wh: "purple",
+        fg: "brown",
+        fn: "grey",
+        tb: "beige",
+    };
 
     state = {
         next_key: null,
         finished: false,
         imgOriginalSize: null,
         imgRenderSize: null,
-        labels: null
+        labels: null,
     };
 
     componentDidMount() {
         console.log("HtmlRenderer", this);
         document.addEventListener("keydown", this.key, true);
-
     }
 
     componentWillUnmount() {
         document.removeEventListener("keydown", this.key, true);
     }
 
-    componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<{}>, snapshot?: any) {
-
+    componentDidUpdate(
+        prevProps: Readonly<any>,
+        prevState: Readonly<{}>,
+        snapshot?: any
+    ) {
         console.log(this);
-        if (this.props.superState?.meta?.image && (!this.state.imgOriginalSize || window.innerHeight != this.state.imgRenderSize?.height)) {
-            const width = window.innerWidth
-            const scaleW = width * 0.5
-            const height = window.innerHeight
-            const scaleH = height
+        if (
+            this.props.superState?.meta?.image &&
+            (!this.state.imgOriginalSize ||
+                window.innerHeight != this.state.imgRenderSize?.height)
+        ) {
+            const width = window.innerWidth;
+            const scaleW = width * 0.5;
+            const height = window.innerHeight;
+            const scaleH = height;
 
-            let im = new Image;
-            im.src = "data:image/jpeg;charset=utf-8;base64," +
+            let im = new Image();
+            im.src =
+                "data:image/jpeg;charset=utf-8;base64," +
                 this.props.superState?.meta?.image;
-            im.onload = () => this.setState({
-                imgOriginalSize: {width: im.width, height: im.height},
-                imgRenderSize: {width: scaleW, height: scaleH}
-            })
+            im.onload = () =>
+                this.setState({
+                    imgOriginalSize: {width: im.width, height: im.height},
+                    imgRenderSize: {width: scaleW, height: scaleH},
+                });
         }
     }
 
@@ -155,16 +163,24 @@ export default class BoxAnnotator extends Component<any> {
                     }
                     data={this.props.superState}
                 />
-                {this.state.finished ?
-                    <div><h2>We have annotated the whole document! <Button
-                        onClick={(e) => {
-                            console.log(e);
-                            Router.push({
-                                pathname: "/difference/",
-                                query: {id: this.props.superState?.value},
-                            });
-                        }}>Return to document!</Button></h2></div>
-                    :
+                {this.state.finished ? (
+                    <div>
+                        <h2>
+                            We have annotated the whole document!{" "}
+                            <Button
+                                onClick={(e) => {
+                                    console.log(e);
+                                    Router.push({
+                                        pathname: "/difference/",
+                                        query: {id: this.props.superState?.value},
+                                    });
+                                }}
+                            >
+                                Return to document!
+                            </Button>
+                        </h2>
+                    </div>
+                ) : (
                     <div className="container" style={{position: "absolute"}}>
                         {this.props.superState?.meta?.image ? (
                             <img
@@ -176,21 +192,43 @@ export default class BoxAnnotator extends Component<any> {
                             />
                         ) : null}
 
-                        {this.state.imgOriginalSize ?
+                        {this.state.imgOriginalSize ? (
                             cols?.map((row, i) => (
                                 <div
                                     style={{
                                         position: "absolute",
-                                        left: (row[0][0] / this.state.imgOriginalSize.width * this.state.imgRenderSize.width).toString() + "px",
-                                        top: (row[0][1] / this.state.imgOriginalSize.height * this.state.imgRenderSize.height - this.state.imgRenderSize.height * 0.003).toString() + "px",
-                                        width: ((row[0][2] - row[0][0]) / this.state.imgOriginalSize.width * this.state.imgRenderSize.width * 1.02).toString() + "px",
-                                        height: ((row[0][3] - row[0][1]) / this.state.imgOriginalSize.height * this.state.imgRenderSize.height + this.state.imgRenderSize.height * 0.003).toString() + "px",
+                                        left:
+                                            (
+                                                (row[0][0] / this.state.imgOriginalSize.width) *
+                                                this.state.imgRenderSize.width
+                                            ).toString() + "px",
+                                        top:
+                                            (
+                                                (row[0][1] / this.state.imgOriginalSize.height) *
+                                                this.state.imgRenderSize.height -
+                                                this.state.imgRenderSize.height * 0.003
+                                            ).toString() + "px",
+                                        width:
+                                            (
+                                                ((row[0][2] - row[0][0]) /
+                                                    this.state.imgOriginalSize.width) *
+                                                this.state.imgRenderSize.width *
+                                                1.02
+                                            ).toString() + "px",
+                                        height:
+                                            (
+                                                ((row[0][3] - row[0][1]) /
+                                                    this.state.imgOriginalSize.height) *
+                                                this.state.imgRenderSize.height +
+                                                this.state.imgRenderSize.height * 0.003
+                                            ).toString() + "px",
                                         //border: "1px solid black",
                                         zIndex: Math.ceil(
-                                            9000000 - (row[0][2] - row[0][0]) * (row[0][3] - row[0][1])
+                                            9000000 -
+                                            (row[0][2] - row[0][0]) * (row[0][3] - row[0][1])
                                         ),
                                         opacity: "0.5",
-                                        background: this.TAG_COLOR[row[1]]
+                                        background: this.TAG_COLOR[row[1]],
                                     }}
                                     onClick={() => {
                                         console.log("row", i);
@@ -206,89 +244,102 @@ export default class BoxAnnotator extends Component<any> {
                                                 "[1].labels.[" + i + "]",
                                                 label,
                                                 (res) => {
-                                                    console.log(res)
-                                                    this.setState({labels: res[1].labels})
+                                                    console.log(res);
+                                                    this.setState({labels: res[1].labels});
                                                 }
                                             );
                                     }}
                                 ></div>
-                            )) : <Watch ariaLabel="Waiting for image" />
-                        }
+                            ))
+                        ) : (
+                            <Watch ariaLabel="Waiting for image"/>
+                        )}
 
                         {cols ? (
                             <>
                                 <Button
                                     style={{backgroundColor: "#DEF"}}
                                     onClick={() => {
-                                        ;(async () => {
-                                            console.log("ok")
-                                            await this.props.service.ok([
-                                                this.props.superState.value,
-                                                this.props.superState.meta,
-                                            ], "", {}, async (val) => {
-                                                console.log(await val)
-                                                if (!Object.keys(val).length) {
-                                                    this.setState({finished: true})
+                                        (async () => {
+                                            console.log("ok");
+                                            await this.props.service.ok(
+                                                [
+                                                    this.props.superState.value,
+                                                    this.props.superState.meta,
+                                                ],
+                                                "",
+                                                {},
+                                                async (val) => {
+                                                    console.log(await val);
+                                                    if (!Object.keys(val).length) {
+                                                        this.setState({finished: true});
+                                                    }
 
+                                                    console.log("get new");
+
+                                                    this.props.service.fetch_all((val) =>
+                                                        this.props.setFullState(val)
+                                                    );
                                                 }
-
-
-                                                console.log("get new")
-
-                                                this.props.service.fetch_all((val) =>
-                                                    this.props.setFullState(val));
-
-                                            })
+                                            );
                                         })();
-
-                                    }}>
+                                    }}
+                                >
                                     OK
                                 </Button>
                                 <Button
                                     style={{backgroundColor: "#FED"}}
-
-                                    onClick={this.props.service.discard}>Discard</Button>
+                                    onClick={this.props.service.discard}
+                                >
+                                    Discard
+                                </Button>
                             </>
                         ) : null}
 
                         <div>
-                            <table style={{width: "10%"}}
-                            >
+                            <table style={{width: "10%"}}>
                                 <tr>
                                     <td> KEY</td>
                                     <td>TAG</td>
                                 </tr>
-                                {Object.entries(this.KEYS).map(([k, v], i) => <tr
-                                        onClick={() => this.setState({next_key: this.KEYS[k]})}
-                                    >
-                                        <td key={i + "_1"}
+                                {Object.entries(this.KEYS).map(([k, v], i) => (
+                                    <tr onClick={() => this.setState({next_key: this.KEYS[k]})}>
+                                        <td
+                                            key={i + "_1"}
                                             style={{
-                                                border: "1px", fontFamily: "keys", fontSize: "4em",
-                                                verticalAlign: "bottom"
+                                                border: "1px",
+                                                fontFamily: "keys",
+                                                fontSize: "4em",
+                                                verticalAlign: "bottom",
                                             }}
-                                        >{this.KEY_TRANSLATE[k]}</td>
-                                        <td key={i + "_2"}
-                                            style={{
-                                                verticalAlign: "top"
-                                            }}>
-                                            <div style={{
-                                                backgroundColor: this.TAG_COLOR[v] as string,
-                                                border: "10px solid " + this.TAG_COLOR[v],
-                                                display: "block", borderRadius: "7px",
-
-                                            }}> {this.TAG_TRANSLATE[v]} </div>
+                                        >
+                                            {this.KEY_TRANSLATE[k]}
                                         </td>
-
+                                        <td
+                                            key={i + "_2"}
+                                            style={{
+                                                verticalAlign: "top",
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    backgroundColor: this.TAG_COLOR[v] as string,
+                                                    border: "10px solid " + this.TAG_COLOR[v],
+                                                    display: "block",
+                                                    borderRadius: "7px",
+                                                }}
+                                            >
+                                                {" "}
+                                                {this.TAG_TRANSLATE[v]}{" "}
+                                            </div>
+                                        </td>
                                     </tr>
-                                )
-                                }
+                                ))}
                             </table>
                         </div>
-
                     </div>
-                }
+                )}
             </div>
-        )
-            ;
+        );
     }
 }

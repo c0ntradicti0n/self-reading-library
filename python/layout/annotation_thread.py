@@ -1,7 +1,7 @@
 import itertools
 import logging
 
-from layout.model_helpers import repaint_image_from_labels, changed_labels
+from layout.model_helpers import changed_labels
 from core.event_binding import RestQueue
 from core.StandardConverter.Scraper import Scraper
 from layout.box_feature_maker.box_feature_maker import BoxFeatureMaker
@@ -22,10 +22,9 @@ from layout.Layout2ReadingOrder import Layout2ReadingOrder
 import os
 from helpers.os_tools import file_exists_regex
 from helpers.list_tools import metaize, forget_except
-from core import config
+from config import config
 import subprocess
 from helpers.model_tools import find_best_model
-from pprint import pprint
 from helpers.model_tools import model_in_the_loop
 
 if not os.path.isdir(config.COLLECTION_PATH):

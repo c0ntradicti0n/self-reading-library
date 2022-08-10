@@ -6,7 +6,8 @@ sys.path.append(".")
 
 from core.pathant.Converter import converter
 from helpers.cache_tools import configurable_cache
-from core import config
+from config import config
+
 
 @converter("feature", 'assigned.feature')
 class FeatureAssigner(PDF_AnnotatorTool):

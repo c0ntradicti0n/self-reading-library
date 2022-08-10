@@ -19,7 +19,7 @@ import seaborn as sns
 import regex
 from scipy.spatial import distance_matrix
 
-from core import config
+from config import config
 from helpers.list_tools import threewise
 from layout.latex.LayoutReader.trueformatupmarker import TrueFormatUpmarker
 

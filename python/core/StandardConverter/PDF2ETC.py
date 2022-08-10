@@ -1,9 +1,8 @@
 import os
-from core import config
+from config import config
 from layout.latex.LayoutReader.trueformatpdf2htmlEX import PDF_AnnotatorTool
 from helpers.cache_tools import configurable_cache
 from core.pathant.Converter import converter
-from core.pathant.parallel import paraloop
 
 outputs = {
     'html': 'html',  # same looking html

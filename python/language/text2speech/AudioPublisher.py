@@ -1,10 +1,9 @@
 import json
 import os
-from pprint import pprint
 
 import falcon
 
-from core import config
+from config import config
 from core.RestPublisher.Resource import Resource
 from core.RestPublisher.RestPublisher import RestPublisher
 from core.RestPublisher.react import react
@@ -39,7 +38,7 @@ class AudioPublisher(RestPublisher, react):
             {"audio_path": audio_path.replace(config.hidden_folder, "")},
             ensure_ascii=False
         )
-        resp.body = json.dumps(
+        resp.text = json.dumps(
             {"audio_path": audio_path.replace(config.hidden_folder, "")},
             ensure_ascii=False
         )
@@ -60,7 +59,7 @@ class AudioPublisher(RestPublisher, react):
         os.system(f"touch  {compute_path}")
         if os.path.exists(meta["audio_path"]) and not os.path.exists(compute_path):
             resp.status = falcon.HTTP_OK
-            resp.body = json.dumps(
+            resp.text = json.dumps(
                 meta["audio_path"].replace(config.hidden_folder, ""),
                 ensure_ascii=False
             )

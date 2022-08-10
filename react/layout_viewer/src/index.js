@@ -1,15 +1,14 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import React from "react";
+import ReactDOM from "react-dom";
+import "./index.css";
+import App from "./App";
+import * as serviceWorker from "./serviceWorker";
 
 if (window) {
-
-  console.log(window)
+  console.log(window);
   window.addEventListener("beforeunload", function (e) {
     window.sessionStorage.tabId = window.tabId;
-    console.log("beforeunload", window)
+    console.log("beforeunload", window);
 
     return null;
   });
@@ -21,8 +20,7 @@ if (window) {
     } else {
       window.tabId = Math.floor(Math.random() * 1000000);
     }
-    console.log("load", window)
-
+    console.log("load", window);
 
     return null;
   });
@@ -32,7 +30,7 @@ ReactDOM.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
-  document.getElementById('root')
+  document.getElementById("root")
 );
 
 // If you want your app to work offline and load faster, you can change

@@ -3,7 +3,7 @@ import logging
 from numpy.core.multiarray import ndarray
 
 from ant import Ant
-from core import config
+from config import config
 from helpers.nested_dict_tools import type_spec, list2dict
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import cache_flow

@@ -7,7 +7,7 @@ import os
 
 import pandas
 from helpers.list_tools import Lookup
-from core import config
+from config import config
 
 os.environ["LD_LIBRARY_PATH"] ='/usr/local/cuda-11.0/targets/x86_64-linux/lib/'
 

@@ -30,9 +30,8 @@ div.c.x1 {
 }
 
 div.t {
-      z-index:300 !important;
+    z-index: 300 !important;
 }
-
 
 
 @keyframes color-change {

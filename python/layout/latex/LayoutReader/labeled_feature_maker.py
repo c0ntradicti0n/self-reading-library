@@ -1,16 +1,13 @@
-import logging
-import os
 import sys
 import unittest
 import pandas
 import numpy
 import random
 from sklearn.preprocessing import MinMaxScaler
-from pdf2image import convert_from_path, convert_from_bytes
+from pdf2image import convert_from_path
 import scipy.spatial as spatial
 
-from core import config
-
+from config import config
 
 sys.path.append(".")
 

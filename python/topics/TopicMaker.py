@@ -6,7 +6,7 @@ import nltk
 from sklearn import mixture
 from sklearn.manifold import TSNE
 
-from core import config
+from config import config
 from nltk.corpus import wordnet as wn
 import numpy as np
 import spacy
@@ -71,7 +71,7 @@ class TopicMaker:
 
             try:
                 embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH]).vector
-                #embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH])._.trf_data.tensors[1]                #embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH])._.trf_data.tensors[1]
+                # embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH])._.trf_data.tensors[1]                #embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH])._.trf_data.tensors[1]
                 shape = embedding.shape
             except Exception as e:
                 logging.error(f"could not create embedding", exc_info=True)

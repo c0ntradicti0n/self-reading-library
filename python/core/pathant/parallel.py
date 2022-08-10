@@ -1,6 +1,6 @@
 import functools
 from joblib import delayed, Parallel
-from core import config
+from config import config
 from helpers.programming import exit_after
 from tqdm import tqdm
 

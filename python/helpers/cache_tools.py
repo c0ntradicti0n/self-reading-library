@@ -12,7 +12,7 @@ import os
 import unittest
 import numpy
 
-from core import config
+from config import config
 
 logger = logging.getLogger(__file__)
 import _pickle as cPickle
@@ -104,9 +104,9 @@ def yield_cache_instead_apply(cls, f, gen, cache, cache_folder, **kwargs):
                                                           value) + ".pdf")))
             for value in values_from_future
             if
-                value in cache
-                or urllib.parse.quote_plus(value) in cache
-                or config.tex_data + urllib.parse.quote_plus(value) + ".pdf" in cache
+            value in cache
+            or urllib.parse.quote_plus(value) in cache
+            or config.tex_data + urllib.parse.quote_plus(value) + ".pdf" in cache
         ]
     else:
         future_yield_values = []
@@ -289,10 +289,10 @@ def uri_with_cache(fun):
             if res == None:
                 fun.cache = "No result was returned"
             resp.status = falcon.HTTP_200
-            resp.body = json.dumps({"response": res, "status": resp.status})
+            resp.text = json.dumps({"response": res, "status": resp.status})
 
         resp.status = falcon.HTTP_200
-        resp.body = json.dumps({"response": memory_caches[(fun, req)], "status": resp.status})
+        resp.text = json.dumps({"response": memory_caches[(fun, req)], "status": resp.status})
 
     return replacement_fun
 

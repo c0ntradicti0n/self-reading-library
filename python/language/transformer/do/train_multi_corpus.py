@@ -1,6 +1,4 @@
-import json
 import subprocess
-from pprint import pprint
 
 import torch
 from _jsonnet import evaluate_file
@@ -8,7 +6,8 @@ from allennlp.common.file_utils import cached_path
 from allennlp.common.params import parse_overrides, _environment_variables, with_fallback
 from language.transformer.attentivecrftagger.attentivecrftagger import AttentiveCrfTagger
 
-from core import config
+from config import config
+
 models = ['over'] #, 'over']
 
 import os
@@ -34,6 +33,6 @@ for model in models:
         .format(
             json_override=json_override,
             config=tagger_config_file,
-            out=config.hidden_folder + '_'.join([model,fname])).format(model=model)
+            out=config.hidden_folder + '_'.join([model, fname])).format(model=model)
     print (script)
     os.system(script)

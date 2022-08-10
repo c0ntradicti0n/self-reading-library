@@ -1,15 +1,13 @@
 import signal
 import time
-from sys import stdout, stderr
 
-from core import config
+from config import config
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from helpers.cache_tools import configurable_cache
 from helpers.os_tools import get_path_filename_extension
 import os
 import subprocess
-from threading import Timer
 from regex import regex
 
 

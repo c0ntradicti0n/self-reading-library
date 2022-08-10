@@ -2,7 +2,7 @@ import json
 import logging
 import os
 
-from core import config
+from config import config
 from helpers.nested_dict_tools import type_spec
 from core.pathant.PathSpec import PathSpec, cache_flow
 
@@ -36,7 +36,7 @@ class Ant(PathSpec):
 
     def cache_write(self, result, meta):
         try:
-            filename = config.cache + type(self).__name__  + '.json'
+            filename = config.cache + type(self).__name__ + '.json'
 
             if os.path.exists(filename):
                 append_write = 'a'  # append if already exists

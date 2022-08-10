@@ -1,12 +1,10 @@
-import logging
 import re
-import textwrap
 import os
 import unicodedata
 from queue import Empty
 
 import chardet
-from core import config
+from config import config
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from language.nlp_helpers.Regexes import SENTENCE_END_REGEX

@@ -10,7 +10,7 @@ from core.RestPublisher.react import react
 from core.StandardConverter.Dict2Graph import Dict2Graph
 from helpers.list_tools import forget_except
 from topics.TopicMaker import TopicMaker
-from core import config
+from config import config
 from core.pathant.Converter import converter
 from flask import Blueprint
 
@@ -72,5 +72,5 @@ class TopicsPublisher(RestPublisher, react):
             value, _ = list(zip(*list(self.ant("arxiv.org", "topics.graph", from_cache_only=True)([]))))
 
         logging.info("computed topics")
-        resp.body = json.dumps([value, {}], ensure_ascii=False)
+        resp.text = json.dumps([value, {}], ensure_ascii=False)
         resp.status = falcon.HTTP_OK

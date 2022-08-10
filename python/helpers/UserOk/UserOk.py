@@ -2,7 +2,7 @@ import itertools
 import os
 import tkinter
 
-from core import config
+from config import config
 from helpers.cache_tools import configurable_cache
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec

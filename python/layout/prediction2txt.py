@@ -1,12 +1,8 @@
-import os
-from pprint import pprint
-
 from ant import Ant
 from core.pathant.Converter import converter
-from core.pathant.PathAnt import PathAnt
 from core.pathant.PathSpec import cache_flow
 import itertools
-from core import config
+from config import config
 
 
 @converter('prediction', 'txt')

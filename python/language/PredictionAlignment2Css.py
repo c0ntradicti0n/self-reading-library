@@ -2,7 +2,7 @@ import logging
 import os
 from collections import defaultdict, Counter
 
-from core import config
+from config import config
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 import pandas as pd

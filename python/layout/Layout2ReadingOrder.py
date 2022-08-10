@@ -1,12 +1,11 @@
 import gc
 import logging
-import threading
 import tracemalloc
 
 from helpers.cache_tools import configurable_cache
 from helpers.hash_tools import hashval
 from layout.imports import *
-from core import config
+from config import config
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from layout import model_helpers

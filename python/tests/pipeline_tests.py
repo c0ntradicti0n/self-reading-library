@@ -6,10 +6,10 @@ from types import SimpleNamespace
 
 import falcon
 
-import core.config
+import config.config
 
-core.config.cache = "./tests/test_cache/"
-os.system(f"rm -rf {core.config.cache}")
+config.config.cache = "./tests/test_cache/"
+os.system(f"rm -rf {config.config.cache}")
 from backend import *
 
 run_extra_threads()
@@ -31,7 +31,7 @@ class TestRest(unittest.TestCase):
         return req, resp
 
     def check_result(self, req, resp):
-        assert "Content-Disposition" in resp.headers or  resp.body != None
+        assert "Content-Disposition" in resp.headers or  resp.text != None
         assert resp.status == falcon.HTTP_OK
         print(resp)
 

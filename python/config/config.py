@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.append(".")
+sys.path.append("../core")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 import logging
 
@@ -46,7 +46,7 @@ logging.basicConfig(format="""%(asctime)s-%(levelname)s: %(message)s""", datefmt
 from GPUtil import showUtilization as gpu_usage
 import torch
 
-path_prefix = "./"
+path_prefix = "../core/"
 
 
 def free_gpu_cache():

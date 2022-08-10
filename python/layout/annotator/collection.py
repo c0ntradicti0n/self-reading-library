@@ -1,5 +1,4 @@
 import logging
-import unittest
 
 from PIL import Image
 
@@ -9,13 +8,9 @@ from core.RestPublisher.RestPublisher import RestPublisher
 from core.RestPublisher.RestPublisher import Resource
 from core.RestPublisher.react import react
 import pandas as pd
-import uuid
-from itertools import islice
 
 from helpers.hash_tools import bas64encode
-from core import config
-import types
-from pprint import pprint
+from config import config
 import os
 import pyarrow.parquet as pq
 

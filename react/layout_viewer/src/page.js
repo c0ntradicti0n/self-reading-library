@@ -1,8 +1,7 @@
-import { withRouter } from 'next/router'
-
+import { withRouter } from "next/router";
 
 function Page({ router }) {
-  return <p>{router.pathname}</p>
+  return <p>{router.pathname}</p>;
 }
 
-export default withRouter(Page)
+export default withRouter(Page);

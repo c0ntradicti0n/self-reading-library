@@ -7,7 +7,7 @@ from layout.training.training import Training
 
 sys.path.append(".")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from core import config
+from config import config
 from core.pathant.PathAnt import PathAnt
 
 Training

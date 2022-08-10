@@ -3,7 +3,7 @@ from core.RestPublisher.RestPublisher import RestPublisher
 from core.RestPublisher.react import react
 from helpers.cache_tools import uri_with_cache
 from core.pathant.Converter import converter
-from core import config
+from config import config
 from pprint import pprint
 
 
@@ -25,7 +25,7 @@ class ConfigRest(RestPublisher, react):
     @uri_with_cache
     def on_get(self, req, resp):
         print("Config info")
-        resp.body = json.dumps(self(), ensure_ascii=False)
+        resp.text = json.dumps(self(), ensure_ascii=False)
         resp.status = falcon.HTTP_OK
 
 if __name__== "__main__":

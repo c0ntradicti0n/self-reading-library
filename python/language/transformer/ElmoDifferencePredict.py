@@ -1,6 +1,7 @@
 from core.pathant.Converter import converter
 from language.transformer.ElmoPredict import ElmoPredict
-from core import config
+from config import config
+
 
 @converter(["reading_order.page", "reading_order.filter_align_text"], 'reading_order.page.difference')
 class ElmoDifferencePredict(ElmoPredict):

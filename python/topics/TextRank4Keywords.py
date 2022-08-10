@@ -4,7 +4,7 @@ import numpy as np
 import spacy
 from spacy.lang.en.stop_words import STOP_WORDS
 
-from core.config import spacy_model_name
+from config.config import spacy_model_name
 
 try:
     nlp = spacy.load(spacy_model_name)

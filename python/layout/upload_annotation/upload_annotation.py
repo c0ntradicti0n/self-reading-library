@@ -3,7 +3,7 @@ from core.RestPublisher.RestPublisher import RestPublisher
 from core.RestPublisher.RestPublisher import Resource
 from core.RestPublisher.react import react
 from core.event_binding import queue_iter
-from core import config
+from config import config
 import logging
 import os
 

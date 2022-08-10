@@ -1,9 +1,8 @@
 import os
 
-import more_itertools
 import regex
 
-from core import config
+from config import config
 from core.event_binding import queue_iter
 from helpers.list_tools import dictize
 

@@ -1,5 +1,4 @@
 import logging
-import os
 import sys
 import unittest
 import pandas
@@ -8,19 +7,15 @@ import random
 
 from PIL.Image import Resampling
 from pdfminer.psparser import PSEOF
-from sklearn.preprocessing import MinMaxScaler
 import scipy.spatial as spatial
-from core import config
+from config import config
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextContainer, LTChar
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfdocument import PDFDocument
-from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfinterp import resolve1
-import pdfminer
 from collections import namedtuple
-from pdf2image import convert_from_path, convert_from_bytes
-from PIL import Image
+from pdf2image import convert_from_path
 
 sys.path.append(".")
 from core.pathant.PathSpec import PathSpec

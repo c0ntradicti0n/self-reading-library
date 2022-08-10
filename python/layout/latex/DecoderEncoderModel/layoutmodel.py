@@ -18,7 +18,7 @@ import more_itertools
 
 from helpers.list_tools import Lookup, sorted_by_zipped
 from helpers.pandas_tools import unpack_list_column
-from core import config
+from config import config
 from core.pathant.PathSpec import PathSpec
 from helpers.nested_dict_tools import flatten
 
@@ -155,7 +155,7 @@ class LayoutModeler(PathSpec):
         gen = feature_generator()
         x_y = next(gen)
         feature_columns = \
-            [tf.feature_column.numeric_column(str(i)) for i in range(0, len(config.cols_to_use))] +\
+            [tf.feature_column.numeric_column(str(i)) for i in range(0, len(config.cols_to_use))] + \
             [tf.feature_column.numeric_column("cat" + str(i)) for i in range(len(config.cols_to_use), len(x_y[0]))]
 
 

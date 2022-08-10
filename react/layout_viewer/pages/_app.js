@@ -1,9 +1,8 @@
-import React from 'react'
-import App from 'next/app'
-import * as glob from 'glob'
-import '../src/App.css';
+import React from "react";
+import App from "next/app";
+import * as glob from "glob";
+import "../src/App.css";
 import NoSSR from "../components/NoSSR";
-
 
 class MyApp extends App {
     // Only uncomment this method if you have blocking data requirements for
@@ -15,26 +14,26 @@ class MyApp extends App {
         if (process.browser) {
             return __NEXT_DATA__.props.pageProps;
         }
-        console.log("apps get initial props is run...")
-        let pages = glob.sync('pages/**/*', {cwd: "./"}).map(path => path.match("pages\\/(.+)\..sx?")[1]).filter(fname => !fname.startsWith("_"))
-
+        console.log("apps get initial props is run...");
+        let pages = glob
+            .sync("pages/**/*", {cwd: "./"})
+            .map((path) => path.match("pages\\/(.+)..sx?")[1])
+            .filter((fname) => !fname.startsWith("_"));
 
         // calls page's `getInitialProps` and fills `appProps.pageProps`
         const appProps = await App.getInitialProps(appContext);
-        return {pageProps: {pages: pages}}
+        return {pageProps: {pages: pages}};
     }
 
     render() {
-        const {Component, appProps} = this.props
+        const {Component, appProps} = this.props;
         // Workaround for https://github.com/zeit/next.js/issues/8592
 
-        return (
-            <div id="comp-wrapp">
+        return (<div id="comp-wrapp">
                 <NoSSR>
                     <Component {...this.props.pageProps} />
                 </NoSSR>
-            </div>
-        )
+            </div>);
     }
 }
 

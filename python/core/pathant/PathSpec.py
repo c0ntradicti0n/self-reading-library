@@ -2,9 +2,9 @@ import logging
 import coloredlogs
 import sys
 from enum import Enum
-from core import config
+from config import config
 import logging
-import core.config
+from config import config
 
 class cache_flow(Enum):
     iterate = 1

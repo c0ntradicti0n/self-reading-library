@@ -1,12 +1,7 @@
 import logging
 
-from allennlp.common import Params
-from allennlp.predictors import Predictor
-from texttable import Texttable
-from core import config
+from config import config
 from core.pathant.PathSpec import PathSpec
-from allennlp.models.model import Model
-from language.transformer.difference_predictor.difference_predictor import DifferenceTaggerPredictor
 import os
 import subprocess
 import sys

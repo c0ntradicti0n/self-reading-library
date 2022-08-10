@@ -1,10 +1,8 @@
 import json
-from pprint import pprint
 
-from core import config
+from config import config
 from core.RestPublisher.Resource import Resource
 from core.RestPublisher.RestPublisher import RestPublisher
-from helpers.cache_tools import uri_with_cache
 
 
 class PdfCssPublisher(RestPublisher):

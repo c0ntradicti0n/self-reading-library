@@ -8,7 +8,7 @@ from keras import Input
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.models import Model
 from keras.layers import Embedding, Conv1D, MaxPooling1D, Flatten, Dense
-from core import config
+from config import config
 from tensorflow.python.keras.utils.np_utils import to_categorical
 import tensorflow as tf
 texts = []  # list of text samples

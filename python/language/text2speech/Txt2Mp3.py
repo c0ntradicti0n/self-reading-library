@@ -2,7 +2,7 @@ import logging
 import os
 
 from ant import Ant
-from core import config
+from config import config
 
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import cache_flow
