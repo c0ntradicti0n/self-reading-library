@@ -121,76 +121,13 @@ export default class ??Title!!Service extends ServerResource<any> {
 
     page_code = """
 import React, {useContext, useEffect, useState} from 'react'
-import {withRouter} from 'next/router'
-import ??Title!!Service from '../src/resources/??Title!!Service'
-import HtmlRenderer from './../src/components/HtmlRenderer'
-import BoxAnnotator from './../src/components/BoxAnnotator'
-import DownloadFile from './../src/components/DownloadFile'
-import {DocumentContext, DocumentContextType} from "../src/contexts/DocumentContext.tsx";
+import MacroComponentSwitch from './../src/components/MacroComponentSwitch'
 
-import dynamic from 'next/dynamic'
-
-
-const Graph = dynamic(
-    () => import('./../src/components/Graph.js'),
-    {
-        loading: () => <p>...</p>,
-        ssr: false
-    }
-)
-
-interface Props {
-    router?: any
+const ??Title!! = () => {
+     return <MacroComponentSwitch component={"??type!!"} url={'/??title!!'} />
 }
 
-const ??Title!! = (props: Props) => {
-    const context = useContext<DocumentContextType>(DocumentContext)
-    const component = "??type!!"
-    const service = new ??Title!!Service()
-    useEffect(
-        () => {
-            let service = new ??Title!!Service()
-            console.log("get " + props.router.query.id)
-            if (props.router.query.id) {
-                console.log("query", props.router.query)
-                service.fetch_one(props.router.query.id, context?.setValueMetas)
-            } else {
-                service.fetch_all(context?.value, context?.setValueMetas)
-            }
-        }, [])
-    console.log("Created component", component, context)
-
-    if (["upload_annotation", "annotation"].includes(component)) {
-        return <BoxAnnotator
-                service={service}
-            />
-    }
-
-    // @ts-ignore
-    if (component === "download") {
-        return <DownloadFile data={context.value}/>
-    }
-
-    // @ts-ignore
-    if (component === "text") {
-        return JSON.stringify({value: context.value, meta: context.meta})
-    }
-
-    // @ts-ignore
-    if (component === "graph" && state.value)
-        return <Graph/>
-
-    // @ts-ignore
-    if (component === "html") 
-        return <HtmlRenderer service={??Title!!Service}  />
-    
-    else return null
-
-}
-
-    
-    
-export default withRouter(??Title!!)    
+export default ??Title!!    
     """ \
         .replace("{", "{{") \
         .replace("}", "}}") \

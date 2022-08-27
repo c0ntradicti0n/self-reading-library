@@ -80,9 +80,6 @@ export default class ServerResource<T> {
     is_file = false,
     query: string = null
   ) => {
-    // Default options are marked with *
-    console.log('URL', AppSettings.BACKEND_HOST + this.route + this.id)
-
     let querystring = ''
     if (query) querystring = query
     else if (typeof window !== 'undefined') {
@@ -104,15 +101,14 @@ export default class ServerResource<T> {
       delete fetch_init.body
     }
 
-    console.log(fetch_init)
-
-    try {
-      const response = await fetch(
-        // @ts-ignore
-        AppSettings.BACKEND_HOST +
+    const request_query = AppSettings.BACKEND_HOST +
           this.route +
           this.id +
-          (querystring ? '?' + querystring : ''),
+          (querystring ? '?' + querystring : '')
+    try {
+      const response = await fetch(
+        request_query,
+        // @ts-ignore
         fetch_init
       )
 
@@ -132,7 +128,7 @@ export default class ServerResource<T> {
       try {
         return callback(result)
       } catch (e) {
-        console.log('No callback given?', e, callback)
+        console.log('No callback?', e, callback)
         console.trace()
       }
     } catch (e) {
@@ -154,7 +150,6 @@ export default class ServerResource<T> {
   }
 
   fetch_all = async (callback) => {
-    console.log('Fetch all resources')
     if (this.fetch_allowed) {
       return this.request('get', undefined, callback)
     }

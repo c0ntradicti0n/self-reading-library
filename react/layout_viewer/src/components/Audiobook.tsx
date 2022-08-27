@@ -35,7 +35,7 @@ const Audiobook = () => {
       existsCall()
       const intervalId = window.setInterval(existsCall, 20000)
       addIntervallId(intervalId)
-      return () => intervalIds.map((id) => clearInterval(id))
+      return () => intervalIds.map((id) => clearInterval(intervalId))
     }
   }, [context.value])
 

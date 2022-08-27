@@ -200,7 +200,7 @@ class RestQueue:
         resp.status = falcon.HTTP_OK
 
     # ok or use one existing file
-    def on_post(self, req, resp, id=None, **kwargs):
+    def on_post(self, req, resp, id=None, *args, **kwargs):
         if (isinstance(req.media, str)):
             doc_id = req.media
             is_url = doc_id.startswith("http")

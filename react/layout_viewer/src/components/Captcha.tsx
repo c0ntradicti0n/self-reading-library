@@ -5,6 +5,7 @@ import { DialogContent } from '@mui/material'
 import { BootstrapDialog } from './BootstrapDialogue'
 import { useState } from 'react'
 import GeneralResource from '../resources/GeneralResource'
+import { AppWrapper } from '../contexts/DocumentContext'
 
 const Kind: {
   [kind: string]: {
@@ -23,7 +24,7 @@ export const Captcha = () => {
   let [kind, setKind] = useState('layout')
   return (
     <div>
-        <Button onClick={() => setOpen(true)}>Captcha</Button>
+      <Button onClick={() => setOpen(true)}>Captcha</Button>
       <BootstrapDialog
         aria-labelledby="customized-dialog-title"
         open={open}
@@ -36,7 +37,7 @@ export const Captcha = () => {
           console.log('stop it!')
         }}>
         <BootstrapDialogTitle onClose={() => console.log('Closing dialogue')}>
-          {Kind[kind].title}
+          <AppWrapper>{Kind[kind].title}</AppWrapper>
         </BootstrapDialogTitle>
         <DialogContent dividers>{Kind[kind].component}</DialogContent>
         <Button variant="outlined" onClick={() => setOpen(false)}>
