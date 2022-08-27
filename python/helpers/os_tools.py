@@ -36,9 +36,6 @@ def make_fresh_dir(dir):
 def get_filename_from_path(path):
     return os.path.basename(path)
 
-def get_filename_from_path(path):
-    return os.path.dirname(path)
-
 PathInfo = namedtuple("PathInfo", ["path", "filename", "extension", "filename_without_extension"])
 def get_path_filename_extension(adress):
     extension = os.path.splitext(adress)[1]

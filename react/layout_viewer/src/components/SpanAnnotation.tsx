@@ -1,160 +1,119 @@
-import { useEffect, useState } from "react";
-import PropTypes from "prop-types";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
-import Typography from "@mui/material/Typography";
-import { styled as sty } from "@mui/material/styles";
-import { Slider } from "@mui/material";
-import { ThreeDots } from "react-loader-spinner";
+import { useContext, useEffect, useState } from 'react'
+import PropTypes from 'prop-types'
+import Button from '@mui/material/Button'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import Typography from '@mui/material/Typography'
+import { Slider } from '@mui/material'
+import { ThreeDots } from 'react-loader-spinner'
+import { DocumentContext } from '../contexts/DocumentContext.tsx'
+
 import {
   addSpan,
   adjustSpanValue,
-  getSpans,
+  annotation2spans,
   popSpan,
   spans2annotation,
-} from "../helpers/span_tools";
-
-const BootstrapDialog = sty(Dialog)(({ theme }) => ({
-  "& .MuiDialogContent-root": {
-    padding: theme.spacing(2),
-    maxWidth: "90%",
-    overflow: "auto",
-    wordWrap: "normal",
-    display: "flex",
-    flex: "1 1 auto",
-    flexWrap: "wrap",
-  },
-  "& .MuiDialogActions-root": {
-    padding: theme.spacing(1),
-  },
-}));
+  valueText,
+} from '../helpers/span_tools'
+import { BootstrapDialogTitle } from './BootstrapDialogueTitle'
+import { BootstrapDialog } from './BootstrapDialogue'
 
 export function AnnotationTable(props: {
-  annotation: string[][];
-  spans: [string, number, number, string[]][];
+  annotation: string[][]
+  spans: [string, number, number, string[]][]
 }) {
   return (
-    <div style={{ display: "flex", flexWrap: "wrap" }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap' }}>
       {props.annotation.map(([word, tag], index) => {
         let span_no =
           props.spans.find(
             ([, begin, end]) => index >= begin && index < end
-          )?.[0] ?? "O";
+          )?.[0] ?? 'O'
         return (
-          <span key={index} className={"tag span_" + span_no}>
+          <span key={index} className={'tag span_' + span_no}>
             {word}
           </span>
-        );
+        )
       })}
     </div>
-  );
+  )
 }
 
-const BootstrapDialogTitle = (props) => {
-  const { children, onClose, ...other } = props;
-
-  return (
-    <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
-      {children}
-      {onClose ? (
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      ) : null}
-    </DialogTitle>
-  );
-};
-
+// @ts-ignore
 BootstrapDialogTitle.propTypes = {
   children: PropTypes.node,
   onClose: PropTypes.func.isRequired,
-};
+}
 
-export default function SpanAnnotation({
-  value,
-  meta,
-  text,
-  onClose,
-  service,
-}) {
-  const [open, setOpen] = useState(true);
-  const [annotation, setAnnotation] = useState(null);
+export default function SpanAnnotation({ text, onClose, service }) {
+  const [open, setOpen] = useState(true)
+  const [annotation, setAnnotation] = useState(null)
+  const context = useContext<DocumentContext>(DocumentContext)
+  let { value, meta } = context
+
+  console.log()
 
   // @ts-ignore
   const [spanIndices, setSpanIndices] = useState<
     [string, number, number, string[]][]
-  >([]);
+  >([])
   useEffect(() => {
-    (async () => {
-      await service.fetch_one([value, text, meta["pdf_path"]], (res) => {
-        setAnnotation(res);
-        setSpanIndices(getSpans(res));
-      });
-    })();
-  }, []);
+    ;(async () => {
+      await service.fetch_one([value, text, value], (res) => {
+        setAnnotation(res)
+        setSpanIndices([...annotation2spans(res)])
+      })
+    })()
+  }, [])
 
   const handleClickOpen = () => {
-    setOpen(true);
-  };
+    setOpen(true)
+  }
   const handleCloseSave = () => {
-    console.log("save");
-    (async () => {
+    console.log('save')
+    ;(async () => {
       await service.save(
         value,
         spans2annotation(annotation, spanIndices),
         () => {
-          console.log("saved");
+          console.log('saved')
         }
-      );
-    })();
-    setOpen(false);
-    onClose();
-  };
+      )
+    })()
+    setOpen(false)
+    onClose()
+  }
 
   const handleCloseDiscard = () => {
-    setOpen(false);
-    console.log("close discard");
-    onClose();
-  };
+    setOpen(false)
+    console.log('close discard')
+    onClose()
+  }
 
-  console.log(spanIndices);
+  console.log(spanIndices)
   return (
     <div
       onClick={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        console.log("stop it! click");
+        e.stopPropagation()
+        e.preventDefault()
+        console.log('stop it! click')
       }}
       onMouseUp={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        console.log("stop it! up");
+        e.stopPropagation()
+        e.preventDefault()
+        console.log('stop it! up')
       }}
       onChange={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        console.log("stop it! change");
+        e.stopPropagation()
+        e.preventDefault()
+        console.log('stop it! change')
       }}
       onBlur={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        console.log("stop it! blur");
-      }}
-    >
+        e.stopPropagation()
+        e.preventDefault()
+        console.log('stop it! blur')
+      }}>
       <Button variant="outlined" onClick={handleClickOpen}>
         Open dialog
       </Button>
@@ -162,15 +121,15 @@ export default function SpanAnnotation({
         aria-labelledby="customized-dialog-title"
         open={open}
         fullWidth
-        maxWidth={"xl"}
-        style={{ marginRight: "30%" }}
+        maxWidth={'xl'}
+        style={{ marginRight: '30%' }}
         onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          console.log("stop it!");
+          e.preventDefault()
+          e.stopPropagation()
+          console.log('stop it!')
         }}
       >
-        <BootstrapDialogTitle onClose={() => console.log("Closing dialogue")}>
+        <BootstrapDialogTitle onClose={() => handleCloseDiscard()}>
           Teach the difference
         </BootstrapDialogTitle>
         <DialogContent dividers>
@@ -181,8 +140,7 @@ export default function SpanAnnotation({
               <Typography gutterBottom>
                 <AnnotationTable
                   annotation={annotation}
-                  spans={spanIndices}
-                ></AnnotationTable>
+                  spans={spanIndices}></AnnotationTable>
               </Typography>
               <Typography gutterBottom>
                 {spanIndices.map(([tag, i1, i2, ws], i) => (
@@ -190,26 +148,24 @@ export default function SpanAnnotation({
                     <Button
                       startIcon="minus"
                       onClick={() => {
-                        popSpan(spanIndices, i, setSpanIndices);
-                      }}
-                    ></Button>
+                        popSpan(spanIndices, i, setSpanIndices)
+                      }}></Button>
                     <b>{tag}</b>
+                    <b>{spanIndices[i].slice(1, 3)}</b>
                     <br />
                     <div
                       style={{
-                        marginRight: "0px",
-                        marginLeft: "0px",
-                      }}
-                    >
+                        marginRight: '0px',
+                        marginLeft: '0px',
+                      }}>
                       <div
                         style={{
-                          wordWrap: "break-word",
-                          whiteSpace: "normal",
-                          width: "80vw",
-                        }}
-                      >
+                          wordWrap: 'break-word',
+                          whiteSpace: 'normal',
+                          width: '50vw',
+                        }}>
                         {ws.map((w, iii) => (
-                          <span key={iii} className={"tag span_" + tag}>
+                          <span key={iii} className={'tag span_' + tag}>
                             {w}
                           </span>
                         ))}
@@ -217,40 +173,27 @@ export default function SpanAnnotation({
 
                       <Slider
                         aria-label="annotation"
-                        value={spanIndices[i].slice(1, 3) as number[]}
+                        value={[i1, i2]}
                         valueLabelDisplay="auto"
+                        style={{ width: '50vw !important' }}
                         onChange={(event, newValue, activeThumb) => {
-                          console.log(
-                            "changing slider",
-                            event,
-                            newValue,
-                            activeThumb
-                          );
-                          setSpanIndices(
-                            adjustSpanValue(
-                              newValue,
-                              activeThumb,
-                              spanIndices,
-                              i,
-                              tag,
-                              annotation
-                            )
-                          );
-                          event.stopPropagation();
-                          event.stopImmediatePropagation();
-                          console.log("stop it!");
-                          return false;
-                        }}
-                        onMouseUp={(event) => {
-                          event.stopPropagation();
-                          console.log("stop it!");
+                          const result = adjustSpanValue(
+                            newValue as [number, number],
+                            activeThumb,
+                            spanIndices,
+                            i,
+                            tag,
+                            annotation
+                          )
+                          console.log(result)
+                          setSpanIndices(result)
                         }}
                         step={1}
                         marks
                         min={0}
                         max={annotation.length}
                         disableSwap
-                        getAriaValueText={valuetext}
+                        getAriaValueText={valueText}
                       />
                     </div>
                   </div>
@@ -259,9 +202,8 @@ export default function SpanAnnotation({
               <Button
                 startIcon="add"
                 onClick={() => {
-                  setSpanIndices(addSpan(spanIndices, annotation));
-                }}
-              ></Button>
+                  setSpanIndices(addSpan(spanIndices, annotation))
+                }}></Button>
             </>
           )}
         </DialogContent>
@@ -273,5 +215,5 @@ export default function SpanAnnotation({
         </DialogActions>
       </BootstrapDialog>
     </div>
-  );
+  )
 }

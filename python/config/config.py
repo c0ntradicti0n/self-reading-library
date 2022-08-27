@@ -156,7 +156,7 @@ FEATURES = Features({
     'attention_mask': Sequence(Value(dtype='int64')),
     'token_type_ids': Sequence(Value(dtype='int64')),
     'bbox': Array2D(dtype="int64", shape=(512, 4)),
-    'labels': Sequence(ClassLabel(names=LABELS + [max(LABELS) + 1]))
+    'labels': Sequence(ClassLabel(names=LABELS + [max(LABELS) + 1, max(LABELS) + 2]))
 })
 NUM_LABELS = len(LABELS)
 PROCESSOR_PICKLE = hidden_folder + f"processor_module{NUM_LABELS}.pickle"

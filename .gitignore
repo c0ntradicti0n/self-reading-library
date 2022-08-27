@@ -1,3 +1,6 @@
 /python/language/transformer/models/
 /python/language/transformer/output/
+/react/layout_viewer/node_modules/
+/react/layout_viewer/.next
+
 **/__pycache__/

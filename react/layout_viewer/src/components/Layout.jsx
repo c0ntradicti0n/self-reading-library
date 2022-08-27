@@ -1,21 +1,21 @@
-import * as React from "react";
-import Head from "next/head";
-import styled from "styled-components";
-import Url2Difference from "./Url2Difference";
-import { Button } from "@mui/material";
+import * as React from 'react'
+import Head from 'next/head'
+import styled from 'styled-components'
+import Url2Difference from './Url2Difference'
+import { Button } from '@mui/material'
 
 const layoutStyle = {
   margin: 20,
   padding: 20,
-  display: "flex",
-};
+  display: 'flex',
+}
 
 const Lib = styled.div`
   //border: 3px solid black;
   height: 10em;
   grid-column-end: span 2;
   margin: 10px;
-`;
+`
 
 const Mansonry = styled.div`
   display: grid;
@@ -23,12 +23,12 @@ const Mansonry = styled.div`
   grid-template-rows: masonry;
   gap: 10px;
 
-  font-family: "Roboto Serif", serif;
-`;
+  font-family: 'Roboto Serif', serif;
+`
 
 export default class Layout extends React.Component {
   render() {
-    let title = "Automatic library";
+    let title = 'Automatic library'
 
     return (
       <div style={layoutStyle}>
@@ -66,8 +66,8 @@ export default class Layout extends React.Component {
           {this.props.children}
 
           <Lib>
-            Some source of papers:{" "}
-            <Button href={"http://arxiv.org"}>http://arxiv.org</Button>
+            Some source of papers:{' '}
+            <Button href={'http://arxiv.org'}>http://arxiv.org</Button>
             <br />
             <img src="/react/layout_viewer/public/source_of_papers.jpeg" />
           </Lib>
@@ -75,12 +75,12 @@ export default class Layout extends React.Component {
             Some other websites featuring <i> differences </i>
             <ul>
               <li>
-                <Button href={"http://www.differencebetween.net/"}>
+                <Button href={'http://www.differencebetween.net/'}>
                   http://www.differencebetween.net/
                 </Button>
               </li>
               <li>
-                <Button href={"http://www.differencebetween.com/"}>
+                <Button href={'http://www.differencebetween.com/'}>
                   http://www.differencebetween.com/
                 </Button>
               </li>
@@ -88,6 +88,6 @@ export default class Layout extends React.Component {
           </Lib>
         </Mansonry>
       </div>
-    );
+    )
   }
 }

@@ -87,8 +87,6 @@ class RestPublisher(PathSpec, react):
         except:
             logging.error(f"Could not create javascript resource file {self.resource.Title}", exc_info=True)
 
-        self.write_components("/".join([self.npm_components, self.resource.title + ".tsx"]))
-
         try:
             with open("/".join([self.npm_pages, self.resource.title + ".tsx"]), "w") as f:
                 f.write(self.page_code.format(**self.resource, port=self.port, url=self.url, **self.resource.access))
@@ -103,6 +101,7 @@ class RestPublisher(PathSpec, react):
     server_resource_code = \
         """
 import ServerResource from './GeneralResource'
+
 
 export default class ??Title!!Service extends ServerResource<any> {
     constructor () {
@@ -121,15 +120,17 @@ export default class ??Title!!Service extends ServerResource<any> {
 """.replace("{", "{{").replace("}", "}}").replace("??", r"{").replace("!!", "}")
 
     page_code = """
-import React from 'react'
-import Router from 'next/router'
-import { withRouter } from "next/router";
-import ??title!!Service from '../src/resources/??Title!!Service'
+import React, {useContext, useEffect, useState} from 'react'
+import {withRouter} from 'next/router'
+import ??Title!!Service from '../src/resources/??Title!!Service'
 import HtmlRenderer from './../src/components/HtmlRenderer'
 import BoxAnnotator from './../src/components/BoxAnnotator'
 import DownloadFile from './../src/components/DownloadFile'
+import {DocumentContext, DocumentContextType} from "../src/contexts/DocumentContext.tsx";
 
 import dynamic from 'next/dynamic'
+
+
 const Graph = dynamic(
     () => import('./../src/components/Graph.js'),
     {
@@ -138,117 +139,58 @@ const Graph = dynamic(
     }
 )
 
-interface ??Title!!State {
-    ??title!!: any
-    ??title!!s: any
-    meta: any
-    value: any
-}
-
-interface ??Title!!Props {
+interface Props {
     router?: any
 }
 
-class ??title!! extends React.Component<??Title!!Props, ??Title!!State> {
-    ??title!!Service : ??title!!Service
-   
-    constructor (props)  {
-        super(props)
-        this.??title!!Service = new ??title!!Service()
+const ??Title!! = (props: Props) => {
+    const context = useContext<DocumentContextType>(DocumentContext)
+    const component = "??type!!"
+    const service = new ??Title!!Service()
+    useEffect(
+        () => {
+            let service = new ??Title!!Service()
+            console.log("get " + props.router.query.id)
+            if (props.router.query.id) {
+                console.log("query", props.router.query)
+                service.fetch_one(props.router.query.id, context?.setValueMetas)
+            } else {
+                service.fetch_all(context?.value, context?.setValueMetas)
+            }
+        }, [])
+    console.log("Created component", component, context)
 
-        this.state = {
-            ??title!!: null,
-            ??title!!s: null,
-            meta: null,
-            value: null
-        }
-        
-        if (this.props.router.query.id) {
-            console.log("query", this.props.router.query)
-        // @ts-ignore
-            this.??title!!Service.fetch_one(this.props.router.query.id, this.set_??title!!s)
-        }
-        
-        else {    
-        // @ts-ignore
-            this.??title!!Service.fetch_all(this.set_??title!!s)
-        }
-    }
-    
-    set_??title!!s = async (v) => {
-        const prom = await v
-
-        console.log('Setting values', prom.response, prom)
-        
-        
-        const [value, meta] = prom
-        console.log (value, meta)
-        
-        this.setState({
-            ??title!!s: prom.response,
-            value,
-            meta    
-            })
-    }
-    
-    set_??title!! = async (v) => {
-        
-        if (v instanceof Promise) {
-            await v.then(prom => {
-                console.log('Set value', prom.response)
-    
-                this.setState({
-                    ??title!!: prom.response}
-                )
-            })
-        } else {
-            this.setState({
-                ??title!!: v}
-            )
-        }
-    }
-    
-    render ()  {
-        console.log("Created component", this, "??type!!" )
-        
-        if (["upload_annotation", "annotation"].includes("??type!!") )  {
-            return (<>
-                <BoxAnnotator 
-                    superState={this.state} 
-                    service={this.??title!!Service}
-                    setFullState={this.set_??title!!s}
-                />
-            </>)
-        }
-        
-        // @ts-ignore
-        if ("??type!!" === "download")  {
-            return <DownloadFile data={this.state.value} />
-        }
-        
-        // @ts-ignore
-        if ("??type!!" === "text")  {
-            return (<>
-                {JSON.stringify(this.state)} 
-            </>)
-        }
-        
-        // @ts-ignore
-        if ("??type!!" === "graph" && this.state.value)  
-            return <Graph data={this.state.value}/>
-        
-        // @ts-ignore
-        if ("??type!!" === "html") {
-            return <HtmlRenderer 
-                data={this.state}
-                service={this.??title!!Service}
+    if (["upload_annotation", "annotation"].includes(component)) {
+        return <BoxAnnotator
+                service={service}
             />
-        }
-        else return null
     }
-} 
+
+    // @ts-ignore
+    if (component === "download") {
+        return <DownloadFile data={context.value}/>
+    }
+
+    // @ts-ignore
+    if (component === "text") {
+        return JSON.stringify({value: context.value, meta: context.meta})
+    }
+
+    // @ts-ignore
+    if (component === "graph" && state.value)
+        return <Graph/>
+
+    // @ts-ignore
+    if (component === "html") 
+        return <HtmlRenderer service={??Title!!Service}  />
     
-export default withRouter(??title!!)    
+    else return null
+
+}
+
+    
+    
+export default withRouter(??Title!!)    
     """ \
         .replace("{", "{{") \
         .replace("}", "}}") \
@@ -267,16 +209,6 @@ export default withRouter(??title!!)
     }
     """.replace("{", "{{").replace("}", "}}").replace("??", r"{").replace("!!", "}")
     }
-
-    def write_components(self, param):
-        written_componens = []
-        for component, code in self.components.items():
-            try:
-                with open("/".join([self.npm_resources, self.resource.title + ".ts"]), "w") as f:
-                    f.write(code.format(**self.resource, port=self.port, url=self.url, **self.resource.access))
-                    written_componens.append(component)
-            except:
-                logging.error(f"Could not write { self.resource.title }", exc_info=True)
 
 import unittest
 

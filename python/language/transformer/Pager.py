@@ -2,6 +2,7 @@ import re
 import os
 import unicodedata
 from queue import Empty
+from pathlib import Path
 
 import chardet
 from config import config
@@ -199,7 +200,6 @@ class Pager(PathSpec):
     def pdf2htmlEX(self, pdf_filename, html_filename):
         assert (pdf_filename.endswith(".pdf"))
         self.logger.info(f"converting pdf {pdf_filename} to html {html_filename} ")
-        from pathlib import Path
 
         origin = Path(os.getcwd()).resolve()
         destination = Path(html_filename).resolve()
@@ -212,4 +212,7 @@ class Pager(PathSpec):
                                 f"\"{pdf_filename}\" \"{rel_html_path}\"")
 
         if return_code != 0:
-            raise FileNotFoundError(f"{pdf_filename} was not found!")
+            if os.path.exists(pdf_filename):
+                raise RuntimeError(f"{pdf_filename} could not be converted to html back")
+            else:
+                raise FileNotFoundError(f"{pdf_filename} was not found")

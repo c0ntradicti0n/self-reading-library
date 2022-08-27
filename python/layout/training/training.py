@@ -8,7 +8,7 @@ from layout import model_helpers
 from helpers import os_tools
 
 
-@converter("annotation.collection", "model")
+@converter("annotation.corrected", "model")
 class Training(PathSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, num_labels=config.NUM_LABELS, **kwargs)
@@ -39,7 +39,7 @@ class Training(PathSpec):
 
         print("LABEL", feature_df["LABEL"].tolist())
 
-        feature_df = feature_df[feature_df.image_path.map(lambda path: not os.path.exists(path[0]))]
+        feature_df = feature_df[feature_df.image_path.map(lambda path: os.path.exists(path[0]))]
 
         dataset = Dataset.from_pandas(feature_df)
 
@@ -91,7 +91,7 @@ class Training(PathSpec):
             model = model_helpers.MODEL
 
             model.to(config.DEVICE)
-            optimizer = AdamW(model.parameters(), lr=1e-5, weight_decay=0.1)
+            optimizer = AdamW(model.parameters(), lr=1e-5, weight_decay=0.17)
 
             global_step = 0
             num_train_epochs = config.EPOCHS_LAYOUT
@@ -101,19 +101,17 @@ class Training(PathSpec):
             model.train()
             for epoch in range(num_train_epochs):
                 print("Epoch:", epoch)
-                with tqdm(train_dataloader, total=train_dataloader.dataset.num_rows) as tdqm_train_dataloader:
+                with tqdm(train_dataloader, total=train_dataloader.dataset.num_rows / 2) as tdqm_train_dataloader:
                     for batch in tdqm_train_dataloader:
                         tdqm_train_dataloader.set_description(f"Epoch {epoch}")
                         # zero the parameter gradients
-                        optimizer.zero_grad()
+                        #optimizer.zero_grad()
 
                         # forward + backward + optimize
                         outputs = model(**batch)
                         loss = outputs.loss
-                        # print loss every 100 steps
-                        if global_step % 30 == 0:
-                            print(f" .")
-                            tdqm_train_dataloader.set_postfix(loss=loss.item())
+
+                        tdqm_train_dataloader.set_postfix(loss=loss.item())
 
                         loss.backward()
                         optimizer.step()

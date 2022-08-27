@@ -42,9 +42,9 @@ def run_extra_threads():
              ]
              )
 
-    layout = threading.Thread(target=layout_annotate_train_model, name="layout")
+    layout = threading.Thread(target=layout_annotate_train_model, name="layout_captcha")
     layout.start()
-    difference_elmo = threading.Thread(target=annotate_difference_elmo, name="difference")
+    difference_elmo = threading.Thread(target=annotate_difference_elmo, name="difference_captcha")
     difference_elmo.start()
 
 
@@ -80,7 +80,7 @@ def create_app():
             AntPublisher,
 
         # difference
-        '/difference':
+        '/difference_captcha':
             ElmoDifferenceQueueRest,
         '/difference/{id}':
             ElmoDifferenceQueueRest,
@@ -94,7 +94,7 @@ def create_app():
             TopicsPublisher,
 
         # layout
-        '/annotation/{id}':
+        '/annotation_captcha':
             AnnotationQueueRest,
         '/upload_annotation/{id}':
             UploadAnnotationQueueRest,
@@ -137,5 +137,5 @@ if __name__ == "__main__":
 
     logging.debug(get_all_routes(api))
 
-    httpd = simple_server.make_server('0.0.0.0', PORT, api)
+    httpd = simple_server.make_server('0.0.0.0', config.PORT, api)
     httpd.serve_forever()

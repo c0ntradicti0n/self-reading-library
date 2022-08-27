@@ -29,9 +29,12 @@ d = {}
 def init_queues(service_id, id):
     global q
     global d
+    # samples to take from
     q[service_id] = Queue(service_id + "_q")
-    q[id] = Queue(id)
+    # samples edited by user
     d[service_id] = Queue(service_id + "_d")
+    # session dependent queue
+    q[id]         = Queue(id + "_id")
 
 
 def encode_base64(image):
@@ -123,20 +126,20 @@ class RestQueue:
             d[self.service_id].put(id, item)
             q[id].task_done()
         except Exception as e:
-            print("ok, but end of gen")
+            print("Ok, but end of gen")
 
-            logging.error(f"could not remove ${id} from {self.workbook}")
+            logging.error(f"Could not remove ${id} from {self.workbook}")
 
     def discard(self, id):
         try:
-            print("discarding")
+            print("Discarding")
 
             item = self.workbook.pop(id)
             q[self.service_id].task_done()
         except Exception as e:
-            print("discarding error")
+            print("Discarding error")
 
-            logging.error(f"could not remove ${id} from {self.workbook}")
+            logging.error(f"ould not remove ${id} from {self.workbook}")
 
     def on_get(self, req, resp, id=None):  # get image
         data = self.workbook.get(id)

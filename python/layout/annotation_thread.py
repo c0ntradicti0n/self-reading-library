@@ -59,17 +59,13 @@ def unlabeled_not_existent_filter(x_m):
 ant = PathAnt()
 
 sample_pipe = ant(
-    "arxiv.org", "annotation.collection",
-    num_labels=config.NUM_LABELS,
-    via='pdf',
-    filter={'tex': unlabeled_not_existent_filter},
+    "annotation.collection", "annotation.corrected",
     model_path=full_model_path
 )
 
 model_pipe = ant(
-    "annotation.collection", "model",
+    "annotation.corrected", "model",
     num_labels=config.NUM_LABELS,
-    filter={'tex': unlabeled_not_existent_filter},
     collection_step=training_rate
 )
 

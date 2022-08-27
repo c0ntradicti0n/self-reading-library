@@ -1,32 +1,33 @@
-import { AppSettings } from "../../config/connection";
-import { getRandomArbitrary } from "../helpers/array";
+import { AppSettings } from '../../config/connection'
+import { getRandomArbitrary } from '../helpers/array'
 
 const cyrb53 = function (str, seed = 0) {
+  if (!str) return null
   let h1 = 0xdeadbeef ^ seed,
-    h2 = 0x41c6ce57 ^ seed;
+    h2 = 0x41c6ce57 ^ seed
   for (let i = 0, ch; i < str.length; i++) {
-    ch = str.charCodeAt(i);
-    h1 = Math.imul(h1 ^ ch, 2654435761);
-    h2 = Math.imul(h2 ^ ch, 1597334677);
+    ch = str.charCodeAt(i)
+    h1 = Math.imul(h1 ^ ch, 2654435761)
+    h2 = Math.imul(h2 ^ ch, 1597334677)
   }
   h1 =
     Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^
-    Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    Math.imul(h2 ^ (h2 >>> 13), 3266489909)
   h2 =
     Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^
-    Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
-};
+    Math.imul(h1 ^ (h1 >>> 13), 3266489909)
+  return 4294967296 * (2097151 & h2) + (h1 >>> 0)
+}
 
 export default class ServerResource<T> {
-  fetch_allowed: Boolean;
-  read_allowed: Boolean;
-  correct_allowed: Boolean;
-  private route: string;
-  delete_allowed: Boolean;
-  upload_allowed: Boolean;
+  fetch_allowed: Boolean
+  read_allowed: Boolean
+  correct_allowed: Boolean
+  private route: string
+  delete_allowed: Boolean
+  upload_allowed: Boolean
 
-  id: string = "";
+  id: string = ''
 
   constructor(
     route: string,
@@ -37,37 +38,37 @@ export default class ServerResource<T> {
     delete_allowed = true,
     add_id = false
   ) {
-    this.route = route;
-    this.fetch_allowed = fetch_allowed;
-    this.correct_allowed = fetch_allowed;
-    this.read_allowed = read_allowed;
-    this.correct_allowed = correct_allowed;
-    this.upload_allowed = upload_allowed;
-    this.delete_allowed = delete_allowed;
+    this.route = route
+    this.fetch_allowed = fetch_allowed
+    this.correct_allowed = fetch_allowed
+    this.read_allowed = read_allowed
+    this.correct_allowed = correct_allowed
+    this.upload_allowed = upload_allowed
+    this.delete_allowed = delete_allowed
 
     if (add_id) {
-      let id;
+      let id
 
-      if (typeof window !== "undefined") {
+      if (typeof window !== 'undefined') {
         if (!localStorage.getItem(route)) {
-          id = getRandomArbitrary(100000, 999999).toString();
-          localStorage.setItem(route, id);
+          id = getRandomArbitrary(100000, 999999).toString()
+          localStorage.setItem(route, id)
         } else {
-          id = localStorage.getItem(route);
+          id = localStorage.getItem(route)
         }
         console.log(
           localStorage,
           route,
           localStorage.getItem(route),
-          new window.URLSearchParams(window.location.search).get("id")
-        );
+          new window.URLSearchParams(window.location.search).get('id')
+        )
 
         // @ts-ignore
         this.id =
-          "/" +
+          '/' +
           id +
-          "_" +
-          cyrb53(new window.URLSearchParams(window.location.search).get("id"));
+          '_' +
+          cyrb53(new window.URLSearchParams(window.location.search).get('id'))
       }
     }
   }
@@ -80,30 +81,30 @@ export default class ServerResource<T> {
     query: string = null
   ) => {
     // Default options are marked with *
-    console.log("URL", AppSettings.BACKEND_HOST + this.route + this.id);
+    console.log('URL', AppSettings.BACKEND_HOST + this.route + this.id)
 
-    let querystring = "";
-    if (query) querystring = query;
-    else if (typeof window !== "undefined") {
-      querystring = window?.location.search.substring(1);
-      console.log(querystring);
+    let querystring = ''
+    if (query) querystring = query
+    else if (typeof window !== 'undefined') {
+      querystring = window?.location.search.substring(1)
+      console.log(querystring)
     }
 
     var fetch_init = {
       method: method.toUpperCase(),
       headers: {
-        ...(!is_file ? { "Content-Type": "application/json" } : {}),
-        "API-Key": "secret",
-        origin: "localhost",
-        "Accept-Encoding": "gzip",
+        ...(!is_file ? { 'Content-Type': 'application/json' } : {}),
+        'API-Key': 'secret',
+        origin: 'localhost',
+        'Accept-Encoding': 'gzip',
       },
       body: !is_file ? JSON.stringify(data) : data,
-    };
-    if (method === "get") {
-      delete fetch_init.body;
+    }
+    if (method === 'get') {
+      delete fetch_init.body
     }
 
-    console.log(fetch_init);
+    console.log(fetch_init)
 
     try {
       const response = await fetch(
@@ -111,81 +112,81 @@ export default class ServerResource<T> {
         AppSettings.BACKEND_HOST +
           this.route +
           this.id +
-          (querystring ? "?" + querystring : ""),
+          (querystring ? '?' + querystring : ''),
         fetch_init
-      );
+      )
 
       if (!response.ok) {
-        throw response.statusText;
+        throw response.statusText
       }
 
-      let result = null;
+      let result = null
       try {
-        result = await response.json();
-        console.log({ result });
+        result = await response.json()
+        console.log({ result })
       } catch (e) {
-        console.log("Did not get a json back", e, result);
-        result = null;
+        console.log('Did not get a json back', e, result)
+        result = null
       }
 
       try {
-        return callback(result);
+        return callback(result)
       } catch (e) {
-        console.log("No callback given?", e, callback);
-        console.trace();
+        console.log('No callback given?', e, callback)
+        console.trace()
       }
     } catch (e) {
-      console.error(e);
+      console.error(e)
     }
-  };
+  }
 
   exists = async (id, callback: Function) => {
-    console.log("Fetch all resources");
+    console.log('Fetch all resources')
     if (this.fetch_allowed) {
-      return this.request("get", undefined, callback, null, "id=" + id);
+      return this.request('get', undefined, callback, null, 'id=' + id)
     }
-  };
+  }
 
   fetch_one = async (id, callback: Function) => {
     if (this.fetch_allowed) {
-      return this.request("post", id, callback);
+      return this.request('post', id, callback)
     }
-  };
+  }
 
   fetch_all = async (callback) => {
-    console.log("Fetch all resources");
+    console.log('Fetch all resources')
     if (this.fetch_allowed) {
-      return this.request("get", undefined, callback);
+      return this.request('get', undefined, callback)
     }
-  };
+  }
 
   // @ts-ignore
-  ok = async (id, url = "", data = {}, callback) => {
+  ok = async (id, url = '', data = {}, callback) => {
     if (this.read_allowed) {
-      await this.request("post", id, callback);
+      await this.request('post', id, callback)
     }
-  };
+  }
   // @ts-ignore
   change = async (json_path, value, callback) => {
     if (this.upload_allowed) {
-      await this.request("put", [json_path, value], callback);
+      await this.request('put', [json_path, value], callback)
     }
-  };
+  }
 
   // @ts-ignore
   save = async (id, data = {}, callback) => {
-    console.log("save", id, data);
+    console.log('save', id, data)
     if (this.upload_allowed) {
-      await this.request("put", [id, data], callback);
+      await this.request('put', [id, data], callback)
     }
-  };
+  }
 
   // @ts-ignore
   upload = async (form_data, callback) => {
-    console.log("UPLOADING", form_data, this.upload_allowed);
+    console.log('UPLOADING', form_data, this.upload_allowed)
     if (this.upload_allowed) {
-      console.log(new FormData(form_data), new FormData(form_data).get("file"));
-      await this.request("patch", new FormData(form_data), callback, true);
+      console.log(new FormData(form_data), new FormData(form_data).get('file'))
+      await this.request('patch', new FormData(form_data), callback, true)
     }
-  };
+  }
 }

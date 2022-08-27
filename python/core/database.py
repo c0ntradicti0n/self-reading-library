@@ -35,7 +35,7 @@ class Queue:
         #self.print()
 
     def id2tablename(self, id):
-        return f"queue{id}".lower()
+        return f"queue_{id}".lower()
 
     def timeout(self, f, timeout=None):
         # Database polling until value appeared or not

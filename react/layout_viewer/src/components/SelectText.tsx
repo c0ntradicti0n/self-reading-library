@@ -1,40 +1,26 @@
-import { Component } from "react";
-import SpanAnnotation from "./SpanAnnotation";
-import ServerResource from "../resources/GeneralResource";
+import { useState } from 'react'
+import SpanAnnotation from './SpanAnnotation'
 
-interface Props {
-  service: ServerResource<any>;
-  meta: any;
-}
+const SelectText = ({ service, children }) => {
+  const [selected, setSelected] = useState(null)
 
-interface State {
-  selected: string;
-}
-
-class SelectText extends Component<Props, State> {
-  state = { selected: null };
-  handleMouseUp = () => {
-    this.setState({ selected: window.getSelection().toString() });
-    console.log(`Selected text: ${window.getSelection().toString()}`);
-  };
-
-  render() {
-    console.log("SelectText", this)
-    return (
-      <div onMouseUp={this.handleMouseUp}>
-        {this.state.selected && (
-          <SpanAnnotation
-            text={this.state.selected}
-            onClose={() => this.setState({ selected: null })}
-            service={this.props.service}
-            value={this.props.value}
-            meta={this.props.meta}
-          />
-        )}
-        {this.props.children}
-      </div>
-    );
+  const handleMouseUp = () => {
+    setSelected(window.getSelection().toString())
+    console.log(`Selected text: ${window.getSelection().toString()}`)
   }
+
+  return (
+    <div onMouseUp={handleMouseUp}>
+      {selected && (
+        <SpanAnnotation
+          text={selected}
+          onClose={() => setSelected(null)}
+          service={service}
+        />
+      )}
+      {children}
+    </div>
+  )
 }
 
-export default SelectText;
+export default SelectText

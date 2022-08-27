@@ -3,7 +3,7 @@ from core.rest.RestPublisher import RestPublisher
 from core.rest.RestPublisher import Resource
 from core.rest.react import react
 from core.event_binding import queue_iter, RestQueue, queue_put
-from layout.model_helpers import repaint_image_from_labels, changed_labels
+from layout.model_helpers import changed_labels
 import logging
 
 

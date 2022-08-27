@@ -29,7 +29,6 @@ def find_repeating(lst, count=2):
 
 def metaize(l):
     for e in l:
-        logging.info(f"metaize {e}")
         yield e, {}
 
 

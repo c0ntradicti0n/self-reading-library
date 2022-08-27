@@ -601,7 +601,7 @@ class LayoutLMv2TokenizerFast(PreTrainedTokenizerFast):
                                 labels_example.append(self.pad_token_label)
                         except IndexError as e:
                             print("error")
-                            labels_example.append(word_labels[-1])
+                            labels_example.append(word_labels[-1][-1])
                     labels.append(labels_example)
 
 

@@ -5,7 +5,7 @@ module.exports = {
     }
     return config;
   },
-    typescript: {
+  typescript: {
     // !! WARN !!
     // Dangerously allow production builds to successfully complete even if
     // your project has type errors.
@@ -13,4 +13,4 @@ module.exports = {
     // but if not, too time consuming, if it runs locally...
     ignoreBuildErrors: true,
   },
-}
+};

@@ -13,6 +13,8 @@ from helpers.list_tools import metaize, forget_except
 from helpers.model_tools import TRAINING_RATE
 from language.text2speech.AudioPublisher import AudioPublisher
 from topics.TopicsPublisher import TopicsPublisher
+from core.captcha import Captcha
+
 from layout.annotator.annotation import Annotator, AnnotationQueueRest
 from layout.upload_annotation.upload_annotation import UploadAnnotator
 from layout.upload_annotation.upload_annotation import UploadAnnotator

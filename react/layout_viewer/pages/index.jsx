@@ -1,7 +1,7 @@
-import React from "react";
-import Layout from "../src/components/Layout";
-import styled from "styled-components";
-import { Button } from "@mui/material";
+import React from 'react';
+import Layout from '../src/components/Layout';
+import styled from 'styled-components';
+import { Button } from '@mui/material';
 
 const PageTitle = styled.div`
   align: right;
@@ -24,7 +24,7 @@ const CenterHorizontallyVertically = styled.div`
 `;
 
 const Quote = styled.div`
-  font-family: "Roboto", mono;
+  font-family: 'Roboto', mono;
 `;
 
 export default class Index extends React.Component {
@@ -55,13 +55,13 @@ export default class Index extends React.Component {
             <ul>
               <li>PDF-Readerlike view on your papapers</li>
               <li>
-                Put markup for{" "}
+                Put markup for{' '}
                 <span className="span_SUBJECT">
-                  concepts, beeing different{" "}
+                  concepts, beeing different{' '}
                 </span>
-                and{" "}
+                and{' '}
                 <span className="span_CONTRAST">
-                  {" "}
+                  {' '}
                   phrases, explaining something, that makes them different, here
                   we call them "contrasts".
                 </span>

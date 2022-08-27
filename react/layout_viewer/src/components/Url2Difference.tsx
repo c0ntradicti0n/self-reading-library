@@ -1,10 +1,10 @@
-import React from "react";
-import { Button } from "@mui/material";
+import React from 'react'
+import { Button } from '@mui/material'
 
 export default class Url2Difference extends React.Component {
   state = {
     url: null,
-  };
+  }
 
   render() {
     return (
@@ -14,13 +14,13 @@ export default class Url2Difference extends React.Component {
           name="id"
           type="text"
           style={{
-            margin: "10px",
+            margin: '10px',
           }}
         />
-        <Button href={"/difference?id=" + this.state.url} type="submit">
+        <Button href={'/difference?id=' + this.state.url} type="submit">
           Go
         </Button>
       </form>
-    );
+    )
   }
 }
