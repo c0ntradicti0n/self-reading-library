@@ -106,7 +106,7 @@ const BoxAnnotator = ({ service }) => {
       'a'.charCodeAt(0)
     )
 
-    var next_key = KEYS[event.code]
+    const next_key = KEYS[event.code]
 
     if (!next_key) {
       console.log('unknown keycode', event.code)
@@ -226,7 +226,7 @@ const BoxAnnotator = ({ service }) => {
 
                         console.log('get new')
 
-                        service.fetch_all((val) => context.setValueMetas(val))
+                        await service.fetch_all((val) => context.setValueMetas(val))
                       }
                     )
                   })()

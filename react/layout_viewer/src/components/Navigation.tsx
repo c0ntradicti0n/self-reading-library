@@ -6,6 +6,7 @@ import Audiobook from './Audiobook'
 
 import styled from 'styled-components'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
+import { Captcha } from './Captcha'
 
 const NavigationDiv = styled.div`
   position: fixed;
@@ -20,7 +21,7 @@ const NavigationDiv = styled.div`
   z-index: 10000;
 `
 
-const Navigation = (props) => {
+const Navigation = () => {
   const context = useContext<DocumentContext>(DocumentContext)
   const id = context.value
   const shortId = id?.replace('.layouteagle/', '')
@@ -46,7 +47,7 @@ const Navigation = (props) => {
         <Button href={'/difference?id=' + id}>Read annotated paper</Button>
       </div>
       <div>
-        <Audiobook id={id} kind="audiobook" />
+        <Audiobook />
       </div>
       <div>
         <Button href={shortId}>Original PDF</Button>
@@ -57,9 +58,16 @@ const Navigation = (props) => {
         </Button>
       </div>
 
-      <h3>Navigationigate to other document</h3>
+      <h3>Navigate to other document</h3>
 
+      <h5>Captcha game</h5>
+
+
+      <div>
+        <Captcha />
+      </div>
       <h5>Read custom page here, paste URL</h5>
+
       <div>
         <Url2Difference />
       </div>
@@ -70,8 +78,8 @@ const Navigation = (props) => {
           onSubmit={(e) => {
             console.log(e)
             Router.push({
-              pathname: '/difference/',
-              query: { id: (e.target as HTMLTextAreaElement).value },
+                pathname: '/difference/',
+                query: {id: (e.target as HTMLTextAreaElement).value},
             })
           }}>
           <input type="file" id="myfile" name="myfile" />

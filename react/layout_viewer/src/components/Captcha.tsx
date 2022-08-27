@@ -19,10 +19,11 @@ const Kind: {
 }
 
 export const Captcha = () => {
-  let [open, setOpen] = useState(true)
+  let [open, setOpen] = useState(false)
   let [kind, setKind] = useState('layout')
   return (
     <div>
+        <Button onClick={() => setOpen(true)}>Captcha</Button>
       <BootstrapDialog
         aria-labelledby="customized-dialog-title"
         open={open}

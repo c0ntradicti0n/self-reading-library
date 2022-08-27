@@ -31,7 +31,7 @@ const Audiobook = () => {
   console.log(context, 'AUDIOBOOK')
 
   useEffect(() => {
-    if (context.value) {
+    if (context.value && context.value !== id) {
       existsCall()
       const intervalId = window.setInterval(existsCall, 20000)
       addIntervallId(intervalId)
