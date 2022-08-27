@@ -46,30 +46,28 @@ export default class ServerResource<T> {
     this.upload_allowed = upload_allowed
     this.delete_allowed = delete_allowed
 
-    if (add_id) {
-      let id
+    let id
 
-      if (typeof window !== 'undefined') {
-        if (!localStorage.getItem(route)) {
-          id = getRandomArbitrary(100000, 999999).toString()
-          localStorage.setItem(route, id)
-        } else {
-          id = localStorage.getItem(route)
-        }
-        console.log(
-          localStorage,
-          route,
-          localStorage.getItem(route),
-          new window.URLSearchParams(window.location.search).get('id')
-        )
-
-        // @ts-ignore
-        this.id =
-          '/' +
-          id +
-          '_' +
-          cyrb53(new window.URLSearchParams(window.location.search).get('id'))
+    if (typeof window !== 'undefined') {
+      if (!localStorage.getItem(route)) {
+        id = getRandomArbitrary(100000, 999999).toString()
+        localStorage.setItem(route, id)
+      } else {
+        id = localStorage.getItem(route)
       }
+      console.log(
+        localStorage,
+        route,
+        localStorage.getItem(route),
+        new window.URLSearchParams(window.location.search).get('id')
+      )
+
+      // @ts-ignore
+      this.id =
+        '/' +
+        id +
+        '_' +
+        cyrb53(new window.URLSearchParams(window.location.search).get('id'))
     }
   }
 
@@ -101,10 +99,13 @@ export default class ServerResource<T> {
       delete fetch_init.body
     }
 
-    const request_query = AppSettings.BACKEND_HOST +
-          this.route +
-          this.id +
-          (querystring ? '?' + querystring : '')
+    const request_query =
+      AppSettings.BACKEND_HOST +
+      this.route +
+      this.id +
+      (querystring ? '?' + querystring : '')
+
+    console.log(this.id, request_query)
     try {
       const response = await fetch(
         request_query,
