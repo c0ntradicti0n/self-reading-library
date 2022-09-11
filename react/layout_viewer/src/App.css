@@ -136,3 +136,8 @@ span.span_SUBJECT {
   background-color: rgba(0, 0, 0, 0.5);
   user-select: none;
 }
+
+
+.MuiDialog-container {
+  height: 90vh !important;
+}

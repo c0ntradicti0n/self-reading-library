@@ -1,14 +1,16 @@
 import React, { useContext, useEffect, useState } from 'react'
-import ServerResource from '../resources/GeneralResource'
+import Resource from '../resources/Resource'
 import { ThreeCircles, Triangle } from 'react-loader-spinner'
 import SelectText from './SelectText'
 import { AppSettings } from '../../config/connection'
 import Difference_AnnotationService from '../resources/Difference_AnnotationService'
 import { httpGet } from '../helpers/httpGet'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
+import { Slot } from '../contexts/SLOTS'
 
 interface Props {
-  service: ServerResource<any>
+  service: Resource<any>
+  slot: Slot
 }
 
 const HtmlRenderer = (props: Props) => {
@@ -16,27 +18,23 @@ const HtmlRenderer = (props: Props) => {
   const [difference_AnnotationService] = useState<Difference_AnnotationService>(
     new Difference_AnnotationService()
   )
+  difference_AnnotationService.setSlot(props.slot)
 
   const context = useContext<DocumentContext>(DocumentContext)
-  console.log('CONTEXT', context)
   useEffect(() => {
-    if (context.value && !context.value.includes('http')) {
-      console.log('fetching static html', context.value)
+    if (context.value[props.slot] && !context.value[props.slot].includes('http')) {
+      console.log('fetching static html', context.value[props.slot])
       setHtmlContent(
         httpGet(
           AppSettings.FRONTEND_HOST +
             '/' +
-            context.value.replace('.layouteagle/', '') +
+            context.value[props.slot].replace('.layouteagle/', '') +
             '.html'
         )
       )
     }
-  }, [context.value])
+  }, [context.value[props.slot]])
 
-  console.log('HtmlRenderer', context, props, 'ASDASDA')
-
-  //       <Captcha />
-  console.log(htmlContent, context.value)
   return (
     <div>
       <SelectText service={difference_AnnotationService}>
@@ -47,11 +45,11 @@ const HtmlRenderer = (props: Props) => {
             justifyContent: 'center',
             padding: '9em',
           }}>
-          {context.meta ? (
+          {context.meta[props.slot] ? (
             <style
               dangerouslySetInnerHTML={{
                 __html:
-                  context.meta.css +
+                  context.meta[props.slot].css +
                   `\n\n
                    #page-container { 
                    background-color: transparent !important;

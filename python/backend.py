@@ -75,32 +75,36 @@ def create_app():
     from core.rest.LayoutPublisher import LayoutPublisher
 
     publishing = {
-        '/ant':
+        '/ant/{id}':
             AntPublisher,
 
         # difference
-        '/difference_captcha':
-            ElmoDifferenceQueueRest,
         '/difference/{id}':
             ElmoDifferenceQueueRest,
-        '/difference':
-            DifferencePublisher,
-        '/difference_annotation':
+        '/difference_annotation/{id}':
             DifferenceAnnotationPublisher,
 
-        # topics
-        '/library':
-            TopicsPublisher,
-
         # layout
-        '/annotation_captcha':
+        '/annotation_captcha/{id}':
             AnnotationQueueRest,
         '/upload_annotation/{id}':
             UploadAnnotationQueueRest,
-        '/layout': LayoutPublisher,
+        '/layout/{id}': LayoutPublisher,
+
+        # captcha
+        '/difference_captcha/{id}':
+            ElmoDifferenceQueueRest,
+        '/layout_captcha/{id}':
+            AnnotationQueueRest,
+
+        # topics
+        '/library/{id}':
+            TopicsPublisher,
+
+
 
         # audiobook
-        '/audiobook':
+        '/audiobook/{id}':
             AudioPublisher,
     }
 

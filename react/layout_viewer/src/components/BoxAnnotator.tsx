@@ -4,6 +4,9 @@ import { Button } from '@mui/material'
 import Router from 'next/router'
 import { Watch } from 'react-loader-spinner'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
+import Resource from '../resources/Resource'
+
+import {Slot} from "../contexts/SLOTS";
 
 const LABELS = ['NONE', 'c1', 'c2', 'c3', 'wh', 'h', 'pn', 'fn', 'fg', 'tb']
 
@@ -67,7 +70,9 @@ const TAG_COLOR = {
   tb: 'beige',
 }
 
-const BoxAnnotator = ({ service }) => {
+const BoxAnnotator = ({ service,     slot
+ }: {service: Resource<any>, slot: Slot}) => {
+  service.setSlot( slot)
   const [next_key, setNextKey] = useState('')
   const [finished, setFinished] = useState(false)
   const [imgOriginalSize, setImgOriginalSize] = useState(null)
@@ -90,12 +95,12 @@ const BoxAnnotator = ({ service }) => {
     const scaleH = height
 
     let im = new Image()
-    im.src = 'data:image/jpeg;charset=utf-8;base64,' + context.meta?.image
+    im.src = 'data:image/jpeg;charset=utf-8;base64,' + context.meta[slot]?.image
     im.onload = () => {
       setImgOriginalSize({ width: im.width, height: im.height })
       setImgRenderSize({ width: scaleW, height: scaleH })
     }
-  }, [context.meta?.image])
+  }, [context.meta[slot]?.image])
 
   const key = useCallback((event) => {
     console.log(
@@ -118,8 +123,10 @@ const BoxAnnotator = ({ service }) => {
   }, [])
 
   let cols
-  if (context.meta)
-    cols = zip([context.meta.bbox, labels ?? context.meta.labels])
+  if (context?.meta[slot]?.bbox)
+    cols = zip([context.meta[slot].bbox, labels ?? context.meta[slot].labels])
+  else
+    return <pre>{JSON.stringify(context, null,  2)}</pre>
 
   console.log({ imgOriginalSize, imgRenderSize, service })
   return (
@@ -133,7 +140,7 @@ const BoxAnnotator = ({ service }) => {
                 console.log(e)
                 Router.push({
                   pathname: '/difference/',
-                  query: { id: context.value },
+                  query: { id: context.value[slot] },
                 })
               }}>
               Return to document!
@@ -142,11 +149,11 @@ const BoxAnnotator = ({ service }) => {
         </div>
       ) : (
         <div className="container" style={{ position: 'absolute' }}>
-          {context.meta?.image ? (
+          {context.meta[slot]?.image ? (
             <img
               id="annotation_canvas"
               src={
-                'data:image/jpeg;charset=utf-8;base64,' + context.meta?.image
+                'data:image/jpeg;charset=utf-8;base64,' + context.meta[slot]?.image
               }
               alt="layout annotation"
             />
@@ -215,7 +222,7 @@ const BoxAnnotator = ({ service }) => {
                   ;(async () => {
                     console.log('ok')
                     await service.ok(
-                      [context.value, context.meta],
+                      [context.value[slot], context.meta[slot]],
                       '',
                       {},
                       async (val) => {
@@ -226,7 +233,7 @@ const BoxAnnotator = ({ service }) => {
 
                         console.log('get new')
 
-                        await service.fetch_all((val) => context.setValueMetas(val))
+                        await service.fetch_all((val) => context.setValueMetas(slot, val))
                       }
                     )
                   })()

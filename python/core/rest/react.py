@@ -29,7 +29,6 @@ class react:
                                       stderr=subprocess.STDOUT)
 
             os.mkdir(self.npm_resources)
-            sleep(2)
 
         if not sync_is_running:
             command = r"""

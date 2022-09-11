@@ -1,63 +1,51 @@
-import React from 'react';
-import App from 'next/app';
-import * as glob from 'glob';
-import '../src/App.css';
-import NoSSR from '../src/components/NoSSR';
-import { AppWrapper } from '../src/contexts/DocumentContext.tsx';
-import Navigation from '../src/components/Navigation';
+import React, { version } from 'react'
+import App from 'next/app'
+import * as glob from 'glob'
+import '../src/App.css'
+import NoSSR from '../src/components/NoSSR'
+import { AppWrapper } from '../src/contexts/DocumentContext.tsx'
+import { ContextWrapper } from '../src/contexts/ContextContext.tsx'
 
-import { version } from 'react';
+import Navigation from '../src/components/Navigation'
+import {NORMAL} from "../src/contexts/SLOTS";
 
-console.log(version);
+console.log(version)
 
 class MyApp extends App {
   static async getInitialProps(appContext) {
     if (process.browser) {
-      return __NEXT_DATA__.props.pageProps;
+      return __NEXT_DATA__.props.pageProps
     }
-    console.log('apps get initial props is run...');
+    console.log('apps get initial props is run...')
     let pages = glob
       .sync('pages/**/*', { cwd: './' })
       .map((path) => path.match('pages\\/(.+)..sx?')[1])
-      .filter((fname) => !fname.startsWith('_'));
+      .filter((fname) => !fname.startsWith('_'))
 
     // calls page's `getInitialProps` and fills `appProps.pageProps`
-    const appProps = await App.getInitialProps(appContext);
-    return { pageProps: { pages: pages } };
+    const appProps = await App.getInitialProps(appContext)
+    return { pageProps: { pages: pages } }
   }
 
   render() {
-    const { Component, appProps } = this.props;
+    const { Component, appProps } = this.props
     // Workaround for https://github.com/zeit/next.js/issues/8592
 
     return (
       <div id="comp-wrapp">
         <NoSSR>
-          <AppWrapper>
-            <Navigation
-              forward={() =>
-                this.props.service.ok(null, '', {}, () =>
-                  window.location.reload()
-                )
-              }
-              goto={(form_data) =>
-                this.props.service.fetch_one(form_data, () =>
-                  console.log('will display content...')
-                )
-              }
-              upload={(form_data) =>
-                this.props.service.upload(new FormData(form_data), () =>
-                  console.log('will display content...')
-                )
-              }
-              data={this.props}
-            />
-            <Component {...this.props.pageProps} />
-          </AppWrapper>
+          <ContextWrapper>
+            <AppWrapper>
+              <Navigation
+               slot={NORMAL}
+              />
+              <Component {...this.props.pageProps} slot={NORMAL} />
+            </AppWrapper>
+          </ContextWrapper>
         </NoSSR>
       </div>
-    );
+    )
   }
 }
 
-export default MyApp;
+export default MyApp

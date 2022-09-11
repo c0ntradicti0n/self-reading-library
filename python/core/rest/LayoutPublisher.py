@@ -9,6 +9,6 @@ class LayoutPublisher(PdfCssPublisher):
         super().__init__(*args, kind="layout", **kwargs )
 
 
-    def on_post(self, req, resp, **kwargs):
+    def on_post(self, req, resp, id=None, **kwargs):
         print(req, resp)
         id = req.params

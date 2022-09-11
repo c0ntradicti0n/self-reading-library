@@ -36,7 +36,7 @@ class RestPublisher(PathSpec, react):
         return jsonify(meta=self.meta), 400
 
     # get html
-    def on_post(self, i):
+    def on_post(self, *args, **kwargs):
 
         self.logger.error("rest call on abstract publisher!")
         return jsonify(page=self.data[i]), 200
@@ -100,10 +100,10 @@ class RestPublisher(PathSpec, react):
 
     server_resource_code = \
         """
-import ServerResource from './GeneralResource'
+import Resource from './Resource'
 
 
-export default class ??Title!!Service extends ServerResource<any> {
+export default class ??Title!!Service extends Resource<any> {
     constructor () {
         super(
          '/??title!!', 

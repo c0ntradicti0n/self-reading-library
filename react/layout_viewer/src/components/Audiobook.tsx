@@ -7,6 +7,7 @@ import { DocumentContext } from '../contexts/DocumentContext.tsx'
 import AudiobookService from '../resources/AudiobookService'
 
 const Audiobook = () => {
+  return null
   const context = useContext<DocumentContext>(DocumentContext)
   const [service] = useState(new AudiobookService())
 
@@ -18,7 +19,7 @@ const Audiobook = () => {
   const addIntervallId = (n) => setIntervalIds([...intervalIds, n])
 
   const existsCall = async () => {
-    await service.exists(context.value, (res) => {
+    await service.exists(context.value[props.slot], (res) => {
       console.log(res)
       setExists(true)
       setId(id)
@@ -31,18 +32,18 @@ const Audiobook = () => {
   console.log(context, 'AUDIOBOOK')
 
   useEffect(() => {
-    if (context.value && context.value !== id) {
+    if (context.value[props.slot] && context.value[props.slot] !== id) {
       existsCall()
       const intervalId = window.setInterval(existsCall, 20000)
       addIntervallId(intervalId)
       return () => intervalIds.map((id) => clearInterval(intervalId))
     }
-  }, [context.value])
+  }, [context.value[props.slot]])
 
   const load = async () => {
-    if (context.value && id != context.value) {
-      console.log('Request audiobook for', context.value)
-      await service.fetch_one(context.value, (res) => {
+    if (context.value[props.slot] && id != context.value[props.slot]) {
+      console.log('Request audiobook for', context.value[props.slot])
+      await service.fetch_one(context.value[props.slot], (res) => {
         console.log(res)
         setExists(true)
         setId(id)

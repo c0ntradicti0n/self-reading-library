@@ -1,58 +1,64 @@
 import React, {useContext, useEffect} from 'react'
-import {withRouter} from 'next/router'
+import {useRouter, withRouter} from 'next/router'
 import HtmlRenderer from './HtmlRenderer'
 import BoxAnnotator from './BoxAnnotator'
 import DownloadFile from './DownloadFile'
-import {DocumentContext, DocumentContextType} from "../contexts/DocumentContext.tsx";
+import {
+    DocumentContext,
+    DocumentContextType,
+} from '../contexts/DocumentContext.tsx'
 import dynamic from 'next/dynamic'
-import ServerResource from "../resources/GeneralResource";
+import Resource from '../resources/Resource'
+import {NORMAL, Slot} from "../contexts/SLOTS";
 
-
-const Graph = dynamic(
-    () => import('./Graph.js'),
-    {
-        loading: () => <p>...</p>,
-        ssr: false
-    }
-)
+const Graph = dynamic(() => import('./Graph.js'), {
+    loading: () => <p>...</p>,
+    ssr: false,
+})
 
 interface Props {
-    router?: any
-    component: string,
+    component: string
     url: string
+    value? : string
+    slot: Slot
 }
 
-const MacroComponentSwitch = (props: Props) => {
+const MacroComponentSwitch = ({slot = NORMAL, ... props}: Props) => {
+    const router = useRouter()
     const context = useContext<DocumentContextType>(DocumentContext)
+    
     const component = props.component
-    const service = new ServerResource(props.url, true, true, true, true, true, false)
-
+    const service = new Resource(props.url, true, true, true, true, true, false)
+    service.setSlot(slot)
+    console.log ("MacroComponentSwitch", props, slot)
     useEffect(
         () => {
-            if (props.router.query.id) {
-                service.fetch_one(props.router.query.id, context?.setValueMetas)
+            const valueToFetch = props.value ?? (slot == NORMAL ? router.query.id : null) ;
+            if (valueToFetch) {
+                service.fetch_one(valueToFetch, (val) => context?.setValueMetas(slot, val))
             } else {
-                service.fetch_one("any", context?.setValueMetas)
+                service.fetch_one("any", (val) => context?.setValueMetas(slot, val))
             }
         }, [])
 
-    if (!context.value)
+    console.log(context, props)
+    if (!context.value[slot])
         return null
 
     if (["upload_annotation", "annotation"].includes(component)) {
         return <BoxAnnotator
-                service={service}
-            />
+            service={service} slot={slot}
+        />
     }
 
     // @ts-ignore
     if (component === "download") {
-        return <DownloadFile data={context.value}/>
+        return <DownloadFile data={context.value[slot]} />
     }
 
     // @ts-ignore
     if (component === "text") {
-        return JSON.stringify({value: context.value, meta: context.meta})
+        return JSON.stringify({value: context.value[slot], meta: context.meta[slot]})
     }
 
     // @ts-ignore
@@ -60,12 +66,12 @@ const MacroComponentSwitch = (props: Props) => {
         return <Graph/>
 
     // @ts-ignore
-    if (component === "html") 
-        return <HtmlRenderer service={service}  />
-    
-    else return null
+    if (component === "html")
+        return <HtmlRenderer service={service} slot={slot}/>
+
+    else return "Component not found"
 }
 
 // @ts-ignore
-export default withRouter(MacroComponentSwitch)
+export default MacroComponentSwitch
     

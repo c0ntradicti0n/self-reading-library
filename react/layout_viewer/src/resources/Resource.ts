@@ -1,5 +1,6 @@
 import { AppSettings } from '../../config/connection'
 import { getRandomArbitrary } from '../helpers/array'
+import {NORMAL, Slot} from "../contexts/SLOTS";
 
 const cyrb53 = function (str, seed = 0) {
   if (!str) return null
@@ -19,7 +20,7 @@ const cyrb53 = function (str, seed = 0) {
   return 4294967296 * (2097151 & h2) + (h1 >>> 0)
 }
 
-export default class ServerResource<T> {
+export default class Resource<T> {
   fetch_allowed: Boolean
   read_allowed: Boolean
   correct_allowed: Boolean
@@ -28,6 +29,7 @@ export default class ServerResource<T> {
   upload_allowed: Boolean
 
   id: string = ''
+  slot: Slot
 
   constructor(
     route: string,
@@ -71,6 +73,8 @@ export default class ServerResource<T> {
     }
   }
 
+  setSlot = (slot) => this.slot = slot
+
   request = async (
     method: String,
     data = {},
@@ -79,11 +83,13 @@ export default class ServerResource<T> {
     query: string = null
   ) => {
     let querystring = ''
+    if (this.slot == NORMAL) {
     if (query) querystring = query
     else if (typeof window !== 'undefined') {
       querystring = window?.location.search.substring(1)
       console.log(querystring)
-    }
+    }}
+    console.log("Resource request", this, querystring, method, data, callback, is_file, query)
 
     var fetch_init = {
       method: method.toUpperCase(),

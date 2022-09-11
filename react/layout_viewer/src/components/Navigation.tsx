@@ -6,7 +6,8 @@ import Audiobook from './Audiobook'
 
 import styled from 'styled-components'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
-import { Captcha } from './Captcha'
+import Captcha from './Captcha'
+import {Slot} from "../contexts/SLOTS";
 
 const NavigationDiv = styled.div`
   position: fixed;
@@ -21,9 +22,9 @@ const NavigationDiv = styled.div`
   z-index: 10000;
 `
 
-const Navigation = () => {
+const Navigation = ({slot}: Slot) => {
   const context = useContext<DocumentContext>(DocumentContext)
-  const id = context.value
+  const id = context.value[slot]
   const shortId = id?.replace('.layouteagle/', '')
   return (
     <NavigationDiv>
@@ -33,7 +34,7 @@ const Navigation = () => {
           href="https://self-reading-library.science">
           <img
             style={{ width: '5vw', borderRadius: '60px' }}
-            src="/react/layout_viewer/public/logo.jpeg"
+            src="/logo.jpeg"
             alt={'Logo'}
           />
         </Button>
@@ -61,13 +62,11 @@ const Navigation = () => {
       <h3>Navigate to other document</h3>
 
       <h5>Captcha game</h5>
-
-
       <div>
         <Captcha />
       </div>
-      <h5>Read custom page here, paste URL</h5>
 
+      <h5>Read custom page here, paste URL</h5>
       <div>
         <Url2Difference />
       </div>
@@ -85,7 +84,7 @@ const Navigation = () => {
           <input type="file" id="myfile" name="myfile" />
         </form>
       </div>
-      <h3>Navigationigate to 3D-Library</h3>
+      <h3>Navigate to 3D-Library</h3>
 
       <div>
         <Button href={'/library'}>Library</Button>
