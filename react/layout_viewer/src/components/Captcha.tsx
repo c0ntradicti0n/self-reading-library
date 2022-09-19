@@ -1,8 +1,8 @@
+import React, {useContext, useState} from "react"
 import Button from '@mui/material/Button'
 import { BootstrapDialogTitle } from './BootstrapDialogueTitle'
 import { DialogContent } from '@mui/material'
 import { BootstrapDialog } from './BootstrapDialogue'
-import {useContext, useState} from 'react'
 import MacroComponentSwitch from './MacroComponentSwitch'
 import { ContextContext } from '../contexts/ContextContext'
 import { CAPTCHA } from '../contexts/SLOTS'
@@ -23,7 +23,7 @@ const Captcha = () => {
   const contextContext = useContext(ContextContext)
   console.log("contextContext", contextContext)
 
-  let [open, __setOpen] = useState(false)
+  const [open, __setOpen] = useState(false)
   const setOpen = (o) => {
       console.log("setOpen", o)
 
@@ -34,7 +34,7 @@ const Captcha = () => {
     __setOpen(o)
   }
 
-  let [kind, setKind] = useState('annotation')
+  const [kind, setKind] = useState('annotation')
 
   return (
     <div>
@@ -59,9 +59,7 @@ const Captcha = () => {
           {Kind[kind].title}
         </BootstrapDialogTitle>
         <DialogContent dividers>
-          {
-            <MacroComponentSwitch component={kind} url={Kind[kind].url} slot={CAPTCHA} value="new" />
-            }
+            <MacroComponentSwitch component={kind} url={Kind[kind].url} slot={CAPTCHA} />
         </DialogContent>
         <Button variant="outlined" onClick={() => setOpen(false)}>
           Solved

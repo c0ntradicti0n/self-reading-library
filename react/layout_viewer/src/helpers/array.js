@@ -3,8 +3,8 @@ export function getRandomArbitrary(min, max) {
 }
 
 export const pairwise = (array) => {
-  let r = []
-  for (var i = 0; i < array.length - 1; i++) {
+  const r = []
+  for (let i = 0; i < array.length - 1; i++) {
     r.push([array[i], array[i + 1]])
   }
   return r
@@ -13,8 +13,8 @@ export const zip = (rows) => rows[0].map((_, c) => rows.map((row) => row[c]))
 
 export const nest = function (seq, keys) {
   if (!keys.length) return seq
-  var first = keys[0]
-  var rest = keys.slice(1)
+  const first = keys[0]
+  const rest = keys.slice(1)
   return new python_groupby(seq, first).map(function (value) {
     return nest(value, rest)
   })

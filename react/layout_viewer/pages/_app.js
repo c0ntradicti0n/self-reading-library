@@ -17,14 +17,14 @@ class MyApp extends App {
       return __NEXT_DATA__.props.pageProps
     }
     console.log('apps get initial props is run...')
-    let pages = glob
+    const pages = glob
       .sync('pages/**/*', { cwd: './' })
       .map((path) => path.match('pages\\/(.+)..sx?')[1])
       .filter((fname) => !fname.startsWith('_'))
 
     // calls page's `getInitialProps` and fills `appProps.pageProps`
     const appProps = await App.getInitialProps(appContext)
-    return { pageProps: { pages: pages } }
+    return { pageProps: { pages } }
   }
 
   render() {

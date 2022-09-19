@@ -1,11 +1,11 @@
 import { AppSettings } from '../../config/connection'
 import { getRandomArbitrary } from '../helpers/array'
-import {NORMAL, Slot} from "../contexts/SLOTS";
+import { NORMAL, Slot } from '../contexts/SLOTS'
 
 const cyrb53 = function (str, seed = 0) {
   if (!str) return null
-  let h1 = 0xdeadbeef ^ seed,
-    h2 = 0x41c6ce57 ^ seed
+  let h1 = 0xdeadbeef ^ seed
+  let h2 = 0x41c6ce57 ^ seed
   for (let i = 0, ch; i < str.length; i++) {
     ch = str.charCodeAt(i)
     h1 = Math.imul(h1 ^ ch, 2654435761)
@@ -20,11 +20,11 @@ const cyrb53 = function (str, seed = 0) {
   return 4294967296 * (2097151 & h2) + (h1 >>> 0)
 }
 
-export default class Resource<T> {
+export default class Resource {
   fetch_allowed: Boolean
   read_allowed: Boolean
   correct_allowed: Boolean
-  private route: string
+  private readonly route: string
   delete_allowed: Boolean
   upload_allowed: Boolean
 
@@ -38,7 +38,7 @@ export default class Resource<T> {
     upload_allowed = true,
     correct_allowed = true,
     delete_allowed = true,
-    add_id = false
+    no_id = false
   ) {
     this.route = route
     this.fetch_allowed = fetch_allowed
@@ -48,9 +48,9 @@ export default class Resource<T> {
     this.upload_allowed = upload_allowed
     this.delete_allowed = delete_allowed
 
-    let id
+    let id: string
 
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && this.slot === NORMAL || ! this.slot && !no_id) {
       if (!localStorage.getItem(route)) {
         id = getRandomArbitrary(100000, 999999).toString()
         localStorage.setItem(route, id)
@@ -64,16 +64,13 @@ export default class Resource<T> {
         new window.URLSearchParams(window.location.search).get('id')
       )
 
-      // @ts-ignore
-      this.id =
-        '/' +
-        id +
-        '_' +
-        cyrb53(new window.URLSearchParams(window.location.search).get('id'))
+      this.id = `/${id}_${cyrb53(
+        new window.URLSearchParams(window.location.search).get('id')
+      )}`
     }
   }
 
-  setSlot = (slot) => this.slot = slot
+  setSlot = (slot) => (this.slot = slot)
 
   request = async (
     method: String,
@@ -83,15 +80,25 @@ export default class Resource<T> {
     query: string = null
   ) => {
     let querystring = ''
-    if (this.slot == NORMAL) {
-    if (query) querystring = query
-    else if (typeof window !== 'undefined') {
-      querystring = window?.location.search.substring(1)
-      console.log(querystring)
-    }}
-    console.log("Resource request", this, querystring, method, data, callback, is_file, query)
+    if (this.slot === NORMAL) {
+      if (query) querystring = query
+      else if (typeof window !== 'undefined') {
+        querystring = window?.location.search.substring(1)
+        console.log(querystring)
+      }
+    }
+    console.log(
+      'Resource request',
+      this,
+      querystring,
+      method,
+      data,
+      callback,
+      is_file,
+      query
+    )
 
-    var fetch_init = {
+    const fetch_init = {
       method: method.toUpperCase(),
       headers: {
         ...(!is_file ? { 'Content-Type': 'application/json' } : {}),
@@ -115,7 +122,6 @@ export default class Resource<T> {
     try {
       const response = await fetch(
         request_query,
-        // @ts-ignore
         fetch_init
       )
 
@@ -146,36 +152,34 @@ export default class Resource<T> {
   exists = async (id, callback: Function) => {
     console.log('Fetch all resources')
     if (this.fetch_allowed) {
-      return this.request('get', undefined, callback, null, 'id=' + id)
+      return await this.request('get', undefined, callback, null, 'id=' + id)
     }
   }
 
   fetch_one = async (id, callback: Function) => {
     if (this.fetch_allowed) {
-      return this.request('post', id, callback)
+      return await this.request('post', id, callback)
     }
   }
 
   fetch_all = async (callback) => {
     if (this.fetch_allowed) {
-      return this.request('get', undefined, callback)
+      return await this.request('get', undefined, callback)
     }
   }
 
-  // @ts-ignore
   ok = async (id, url = '', data = {}, callback) => {
     if (this.read_allowed) {
       await this.request('post', id, callback)
     }
   }
-  // @ts-ignore
+
   change = async (json_path, value, callback) => {
     if (this.upload_allowed) {
       await this.request('put', [json_path, value], callback)
     }
   }
 
-  // @ts-ignore
   save = async (id, data = {}, callback) => {
     console.log('save', id, data)
     if (this.upload_allowed) {
@@ -183,8 +187,7 @@ export default class Resource<T> {
     }
   }
 
-  // @ts-ignore
-  upload = async (form_data, callback) => {
+  upload = async (form_data: HTMLFormElement, callback: Function) => {
     console.log('UPLOADING', form_data, this.upload_allowed)
     if (this.upload_allowed) {
       console.log(new FormData(form_data), new FormData(form_data).get('file'))

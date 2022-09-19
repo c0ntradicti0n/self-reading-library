@@ -98,7 +98,7 @@ class RestQueue:
     def get(self, id):
 
         try:
-            self.workbook[id] = q[id].get(id, timeout=10)
+            self.workbook[id] = q[id if id else self.service_id].get(id if id else self.service_id, timeout=10)
             logging.info("Get new")
 
         except Exception as e:
@@ -121,7 +121,7 @@ class RestQueue:
     def ok(self, id):
         try:
             logging.info(f"Ok {id}")
-            self.workbook.get(id)
+            item = self.workbook.get(id)
             item = self.workbook.pop(id)
             d[self.service_id].put(id, item)
             q[id].task_done()
@@ -201,7 +201,7 @@ class RestQueue:
 
     # ok or use one existing file
     def on_post(self, req, resp, id=None, *args, **kwargs):
-        if (isinstance(req.media, str)):
+        if isinstance(req.media, str):
             doc_id = req.media
             is_url = doc_id.startswith("http")
             url = doc_id if is_url else None

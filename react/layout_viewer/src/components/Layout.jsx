@@ -28,7 +28,7 @@ const Mansonry = styled.div`
 
 export default class Layout extends React.Component {
   render() {
-    let title = 'Automatic library'
+    const title = 'Automatic library'
 
     return (
       <div style={layoutStyle}>

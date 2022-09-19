@@ -1,7 +1,7 @@
 import { getSpans } from '../src/util/annotation.ts';
 
 describe('A suite is just a function', function () {
-  var a = [
+  const a = [
     ['word', 'tag'],
     ['the', 'B-SUBJ'],
     ['lazy', 'I-SUBJ'],

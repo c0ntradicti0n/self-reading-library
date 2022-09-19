@@ -5,10 +5,16 @@ extends:
   - plugin:react/recommended
   - standard-with-typescript
   - prettier
+parser: "@typescript-eslint/parser"
 overrides: []
 parserOptions:
+  project: ['../tsconfig.yml']
   ecmaVersion: latest
   sourceType: module
 plugins:
   - react
-rules: {}
+rules:
+  "@typescript-eslint/explicit-function-return-type": 0
+  "@typescript-eslint/strict-boolean-expressions": 0
+  "@typescript-eslint/naming_convention": 0
+

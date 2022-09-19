@@ -11,12 +11,15 @@ from helpers.cache_tools import compressed_pickle, decompress_pickle
 ibis.options.interactive = True
 
 class Queue:
+    connection = None
+
     def __init__(self, service_id):
         self.row_id = None
         self.service_id = self.id2tablename(service_id)
-        self.connection = ibis.postgres.connect(
-            url='postgresql://python:python@localhost:5432/postgres'
-        )
+        if not Queue.connection:
+            Queue.connection = ibis.postgres.connect(
+                url='postgresql://python:python@localhost:5432/postgres'
+            )
 
         sc = ibis.schema([
             ('doc_id', 'string'),
@@ -29,10 +32,9 @@ class Queue:
             self.table = self.connection.table(self.service_id)
 
         except:
-            self.connection.create_table(self.service_id, schema=sc)
+            Queue.connection.create_table(self.service_id, schema=sc)
             self.table = self.connection.table(self.service_id)
 
-        #self.print()
 
     def id2tablename(self, id):
         return f"queue_{id}".lower()
@@ -62,9 +64,9 @@ class Queue:
     def print(self):
         for table in self.connection.list_tables():
             self.print_table(table)
-    def print_table(self):
+    def print_table(self, table=None):
         print(f"TABLE {self.service_id}")
-        print(self.connection.table(self.service_id).limit(10000).execute())
+        print(self.connection.table(self.service_id if not table else table).limit(10000).execute())
 
     def task_done(self, id=None):
         self.connection.con.execute(f"DELETE from {self.service_id} where row_id = '{self.row_id if not id else id}'")

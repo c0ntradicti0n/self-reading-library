@@ -4,6 +4,7 @@ from wsgiref import simple_server
 import threading
 from config import config
 from config.ant_imports import *
+from layout.annotator.annotation_to_gold import AnnotatedToGoldQueueRest
 
 
 def get_all_routes(api):
@@ -95,7 +96,9 @@ def create_app():
         '/difference_captcha/{id}':
             ElmoDifferenceQueueRest,
         '/layout_captcha/{id}':
-            AnnotationQueueRest,
+            AnnotatedToGoldQueueRest,
+        '/layout_captcha':
+            AnnotatedToGoldQueueRest,
 
         # topics
         '/library/{id}':
