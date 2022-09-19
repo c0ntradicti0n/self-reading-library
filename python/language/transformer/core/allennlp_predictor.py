@@ -9,6 +9,7 @@ from allennlp.data.fields import TextField, SequenceLabelField
 from allennlp.models import Model
 from allennlp.predictors.predictor import Predictor
 
+
 @Predictor.register("sentence-tagger*")
 class SentenceTaggerPredictor(Predictor):
     """
@@ -20,10 +21,15 @@ class SentenceTaggerPredictor(Predictor):
     """
 
     def __init__(
-        self, model: Model, dataset_reader: DatasetReader, language: str = "en_core_web_sm"
+        self,
+        model: Model,
+        dataset_reader: DatasetReader,
+        language: str = "en_core_web_sm",
     ) -> None:
         super().__init__(model, dataset_reader)
-        self._tokenizer = SpacyWordSplitter(split_on_spaces=True) #, pos_tags=True, split_on_spaces=True)
+        self._tokenizer = SpacyWordSplitter(
+            split_on_spaces=True
+        )  # , pos_tags=True, split_on_spaces=True)
 
     def predict_sentence(self, sentence) -> JsonDict:
         return self.predict_json({"sentence": sentence})
@@ -34,10 +40,10 @@ class SentenceTaggerPredictor(Predictor):
         Expects JSON that looks like ``{"sentence": "..."}``.
         Runs the underlying model, and adds the ``"words"`` to the output.
         """
-        if 'sentence' in json_dict:
+        if "sentence" in json_dict:
             sentence = json_dict["sentence"]
             tokens = self._tokenizer.tokenize(sentence)
-        if 'tokens' in json_dict:
+        if "tokens" in json_dict:
             tokens = json_dict["tokens"]
         return self._dataset_reader.text_to_instance(tokens)
 
@@ -75,7 +81,9 @@ class SentenceTaggerPredictor(Predictor):
             tag = predicted_tags[i]
             # if its a U, add it to the list
             if tag[0] == "U":
-                current_tags = [t if idx == i else "O" for idx, t in enumerate(predicted_tags)]
+                current_tags = [
+                    t if idx == i else "O" for idx, t in enumerate(predicted_tags)
+                ]
                 predicted_spans.append(current_tags)
             # if its a B, keep going until you hit an L.
             elif tag[0] == "B":

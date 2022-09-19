@@ -11,8 +11,10 @@ class Ant(PathSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not self.cached:
-            raise Exception(f"You may say to cache or not for inheriting class '{type(self).__name__ }'"
-                            f"\n by adding kwarg 'cached: [cache_flow] = ...' ")
+            raise Exception(
+                f"You may say to cache or not for inheriting class '{type(self).__name__ }'"
+                f"\n by adding kwarg 'cached: [cache_flow] = ...' "
+            )
 
     def __call__(self, args):
         if self.cached == cache_flow.iterate:
@@ -27,7 +29,9 @@ class Ant(PathSpec):
 
                 result = self.call(dingsbums, meta=meta)
                 if not result:
-                    logging.error(f"result of '{type(self).__name__ }' was None or nothing")
+                    logging.error(
+                        f"result of '{type(self).__name__ }' was None or nothing"
+                    )
                 self.cache_write(result, meta)
                 yield result, meta
 
@@ -36,12 +40,12 @@ class Ant(PathSpec):
 
     def cache_write(self, result, meta):
         try:
-            filename = config.cache + type(self).__name__ + '.json'
+            filename = config.cache + type(self).__name__ + ".json"
 
             if os.path.exists(filename):
-                append_write = 'a'  # append if already exists
+                append_write = "a"  # append if already exists
             else:
-                append_write = 'w'  # make a new file if not
+                append_write = "w"  # make a new file if not
 
             with open(filename, append_write) as f:
                 result_string = json.dumps([result, meta])
@@ -50,20 +54,17 @@ class Ant(PathSpec):
             logging.error(f"could not write cache because of: {e}")
 
 
+if __name__ == "__main__":
 
-if __name__=="__main__":
     class test(Ant):
         def __init__(self, *args, **kwargs):
-            super().__init__(*args, cached = cache_flow.iterate, **kwargs)
+            super().__init__(*args, cached=cache_flow.iterate, **kwargs)
+
         def call(self, arg, meta=None):
             print("Input was: ", type_spec(arg), arg)
 
             return arg + 1
 
     t1, t2, t3 = test(), test(), test()
-    print ("path: ", list(t1(t2(t3([1])))))
-    print ("list: ", list( t1([1,2,3])))
-
-
-
-
+    print("path: ", list(t1(t2(t3([1])))))
+    print("list: ", list(t1([1, 2, 3])))

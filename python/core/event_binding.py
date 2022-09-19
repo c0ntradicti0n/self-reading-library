@@ -34,12 +34,12 @@ def init_queues(service_id, id):
     # samples edited by user
     d[service_id] = Queue(service_id + "_d")
     # session dependent queue
-    q[id]         = Queue(id + "_id")
+    q[id] = Queue(id + "_id")
 
 
 def encode_base64(image):
     buffer = io.BytesIO()
-    image.save(buffer, format='JPEG', quality=75)
+    image.save(buffer, format="JPEG", quality=75)
     byte_object = buffer.getbuffer()
     return byte_object
 
@@ -48,14 +48,16 @@ def round_double_list(bbox):
     return [[round(c, 2) for c in box] for box in bbox]
 
 
-funs = defaultdict(lambda x: x, {
-    "layout_predictions": lambda x: None,
-    "df": lambda x: None,
-    "human_image": lambda x: base64.b64encode(encode_base64(x)).decode('utf-8'),
-    "image": lambda x: base64.b64encode(encode_base64(x)).decode('utf-8'),
-
-    "bbox": lambda x: round_double_list(x)
-})
+funs = defaultdict(
+    lambda x: x,
+    {
+        "layout_predictions": lambda x: None,
+        "df": lambda x: None,
+        "human_image": lambda x: base64.b64encode(encode_base64(x)).decode("utf-8"),
+        "image": lambda x: base64.b64encode(encode_base64(x)).decode("utf-8"),
+        "bbox": lambda x: round_double_list(x),
+    },
+)
 
 
 def encode_some(k, v):
@@ -64,15 +66,12 @@ def encode_some(k, v):
 
 def encode(obj_meta):
     obj, meta = obj_meta
-    if "human_image_path" in meta and not 'human_image' in meta:
-        meta['human_image'] = Image.open(meta['human_image_path'])
-    if "image_path" in meta and not 'image' in meta:
-        meta['image'] = Image.open(meta['image_path'])
+    if "human_image_path" in meta and not "human_image" in meta:
+        meta["human_image"] = Image.open(meta["human_image_path"])
+    if "image_path" in meta and not "image" in meta:
+        meta["image"] = Image.open(meta["image_path"])
     if isinstance(meta, dict):
-        meta = {
-            k: encode_some(k, v)
-            for k, v in meta.items()
-        }
+        meta = {k: encode_some(k, v) for k, v in meta.items()}
     return (obj, meta)
 
 
@@ -80,12 +79,7 @@ all_rest_queues = []
 
 
 class RestQueue:
-    def __init__(
-            self,
-            service_id,
-            update_data=lambda x: x,
-            work_on_upload=None
-    ):
+    def __init__(self, service_id, update_data=lambda x: x, work_on_upload=None):
         global all_rest_queues
         all_rest_queues.append(self)
         self.service_id = service_id
@@ -98,7 +92,9 @@ class RestQueue:
     def get(self, id):
 
         try:
-            self.workbook[id] = q[id if id else self.service_id].get(id if id else self.service_id, timeout=10)
+            self.workbook[id] = q[id if id else self.service_id].get(
+                id if id else self.service_id, timeout=10
+            )
             logging.info("Get new")
 
         except Exception as e:
@@ -168,12 +164,12 @@ class RestQueue:
     def on_patch(self, req, resp, id=None):
         pprint(req)
 
-        file_part = req.get_param('file')
+        file_part = req.get_param("file")
 
         # Read image as binary
 
         if not file_part.file:
-            resp.media = {'status': 'missing file'}
+            resp.media = {"status": "missing file"}
             resp.status = falcon.HTTP_400
 
         raw = file_part.file.read()
@@ -191,12 +187,14 @@ class RestQueue:
         if self.work_on_upload:
             logging.info(f"starting thread! for {self.work_on_upload}")
 
-            t = threading.Thread(target=self.work_on_upload, args=(path,), name="fill on upload")
+            t = threading.Thread(
+                target=self.work_on_upload, args=(path,), name="fill on upload"
+            )
             t.start()
 
         logging.info(f"Started task {self.work_on_upload} after upload")
 
-        resp.media = {'status': 'ok'}
+        resp.media = {"status": "ok"}
         resp.status = falcon.HTTP_OK
 
     # ok or use one existing file
@@ -205,28 +203,27 @@ class RestQueue:
             doc_id = req.media
             is_url = doc_id.startswith("http")
             url = doc_id if is_url else None
-            doc_id = f"{config.hidden_folder}pdfs/{hash_tools.hashval(doc_id)}.pdf" if is_url else doc_id
-
-            logging.info(
-                f"Annotate new document {doc_id=} {id=} {url=}"
+            doc_id = (
+                f"{config.hidden_folder}pdfs/{hash_tools.hashval(doc_id)}.pdf"
+                if is_url
+                else doc_id
             )
+
+            logging.info(f"Annotate new document {doc_id=} {id=} {url=}")
             init_queues(self.service_id, id)
             self.work_on_upload(doc_id, service_id=id, url=url)
         else:
-            logging.info(
-                f"Add annotation to collection {id=}"
-            )
+            logging.info(f"Add annotation to collection {id=}")
 
             self.ok(id)
 
         self.get(id)
-        if  self.workbook.get(id):
+        if self.workbook.get(id):
             resp.text = json.dumps(encode(self.workbook[id]), ensure_ascii=False)
             resp.status = falcon.HTTP_OK
         else:
             resp.status = falcon.HTTP_OK
             resp.text = json.dumps({})
-
 
     def on_delete(self, req, resp, id=None):
         print(req, resp)
@@ -297,6 +294,7 @@ def queue_iter(service_id, gen, single=False):
 
 
 if __name__ == "__main__":
+
     def fibonacciGenerator(min, max=1000):
         a = 0
         b = 1
@@ -304,7 +302,6 @@ if __name__ == "__main__":
             if i >= min:
                 yield b
             a, b = b, a + b
-
 
     def worker():
         logging.info("yielding")
@@ -320,7 +317,6 @@ if __name__ == "__main__":
                     print(f"yielded {e}")
             except RuntimeError as e:
                 print("end...")
-
 
     t = threading.Thread(target=worker, name="test")
     t.start()

@@ -17,19 +17,19 @@ import threading
 
 def preprocess_text(texts):
     text = " ".join([word for t in texts for i, word in t])
-    text = text.replace('-\n', '')
+    text = text.replace("-\n", "")
     text = unicodedata.normalize("NFKD", text)
     real_tokens = split_punctuation(text, ".,:!?;")
     return real_tokens
 
 
-@converter("reading_order", 'reading_order.page')
+@converter("reading_order", "reading_order.page")
 class Pager(PathSpec):
     def __init__(self, *args, max_window=200, **kwargs):
         super().__init__(*args, **kwargs)
         self.max_window = max_window
 
-    WORD_I_LINE_REGEX = re.compile(r"^(\d+):(.*)", re.DOTALL);
+    WORD_I_LINE_REGEX = re.compile(r"^(\d+):(.*)", re.DOTALL)
 
     def match_reading_order_line(self, line):
         m = Pager.WORD_I_LINE_REGEX.match(line)
@@ -40,34 +40,40 @@ class Pager(PathSpec):
 
     def run_pdf2htmlEX(self, pdf_path, meta):
         outputs = {
-            'html': 'html',  # same looking html
-            'reading_order': 'wordi',  # numbered word list
-            'feat': 'feat'  # json with indexed single words as they can be reapplied via css to the html-document
+            "html": "html",  # same looking html
+            "reading_order": "wordi",  # numbered word list
+            "feat": "feat",  # json with indexed single words as they can be reapplied via css to the html-document
         }
 
-        html_path = pdf_path + "." + outputs['html']
-        pdf2htmlEX_wordi_path = pdf_path + "." + outputs['reading_order']
-        feat_path = pdf_path + "." + outputs['feat']
+        html_path = pdf_path + "." + outputs["html"]
+        pdf2htmlEX_wordi_path = pdf_path + "." + outputs["reading_order"]
+        feat_path = pdf_path + "." + outputs["feat"]
 
-        if not (os.path.exists(pdf2htmlEX_wordi_path) and os.path.exists(html_path) and os.path.exists(feat_path)):
+        if not (
+            os.path.exists(pdf2htmlEX_wordi_path)
+            and os.path.exists(html_path)
+            and os.path.exists(feat_path)
+        ):
             self.logger.warning(f"working on {pdf_path}")
             self.pdf2htmlEX(pdf_path, html_path)
         else:
             self.logger.warning(f"pdf2htmlEX has run yet on {pdf_path}")
 
-        meta['pdf2htmlEX.html'] = html_path
-        meta['html_path'] = html_path
-        meta['pdf_path'] = pdf_path
-        meta['pdf2htmlEX_wordi_path'] = pdf2htmlEX_wordi_path
-        meta['feat_path'] = feat_path
+        meta["pdf2htmlEX.html"] = html_path
+        meta["html_path"] = html_path
+        meta["pdf_path"] = pdf_path
+        meta["pdf2htmlEX_wordi_path"] = pdf2htmlEX_wordi_path
+        meta["feat_path"] = feat_path
 
         return (html_path, pdf2htmlEX_wordi_path, feat_path)
 
     def __call__(self, paths, *args, **kwargs):
         for _pdf_path, meta in paths:
-            texts = meta['enumerated_texts']
+            texts = meta["enumerated_texts"]
             try:
-                pdf_path, pdf2htmlEX_wordi_path, _ = self.run_pdf2htmlEX(meta['html_path'], meta)
+                pdf_path, pdf2htmlEX_wordi_path, _ = self.run_pdf2htmlEX(
+                    meta["html_path"], meta
+                )
             except Exception as e:
                 self.logger.error("could not transpile pdf to html", exc_info=True)
                 continue
@@ -75,15 +81,24 @@ class Pager(PathSpec):
             # read the text as it is referenced in the html from the reading_order file
             # containing the class index of the tags and the string, may contain
             # errors: f"{index}:{string}"
-            with open(pdf2htmlEX_wordi_path, 'rb') as f:
+            with open(pdf2htmlEX_wordi_path, "rb") as f:
                 content = f.read()
 
-            encoding = chardet.detect(content)['encoding']
+            encoding = chardet.detect(content)["encoding"]
             if not encoding:
                 encoding = "utf-8"
-            lines = [ww for w in re.split("(?![^:])\n", content.decode(encoding, errors="ignore"))  for ww in w.split("\n") if ww]
+            lines = [
+                ww
+                for w in re.split(
+                    "(?![^:])\n", content.decode(encoding, errors="ignore")
+                )
+                for ww in w.split("\n")
+                if ww
+            ]
 
-            i_word = [self.match_reading_order_line(line) for line in lines if len(line) > 2]
+            i_word = [
+                self.match_reading_order_line(line) for line in lines if len(line) > 2
+            ]
 
             # use layout filtered text
             real_tokens = preprocess_text(texts)
@@ -91,8 +106,16 @@ class Pager(PathSpec):
             # start iterating on windows of this text
             generator = self.make_tokenized_windows(real_tokens)
             next(generator)
-            threading.Thread(target=self.window_thread, args=(generator, meta, i_word,), name="make text windows").start()
-            meta['texts'] = texts
+            threading.Thread(
+                target=self.window_thread,
+                args=(
+                    generator,
+                    meta,
+                    i_word,
+                ),
+                name="make text windows",
+            ).start()
+            meta["texts"] = texts
             yield _pdf_path, meta
 
     def window_thread(self, generator, meta, i_word):
@@ -101,13 +124,15 @@ class Pager(PathSpec):
         last_annotated_token = 0
         while True:
             try:
-                last_annotated_token = ElmoPredict.q1[self.flags['service_id']].get(timeout=369)
+                last_annotated_token = ElmoPredict.q1[self.flags["service_id"]].get(
+                    timeout=369
+                )
             except Empty:
                 self.logger.error("Left windowing thread, deadlock")
                 break
 
             try:
-                ElmoPredict.q1[self.flags['service_id']].task_done()
+                ElmoPredict.q1[self.flags["service_id"]].task_done()
             except Exception as e:
                 self.logger.error("Tasks were already done, retrying")
                 break
@@ -118,7 +143,7 @@ class Pager(PathSpec):
 
             except StopIteration as e:
                 self.logger.info("eof")
-                ElmoPredict.q2[self.flags['service_id']].put((None, None))
+                ElmoPredict.q2[self.flags["service_id"]].put((None, None))
                 break
 
             self.logger.info(" ".join([t for t in window]))
@@ -127,7 +152,17 @@ class Pager(PathSpec):
                 self.logger.info("finishing?")
                 return
 
-            ElmoPredict.q2[self.flags['service_id']].put((window, {**window_meta, "i_word": i_word, **meta, 'doc_id': meta['pdf_path']}))
+            ElmoPredict.q2[self.flags["service_id"]].put(
+                (
+                    window,
+                    {
+                        **window_meta,
+                        "i_word": i_word,
+                        **meta,
+                        "doc_id": meta["pdf_path"],
+                    },
+                )
+            )
 
             # last_annotated_token = ElmoPredict.consumed_tokens_queue.get()
 
@@ -156,9 +191,9 @@ class Pager(PathSpec):
         #
         windowing = True
         start_i2 = 0
-        sentence_marks = [0] + [i + 1 for i, w in enumerate(real_tokens)
-                if SENTENCE_END_REGEX.match(w)]
-
+        sentence_marks = [0] + [
+            i + 1 for i, w in enumerate(real_tokens) if SENTENCE_END_REGEX.match(w)
+        ]
 
         consumed_tokens = 0
         loop_count = 0
@@ -177,7 +212,7 @@ class Pager(PathSpec):
                 self.logger.info("...")
 
             start_i2 = min(sentence_marks, key=lambda _m: abs(_m - start_i2))
-            rest_text = real_tokens[start_i2: start_i2 + 300]
+            rest_text = real_tokens[start_i2 : start_i2 + 300]
 
             if len(rest_text) == 0:
                 return
@@ -187,7 +222,7 @@ class Pager(PathSpec):
 
             if not window:
                 self.logger.info("Zero text, reset window")
-                window = rest_text[:self.max_window]
+                window = rest_text[: self.max_window]
 
             consumed_tokens = yield window, {}
 
@@ -198,21 +233,25 @@ class Pager(PathSpec):
             loop_count += 1
 
     def pdf2htmlEX(self, pdf_filename, html_filename):
-        assert (pdf_filename.endswith(".pdf"))
+        assert pdf_filename.endswith(".pdf")
         self.logger.info(f"converting pdf {pdf_filename} to html {html_filename} ")
 
         origin = Path(os.getcwd()).resolve()
         destination = Path(html_filename).resolve()
         rel_html_path = os.path.relpath(destination, start=origin)
-        return_code = os.system(f"{config.pdf2htmlEX} "
-                                f"--space-as-offset 1 "
-                                f"--decompose-ligature 1 "
-                                f"--optimize-text 1 "
-                                f"--fit-width {config.reader_width}  "
-                                f"\"{pdf_filename}\" \"{rel_html_path}\"")
+        return_code = os.system(
+            f"{config.pdf2htmlEX} "
+            f"--space-as-offset 1 "
+            f"--decompose-ligature 1 "
+            f"--optimize-text 1 "
+            f"--fit-width {config.reader_width}  "
+            f'"{pdf_filename}" "{rel_html_path}"'
+        )
 
         if return_code != 0:
             if os.path.exists(pdf_filename):
-                raise RuntimeError(f"{pdf_filename} could not be converted to html back")
+                raise RuntimeError(
+                    f"{pdf_filename} could not be converted to html back"
+                )
             else:
                 raise FileNotFoundError(f"{pdf_filename} was not found")

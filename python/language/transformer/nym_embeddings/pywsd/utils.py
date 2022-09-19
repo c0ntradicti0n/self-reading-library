@@ -11,26 +11,27 @@ import re
 
 from nym_embeddings.pywsd.tokenize import word_tokenize
 
-SS_PARAMETERS_TYPE_MAP = {'definition':str,
-                          'lemma_names':list, # list(str)
-                          'examples':list,
-                          'hypernyms':list,
-                          'hyponyms': list,
-                          'member_holonyms':list,
-                          'part_holonyms':list,
-                          'substance_holonyms':list,
-                          'member_meronyms':list,
-                          'substance_meronyms': list,
-                          'part_meronyms':list,
-                          'similar_tos':list
-                          }
+SS_PARAMETERS_TYPE_MAP = {
+    "definition": str,
+    "lemma_names": list,  # list(str)
+    "examples": list,
+    "hypernyms": list,
+    "hyponyms": list,
+    "member_holonyms": list,
+    "part_holonyms": list,
+    "substance_holonyms": list,
+    "member_meronyms": list,
+    "substance_meronyms": list,
+    "part_meronyms": list,
+    "similar_tos": list,
+}
 
 
 def remove_tags(text: str) -> str:
-    """ Removes <tags> in angled brackets from text. """
+    """Removes <tags> in angled brackets from text."""
 
-    tags = {i:" " for i in re.findall("(<[^>\n]*>)",text.strip())}
-    no_tag_text = reduce(lambda x, kv:x.replace(*kv), tags.iteritems(), text)
+    tags = {i: " " for i in re.findall("(<[^>\n]*>)", text.strip())}
+    no_tag_text = reduce(lambda x, kv: x.replace(*kv), tags.iteritems(), text)
     return " ".join(no_tag_text.split())
 
 
@@ -70,7 +71,7 @@ def semcor_to_offset(sensekey):
     """
 
     synset = wn.lemma_from_key(sensekey).synset
-    offset = '%08d-%s' % (synset.offset, synset.pos)
+    offset = "%08d-%s" % (synset.offset, synset.pos)
     return offset
 
 
@@ -78,8 +79,13 @@ porter = PorterStemmer()
 wnl = WordNetLemmatizer()
 
 
-def lemmatize(ambiguous_word: str, pos: str = None, neverstem=False,
-              lemmatizer=wnl, stemmer=porter) -> str:
+def lemmatize(
+    ambiguous_word: str,
+    pos: str = None,
+    neverstem=False,
+    lemmatizer=wnl,
+    stemmer=porter,
+) -> str:
     """
     Tries to convert a surface word into lemma, and if lemmatize word is not in
     wordnet then try and convert surface word into its stem.
@@ -89,8 +95,11 @@ def lemmatize(ambiguous_word: str, pos: str = None, neverstem=False,
     """
 
     # Try to be a little smarter and use most frequent POS.
-    pos = pos if pos else penn2morphy(pos_tag([ambiguous_word])[0][1],
-                                     default_to_noun=True)
+    pos = (
+        pos
+        if pos
+        else penn2morphy(pos_tag([ambiguous_word])[0][1], default_to_noun=True)
+    )
     lemma = lemmatizer.lemmatize(ambiguous_word, pos=pos)
     stem = stemmer.stem(ambiguous_word)
     # Ensure that ambiguous word is a lemma.
@@ -109,34 +118,40 @@ def penn2morphy(penntag, returnNone=False, default_to_noun=False) -> str:
     """
     Converts tags from Penn format (input: single string) to Morphy.
     """
-    morphy_tag = {'NN':'n', 'JJ':'a', 'VB':'v', 'RB':'r'}
+    morphy_tag = {"NN": "n", "JJ": "a", "VB": "v", "RB": "r"}
     try:
         return morphy_tag[penntag[:2]]
     except:
         if returnNone:
             return None
         elif default_to_noun:
-            return 'n'
+            return "n"
         else:
-            return ''
+            return ""
 
 
-def lemmatize_sentence(tokens: list, neverstem=False, keepWordPOS=False,
-                       tokenizer=word_tokenize, postagger=pos_tag,
-                       lemmatizer=wnl, stemmer=porter) -> list:
+def lemmatize_sentence(
+    tokens: list,
+    neverstem=False,
+    keepWordPOS=False,
+    tokenizer=word_tokenize,
+    postagger=pos_tag,
+    lemmatizer=wnl,
+    stemmer=porter,
+) -> list:
 
     words, lemmas, poss = [], [], []
     for word, pos in postagger(tokens):
         pos = penn2morphy(pos)
-        lemmas.append(lemmatize(word.lower(), pos, neverstem,
-                                lemmatizer, stemmer))
+        lemmas.append(lemmatize(word.lower(), pos, neverstem, lemmatizer, stemmer))
         poss.append(pos)
         words.append(word)
 
     if keepWordPOS:
-        return words, lemmas, [None if i == '' else i for i in poss]
+        return words, lemmas, [None if i == "" else i for i in poss]
 
     return lemmas
+
 
 def synset_properties(synset: "wn.Synset", parameter: str):
     """
@@ -145,14 +160,16 @@ def synset_properties(synset: "wn.Synset", parameter: str):
     """
 
     return_type = SS_PARAMETERS_TYPE_MAP[parameter]
-    func = 'synset.' + parameter
+    func = "synset." + parameter
 
     return eval(func) if isinstance(eval(func), return_type) else eval(func)()
 
+
 def has_synset(word: str) -> list:
-    """" Returns a list of synsets of a word after lemmatization. """
+    """ " Returns a list of synsets of a word after lemmatization."""
 
     return wn.synsets(lemmatize(word, neverstem=True))
+
 
 # To check default parameters of simple_lesk()
 ## a = inspect.getargspec(simple_lesk)

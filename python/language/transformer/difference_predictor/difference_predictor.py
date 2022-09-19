@@ -9,7 +9,8 @@ from allennlp.predictors.predictor import Predictor
 
 from beautifultable import BeautifulTable
 
-@Predictor.register('difference_predictor')
+
+@Predictor.register("difference_predictor")
 class DifferenceTaggerPredictor(Predictor):
     """
     Predictor for any model that takes in a sentence and returns
@@ -18,19 +19,25 @@ class DifferenceTaggerPredictor(Predictor):
     and also
     the :class:`~allennlp.models.simple_tagger.SimpleTagger` model.
     """
-    def __init__(self, model: Model, dataset_reader: DatasetReader, language: str = 'en_core_web_sm') -> None:
+
+    def __init__(
+        self,
+        model: Model,
+        dataset_reader: DatasetReader,
+        language: str = "en_core_web_sm",
+    ) -> None:
         super().__init__(model, dataset_reader)
         self._tokenizer = SpacyTokenizer(language=language, pos_tags=True)
-        self.model =  model
+        self.model = model
 
     @overrides
     def predict_json(self, inputs: JsonDict) -> JsonDict:
         instance = self._json_to_instance(inputs)
-        #self.model.vocab.extend_from_instances(self.model., instances=[instance])
-        #self.model.extend_embedder_vocab(embedding_sources_mapping)
+        # self.model.vocab.extend_from_instances(self.model., instances=[instance])
+        # self.model.extend_embedder_vocab(embedding_sources_mapping)
         output = self.predict_instance(instance)
-        output = list(zip(output['tags'], output['words']))
-        return  output
+        output = list(zip(output["tags"], output["words"]))
+        return output
 
     @overrides
     def _json_to_instance(self, json_dict: JsonDict) -> Instance:

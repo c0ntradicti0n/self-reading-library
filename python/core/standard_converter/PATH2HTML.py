@@ -9,17 +9,28 @@ from core.pathant.PathSpec import PathSpec
 class PATH2HTML(RestPublisher, react):
     def __init__(self, *args, **kwargs):
 
-        super().__init__(*args, **kwargs, resource=Resource(
-            title="difference",
-            type="html",
-            path="difference",
-            route="difference",
-            access={"add_id": True, "fetch": True, "read": True, "upload": True, "correct": True, "delete": True}))
-
+        super().__init__(
+            *args,
+            **kwargs,
+            resource=Resource(
+                title="difference",
+                type="html",
+                path="difference",
+                route="difference",
+                access={
+                    "add_id": True,
+                    "fetch": True,
+                    "read": True,
+                    "upload": True,
+                    "correct": True,
+                    "delete": True,
+                },
+            )
+        )
 
     def __call__(self, labeled_paths, *args, **kwargs):
         for path, meta in labeled_paths:
-            with open(meta['html_path'], "r") as f:
+            with open(meta["html_path"], "r") as f:
                 content = f.read()
-            meta['html'] = content
+            meta["html"] = content
             yield path, meta

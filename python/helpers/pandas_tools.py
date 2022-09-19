@@ -3,7 +3,8 @@ import logging
 import numpy
 import pandas
 
-def unpack_list_column(column_name, df, prefix='', suffix=''):
+
+def unpack_list_column(column_name, df, prefix="", suffix=""):
     if not prefix and not suffix:
         raise ValueError("Either prefix or suffix must be given")
     lists = list(df[column_name])

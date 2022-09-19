@@ -4,6 +4,7 @@ import logging
 from helpers.time_tools import timeit_context
 from core.pathant.parallel import paraloop
 
+
 class Pipeline:
     def __init__(self, pipeline, source, target, extra_paths, via=None, **flags):
         self.extra_paths = extra_paths
@@ -14,7 +15,7 @@ class Pipeline:
         self.via = via
         self.dummy_generator = itertools.cycle([("dummy", {"meta": None})])
 
-    def log_progress(self, gen, *args, name='unknown', logger=print, **kwargs):
+    def log_progress(self, gen, *args, name="unknown", logger=print, **kwargs):
         try:
             for x in gen:
                 msg = f"Pipeline step {name} running on result: '''{str(x)[:100]}...'''"
@@ -32,7 +33,11 @@ class Pipeline:
 
             name = functional_object.__class__.__name__
             start_message = f"Pipeline object '{name}' is started"
-            logger = functional_object.logger.info if hasattr(functional_object, 'logger') else print
+            logger = (
+                functional_object.logger.info
+                if hasattr(functional_object, "logger")
+                else print
+            )
             logger(start_message)
 
             try:
@@ -41,8 +46,9 @@ class Pipeline:
                         others = self.extra_paths[functional_object]
                         others = [other(self.dummy_generator) for other in others]
 
-
-                        intermediate_result = functional_object(intermediate_result, *others)
+                        intermediate_result = functional_object(
+                            intermediate_result, *others
+                        )
                     elif intermediate_result != None:
                         intermediate_result = functional_object(intermediate_result)
                     else:
@@ -51,7 +57,9 @@ class Pipeline:
                     print(functional_object)
                     raise e
             except RuntimeError as e:
-                logging.error(f"StopIteration {e} raised between {functional_object} and {intermediate_result}")
+                logging.error(
+                    f"StopIteration {e} raised between {functional_object} and {intermediate_result}"
+                )
                 raise e
 
             intermediate_result = intermediate_result
@@ -64,9 +72,7 @@ class Pipeline:
             pipeline=self.pipeline + other.pipeline,
             source=self.source,
             target=other.target,
-            extra_paths={**self.extra_paths, **other.extra_paths}
-
+            extra_paths={**self.extra_paths, **other.extra_paths},
         )
         new_pipe.flags = {**self.flags, **other.flags}
         return new_pipe
-

@@ -1,12 +1,13 @@
 import os
 import sys
+
 sys.path.append("../core")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 import logging
 
-os.environ["LD_LIBRARY_PATH"] = '/usr/local/cuda-11.0/targets/x86_64-linux/lib/'
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-os.environ['TOKENIZERS_PARALLELISM'] = 'true'
+os.environ["LD_LIBRARY_PATH"] = "/usr/local/cuda-11.0/targets/x86_64-linux/lib/"
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+os.environ["TOKENIZERS_PARALLELISM"] = "true"
 from traceback_with_variables import activate_by_import
 from traceback_with_variables import Format, ColorSchemes, is_ipython_global
 
@@ -15,33 +16,41 @@ fmt = Format(
     after=3,
     max_value_str_len=-1,
     max_exc_str_len=-1,
-    ellipsis_='...',
+    ellipsis_="...",
     color_scheme=ColorSchemes.synthwave,
-    skip_files_except=['my_project', 'site-packages'],
-    brief_files_except='my_project',
+    skip_files_except=["my_project", "site-packages"],
+    brief_files_except="my_project",
     custom_var_printers=[  # first matching is used
-        ('password', lambda v: '...hidden...'),  # by name, print const str
-        (list, lambda v: f'list{v}'),  # by type, print fancy str
-        (lambda name, type_, filename, is_global: is_global, lambda v: None),  # custom filter, skip printing
+        ("password", lambda v: "...hidden..."),  # by name, print const str
+        (list, lambda v: f"list{v}"),  # by type, print fancy str
+        (
+            lambda name, type_, filename, is_global: is_global,
+            lambda v: None,
+        ),  # custom filter, skip printing
         (is_ipython_global, lambda v: None),  # same, handy for Jupyter
-        (['secret', dict, (lambda name, *_: 'asd' in name)], lambda v: '???'),  # by different things, print const str
-    ]
+        (
+            ["secret", dict, (lambda name, *_: "asd" in name)],
+            lambda v: "???",
+        ),  # by different things, print const str
+    ],
 )
 import tensorflow as tf
 
-tf.config.list_physical_devices('GPU')
+tf.config.list_physical_devices("GPU")
 tf.get_logger().setLevel(3)
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 import numpy
 
 numpy.set_printoptions(threshold=sys.maxsize)
 
-logging.getLogger('allennlp').setLevel(logging.ERROR)
+logging.getLogger("allennlp").setLevel(logging.ERROR)
 
-logging.getLogger('pytorch_pretrained_bert').setLevel(logging.ERROR)
-logging.getLogger('pytorch_transformers').setLevel(logging.ERROR)
-logging.getLogger('pdfminer').setLevel(logging.ERROR)
-logging.basicConfig(format="""%(asctime)s-%(levelname)s: %(message)s""", datefmt="%H:%M:%S")
+logging.getLogger("pytorch_pretrained_bert").setLevel(logging.ERROR)
+logging.getLogger("pytorch_transformers").setLevel(logging.ERROR)
+logging.getLogger("pdfminer").setLevel(logging.ERROR)
+logging.basicConfig(
+    format="""%(asctime)s-%(levelname)s: %(message)s""", datefmt="%H:%M:%S"
+)
 
 from GPUtil import showUtilization as gpu_usage
 import torch
@@ -72,11 +81,11 @@ try:
 except Exception as e:
     logging.info("No gpu available!", exc_info=True)
 
-feature_fuzz_ranges = (-0.02, 0.04, 0.02),
+feature_fuzz_ranges = ((-0.02, 0.04, 0.02),)
 sys.path.append(os.getcwd())
 
 logging_level = logging.INFO
-logging_config = '/home/finn/PycharmProjects/LayoutEagle/python/config/logging.yaml'
+logging_config = "/home/finn/PycharmProjects/LayoutEagle/python/config/logging.yaml"
 model_config = "elmo_lstm3_feedforward4_crf_straight.json"
 jobs = 32
 max_time_per_call = 30
@@ -92,8 +101,8 @@ cache = hidden_folder + "cache/"
 tex_data = hidden_folder + "/pdfs/"
 models = hidden_folder + "models/"
 tex_source = "http://arxiv.org"
-INDEX_WRAP_TAG_NAME = 'z'
-wordlist = '../pdfetc2txt/wordlist.txt'
+INDEX_WRAP_TAG_NAME = "z"
+wordlist = "../pdfetc2txt/wordlist.txt"
 reader_width = 700
 basewidth = 2500
 
@@ -117,47 +126,63 @@ layout_model_path = hidden_folder + "/layout_model/"
 saved_layout_model_dir = hidden_folder + "/layout_model_saved/"
 collected_features_path = ".core/labeled_features.pickle"
 use_pdf2htmlex_features = False
-cols_to_use = ["page_number",
-               "number_of_lines",
-               "x", "y", "x0", "x1", "y0", "y1", "height", "width"]
+cols_to_use = [
+    "page_number",
+    "number_of_lines",
+    "x",
+    "y",
+    "x0",
+    "x1",
+    "y0",
+    "y1",
+    "height",
+    "width",
+]
 array_cols_to_use = []
 N = 7
-DEVICE = torch.device('cpu')
+DEVICE = torch.device("cpu")
 #        torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 TEXT_BOX_MODEL_PATH = hidden_folder + "text_box_models/"
 PREDICTION_PATH = hidden_folder + "prediction/"
 NOT_COLLECTED_PATH = hidden_folder + "non_collection/"
 COLLECTION_PATH = hidden_folder + "collection/"
-LABELS = ['NONE', 'c1', 'c2', 'c3', 'wh', 'h', 'pn', 'fn', 'fg', 'tb']
-TEXT_LABELS = ['c1', 'c2', 'c3', 'wh']
-TITLE = ['h']
+LABELS = ["NONE", "c1", "c2", "c3", "wh", "h", "pn", "fn", "fg", "tb"]
+TEXT_LABELS = ["c1", "c2", "c3", "wh"]
+TITLE = ["h"]
 MAX_PAGES_PER_DOCUMENT = 25
 label2id = {t: i for i, t in enumerate(LABELS)}
-label2color = {'c1': 'blue',
-               'c2': 'green',
-               'c3': 'orange',
-               'NONE': 'violet',
-               'none': 'violet',
-               'None': 'violet',
-               'other': 'yellow',
-               None: 'violet',
-               'pn': 'yellow',
-               'h': 'red',
-               'wh': 'purple',
-               'fg': 'brown',
-               'fn': 'grey',
-               'tb': 'beige'}
+label2color = {
+    "c1": "blue",
+    "c2": "green",
+    "c3": "orange",
+    "NONE": "violet",
+    "none": "violet",
+    "None": "violet",
+    "other": "yellow",
+    None: "violet",
+    "pn": "yellow",
+    "h": "red",
+    "wh": "purple",
+    "fg": "brown",
+    "fn": "grey",
+    "tb": "beige",
+}
 id2label = {v: k for k, v in label2id.items()}
 LABELS = [label2id[L] for L in LABELS]
 from datasets import Features, Sequence, ClassLabel, Value, Array2D, Array3D
-FEATURES = Features({
-    'image': Array3D(dtype="int64", shape=(3, 224, 224)),
-    'input_ids': Sequence(feature=Value(dtype='int64')),
-    'attention_mask': Sequence(Value(dtype='int64')),
-    'token_type_ids': Sequence(Value(dtype='int64')),
-    'bbox': Array2D(dtype="int64", shape=(512, 4)),
-    'labels': Sequence(ClassLabel(names=LABELS + [max(LABELS) + 1, max(LABELS) + 2]))
-})
+
+FEATURES = Features(
+    {
+        "image": Array3D(dtype="int64", shape=(3, 224, 224)),
+        "input_ids": Sequence(feature=Value(dtype="int64")),
+        "attention_mask": Sequence(Value(dtype="int64")),
+        "token_type_ids": Sequence(Value(dtype="int64")),
+        "bbox": Array2D(dtype="int64", shape=(512, 4)),
+        "labels": Sequence(
+            ClassLabel(names=LABELS + [max(LABELS) + 1, max(LABELS) + 2])
+        ),
+    }
+)
 NUM_LABELS = len(LABELS)
 PROCESSOR_PICKLE = hidden_folder + f"processor_module{NUM_LABELS}.pickle"
 MODEL_PICKLE = hidden_folder + "model_module{NUM_LABELS}.pickle"
@@ -167,6 +192,6 @@ ELMO_DIFFERENCE_MODEL_PATH = hidden_folder + "elmo_difference_models"
 ELMO_DIFFERENCE_COLLECTION_PATH = hidden_folder + "elmo_difference_collection"
 PORT = 9999
 TOPIC_TEXT_LENGTH = 180
-spacy_model_name = 'en_core_web_trf'
+spacy_model_name = "en_core_web_trf"
 audio_format = ".ogg"
 audio_path = hidden_folder + "audio/"

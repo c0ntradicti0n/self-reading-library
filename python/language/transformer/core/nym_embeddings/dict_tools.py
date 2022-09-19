@@ -22,7 +22,7 @@ def balance_complex_tuple_dict(d):
                 # If not create a new list
                 inverse[item] = [key]
             else:
-                if (item == key):
+                if item == key:
                     continue
                 inverse[item].append(key)
 
@@ -37,15 +37,18 @@ def dict_compare(d1, d2, ignore_order=False):
     intersect_keys = d1_keys.intersection(d2_keys)
     added = d1_keys - d2_keys
     removed = d2_keys - d1_keys
-    modified = {o : (d1[o], d2[o]) for o in intersect_keys if d1[o] != d2[o]}
+    modified = {o: (d1[o], d2[o]) for o in intersect_keys if d1[o] != d2[o]}
     if ignore_order:
-        modified = {o : (d1[o], d2[o]) for o in intersect_keys
-                    if set(d1[o]) != set(d2[o])}
+        modified = {
+            o: (d1[o], d2[o]) for o in intersect_keys if set(d1[o]) != set(d2[o])
+        }
 
     same = set(o for o in intersect_keys if d1[o] == d2[o])
     return added, removed, modified, same
 
+
 import collections
+
 
 def update(d, u):
     for k, v in u.items():
@@ -57,17 +60,18 @@ def update(d, u):
 
 
 import unittest
+
+
 class TestDicTools(unittest.TestCase):
-
-
     def test_balance_complex_tuple_dict(self):
         import pprint
+
         d = {
-            ('differ'):['equal'],
-            ('have','*','in', 'common'):[('differ','in'), 'differ', 'derive']
+            ("differ"): ["equal"],
+            ("have", "*", "in", "common"): [("differ", "in"), "differ", "derive"],
         }
         balanced = balance_complex_tuple_dict(dict(d))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

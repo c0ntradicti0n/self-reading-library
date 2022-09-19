@@ -5,7 +5,7 @@ import itertools
 from config import config
 
 
-@converter('prediction', 'txt')
+@converter("prediction", "txt")
 class Prediction2Text(Ant):
     def __init__(self, debug=True, *args, n=15, **kwargs):
         super().__init__(*args, cached=cache_flow.iterate, **kwargs)
@@ -18,34 +18,26 @@ class Prediction2Text(Ant):
             for prediction, meta in prediction_metas_per_document:
                 label_box_text = list(
                     zip(
-                        prediction['labels'],
-                        prediction['bbox'],
-                        prediction['df'].text.to_list()[0]
+                        prediction["labels"],
+                        prediction["bbox"],
+                        prediction["df"].text.to_list()[0],
                     )
                 )
                 label_groups = [
                     (k, list(g))
                     for k, g in itertools.groupby(
-                        list(sorted(
-                            label_box_text,
-                            key=lambda lbt: lbt[0]
-                        )),
-                        key=lambda l_b_t: l_b_t[0]
+                        list(sorted(label_box_text, key=lambda lbt: lbt[0])),
+                        key=lambda l_b_t: l_b_t[0],
                     )
                 ]
-                label_groups = [
-                    g for g in label_groups
-                    if g[0] in config.TEXT_LABELS
-                ]
+                label_groups = [g for g in label_groups if g[0] in config.TEXT_LABELS]
                 label_box_text_sorted = [
                     list(sorted(list(g), key=lambda x: x[1][0] * x[1][1]))
                     for k, g in label_groups
                 ]
-                text = [
-                    l_b_t[2] for l in label_box_text_sorted for l_b_t in l
-                ]
+                text = [l_b_t[2] for l in label_box_text_sorted for l_b_t in l]
 
                 all_text.extend(text)
 
-            meta['reading_order'] = label_box_text_sorted
+            meta["reading_order"] = label_box_text_sorted
             yield all_text, meta

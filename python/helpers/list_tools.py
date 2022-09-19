@@ -36,10 +36,10 @@ def dictize(obj_meta_gen):
     for o, m in obj_meta_gen:
         yield {"value": o}, m
 
+
 def forget_except(obj_meta_gen, keys):
     for o, m in obj_meta_gen:
-        yield  o, {kk:v for kk, v in m.items() if kk in keys}
-
+        yield o, {kk: v for kk, v in m.items() if kk in keys}
 
 
 def reverse_dict_of_lists(d):
@@ -57,9 +57,10 @@ def threewise(iterable):
     for i in range(1, l - 1):
         yield iterable[i - 1], iterable[i], iterable[i + 1]
 
-def unique(iterable, key=None, delivered = []):
+
+def unique(iterable, key=None, delivered=[]):
     collector = []
-    added=delivered
+    added = delivered
     for v in iterable:
         if key:
             k = key(v)
@@ -72,12 +73,13 @@ def unique(iterable, key=None, delivered = []):
                 added.append(v)
     return collector
 
-def nd_fractal(s_value, s_tuple, n=3, lense=1):
-    """   [10, 40, 70] ->
 
-          10- >  [-10.  10.  30.]
-          40 ->  [ 20. 40. 60.]
-          70 ->  [ 50. 70. 90.]
+def nd_fractal(s_value, s_tuple, n=3, lense=1):
+    """[10, 40, 70] ->
+
+    10- >  [-10.  10.  30.]
+    40 ->  [ 20. 40. 60.]
+    70 ->  [ 50. 70. 90.]
 
     """
     mid = numpy.mean(s_tuple)
@@ -92,8 +94,12 @@ class Lookup:
     def __init__(self, tokens: List):
         if all(isinstance(t, List) for t in tokens):
             tokens = flatten(tokens)
-        self.id_to_token = OrderedDict(sorted((i, t) for i, t in list(enumerate(sorted(tokens)))))
-        self.token_to_id = OrderedDict(sorted((k, v) for v, k in self.id_to_token.items()))
+        self.id_to_token = OrderedDict(
+            sorted((i, t) for i, t in list(enumerate(sorted(tokens))))
+        )
+        self.token_to_id = OrderedDict(
+            sorted((k, v) for v, k in self.id_to_token.items())
+        )
 
     def __call__(self, id_s=None, token_s=None):
         assert bool(id_s) ^ bool(token_s)
@@ -106,7 +112,9 @@ class Lookup:
         try:
             return [self.id_to_token[id] for id in ids]
         except:
-            logging.error(f"{[id for id in ids if id not in self.id_to_token]} not in labels dict {self.id_to_token}")
+            logging.error(
+                f"{[id for id in ids if id not in self.id_to_token]} not in labels dict {self.id_to_token}"
+            )
 
 
 def pad_along_axis(array: numpy.ndarray, target_length, axis=0):
@@ -119,7 +127,7 @@ def pad_along_axis(array: numpy.ndarray, target_length, axis=0):
     npad = [(0, 0) for x in range(axis_nb)]
     npad[axis] = (0, pad_size)
 
-    b = numpy.pad(array, pad_width=npad, mode='constant', constant_values=0)
+    b = numpy.pad(array, pad_width=npad, mode="constant", constant_values=0)
 
     return b
 
@@ -162,5 +170,5 @@ class ListToolsTest(unittest.TestCase):
             # assert new_range[0] >= s1 and new_range[2] <= s3
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

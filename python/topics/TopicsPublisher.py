@@ -14,44 +14,57 @@ from config import config
 from core.pathant.Converter import converter
 from flask import Blueprint
 
-bp = Blueprint('blueprint', __name__, template_folder='templates')
+bp = Blueprint("blueprint", __name__, template_folder="templates")
 
 topic_maker = TopicMaker()
 
 
 @converter("reading_order", "topics.graph")
 class TopicsPublisher(RestPublisher, react):
-    def __init__(self,
-                 *args,
-                 **kwargs):
-        super().__init__(*args, **kwargs, resource=Resource(
-            title="library",
-            type="graph",
-            path="library",
-            route="library",
-            access={"fetch": True, "read": True, "upload": True, "correct": True, "delete": True}))
+    def __init__(self, *args, **kwargs):
+        super().__init__(
+            *args,
+            **kwargs,
+            resource=Resource(
+                title="library",
+                type="graph",
+                path="library",
+                route="library",
+                access={
+                    "fetch": True,
+                    "read": True,
+                    "upload": True,
+                    "correct": True,
+                    "delete": True,
+                },
+            ),
+        )
 
         self.topics = None
 
     reading_order_regex = regex.compile(" *\d+:(.*)")
 
     def __call__(self, documents):
-        documents = list(forget_except(documents, keys=["used_text_boxes", "doc_id", "title", "html_path"]))
+        documents = list(
+            forget_except(
+                documents, keys=["used_text_boxes", "doc_id", "title", "html_path"]
+            )
+        )
 
         html_paths_json_paths_txt_paths, metas = list(zip(*documents))
 
         texts = [
-            " ".join("\n".join([tb[0]
-                                for utb in meta["used_text_boxes"]
-                                for tb in utb]
-                               ).split()[:10])
+            " ".join(
+                "\n".join(
+                    [tb[0] for utb in meta["used_text_boxes"] for tb in utb]
+                ).split()[:10]
+            )
             for meta in metas
         ]
 
-
         self.topics, text_ids = topic_maker(texts, meta=metas)
 
-        with open(config.topics_dump + f"_{len(documents)}", 'wb') as f:
+        with open(config.topics_dump + f"_{len(documents)}", "wb") as f:
             pickle.dump([self.topics, metas], f)
 
         yield self.topics, text_ids
@@ -69,7 +82,13 @@ class TopicsPublisher(RestPublisher, react):
         else:
             logging.info("recreate")
 
-            value, _ = list(zip(*list(self.ant("arxiv.org", "topics.graph", from_cache_only=True)([]))))
+            value, _ = list(
+                zip(
+                    *list(
+                        self.ant("arxiv.org", "topics.graph", from_cache_only=True)([])
+                    )
+                )
+            )
 
         logging.info("computed topics")
         resp.text = json.dumps([value, {}], ensure_ascii=False)

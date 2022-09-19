@@ -27,9 +27,7 @@ class AutoHash:
     # distinguish ordered from unordered containers
     # so we need to just list them out manually as needed
 
-    type_info = collections.namedtuple(
-        'type_info',
-        'type transformation aggregator')
+    type_info = collections.namedtuple("type_info", "type transformation aggregator")
 
     ident = lambda x: x
     # order matters; first match is used to handle a datatype
@@ -41,29 +39,26 @@ class AutoHash:
         type_info(list, ident, tuple),
         type_info(tuple, ident, tuple),
         type_info(collections.deque, ident, tuple),
-        type_info(collections.Iterable, ident, frozenset) # other iterables
+        type_info(collections.Iterable, ident, frozenset),  # other iterables
     )
 
     # hash_func can be set to replace the built-in hash function
     # cache can be turned on; if it is, cycles will be detected,
     # otherwise cycles in a data structure will cause failure
     def __init__(self, data, hash_func=hash, cache=False, verbose=False):
-        self._data=data
-        self.hash_func=hash_func
-        self.verbose=verbose
-        self.cache=cache
+        self._data = data
+        self.hash_func = hash_func
+        self.verbose = verbose
+        self.cache = cache
         # cache objects' hashes for performance and to deal with cycles
         if self.cache:
-            self.seen={}
+            self.seen = {}
 
     def hash_ex(self, o):
         # note: isinstance(o, Hashable) won't check inner types
         try:
             if self.verbose:
-                print(type(o),
-                    reprlib.repr(o),
-                    self.hash_func(o),
-                    file=sys.stderr)
+                print(type(o), reprlib.repr(o), self.hash_func(o), file=sys.stderr)
             return self.hash_func(o)
         except TypeError:
             pass
@@ -71,7 +66,7 @@ class AutoHash:
         # we let built-in hash decide if the hash value is worth caching
         # so we don't cache the built-in hash results
         if self.cache and id(o) in self.seen:
-            return self.seen[id(o)][0] # found in cache
+            return self.seen[id(o)][0]  # found in cache
 
         # check if o can be handled by decomposing it into components
         for typ, transformation, aggregator in AutoHash.known_types:
@@ -95,7 +90,7 @@ class AutoHash:
                     print(type(o), reprlib.repr(o), h, file=sys.stderr)
                 return h
 
-        raise TypeError('Object {} of type {} not hashable'.format(repr(o), type(o)))
+        raise TypeError("Object {} of type {} not hashable".format(repr(o), type(o)))
 
     def __hash__(self):
         return self.hash_ex(self._data)
@@ -117,7 +112,7 @@ class AutoHash:
         # we should return False, but NotImplemented will have the same effect
         # any other case: we won't reach the __eq__ code in this class, no need to worry about it
 
-        if isinstance(self, type(other)): # identifies case 1
+        if isinstance(self, type(other)):  # identifies case 1
             return self._data == other._data
-        else: # identifies cases 2 and 3
+        else:  # identifies cases 2 and 3
             return NotImplemented

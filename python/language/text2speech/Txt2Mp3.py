@@ -21,17 +21,21 @@ def generate_audio(id, text):
     with open(f"{id}.txt", "w") as f:
         f.write(text)
 
-    os.system(f". ../tts/venv/bin/activate &&  python ../tts/tts.py -i {id}.txt {out_path}.ogg ")
+    os.system(
+        f". ../tts/venv/bin/activate &&  python ../tts/tts.py -i {id}.txt {out_path}.ogg "
+    )
 
     return out_path
 
 
 def get_audio_path(id):
-    out_path = config.audio_path + id.replace(config.hidden_folder, "") + config.audio_format
+    out_path = (
+        config.audio_path + id.replace(config.hidden_folder, "") + config.audio_format
+    )
     return out_path
 
 
-@converter('reading_order', 'audio')
+@converter("reading_order", "audio")
 class Txt2Mp3(Ant):
     def __init__(self, debug=True, *args, n=15, **kwargs):
         super().__init__(*args, cached=cache_flow.iterate, **kwargs)
@@ -43,7 +47,10 @@ class Txt2Mp3(Ant):
     )
     def __call__(self, iterator, *args, **kwargs):
         for id, meta in iterator:
-            text = " ".join(preprocess_text(meta["enumerated_texts"])).replace("/n", " ") + "\n"
+            text = (
+                " ".join(preprocess_text(meta["enumerated_texts"])).replace("/n", " ")
+                + "\n"
+            )
 
             audio_path = generate_audio(id, text)
 
@@ -55,11 +62,12 @@ if __name__ == "__main__":
     list(
         Txt2Mp3(
             [
-                ("test",
-                 {
-                     "text": "Emissions data from three companies, Bit Digital, Greenidge and Stronghold, indicated their operations create 1.6m tons of CO2 annually, an amount produced by nearly 360,000 cars. Their environmental impact is significant despite industry claims about clean energy use and climate commitments, the lawmakers wrote.\n"
-                 }
-                 )
+                (
+                    "test",
+                    {
+                        "text": "Emissions data from three companies, Bit Digital, Greenidge and Stronghold, indicated their operations create 1.6m tons of CO2 annually, an amount produced by nearly 360,000 cars. Their environmental impact is significant despite industry claims about clean energy use and climate commitments, the lawmakers wrote.\n"
+                    },
+                )
             ]
         )
     )

@@ -4,11 +4,13 @@ except ImportError:
     from collections import Mapping
 import numpy as np
 
+
 def get_dict_wo_key(dictionary, key):
     """Returns a **shallow** copy of the dictionary without a key."""
     _dict = dictionary.copy()
     _dict.pop(key, None)
     return _dict
+
 
 def flatten(*args):
     """
@@ -24,13 +26,15 @@ def flatten(*args):
 
     x = []
     for l in args:
-        if not isinstance(l, (list, tuple)): l = [l]
+        if not isinstance(l, (list, tuple)):
+            l = [l]
         for item in l:
             if isinstance(item, (list, tuple)):
                 x.extend(flatten(item))
             else:
                 x.append(item)
     return x
+
 
 def nested_dict_iter(nested):
     try:
@@ -49,14 +53,14 @@ def apply(data, f):
     while stack:
         data = stack.pop()
         if isinstance(data, dict):
-            for k,v in data.items():
-                if isinstance(v, (dict,list,tuple)):
+            for k, v in data.items():
+                if isinstance(v, (dict, list, tuple)):
                     stack.append(v)
                 else:
                     data[k] = f(v)
         if isinstance(data, list):
-            for i,e in enumerate(data):
-                if isinstance(e, (dict,list,tuple)):
+            for i, e in enumerate(data):
+                if isinstance(e, (dict, list, tuple)):
                     stack.append(e)
                 else:
                     data[i] = f(e)
@@ -64,7 +68,8 @@ def apply(data, f):
 
 import collections
 
-def flattenDict(d, parent_key='', sep='_'):
+
+def flattenDict(d, parent_key="", sep="_"):
     items = []
     for k, v in d.items():
         try:
@@ -78,7 +83,13 @@ def flattenDict(d, parent_key='', sep='_'):
     return dict(items)
 
 
-def reverseDict(dic, end_key, call=None, extra_keys=[], excluded_types=[str, int, float, np.array, np.float64]):
+def reverseDict(
+    dic,
+    end_key,
+    call=None,
+    extra_keys=[],
+    excluded_types=[str, int, float, np.array, np.float64],
+):
     """ Reverse nested dict, that the key and values are exchanged and non-uniqueness is replaced by lists
 
     >>> exampleset = { \
@@ -112,20 +123,22 @@ def reverseDict(dic, end_key, call=None, extra_keys=[], excluded_types=[str, int
     # https://stackoverflow.com/questions/35627441/using-recursion-to-reverse-a-dictionary-around-a-value-in-python
 
     if isinstance(end_key, str):
+
         def condition(x):
             return x == end_key
+
     if callable(end_key):
+
         def condition(x):
             return end_key(x)
 
     res = []
 
-
     def revnest(inp, keys=[]):
         res2 = res
         if type(inp) == list:
-            #inp = {i: j[i] for j in inp for i in j}
-            inp = {str(k):v for k,v in enumerate(inp)}
+            # inp = {i: j[i] for j in inp for i in j}
+            inp = {str(k): v for k, v in enumerate(inp)}
             register = False
         else:
             register = True
@@ -133,14 +146,13 @@ def reverseDict(dic, end_key, call=None, extra_keys=[], excluded_types=[str, int
         if type(inp) in excluded_types or not inp:
             return
 
-        if not isinstance(inp, (dict,list,tuple)):
-            print ('non iterable type in dict, that is not ignored %s' % str(inp))
+        if not isinstance(inp, (dict, list, tuple)):
+            print("non iterable type in dict, that is not ignored %s" % str(inp))
             return
-
 
         for x in inp:
             if condition(x):
-                res2.append({tuple(inp[x]):{}})
+                res2.append({tuple(inp[x]): {}})
                 if call:
                     kwargs = {z: inp[z] for z in extra_keys}
                     call(inp[x], keys, **kwargs)
@@ -174,10 +186,9 @@ def recursive_map(something, func):
         return func(something)
 
 
-
-
 # Note: Typing for elements of iterable types such as Set, List, or Dict
 # use a variation of Run Length Encoding.
+
 
 def type_spec_iterable(iterable, name="Types of it are "):
     def iterable_info(iterable):
@@ -191,11 +202,13 @@ def type_spec_iterable(iterable, name="Types of it are "):
         first_item_done = False
         for e in iterable:
             item_type = type_spec(e)
-            if (item_type != pervious_identity_type):
+            if item_type != pervious_identity_type:
                 if not first_item_done:
                     first_item_done = True
                 else:
-                    types_list.append((pervious_identity_type, pervious_identity_type_count))
+                    types_list.append(
+                        (pervious_identity_type, pervious_identity_type_count)
+                    )
                 pervious_identity_type = item_type
                 pervious_identity_type_count = 1
             else:
@@ -203,6 +216,7 @@ def type_spec_iterable(iterable, name="Types of it are "):
             length += 1
         types_list.append((pervious_identity_type, pervious_identity_type_count))
         return (length, types_list)
+
     (length, identity_list) = iterable_info(iterable)
     element_types = ""
     for (identity_item_type, identity_item_count) in identity_list:
@@ -219,16 +233,21 @@ def type_spec_iterable(iterable, name="Types of it are "):
     result = name + "=" + str(length) + "[" + element_types + "]"
     return result
 
+
 def list2dict(d, key):
     try:
         if isinstance(d, dict):
             return {k: list2dict(v, key) for k, v in d.items()}
         elif isinstance(d, (set, list)):
-            return {key(e): list2dict(e, key) if isinstance( e, dict) else list2dict(e, key)  for e in d}
+            return {
+                key(e): list2dict(e, key) if isinstance(e, dict) else list2dict(e, key)
+                for e in d
+            }
         else:
             return d
     except:
         return d
+
 
 def type_spec_dict(dict, name):
     def dict_info(dict):
@@ -244,11 +263,13 @@ def type_spec_dict(dict, name):
             key_type = type_spec(k)
             value_type = type_spec(v)
             item_type = (key_type, value_type)
-            if (item_type != pervious_identity_type):
+            if item_type != pervious_identity_type:
                 if not first_item_done:
                     first_item_done = True
                 else:
-                    types_list.append((pervious_identity_type, pervious_identity_type_count))
+                    types_list.append(
+                        (pervious_identity_type, pervious_identity_type_count)
+                    )
                 pervious_identity_type = item_type
                 pervious_identity_type_count = 1
             else:
@@ -256,9 +277,13 @@ def type_spec_dict(dict, name):
             length += 1
         types_list.append((pervious_identity_type, pervious_identity_type_count))
         return (length, types_list)
+
     (length, identity_list) = dict_info(dict)
     element_types = ""
-    for ((identity_key_type,identity_value_type), identity_item_count) in identity_list:
+    for (
+        (identity_key_type, identity_value_type),
+        identity_item_count,
+    ) in identity_list:
         if element_types == "":
             pass
         else:
@@ -270,28 +295,44 @@ def type_spec_dict(dict, name):
     result = name + "[" + str(length) + "]<" + element_types + ">"
     return result
 
+
 def type_spec_tuple(tuple, name):
     return name + "<" + ", ".join(type_spec(e) for e in tuple) + ">"
+
 
 def type_spec(obj):
     object_type = type(obj)
     name = object_type.__name__
-    if (object_type is int) or (object_type is bytes) or (object_type is str) or (object_type is bool) or (object_type is float):
+    if (
+        (object_type is int)
+        or (object_type is bytes)
+        or (object_type is str)
+        or (object_type is bool)
+        or (object_type is float)
+    ):
         result = name
     elif object_type is type(None):
         result = "(none)"
     elif (object_type is list) or (object_type is set):
         result = type_spec_iterable(obj, name)
-    elif (object_type is dict):
+    elif object_type is dict:
         result = type_spec_dict(obj, name)
-    elif (object_type is tuple):
+    elif object_type is tuple:
         result = type_spec_tuple(obj, name)
     else:
-        if name == 'ndarray':
+        if name == "ndarray":
             ndarray = obj
-            ndarray_shape = "[" + str(ndarray.shape).replace("L","").replace(" ","").replace("(","").replace(")","") + "]"
+            ndarray_shape = (
+                "["
+                + str(ndarray.shape)
+                .replace("L", "")
+                .replace(" ", "")
+                .replace("(", "")
+                .replace(")", "")
+                + "]"
+            )
             ndarray_data_type = str(ndarray.dtype).split("'")[1]
             result = name + ndarray_shape + "<" + ndarray_data_type + ">"
         else:
-            result = "Unknown type: " , name
+            result = "Unknown type: ", name
     return result

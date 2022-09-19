@@ -23,39 +23,44 @@ def get_all_routes(api):
 
 def run_extra_threads():
     from layout.annotation_thread import layout_annotate_train_model
+
     ant = PathAnt()
 
     filling_pipe = ant(
-        "arxiv.org", f"reading_order",
+        "arxiv.org",
+        f"reading_order",
         num_labels=config.NUM_LABELS,
-        layout_model_path=full_model_path
+        layout_model_path=full_model_path,
     )
 
-    ant.info("workflow.png",
-             pipelines_to_highlight=[
-                 elmo_difference_pipe,
-                 sample_pipe,
-                 model_pipe,
-                 upload_pipe,
-                 elmo_difference_model_pipe,
-                 filling_pipe
-             ]
-             )
+    ant.info(
+        "workflow.png",
+        pipelines_to_highlight=[
+            elmo_difference_pipe,
+            sample_pipe,
+            model_pipe,
+            upload_pipe,
+            elmo_difference_model_pipe,
+            filling_pipe,
+        ],
+    )
 
     layout = threading.Thread(target=layout_annotate_train_model, name="layout_captcha")
     layout.start()
-    difference_elmo = threading.Thread(target=annotate_difference_elmo, name="difference_captcha")
+    difference_elmo = threading.Thread(
+        target=annotate_difference_elmo, name="difference_captcha"
+    )
     difference_elmo.start()
-
 
     def fill_library():
         x = None
         while not x:
 
             try:
-                gen = forget_except(filling_pipe(itertools.islice((
-                    metaize(["pdfs"] * 200)
-                ), 200)), keys=["html_path"])
+                gen = forget_except(
+                    filling_pipe(itertools.islice((metaize(["pdfs"] * 200)), 200)),
+                    keys=["html_path"],
+                )
                 for i in range(100):
                     k = next(gen, None)
                     del k
@@ -69,6 +74,7 @@ def run_extra_threads():
 
 def create_app():
     import falcon
+
     logging.info(f"STARTING APP")
 
     from language.transformer.ElmoDifference import ElmoDifferenceQueueRest
@@ -76,57 +82,38 @@ def create_app():
     from core.rest.LayoutPublisher import LayoutPublisher
 
     publishing = {
-        '/ant/{id}':
-            AntPublisher,
-
+        "/ant/{id}": AntPublisher,
         # difference
-        '/difference/{id}':
-            ElmoDifferenceQueueRest,
-        '/difference_annotation/{id}':
-            DifferenceAnnotationPublisher,
-
+        "/difference/{id}": ElmoDifferenceQueueRest,
+        "/difference_annotation/{id}": DifferenceAnnotationPublisher,
         # layout
-        '/annotation_captcha/{id}':
-            AnnotationQueueRest,
-        '/upload_annotation/{id}':
-            UploadAnnotationQueueRest,
-        '/layout/{id}': LayoutPublisher,
-
+        "/annotation_captcha/{id}": AnnotationQueueRest,
+        "/upload_annotation/{id}": UploadAnnotationQueueRest,
+        "/layout/{id}": LayoutPublisher,
         # captcha
-        '/difference_captcha/{id}':
-            ElmoDifferenceQueueRest,
-        '/layout_captcha/{id}':
-            AnnotatedToGoldQueueRest,
-        '/layout_captcha':
-            AnnotatedToGoldQueueRest,
-
+        "/difference_captcha/{id}": ElmoDifferenceQueueRest,
+        "/layout_captcha/{id}": AnnotatedToGoldQueueRest,
+        "/layout_captcha": AnnotatedToGoldQueueRest,
         # topics
-        '/library/{id}':
-            TopicsPublisher,
-
-
-
+        "/library/{id}": TopicsPublisher,
         # audiobook
-        '/audiobook/{id}':
-            AudioPublisher,
+        "/audiobook/{id}": AudioPublisher,
     }
 
     from falcon_cors import CORS
 
     cors = CORS(
-        allow_origins_list=['*'],
+        allow_origins_list=["*"],
         allow_all_origins=True,
         allow_all_headers=True,
         allow_credentials_all_origins=True,
         allow_all_methods=falcon.HTTP_METHODS,
-        log_level="DEBUG"
+        log_level="DEBUG",
     )
 
     from falcon_multipart.middleware import MultipartMiddleware
 
-    api = falcon.App(middleware=[
-        cors.middleware,
-        MultipartMiddleware()])
+    api = falcon.App(middleware=[cors.middleware, MultipartMiddleware()])
 
     for route, module in publishing.items():
         api.add_route(route, module)
@@ -143,5 +130,5 @@ if __name__ == "__main__":
 
     logging.debug(get_all_routes(api))
 
-    httpd = simple_server.make_server('0.0.0.0', config.PORT, api)
+    httpd = simple_server.make_server("0.0.0.0", config.PORT, api)
     httpd.serve_forever()

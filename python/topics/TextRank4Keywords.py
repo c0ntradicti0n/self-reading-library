@@ -9,12 +9,11 @@ from config.config import spacy_model_name
 try:
     nlp = spacy.load(spacy_model_name)
 except OSError:
-    os.system(f'python -m spacy download {spacy_model_name}')
+    os.system(f"python -m spacy download {spacy_model_name}")
     nlp = spacy.load(spacy_model_name)
 
 
-
-class TextRank4Keyword():
+class TextRank4Keyword:
     """Extract keywords from text"""
 
     def __init__(self):
@@ -75,7 +74,7 @@ class TextRank4Keyword():
         """Get normalized matrix"""
         # Build matrix
         vocab_size = len(vocab)
-        g = np.zeros((vocab_size, vocab_size), dtype='float')
+        g = np.zeros((vocab_size, vocab_size), dtype="float")
         for word1, word2 in token_pairs:
             i, j = vocab[word1], vocab[word2]
             g[i][j] = 1
@@ -85,18 +84,27 @@ class TextRank4Keyword():
 
         # Normalize matrix by column
         norm = np.sum(g, axis=0)
-        g_norm = np.divide(g, norm, where=norm != 0)  # this is ignore the 0 element in norm
+        g_norm = np.divide(
+            g, norm, where=norm != 0
+        )  # this is ignore the 0 element in norm
 
         return g_norm
 
     def get_keywords(self, number=10):
         """Print top number keywords"""
-        node_weight = OrderedDict(sorted(self.node_weight.items(), key=lambda t: t[1], reverse=True))
+        node_weight = OrderedDict(
+            sorted(self.node_weight.items(), key=lambda t: t[1], reverse=True)
+        )
         return list(node_weight.items())[:10]
 
-    def analyze(self, text,
-                candidate_pos=['NOUN', 'PROPN'],
-                window_size=4, lower=False, stopwords=list()):
+    def analyze(
+        self,
+        text,
+        candidate_pos=["NOUN", "PROPN"],
+        window_size=4,
+        lower=False,
+        stopwords=list(),
+    ):
         """Main function to analyze text"""
 
         # Set stop words
@@ -106,7 +114,9 @@ class TextRank4Keyword():
         doc = nlp(text)
 
         # Filter sentences
-        sentences = self.sentence_segment(doc, candidate_pos, lower)  # list of list of words
+        sentences = self.sentence_segment(
+            doc, candidate_pos, lower
+        )  # list of list of words
 
         # Build vocabulary
         vocab = self.get_vocab(sentences)

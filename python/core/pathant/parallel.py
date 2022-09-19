@@ -4,6 +4,7 @@ from config import config
 from helpers.programming import exit_after
 from tqdm import tqdm
 
+
 def paraloop(original_fun):
     def wrapper(self, param):
         def f(arg):
@@ -16,10 +17,9 @@ def paraloop(original_fun):
                 return ff(arg)
 
             except KeyboardInterrupt as e:
-                 if config.ARGS.skip_on_timeout:
-                     return [None]
-                 raise e
-
+                if config.ARGS.skip_on_timeout:
+                    return [None]
+                raise e
 
         args = list(param)
 

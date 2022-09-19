@@ -15,10 +15,13 @@ from wn.info import WordNetInformationContent as WordNetIC
 from nym_embeddings.pywsd.tokenize import word_tokenize
 from nym_embeddings.pywsd.utils import lemmatize
 
-wnic_bnc_resnik_add1 = WordNetIC('bnc', resnik=True, add1=True)
-wnic_bnc_add1 = WordNetIC('bnc', resnik=False, add1=True)
+wnic_bnc_resnik_add1 = WordNetIC("bnc", resnik=True, add1=True)
+wnic_bnc_add1 = WordNetIC("bnc", resnik=False, add1=True)
 
-def similarity_by_path(sense1: "wn.Synset", sense2: "wn.Synset", option: str = "path") -> float:
+
+def similarity_by_path(
+    sense1: "wn.Synset", sense2: "wn.Synset", option: str = "path"
+) -> float:
     """
     Returns maximum path similarity between two senses.
 
@@ -27,19 +30,25 @@ def similarity_by_path(sense1: "wn.Synset", sense2: "wn.Synset", option: str = "
     :param option: String, one of ('path', 'wup', 'lch').
     :return: A float, similarity measurement.
     """
-    if option.lower() in ["path", "path_similarity"]: # Path similarities.
-        return max(wn.path_similarity(sense1, sense2, if_none_return=0),
-                   wn.path_similarity(sense2, sense1, if_none_return=0))
-    elif option.lower() in ["wup", "wupa", "wu-palmer", "wu-palmer"]: # Wu-Palmer
-        return max(wn.wup_similarity(sense1, sense2, if_none_return=0),
-                   wn.wup_similarity(sense2, sense1, if_none_return=0))
-    elif option.lower() in ['lch', "leacock-chordorow"]: # Leacock-Chodorow
-        if sense1.pos != sense2.pos: # lch can't do diff POS
+    if option.lower() in ["path", "path_similarity"]:  # Path similarities.
+        return max(
+            wn.path_similarity(sense1, sense2, if_none_return=0),
+            wn.path_similarity(sense2, sense1, if_none_return=0),
+        )
+    elif option.lower() in ["wup", "wupa", "wu-palmer", "wu-palmer"]:  # Wu-Palmer
+        return max(
+            wn.wup_similarity(sense1, sense2, if_none_return=0),
+            wn.wup_similarity(sense2, sense1, if_none_return=0),
+        )
+    elif option.lower() in ["lch", "leacock-chordorow"]:  # Leacock-Chodorow
+        if sense1.pos != sense2.pos:  # lch can't do diff POS
             return 0
         return wn.lch_similarity(sense1, sense2, if_none_return=0)
 
 
-def similarity_by_infocontent(sense1: "wn.Synset", sense2: "wn.Synset", option: str) -> float:
+def similarity_by_infocontent(
+    sense1: "wn.Synset", sense2: "wn.Synset", option: str
+) -> float:
     """
     Returns similarity scores by information content.
 
@@ -49,22 +58,22 @@ def similarity_by_infocontent(sense1: "wn.Synset", sense2: "wn.Synset", option: 
     :return: A float, similarity measurement.
     """
 
-    if sense1.pos != sense2.pos: # infocontent sim can't do diff POS.
+    if sense1.pos != sense2.pos:  # infocontent sim can't do diff POS.
         return 0
 
-    if option in ['res', 'resnik']:
+    if option in ["res", "resnik"]:
         if sense1.pos not in wnic_bnc_resnik_add1.ic:
             return 0
         return wn.res_similarity(sense1, sense2, wnic_bnc_resnik_add1)
-    #return min(wn.res_similarity(sense1, sense2, wnic.ic(ic)) \
+    # return min(wn.res_similarity(sense1, sense2, wnic.ic(ic)) \
     #             for ic in info_contents)
 
-    elif option in ['jcn', "jiang-conrath"]:
+    elif option in ["jcn", "jiang-conrath"]:
         if sense1.pos not in wnic_bnc_add1.ic:
             return 0
         return wn.jcn_similarity(sense1, sense2, wnic_bnc_add1)
 
-    elif option in ['lin']:
+    elif option in ["lin"]:
         if sense1.pos not in wnic_bnc_add1.ic:
             return 0
         return wn.lin_similarity(sense1, sense2, wnic_bnc_add1)
@@ -80,18 +89,30 @@ def sim(sense1: "wn.Synset", sense2: "wn.Synset", option: str = "path") -> float
     :return: A float, similarity measurement.
     """
     option = option.lower()
-    if option.lower() in ["path", "path_similarity",
-                        "wup", "wupa", "wu-palmer", "wu-palmer",
-                        'lch', "leacock-chordorow"]:
+    if option.lower() in [
+        "path",
+        "path_similarity",
+        "wup",
+        "wupa",
+        "wu-palmer",
+        "wu-palmer",
+        "lch",
+        "leacock-chordorow",
+    ]:
         return similarity_by_path(sense1, sense2, option)
-    elif option.lower() in ["res", "resnik",
-                          "jcn","jiang-conrath",
-                          "lin"]:
+    elif option.lower() in ["res", "resnik", "jcn", "jiang-conrath", "lin"]:
         return similarity_by_infocontent(sense1, sense2, option)
 
 
-def max_similarity(context_sentence: str, ambiguous_word: str, option="path",
-                   lemma=True, context_is_lemmatized=False, pos=None, best=True) -> "wn.Synset":
+def max_similarity(
+    context_sentence: str,
+    ambiguous_word: str,
+    option="path",
+    lemma=True,
+    context_is_lemmatized=False,
+    pos=None,
+    best=True,
+) -> "wn.Synset":
     """
     Perform WSD by maximizing the sum of maximum similarity between possible
     synsets of all words in the context sentence and the possible synsets of the
@@ -116,15 +137,15 @@ def max_similarity(context_sentence: str, ambiguous_word: str, option="path",
         for j in context_sentence:
             _result = [0]
             for k in wn.synsets(j):
-                _result.append(sim(i,k,option))
+                _result.append(sim(i, k, option))
             result[i] += max(_result)
 
-    if option in ["res","resnik"]: # lower score = more similar
-        result = sorted([(v,k) for k,v in result.items()])
-    else: # higher score = more similar
-        result = sorted([(v,k) for k,v in result.items()],reverse=True)
+    if option in ["res", "resnik"]:  # lower score = more similar
+        result = sorted([(v, k) for k, v in result.items()])
+    else:  # higher score = more similar
+        result = sorted([(v, k) for k, v in result.items()], reverse=True)
 
     try:
-         return result[0][1] if best else result
+        return result[0][1] if best else result
     except IndexError:
         return None

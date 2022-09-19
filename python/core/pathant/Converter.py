@@ -4,7 +4,7 @@ from core.pathant.converters import ____CONVERTERS____
 
 
 class converter(object):
-    def __init__(self,  _from, _to, *args, **kwargs):
+    def __init__(self, _from, _to, *args, **kwargs):
         self._from = _from
         self._to = _to
         self.args = args

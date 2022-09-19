@@ -6,21 +6,29 @@ from core.rest.RestPublisher import RestPublisher
 
 
 class PdfCssPublisher(RestPublisher):
-
-    def __init__(self,
-                 *args, kind= None,
-                 **kwargs ):
-        super().__init__(*args, **kwargs, resource=Resource(
-            title=kind,
-            type="html",
-            path=kind,
-            route=kind,
-            access={"fetch": True, "read": True, "upload": True, "correct": True, "delete": True}))
+    def __init__(self, *args, kind=None, **kwargs):
+        super().__init__(
+            *args,
+            **kwargs,
+            resource=Resource(
+                title=kind,
+                type="html",
+                path=kind,
+                route=kind,
+                access={
+                    "fetch": True,
+                    "read": True,
+                    "upload": True,
+                    "correct": True,
+                    "delete": True,
+                },
+            ),
+        )
         self.dir = config.markup_dir
         self.kind = kind
 
     def on_get(self, req, resp, id=None):
-        print (f"Annotating {self.kind}")
+        print(f"Annotating {self.kind}")
         self.html_pipeline = self.ant("pdf", "htm")
 
         try:
@@ -33,10 +41,7 @@ class PdfCssPublisher(RestPublisher):
             with open(html_path[0], "r") as f:
                 html = "".join(f.readlines())
 
-                return {
-                    "html": html,
-                    "css": css_value[0]
-                }
+                return {"html": html, "css": css_value[0]}
 
         except Exception as e:
             print(html_path)

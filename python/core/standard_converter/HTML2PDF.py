@@ -4,7 +4,7 @@ from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 
 
-@converter('html', 'pdf')
+@converter("html", "pdf")
 class HTML2PDF(PathSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

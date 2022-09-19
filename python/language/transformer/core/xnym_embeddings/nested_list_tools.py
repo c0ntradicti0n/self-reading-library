@@ -11,6 +11,7 @@ def flatten(iterable):
         else:
             yield el
 
+
 def flatten_reduce(iterable):
     if not isinstance(iterable[0], dict):
         return functools.reduce(operator.add, iterable)
@@ -20,10 +21,12 @@ def flatten_reduce(iterable):
 
 def curry(fun, *args, **kwargs):
     def fun_new(x):
-        return fun (x, *args, **kwargs)
+        return fun(x, *args, **kwargs)
+
     return fun_new
 
-def on_each_level (lol, fun, out = []):
+
+def on_each_level(lol, fun, out=[]):
     for x in lol:
         if not isinstance(x, list):
             out.append(fun(x))
@@ -44,7 +47,7 @@ def gen_dict_extract(var, key):
             yield from gen_dict_extract(d, key)
 
 
-def on_each_iterable (lol, fun):
+def on_each_iterable(lol, fun):
     out = []
     if isinstance(lol, collections.Iterable) and not isinstance(lol, str):
         for x in lol:
@@ -76,12 +79,20 @@ def stack_matryoshka(nesting_list):
             through = list(nesting_list[m])
 
             def replacing_fun(x):
-                return list(replace(list(x), is_fitting, [to_fit_there], window_size=len(to_fit_there)))
+                return list(
+                    replace(
+                        list(x),
+                        is_fitting,
+                        [to_fit_there],
+                        window_size=len(to_fit_there),
+                    )
+                )
 
             nesting_list[m] = on_each_iterable(through, replacing_fun)
 
         n = n + 1
-    return (nesting_list[-1])
+    return nesting_list[-1]
+
 
 def replace_pattern(lst, pattern_sequence, replacement, expand=False):
     out = lst[:]
@@ -99,22 +110,23 @@ def replace_pattern(lst, pattern_sequence, replacement, expand=False):
                     break
                 i1 += 1
             if f == 1:
-                del out[i+ +len_difference : i1  + len_difference]
+                del out[i + +len_difference : i1 + len_difference]
                 if expand:
                     for x in list(replacement):
                         out.insert(i + len_difference, x)
                 else:
-                    for j,x in enumerate(list(replacement)):
-                        if '\\' in x:
+                    for j, x in enumerate(list(replacement)):
+                        if "\\" in x:
                             n = int(x[1])
-                            out.insert(i+j + len_difference, lst[i+n])
+                            out.insert(i + j + len_difference, lst[i + n])
                         else:
-                            out.insert(i+j + len_difference, x)
+                            out.insert(i + j + len_difference, x)
                     len_difference += len(replacement) - len(pattern_sequence)
 
     return out
 
-def check_for_tuple_at_index(l, t, start, wildcard='*'):
+
+def check_for_tuple_at_index(l, t, start, wildcard="*"):
     suspend = False
 
     i1 = start
@@ -123,7 +135,7 @@ def check_for_tuple_at_index(l, t, start, wildcard='*'):
     try:
         e2 = t[i2]
     except IndexError:
-        x=1
+        x = 1
         raise
 
     # find_end
@@ -164,7 +176,7 @@ def check_for_tuple_at_index(l, t, start, wildcard='*'):
 import unittest
 
 
-def check_for_tuple_in_list (l, t, wildcard='*'):
+def check_for_tuple_in_list(l, t, wildcard="*"):
     found = False
     suspend = False
     for i1, e1 in enumerate(l):
@@ -179,11 +191,11 @@ def check_for_tuple_in_list (l, t, wildcard='*'):
             found = False
             if e1 == e2:
                 found = True
-                i2+=1
+                i2 += 1
                 if i2 == len(t):
                     return True
                 e2 = t[i2]
-                i1+=1
+                i1 += 1
                 if i1 == len(l):
                     return False
                 e1 = l[i1]
@@ -208,59 +220,74 @@ def check_for_tuple_in_list (l, t, wildcard='*'):
             return False
     return found
 
+
 import unittest
+
 
 class TestNLT(unittest.TestCase):
     def test_check_for_tuple_at_index(self):
-        l  = [1,2,3,4,5,6,7,8,9]
-        t1 = (1,2,3)
-        t2 = (4,5,6)
+        l = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        t1 = (1, 2, 3)
+        t2 = (4, 5, 6)
         t3 = (3,)
-        t4 = (4,'*')
+        t4 = (4, "*")
         t5 = (9,)
 
-        self.assertTrue (check_for_tuple_at_index(l,t1, start=0))
-        self.assertFalse (check_for_tuple_at_index(l,t1, start=1))
-        self.assertTrue (check_for_tuple_at_index(l,t2, start=3))
-        self.assertFalse (check_for_tuple_at_index(l,t2, start=8))
-        self.assertTrue (check_for_tuple_at_index(l,t3, start=2))
-        self.assertFalse (check_for_tuple_at_index(l,t3, start=8))
-        self.assertTrue (check_for_tuple_at_index(l,t4, start=3))
-        self.assertTrue (check_for_tuple_at_index(l,t5, start=8))
-
+        self.assertTrue(check_for_tuple_at_index(l, t1, start=0))
+        self.assertFalse(check_for_tuple_at_index(l, t1, start=1))
+        self.assertTrue(check_for_tuple_at_index(l, t2, start=3))
+        self.assertFalse(check_for_tuple_at_index(l, t2, start=8))
+        self.assertTrue(check_for_tuple_at_index(l, t3, start=2))
+        self.assertFalse(check_for_tuple_at_index(l, t3, start=8))
+        self.assertTrue(check_for_tuple_at_index(l, t4, start=3))
+        self.assertTrue(check_for_tuple_at_index(l, t5, start=8))
 
     def test_check_for_tuple_in_list(self):
-        l  = [1,2,3,4,5,6,7,8,9]
-        t1 = (1,2,3)
-        t2 = (1,2,4)
-        t3 = (8,9,10)
-        t4 = (7,8,9)
-        t5 = (1,2,3,4,5,6,7,8,9,0)
+        l = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        t1 = (1, 2, 3)
+        t2 = (1, 2, 4)
+        t3 = (8, 9, 10)
+        t4 = (7, 8, 9)
+        t5 = (1, 2, 3, 4, 5, 6, 7, 8, 9, 0)
 
-        t6 = (1,'*',3)
-        t7 = (1,'*',4)
-        t8 = (1,'*',9)
-        t9 = (6,'*',9)
-        t10= (6,'*',10)
-        t11= (6,'*',7)
-        t12 = (1,2)
+        t6 = (1, "*", 3)
+        t7 = (1, "*", 4)
+        t8 = (1, "*", 9)
+        t9 = (6, "*", 9)
+        t10 = (6, "*", 10)
+        t11 = (6, "*", 7)
+        t12 = (1, 2)
 
-        self.assertTrue (True  == check_for_tuple_in_list(l,t1))
-        self.assertTrue (False == check_for_tuple_in_list(l,t2))
-        self.assertTrue (False == check_for_tuple_in_list(l,t3))
-        self.assertTrue (True  == check_for_tuple_in_list(l,t4))
-        self.assertTrue (False == check_for_tuple_in_list(l,t5))
-        self.assertTrue (True  == check_for_tuple_in_list(l,t6))
-        self.assertTrue (True  == check_for_tuple_in_list(l,t7))
-        self.assertTrue (True  == check_for_tuple_in_list(l,t8))
-        self.assertTrue (True  == check_for_tuple_in_list(l,t9))
-        self.assertTrue (False == check_for_tuple_in_list(l,t10))
-        self.assertTrue (True  == check_for_tuple_in_list(l,t11))
-        self.assertTrue (True  == check_for_tuple_in_list(l,t12))
+        self.assertTrue(True == check_for_tuple_in_list(l, t1))
+        self.assertTrue(False == check_for_tuple_in_list(l, t2))
+        self.assertTrue(False == check_for_tuple_in_list(l, t3))
+        self.assertTrue(True == check_for_tuple_in_list(l, t4))
+        self.assertTrue(False == check_for_tuple_in_list(l, t5))
+        self.assertTrue(True == check_for_tuple_in_list(l, t6))
+        self.assertTrue(True == check_for_tuple_in_list(l, t7))
+        self.assertTrue(True == check_for_tuple_in_list(l, t8))
+        self.assertTrue(True == check_for_tuple_in_list(l, t9))
+        self.assertTrue(False == check_for_tuple_in_list(l, t10))
+        self.assertTrue(True == check_for_tuple_in_list(l, t11))
+        self.assertTrue(True == check_for_tuple_in_list(l, t12))
 
-        t12 = 'derive'
-        l = ['have', 'both', 'the', 'name', 'the', 'definition', 'answer', 'to', 'the', 'name', 'in', 'common']
-        self.assertTrue (False  == check_for_tuple_in_list(l,t12))
+        t12 = "derive"
+        l = [
+            "have",
+            "both",
+            "the",
+            "name",
+            "the",
+            "definition",
+            "answer",
+            "to",
+            "the",
+            "name",
+            "in",
+            "common",
+        ]
+        self.assertTrue(False == check_for_tuple_in_list(l, t12))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

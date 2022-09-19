@@ -10,7 +10,7 @@ import numpy as np
 
 
 @TokenEmbedder.register("nym_embedder")
-class NymEmbedder (TokenEmbedder):
+class NymEmbedder(TokenEmbedder):
     """
     Represents a sequence of tokens as a relation based embeddings.
 
@@ -26,14 +26,17 @@ class NymEmbedder (TokenEmbedder):
     ignore_oov : ``bool``, optional (default = ``False``)
         If true, we ignore the OOV token.
     """
-    def __init__(self,
-                 vocab: Vocabulary,
-                 projection_dim: int = 10,
-                 model_path:str=""
-                 , ignore_oov=True):
+
+    def __init__(
+        self,
+        vocab: Vocabulary,
+        projection_dim: int = 10,
+        model_path: str = "",
+        ignore_oov=True,
+    ):
         super(NymEmbedder, self).__init__()
 
-        with timeit_context('initializing knowledge embedder'):
+        with timeit_context("initializing knowledge embedder"):
             self.vocab = vocab
 
             self._ignore_oov = ignore_oov
@@ -42,7 +45,7 @@ class NymEmbedder (TokenEmbedder):
             self.output_dim = projection_dim
             self.model = restore_model(model_name_path=model_path)
 
-            self.oov_pad_vec = np.full(self.get_output_dim(), 1/self.get_output_dim())
+            self.oov_pad_vec = np.full(self.get_output_dim(), 1 / self.get_output_dim())
 
     @overrides
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:
@@ -58,14 +61,19 @@ class NymEmbedder (TokenEmbedder):
         ``(batch_size, vocab_size)``
         """
         input_array = inputs.cpu().detach().numpy().astype(int)
-        return torch.FloatTensor([[self.model.get_embeddings(str(tok))
-                                   if tok != self._oov_idx
-                                   else self.oov_pad_vec
-                                   for tok in sample]
-                                  for sample in input_array])
+        return torch.FloatTensor(
+            [
+                [
+                    self.model.get_embeddings(str(tok))
+                    if tok != self._oov_idx
+                    else self.oov_pad_vec
+                    for tok in sample
+                ]
+                for sample in input_array
+            ]
+        )
 
     @overrides
     def get_output_dim(self) -> int:
-        print (self.model.k * 2)
+        print(self.model.k * 2)
         return self.model.k
-

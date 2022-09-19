@@ -6,7 +6,7 @@ def flatten(t):
 
 
 def split_punctuation(s, punctuations):
-    """  simple tokenizer...
+    """simple tokenizer...
 
     >>> split_punctuation("sentence, bla... end. go further. and here! also at the end?", "!?.:,;")
     ['sentence', ',', 'bla', '...', 'end', '.', 'go', 'further', '.', 'and', 'here', '!', 'also', 'at', 'the', 'end', '?']
@@ -19,11 +19,11 @@ def split_punctuation(s, punctuations):
 
         things = []
         for word in re.split(rf"(?<=[a-zA-Z][a-zA-Z])(?=\{separator})(?:/d)*", s):
-            things.append(
-                split_punctuation(word, rest))
+            things.append(split_punctuation(word, rest))
         return flatten(things)
 
 
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()

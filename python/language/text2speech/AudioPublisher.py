@@ -15,15 +15,24 @@ from language.text2speech.Txt2Mp3 import get_audio_path
 
 @converter("audio", "rest")
 class AudioPublisher(RestPublisher, react):
-    def __init__(self,
-                 *args,
-                 **kwargs):
-        super().__init__(*args, **kwargs, resource=Resource(
-            title="audiobook",
-            type="download",
-            path="audiobook",
-            route="audiobook",
-            access={"fetch": True, "read": True, "upload": True, "correct": True, "delete": True}))
+    def __init__(self, *args, **kwargs):
+        super().__init__(
+            *args,
+            **kwargs,
+            resource=Resource(
+                title="audiobook",
+                type="download",
+                path="audiobook",
+                route="audiobook",
+                access={
+                    "fetch": True,
+                    "read": True,
+                    "upload": True,
+                    "correct": True,
+                    "delete": True,
+                },
+            ),
+        )
 
     @configurable_cache(
         filename=config.cache + os.path.basename(__file__),
@@ -36,11 +45,11 @@ class AudioPublisher(RestPublisher, react):
         audio_path = get_audio_path(id)
         json.dumps(
             {"audio_path": audio_path.replace(config.hidden_folder, "")},
-            ensure_ascii=False
+            ensure_ascii=False,
         )
         resp.text = json.dumps(
             {"audio_path": audio_path.replace(config.hidden_folder, "")},
-            ensure_ascii=False
+            ensure_ascii=False,
         )
         if os.path.exists(audio_path):
             resp.status = falcon.HTTP_OK
@@ -50,9 +59,10 @@ class AudioPublisher(RestPublisher, react):
     def on_post(self, req, resp, id=None):
         id = req.media
         pipeline = self.ant(
-            "feature", "audio",
+            "feature",
+            "audio",
             from_function_only=True,
-            layout_model_path=config.layout_model_path
+            layout_model_path=config.layout_model_path,
         )
         id, meta = list(pipeline(metaize([id])))[0]
         compute_path = f"{id}.audiobook"
@@ -60,8 +70,7 @@ class AudioPublisher(RestPublisher, react):
         if os.path.exists(meta["audio_path"]) and not os.path.exists(compute_path):
             resp.status = falcon.HTTP_OK
             resp.text = json.dumps(
-                meta["audio_path"].replace(config.hidden_folder, ""),
-                ensure_ascii=False
+                meta["audio_path"].replace(config.hidden_folder, ""), ensure_ascii=False
             )
         else:
             if os.path.exists(compute_path):

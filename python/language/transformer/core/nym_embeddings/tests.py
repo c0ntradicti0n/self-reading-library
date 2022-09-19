@@ -33,4 +33,5 @@ with timing("lemmatize list 2"):
     synseted_texts = [memoizedstringsynsettisation.lazy_lemmatize(t) for t in texts]
 
 from guppy3 import hpy
+
 print(hpy.heap())

@@ -5,7 +5,7 @@
 from fastDamerauLevenshtein import damerauLevenshtein
 from texttable import Texttable
 
-damerauLevenshtein('car', 'cars', similarity=True)  # expected result: 0.75
+damerauLevenshtein("car", "cars", similarity=True)  # expected result: 0.75
 
 
 # zeros() was origianlly from NumPy.
@@ -23,26 +23,24 @@ gap_penalty = -1
 
 
 def match_score(alpha, beta):
-    sim = damerauLevenshtein(alpha, beta, similarity=True,
-                             replaceWeight=1
-                             )
-    return (sim - 0.5)
+    sim = damerauLevenshtein(alpha, beta, similarity=True, replaceWeight=1)
+    return sim - 0.5
 
 
 def none_window(seq, i1):
     window = []
     for i in range(i1, 0, -1):
-        if seq[i] == '-':
+        if seq[i] == "-":
             window.append(i)
         else:
             window.append(i)
-            break;
+            break
     for i in range(i1, len(seq)):
-        if seq[i] == '-':
+        if seq[i] == "-":
             window.append(i)
         else:
             window.append(i)
-            break;
+            break
 
     return list(sorted(set(window)))
 
@@ -50,27 +48,43 @@ def none_window(seq, i1):
 def rework_windows(align1, align2, ialign1, ialign2):
     for i in range(0, len(align1)):
 
-        if align1[i] == '-':
+        if align1[i] == "-":
             window = none_window(align1, i)
             i_start = window[0]
             i_end = window[-1]
-            word_right = "".join(align2[j] for j in window[1:]).replace('-', '').replace(':', '')
-            word_left = "".join(align2[j] for j in window[:-1]).replace('-', '').replace(':', '')
+            word_right = (
+                "".join(align2[j] for j in window[1:]).replace("-", "").replace(":", "")
+            )
+            word_left = (
+                "".join(align2[j] for j in window[:-1])
+                .replace("-", "")
+                .replace(":", "")
+            )
 
-            if match_score(word_right, align1[i_end]) > match_score(word_left, align2[i_start]):
+            if match_score(word_right, align1[i_end]) > match_score(
+                word_left, align2[i_start]
+            ):
                 i_real = i_end
             else:
                 i_real = i_start
             ialign1[i] = ialign1[i_real]
 
-        if align2[i] == '-':
+        if align2[i] == "-":
             window = none_window(align2, i)
             i_start = window[0]
             i_end = window[-1]
-            word_right = "".join(align1[j] for j in window[1:]).replace('-', '').replace(':', '')
-            word_left = "".join(align1[j] for j in window[:-1]).replace('-', '').replace(':', '')
+            word_right = (
+                "".join(align1[j] for j in window[1:]).replace("-", "").replace(":", "")
+            )
+            word_left = (
+                "".join(align1[j] for j in window[:-1])
+                .replace("-", "")
+                .replace(":", "")
+            )
 
-            if match_score(word_right, align2[i_end]) > match_score(word_left, align2[i_start]):
+            if match_score(word_right, align2[i_end]) > match_score(
+                word_left, align2[i_start]
+            ):
                 i_real = i_end
             else:
                 i_real = i_start
@@ -222,14 +236,14 @@ def needle(seq1, seq2):
             j -= 1
         elif score_up < score_left:
             align1.append(seq1[i - 1])
-            align2.append('-')
+            align2.append("-")
 
             ialign1.append(i - 1)
             ialign2.append(None)
 
             i -= 1
         elif score_current < score_up:
-            align1.append('-')
+            align1.append("-")
             align2.append(seq2[j - 1])
 
             ialign1.append(None)
@@ -239,14 +253,14 @@ def needle(seq1, seq2):
         else:
             if score_left <= score_up:
                 align1.append(seq1[i - 1])
-                align2.append('-')
+                align2.append("-")
 
                 ialign1.append(i - 1)
                 ialign2.append(None)
 
                 i -= 1
             else:
-                align1.append('-')
+                align1.append("-")
                 align2.append(seq2[j - 1])
 
                 ialign1.append(None)
@@ -265,7 +279,7 @@ def needle(seq1, seq2):
     # Finish tracing up to the top left cell
     while i > 0:
         align1.append(seq1[i - 1])
-        align2.append('-')
+        align2.append("-")
 
         ialign1.append(i - 1)
         ialign2.append(None)
@@ -292,47 +306,212 @@ def needle(seq1, seq2):
 def alignment_table(alignment, a, b):
     table = Texttable()
     table.set_deco(Texttable.HEADER)
-    table.set_cols_align(["c", "r", "l", "r", "l", 'r', 'l'])
+    table.set_cols_align(["c", "r", "l", "r", "l", "r", "l"])
     table.add_rows(
-        [
-            ['i', 'w1', 'w2', 'i1', "->", 'i2', '->']
-        ] + [
-            [i, t, w, x, a[x], y, b[y]
-             ]
-            for i, (t, w, x, y)
-            in enumerate(alignment)]
+        [["i", "w1", "w2", "i1", "->", "i2", "->"]]
+        + [[i, t, w, x, a[x], y, b[y]] for i, (t, w, x, y) in enumerate(alignment)]
     )
     return table.draw()
 
 
 if __name__ == "__main__":
-    fruits1 = ['Intro', 'duction', 'f', 'rom', ':', '', 'Distinction', ':', '', 'A', 'Social', 'Critique', 'of', 'the',
-               'J', 'udgement', 'of', 'Taste', '', 'by', 'Pierr', 'e', 'Bou', 'rdieu', '198', '4', 'Introduction',
-               'You', 'said', 'i', 't,', 'my', 'go', 'od', 'kn', 'ight', 'There', 'oug', 'ht', 'to', 'b', 'e', 'laws',
-               'to', '', 'protect', 'the', 'b', 'od', 'y', 'of', 'acquir', 'ed', 'know', 'ledg', 'e.', '', '', 'Take',
-               'one', 'of', 'our', 'g', 'ood', 'p', 'upils,', 'for', 'ex', 'ample:', 'mo', 'dest', '', 'and', 'd',
-               'iligent,', 'from', 'hi', 's', 'earl', 'iest', 'gramm', 'ar', 'c', 'lasse', 's', 'he', '\x19s', '',
-               'kept', 'a', 'lit']
-    fruits2 = ['Introduction', 'from', ':', 'Distinction', ':', 'A', 'Social', 'Critique', 'of', 'the', 'Judgement',
-               'of', 'Taste', 'by', 'Pierre', 'B', 'our', 'dieu', '1984', 'Introduction', 'You', 'said', 'it', ',',
-               'my', 'good', 'knight', 'There', 'ought', 'to', 'be', 'laws', 'to', 'protect', 'the', 'body', 'of',
-               'acquired', 'knowledge', '.', 'Take', 'one', 'of', 'our', 'good', 'pupils', ',', 'for', 'example', ':',
-               'modest', 'and', 'diligent', ',', 'from', 'his', 'earliest', 'grammar', 'classes', 'he', 's', 'kept',
-               'a', 'lit']
+    fruits1 = [
+        "Intro",
+        "duction",
+        "f",
+        "rom",
+        ":",
+        "",
+        "Distinction",
+        ":",
+        "",
+        "A",
+        "Social",
+        "Critique",
+        "of",
+        "the",
+        "J",
+        "udgement",
+        "of",
+        "Taste",
+        "",
+        "by",
+        "Pierr",
+        "e",
+        "Bou",
+        "rdieu",
+        "198",
+        "4",
+        "Introduction",
+        "You",
+        "said",
+        "i",
+        "t,",
+        "my",
+        "go",
+        "od",
+        "kn",
+        "ight",
+        "There",
+        "oug",
+        "ht",
+        "to",
+        "b",
+        "e",
+        "laws",
+        "to",
+        "",
+        "protect",
+        "the",
+        "b",
+        "od",
+        "y",
+        "of",
+        "acquir",
+        "ed",
+        "know",
+        "ledg",
+        "e.",
+        "",
+        "",
+        "Take",
+        "one",
+        "of",
+        "our",
+        "g",
+        "ood",
+        "p",
+        "upils,",
+        "for",
+        "ex",
+        "ample:",
+        "mo",
+        "dest",
+        "",
+        "and",
+        "d",
+        "iligent,",
+        "from",
+        "hi",
+        "s",
+        "earl",
+        "iest",
+        "gramm",
+        "ar",
+        "c",
+        "lasse",
+        "s",
+        "he",
+        "\x19s",
+        "",
+        "kept",
+        "a",
+        "lit",
+    ]
+    fruits2 = [
+        "Introduction",
+        "from",
+        ":",
+        "Distinction",
+        ":",
+        "A",
+        "Social",
+        "Critique",
+        "of",
+        "the",
+        "Judgement",
+        "of",
+        "Taste",
+        "by",
+        "Pierre",
+        "B",
+        "our",
+        "dieu",
+        "1984",
+        "Introduction",
+        "You",
+        "said",
+        "it",
+        ",",
+        "my",
+        "good",
+        "knight",
+        "There",
+        "ought",
+        "to",
+        "be",
+        "laws",
+        "to",
+        "protect",
+        "the",
+        "body",
+        "of",
+        "acquired",
+        "knowledge",
+        ".",
+        "Take",
+        "one",
+        "of",
+        "our",
+        "good",
+        "pupils",
+        ",",
+        "for",
+        "example",
+        ":",
+        "modest",
+        "and",
+        "diligent",
+        ",",
+        "from",
+        "his",
+        "earliest",
+        "grammar",
+        "classes",
+        "he",
+        "s",
+        "kept",
+        "a",
+        "lit",
+    ]
     alignment = list(zip(*needle(fruits1, fruits2)))
-    print(a    print(alignment_table(alignment, fruits1, fruits2))
-lignment_table(alignment, fruits1, fruits2))
+    print(alignment_table(alignment, fruits1, fruits2))
     print(f"len 1 {len(fruits1)}  len 2 {len(fruits2)}")
 
-    fruits1 = ["con", "sump", "t", "ion", "orange", "pear", "apple", "x,y,z", "pear", "orange", "consumption"]
-    fruits2 = ["consumption", "pear", "apple", "x,", "y,", "z", "con", "sump", "t", "ion"]
+    fruits1 = [
+        "con",
+        "sump",
+        "t",
+        "ion",
+        "orange",
+        "pear",
+        "apple",
+        "x,y,z",
+        "pear",
+        "orange",
+        "consumption",
+    ]
+    fruits2 = [
+        "consumption",
+        "pear",
+        "apple",
+        "x,",
+        "y,",
+        "z",
+        "con",
+        "sump",
+        "t",
+        "ion",
+    ]
     alignment = list(zip(*needle(fruits1, fruits2)))
     print()
     table = Texttable()
     table.set_deco(Texttable.HEADER)
     table.set_cols_align(["c", "l", "r", "l", "r"])
-    table.add_rows([['i', 'w1', 'w2', 'i1', 'i2']] + [[i, t, w, x, y] for i, (t, w, x, y)
-                                                      in enumerate(alignment)])
+    table.add_rows(
+        [["i", "w1", "w2", "i1", "i2"]]
+        + [[i, t, w, x, y] for i, (t, w, x, y) in enumerate(alignment)]
+    )
     print(table.draw())
     print(f"len 1 {len(fruits1)}  len 2 {len(fruits2)}")
 

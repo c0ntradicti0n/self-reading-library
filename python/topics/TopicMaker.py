@@ -19,9 +19,14 @@ class TopicMaker:
     weight_file = "https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x1024_128_2048cnn_1xhighway/elmo_2x1024_128_2048cnn_1xhighway_weights.hdf5"
 
     def __init__(self):
-        self.alphabet = [f"{chr(value)}" for value in range(ord('a'), ord('a') + 26)]
+        self.alphabet = [f"{chr(value)}" for value in range(ord("a"), ord("a") + 26)]
         self.numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
-        self.stop_words = ['abstract', 'paper', *self.alphabet, *[str(i) for i in range(1000)]]
+        self.stop_words = [
+            "abstract",
+            "paper",
+            *self.alphabet,
+            *[str(i) for i in range(1000)],
+        ]
 
     def test(self):
         self.nlp = spacy.load("en_core_web_trf")
@@ -30,7 +35,9 @@ class TopicMaker:
 
         # with open("/home/stefan/PycharmProjects/LayoutEagle/test/corpus/faust.txt") as f:
         #    text = " ".join([l for l in f.readlines() ])
-        with open("/home/stefan/PycharmProjects/LayoutEagle/python/test/corpus/faust.txt") as f:
+        with open(
+            "/home/stefan/PycharmProjects/LayoutEagle/python/test/corpus/faust.txt"
+        ) as f:
             text = " ".join([l for l in f.readlines()])[5000:15000]
 
         doc = self.nlp(text)
@@ -43,7 +50,7 @@ class TopicMaker:
             try:
                 for token in document:
                     if token.is_space and token.text.count("\n") > 1:
-                        yield document[start:token.i][:length]
+                        yield document[start : token.i][:length]
                         start = token.i
                 yield document[start:][:length]
             except IndexError:
@@ -70,7 +77,7 @@ class TopicMaker:
             logging.info(f"Text no. {i}")
 
             try:
-                embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH]).vector
+                embedding = self.nlp(text[: config.TOPIC_TEXT_LENGTH]).vector
                 # embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH])._.trf_data.tensors[1]                #embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH])._.trf_data.tensors[1]
                 shape = embedding.shape
             except Exception as e:
@@ -83,7 +90,7 @@ class TopicMaker:
         n_components = 3
         logging.info(f"Reducing from {embeddings.shape} to {n_components} dimensions")
 
-        tsne = TSNE(n_components, method='exact')
+        tsne = TSNE(n_components, method="exact")
         tsne_result = tsne.fit_transform(embeddings)
         logging.info(f"Reduced embeddings to {tsne_result.shape=}")
 
@@ -94,11 +101,15 @@ class TopicMaker:
 
         return topics, meta
 
-    def topicize_recursively(self, embeddings, meta, texts, split_size=10, max_level=5, level=0):
+    def topicize_recursively(
+        self, embeddings, meta, texts, split_size=10, max_level=5, level=0
+    ):
         logging.info(f"Making Topics {level + 1} of maximally {max_level + 1}")
         labels = self.cluster(embeddings=embeddings)
         topic_ids_2_doc_ids = self.labels2docs(texts=texts, labels=labels)
-        keywords = self.make_keywords(topic_2_docids=topic_ids_2_doc_ids, texts=texts, lookup=meta)
+        keywords = self.make_keywords(
+            topic_2_docids=topic_ids_2_doc_ids, texts=texts, lookup=meta
+        )
         topics_titles = self.make_titles(keywords)
 
         topics = {}
@@ -116,7 +127,8 @@ class TopicMaker:
                         group_texts,
                         split_size,
                         max_level=max_level,
-                        level=level + 1)
+                        level=level + 1,
+                    )
                     topics[topics_titles[i_group_label]] = sub_topics
                 else:
                     topics[topics_titles[i_group_label]] = group_meta
@@ -136,7 +148,7 @@ class TopicMaker:
             covariance_type="tied",
             reg_covar=1e-6,
             n_init=20,
-            max_iter=50
+            max_iter=50,
         )
 
         g.fit(X)
@@ -158,12 +170,21 @@ class TopicMaker:
 
         titled_clustered_documents = {}
         for topic_id, text_ids in topic_2_docids.items():
-            constructed_doc = " ".join([w for t in [texts[id] for id in text_ids] for w in t.split() if
-                                        w.lower() not in self.stop_words]).replace(".", "").replace(",", "")
+            constructed_doc = (
+                " ".join(
+                    [
+                        w
+                        for t in [texts[id] for id in text_ids]
+                        for w in t.split()
+                        if w.lower() not in self.stop_words
+                    ]
+                )
+                .replace(".", "")
+                .replace(",", "")
+            )
 
             tr4w = TextRank4Keyword()
-            tr4w.analyze(constructed_doc, window_size=4, lower=True,
-                         stopwords=[])
+            tr4w.analyze(constructed_doc, window_size=4, lower=True, stopwords=[])
             keywords = tr4w.get_keywords(5)
 
             keywords = [k for k in keywords if len(k[0]) > 3]

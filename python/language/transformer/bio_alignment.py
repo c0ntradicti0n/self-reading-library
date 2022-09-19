@@ -1,10 +1,12 @@
 import numpy as np
 
+
 def compare(m, n, match, n_match):
     if m == n:
         return match
     else:
         return n_match
+
 
 def Smith_Waterman(seq1, seq2, mS, mmS, w1):
     path = {}
@@ -13,7 +15,7 @@ def Smith_Waterman(seq1, seq2, mS, mmS, w1):
     for i in range(0, len(seq1) + 1):
         for j in range(0, len(seq2) + 1):
             if i == 0 or j == 0:
-                path['[' + str(i) + ', ' + str(j) + ']'] = []
+                path["[" + str(i) + ", " + str(j) + "]"] = []
             else:
                 if seq1[i - 1] == seq2[j - 1]:
                     s = mS
@@ -23,13 +25,19 @@ def Smith_Waterman(seq1, seq2, mS, mmS, w1):
                 P = S[i - 1, j] - w1
                 Q = S[i, j - 1] - w1
                 S[i, j] = max(L, P, Q, 0)
-                path['[' + str(i) + ', ' + str(j) + ']'] = []
+                path["[" + str(i) + ", " + str(j) + "]"] = []
                 if L == S[i, j]:
-                    path['[' + str(i) + ', ' + str(j) + ']'].append('[' + str(i - 1) + ', ' + str(j - 1) + ']')
+                    path["[" + str(i) + ", " + str(j) + "]"].append(
+                        "[" + str(i - 1) + ", " + str(j - 1) + "]"
+                    )
                 if P == S[i, j]:
-                    path['[' + str(i) + ', ' + str(j) + ']'].append('[' + str(i - 1) + ', ' + str(j) + ']')
+                    path["[" + str(i) + ", " + str(j) + "]"].append(
+                        "[" + str(i - 1) + ", " + str(j) + "]"
+                    )
                 if Q == S[i, j]:
-                    path['[' + str(i) + ', ' + str(j) + ']'].append('[' + str(i) + ', ' + str(j - 1) + ']')
+                    path["[" + str(i) + ", " + str(j) + "]"].append(
+                        "[" + str(i) + ", " + str(j - 1) + "]"
+                    )
 
     end = np.argwhere(S == S.max())
     for i in end:
@@ -63,21 +71,28 @@ def Smith_Waterman_aff(seq1, seq2, match, n_match, u, v):
         for i in range(0, len(seq1)):
             for j in range(0, len(seq2)):
                 if i == 0 or j == 0:
-                    path['[' + str(i) + ', ' + str(j) + ']'] = []
+                    path["[" + str(i) + ", " + str(j) + "]"] = []
                 else:
-                    path['[' + str(i) + ', ' + str(j) + ']'] = []
-                    if L[i,j] == S[i, j]:
-                        path['[' + str(i) + ', ' + str(j) + ']'].append('[' + str(i - 1) + ', ' + str(j - 1) + ']')
-                    if P[i,j] == S[i, j]:
-                        path['[' + str(i) + ', ' + str(j) + ']'].append('[' + str(i - 1) + ', ' + str(j) + ']')
-                    if Q[i,j] == S[i, j]:
-                        path['[' + str(i) + ', ' + str(j) + ']'].append('[' + str(i) + ', ' + str(j - 1) + ']')
+                    path["[" + str(i) + ", " + str(j) + "]"] = []
+                    if L[i, j] == S[i, j]:
+                        path["[" + str(i) + ", " + str(j) + "]"].append(
+                            "[" + str(i - 1) + ", " + str(j - 1) + "]"
+                        )
+                    if P[i, j] == S[i, j]:
+                        path["[" + str(i) + ", " + str(j) + "]"].append(
+                            "[" + str(i - 1) + ", " + str(j) + "]"
+                        )
+                    if Q[i, j] == S[i, j]:
+                        path["[" + str(i) + ", " + str(j) + "]"].append(
+                            "[" + str(i) + ", " + str(j - 1) + "]"
+                        )
     end = np.argwhere(S == S.max())
     for i in end:
         key = str(list(i))
         value = path[key]
         result = [key]
         traceback(path, S, value, result, seq1, seq2)
+
 
 def traceback(path, S, value, result, seq1, seq2):
     i = 0
@@ -86,30 +101,30 @@ def traceback(path, S, value, result, seq1, seq2):
         key = value[0]
         result.append(key)
         value = path[key]
-        i = int((key.split(',')[0]).strip('['))
-        j = int((key.split(',')[1]).strip(']'))
+        i = int((key.split(",")[0]).strip("["))
+        j = int((key.split(",")[1]).strip("]"))
     if S[i, j] == 0:
         x = 0
         y = 0
-        s1 = ''
-        s2 = ''
-        md = ''
-        for n in range(len(result)-2, -1, -1):
+        s1 = ""
+        s2 = ""
+        md = ""
+        for n in range(len(result) - 2, -1, -1):
             point = result[n]
-            i = int((point.split(',')[0]).strip('['))
-            j = int((point.split(',')[1]).strip(']'))
+            i = int((point.split(",")[0]).strip("["))
+            j = int((point.split(",")[1]).strip("]"))
             if i == x:
-                s1 += '-'
-                s2 += seq2[j-1]
-                md += ' '
+                s1 += "-"
+                s2 += seq2[j - 1]
+                md += " "
             elif j == y:
-                s1 += seq1[i-1]
-                s2 += '-'
-                md += ' '
+                s1 += seq1[i - 1]
+                s2 += "-"
+                md += " "
             else:
-                s1 += seq1[i-1]
-                s2 += seq2[j-1]
-                md += '|'
+                s1 += seq1[i - 1]
+                s2 += seq2[j - 1]
+                md += "|"
             x = i
             y = j
 
@@ -117,11 +132,10 @@ def traceback(path, S, value, result, seq1, seq2):
         traceback(path, S, value, result, seq1, seq2)
 
 
-
 if __name__ == "__main__":
     for i in range(500):
 
-        fruits1 = ["orange", "jpear", "aphhple", "pear", "orange"]*i
-        fruits2 = ["pearj", "applhe", "okrang"]*i
-        print(Smith_Waterman(fruits1, fruits2,1, -1/3, 1))
-        print (i)
+        fruits1 = ["orange", "jpear", "aphhple", "pear", "orange"] * i
+        fruits2 = ["pearj", "applhe", "okrang"] * i
+        print(Smith_Waterman(fruits1, fruits2, 1, -1 / 3, 1))
+        print(i)

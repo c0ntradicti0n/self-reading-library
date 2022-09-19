@@ -4,11 +4,9 @@ from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 
 
-@converter( "annotation.collection",  "annotation.corrected")
+@converter("annotation.collection", "annotation.corrected")
 class Captcha(PathSpec):
-    def __init__(self,
-                 *args,
-                 **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def __call__(self, annotation_metas, *args, **kwargs):

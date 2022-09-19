@@ -13,12 +13,12 @@ from language.transformer.core import bio_annotation
 nlp = spacy.load("en_core_sci_sm")
 
 
-
 def next_natural_number():
     i = 0
     while True:
         yield i
         i += 1
+
 
 def seq_split(lst, cond):
     sublst = [lst[0]]
@@ -33,27 +33,28 @@ def seq_split(lst, cond):
 
 
 def approx_unique(urn=[], choices=[], variance=0.005):
-    d = round(max(flatten([urn]+choices)) * variance)
+    d = round(max(flatten([urn] + choices)) * variance)
     for i, v in enumerate(urn):
-        if any(vd in flatten(choices) for vd in range(v-d, v+d)):
+        if any(vd in flatten(choices) for vd in range(v - d, v + d)):
             yield i, v
 
 
 class TextSplitter:
-    """ Splits texts based on the states of made annotations.
+    """Splits texts based on the states of made annotations.
 
-        Longer must be split into smaller annotable pieces. 
+    Longer must be split into smaller annotable pieces.
 
-        It handles two models. It steps through the text and makes predictions, where it takes the first
-        annotation. The corpus for this model must be trained to take the first possible annotation set. 
-        If something ist found, then the text of the intermediate parts of the annotation is fed into
-        the second model. The second model is to be trained to annotate the whole sample and this is done
-        until nothing reasonable is found any more.
-         
+    It handles two models. It steps through the text and makes predictions, where it takes the first
+    annotation. The corpus for this model must be trained to take the first possible annotation set.
+    If something ist found, then the text of the intermediate parts of the annotation is fed into
+    the second model. The second model is to be trained to annotate the whole sample and this is done
+    until nothing reasonable is found any more.
+
     """
-    def __init__(self, model_first, model_over, multi_model=False,  max_len = 100):
+
+    def __init__(self, model_first, model_over, multi_model=False, max_len=100):
         self.model_first = model_first
-        #self.model_second = model_over
+        # self.model_second = model_over
         self.max_len = max_len
         self.annotation_scheme = bio_annotation
         self.multi_model = multi_model
@@ -61,28 +62,32 @@ class TextSplitter:
         next(self.id_source)
 
     def make_proposals(self, tokens):
-        sent_cuts = [i+1 for i, token in  enumerate(tokens)
-                     if token=="." or token=="?" or token=="!"]
+        sent_cuts = [
+            i + 1
+            for i, token in enumerate(tokens)
+            if token == "." or token == "?" or token == "!"
+        ]
         start_i, end_i = self.next_proposal(tokens, sent_cuts, start_i=0)
 
         done = []
         while start_i != end_i:
-            span = sent_cuts[start_i],sent_cuts[end_i]
+            span = sent_cuts[start_i], sent_cuts[end_i]
             if span in done:
                 logging.info("repeating work, why?")
-                start_i =  end_i
+                start_i = end_i
                 end_i = start_i + 5
 
             result = self.get_sample(
-                    start=span[0],
-                    end=span[1],
-                    tokens=tokens[span[0]:span[1]],
-                    sentence_cuts=sent_cuts)
+                start=span[0],
+                end=span[1],
+                tokens=tokens[span[0] : span[1]],
+                sentence_cuts=sent_cuts,
+            )
             done.append(span)
 
             last_start_i, last_end_i = start_i, end_i
             yield result
-            last_mark = sent_cuts[start_i] + result['mark_end']
+            last_mark = sent_cuts[start_i] + result["mark_end"]
             next_position = min(sent_cuts, key=lambda x: abs(last_mark - x))
             new_start_i = sent_cuts.index(next_position)
             start_i = start_i if new_start_i == start_i else new_start_i
@@ -90,8 +95,8 @@ class TextSplitter:
             if start_i < last_end_i:
                 logging.info("starting at tokens before")
 
-    def next_proposal (self, whole_doc, whole_sent_starts, start_i):
-        """ Effectively this functions computes the new end of the span, that fits in the window of text to be analysed
+    def next_proposal(self, whole_doc, whole_sent_starts, start_i):
+        """Effectively this functions computes the new end of the span, that fits in the window of text to be analysed
 
         :param whole_doc:
         :param whole_sent_starts:
@@ -99,21 +104,27 @@ class TextSplitter:
         :return:
         """
         next_i = start_i
-        while next_i < len(whole_sent_starts)-1 and len(whole_doc[whole_sent_starts[start_i]:whole_sent_starts[next_i]])< self.max_len:
+        while (
+            next_i < len(whole_sent_starts) - 1
+            and len(whole_doc[whole_sent_starts[start_i] : whole_sent_starts[next_i]])
+            < self.max_len
+        ):
             next_i += 1
         return start_i, next_i
 
     def make_windwos(self, doc, text, cuts):
         numba, cut_i = zip(*cuts)
-        groups       = list(zip(cuts, seq_split(doc, lambda t: t.i not in cut_i)))
+        groups = list(zip(cuts, seq_split(doc, lambda t: t.i not in cut_i)))
         return groups
 
-    def get_predicted_annotations (self, windows):
+    def get_predicted_annotations(self, windows):
         reasonable_samples = (self.get_sample_if_reasonable(r) for r in windows)
         return [r for r in reasonable_samples if r]
 
-    def get_sample(self, start, end, tokens, sentence_cuts, depth = 0, max_depth = 1, which='first'):
-        """ make the prediction based on some parts of the text, optionally regarding also distinctions, that appear
+    def get_sample(
+        self, start, end, tokens, sentence_cuts, depth=0, max_depth=1, which="first"
+    ):
+        """make the prediction based on some parts of the text, optionally regarding also distinctions, that appear
         within the sides or arms of a found distinction
 
         :param start:
@@ -125,13 +136,13 @@ class TextSplitter:
         :return:
         """
         indices = list(range(start, end))
-        assert len (indices) == len(tokens)
-        assert len(tokens) == end-start
+        assert len(indices) == len(tokens)
+        assert len(tokens) == end - start
         if not tokens:
             logging.error(ValueError("no text in given span").__repr__())
-            return {'difference':False}
+            return {"difference": False}
 
-        if which == 'first':
+        if which == "first":
             model = self.model_first
         else:
             model = self.model_second
@@ -140,30 +151,32 @@ class TextSplitter:
 
         tokens = [x[0] for x in annotation]
         tags = [x[1] for x in annotation]
-        relevant_tags =  [x != "O" for x in tags]
+        relevant_tags = [x != "O" for x in tags]
         BIO_tokens = [t[0] for t in tags]
 
-        number_of_annotations = BIO_tokens.count('B')
-        number_of_subjects    = BIO_tokens.count('S')
+        number_of_annotations = BIO_tokens.count("B")
+        number_of_subjects = BIO_tokens.count("S")
 
         if True in relevant_tags:
             # global position of span end of annotation
-            mark_end = len(relevant_tags) - relevant_tags[::-1].index(True)  # last tags (look backwards and index first True and thats the position from the end
+            mark_end = len(relevant_tags) - relevant_tags[::-1].index(
+                True
+            )  # last tags (look backwards and index first True and thats the position from the end
         else:
             mark_end = len(tokens)
 
-        privative = number_of_annotations>=2 and number_of_subjects >=2
+        privative = number_of_annotations >= 2 and number_of_subjects >= 2
         return {
-            'annotation': annotation,
-            'indices': indices,
-            'tokens': tokens,
-            'depth': depth,
-            'start': start,
-            'id': next(self.id_source),
-            'mark_end': mark_end,
-            'annotated': any(relevant_tags),
-            'difference': number_of_annotations >=2 ,
-            'privative': privative,
+            "annotation": annotation,
+            "indices": indices,
+            "tokens": tokens,
+            "depth": depth,
+            "start": start,
+            "id": next(self.id_source),
+            "mark_end": mark_end,
+            "annotated": any(relevant_tags),
+            "difference": number_of_annotations >= 2,
+            "privative": privative,
         }
 
     def change_proposals(self, cuts, indices):
@@ -173,8 +186,10 @@ class TextSplitter:
         new_proposals = self.get_predicted_annotations(windows)
         return new_proposals
 
-    def nearest(position:int, positions:List[int], before: bool = False, after: bool = False) -> int:
-        """ Approximating the index, that is next to some value of a specified list, the index can be specified
+    def nearest(
+        position: int, positions: List[int], before: bool = False, after: bool = False
+    ) -> int:
+        """Approximating the index, that is next to some value of a specified list, the index can be specified
         to be before or after this matched element.
 
         At beginning
@@ -243,4 +258,3 @@ class TextSplitter:
                 return pos
         else:
             return pos
-

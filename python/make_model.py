@@ -1,5 +1,6 @@
 import unittest
 
+
 class Mak(unittest.TestCase):
     from core.standard_converter.Scraper.Scraper import Scraper
     from core.LatexReplacer.latex_replacer import LatexReplacer
@@ -26,17 +27,19 @@ class Mak(unittest.TestCase):
 
     def test_make_model(self):
         model_pipe = self.ant(itertools.cycle(["arxiv.org"]), "keras")
-        print (list(model_pipe("https://arxiv.org")))
+        print(list(model_pipe("https://arxiv.org")))
 
     def test_info(self):
         self.ant.info(pipelines_to_highlight=[self.model_pipe, self.prediction_pipe])
 
     def test_prediction(self):
-        pdfs = [".core/tex_data/2adf47ffbf65696180417ca86e91eb90//crypto_github_preprint_v1.pdf",
-                ".core/tex_data/2922d1d785d9620f9cdf8ac9132c59a8//ZV_PRL_rev.pdf",
-                ".core/tex_data/9389d5a6fd9fcc41050f32bcb2a204ef//Manuscript.tex1.labeled.pdf"]
+        pdfs = [
+            ".core/tex_data/2adf47ffbf65696180417ca86e91eb90//crypto_github_preprint_v1.pdf",
+            ".core/tex_data/2922d1d785d9620f9cdf8ac9132c59a8//ZV_PRL_rev.pdf",
+            ".core/tex_data/9389d5a6fd9fcc41050f32bcb2a204ef//Manuscript.tex1.labeled.pdf",
+        ]
         list(self.prediction_pipe([(pdf, {}) for pdf in pdfs]))
 
 
-if __name__=="__init__":
+if __name__ == "__init__":
     unittest()

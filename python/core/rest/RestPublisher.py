@@ -9,16 +9,14 @@ from core.pathant.PathSpec import PathSpec
 
 from flask import jsonify, Blueprint
 
-bp = Blueprint('blueprint', __name__, template_folder='templates')
+bp = Blueprint("blueprint", __name__, template_folder="templates")
 
 
 class RestPublisher(PathSpec, react):
     def __call__(self, pipeline, arg):
         if not isinstance(arg[0], list) and not len(arg[0]) == 2:
             arg = [(a, {}) for a in arg]
-        return list(
-            zip(
-                *list(pipeline(list(arg)))))
+        return list(zip(*list(pipeline(list(arg)))))
 
     # deliver paths
     def on_post(self, *args, **kwargs):  # get one
@@ -61,12 +59,9 @@ class RestPublisher(PathSpec, react):
         self.meta.pop(i)
         self.logger.error("rest call on abstract publisher!")
 
-    def __init__(self,
-                 *args,
-                 port=7770,
-                 url="localhost",
-                 resource: Resource = None,
-                 **kwargs):
+    def __init__(
+        self, *args, port=7770, url="localhost", resource: Resource = None, **kwargs
+    ):
 
         try:
             react.__init__(self, *args, **kwargs)
@@ -81,24 +76,43 @@ class RestPublisher(PathSpec, react):
         self.logger.warning(f"REST-publishing {self.resource.title}")
 
         try:
-            with open("/".join([self.npm_resources, self.resource.Title + "Service.ts"]), "w") as f:
+            with open(
+                "/".join([self.npm_resources, self.resource.Title + "Service.ts"]), "w"
+            ) as f:
                 f.write(
-                    self.server_resource_code.format(**self.resource, port=self.port, url=self.url, **self.resource.access))
+                    self.server_resource_code.format(
+                        **self.resource,
+                        port=self.port,
+                        url=self.url,
+                        **self.resource.access,
+                    )
+                )
         except:
-            logging.error(f"Could not create javascript resource file {self.resource.Title}", exc_info=True)
+            logging.error(
+                f"Could not create javascript resource file {self.resource.Title}",
+                exc_info=True,
+            )
 
         try:
-            with open("/".join([self.npm_pages, self.resource.title + ".tsx"]), "w") as f:
-                f.write(self.page_code.format(**self.resource, port=self.port, url=self.url, **self.resource.access))
+            with open(
+                "/".join([self.npm_pages, self.resource.title + ".tsx"]), "w"
+            ) as f:
+                f.write(
+                    self.page_code.format(
+                        **self.resource,
+                        port=self.port,
+                        url=self.url,
+                        **self.resource.access,
+                    )
+                )
         except:
             logging.error(f"Could not write {self.resource.title}.tsx", exc_info=True)
-
 
     def __iter__(self, incoming):
         if not self.contents:
             self.contents = list(incoming)
 
-    server_resource_code = \
+    server_resource_code = (
         """
 import Resource from './Resource'
 
@@ -117,9 +131,16 @@ export default class ??Title!!Service extends Resource<any> {
     }
 }
 
-""".replace("{", "{{").replace("}", "}}").replace("??", r"{").replace("!!", "}")
+""".replace(
+            "{", "{{"
+        )
+        .replace("}", "}}")
+        .replace("??", r"{")
+        .replace("!!", "}")
+    )
 
-    page_code = """
+    page_code = (
+        """
 import React, {useContext, useEffect, useState} from 'react'
 import MacroComponentSwitch from './../src/components/MacroComponentSwitch'
 
@@ -128,30 +149,42 @@ const ??Title!! = () => {
 }
 
 export default ??Title!!    
-    """ \
-        .replace("{", "{{") \
-        .replace("}", "}}") \
-        .replace("??", r"{") \
+    """.replace(
+            "{", "{{"
+        )
+        .replace("}", "}}")
+        .replace("??", r"{")
         .replace("!!", "}")
+    )
 
     components = {
         "??Title!!Container": """
         ??access[fetch]!!Container extends TemplateContainer {
             
         }
-        """.replace("{", "{{").replace("}", "}}").replace("??", r"{").replace("!!", "}"),
+        """.replace(
+            "{", "{{"
+        )
+        .replace("}", "}}")
+        .replace("??", r"{")
+        .replace("!!", "}"),
         "??resource!!Fetch": """
     ??access[fetch]!!Container extends TemplateContainer {
 
     }
-    """.replace("{", "{{").replace("}", "}}").replace("??", r"{").replace("!!", "}")
+    """.replace(
+            "{", "{{"
+        )
+        .replace("}", "}}")
+        .replace("??", r"{")
+        .replace("!!", "}"),
     }
+
 
 import unittest
 
 
 class TestPaperPublisher(unittest.TestCase):
-
     def setUp(self):
         self.ant = PathAnt()
         self.model_pipe = self.ant(itertools.cycle(["arxiv.org"]), "keras")
@@ -166,5 +199,5 @@ class TestPaperPublisher(unittest.TestCase):
         model_pipe = self.ant(itertools.cycle(["arxiv.org"]), "keras")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

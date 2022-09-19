@@ -8,4 +8,3 @@ import difference_predictor.difference_predictor
 if __name__ == "__main__":
     these_args = sys.argv[1:]
     main(these_args)
-

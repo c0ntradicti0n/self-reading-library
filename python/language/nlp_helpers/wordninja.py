@@ -1,7 +1,7 @@
 import gzip, os, re
 from math import log
 
-__version__ = '2.0.0'
+__version__ = "2.0.0"
 
 
 # I did not author this code, only tweaked it from:
@@ -27,8 +27,9 @@ __version__ = '2.0.0'
 
 _SPLIT_RE = re.compile("[^a-zA-Z0-9']+")
 
+
 class LanguageModel(object):
-    def __init__(self, word_file = None, word_list = None):
+    def __init__(self, word_file=None, word_list=None):
         # Build a cost dictionary, assuming Zipf's law and cost = -math.log(probability).
         if word_file:
             with gzip.open(word_file) as f:
@@ -36,8 +37,12 @@ class LanguageModel(object):
         elif word_list:
             words = word_list
         else:
-            raise NotImplementedError("word_file or word_list must be given for wordninja constructor")
-        self._wordcost = dict((k, log((i + 1) * log(len(words)))) for i, k in enumerate(words))
+            raise NotImplementedError(
+                "word_file or word_list must be given for wordninja constructor"
+            )
+        self._wordcost = dict(
+            (k, log((i + 1) * log(len(words)))) for i, k in enumerate(words)
+        )
         self._maxword = max(len(x) for x in words)
 
     def split(self, s):
@@ -50,8 +55,11 @@ class LanguageModel(object):
         # been built for the i-1 first characters.
         # Returns a pair (match_cost, match_length).
         def best_match(i):
-            candidates = enumerate(reversed(cost[max(0, i - self._maxword):i]))
-            return min((c + self._wordcost.get(s[i - k - 1:i].lower(), 9e999), k + 1) for k, c in candidates)
+            candidates = enumerate(reversed(cost[max(0, i - self._maxword) : i]))
+            return min(
+                (c + self._wordcost.get(s[i - k - 1 : i].lower(), 9e999), k + 1)
+                for k, c in candidates
+            )
 
         # Build the cost array.
         cost = [0]
@@ -67,16 +75,20 @@ class LanguageModel(object):
             assert c == cost[i]
             # Apostrophe and digit handling (added by Genesys)
             newToken = True
-            if not s[i - k:i] == "'":  # ignore a lone apostrophe
+            if not s[i - k : i] == "'":  # ignore a lone apostrophe
                 if len(out) > 0:
                     # re-attach split 's and split digits
-                    if out[-1] == "'s" or (s[i - 1].isdigit() and out[-1][0].isdigit()):  # digit followed by digit
-                        out[-1] = s[i - k:i] + out[-1]  # combine current token with previous token
+                    if out[-1] == "'s" or (
+                        s[i - 1].isdigit() and out[-1][0].isdigit()
+                    ):  # digit followed by digit
+                        out[-1] = (
+                            s[i - k : i] + out[-1]
+                        )  # combine current token with previous token
                         newToken = False
             # (End of Genesys addition)
 
             if newToken:
-                out.append(s[i - k:i])
+                out.append(s[i - k : i])
 
             i -= k
 
@@ -90,8 +102,5 @@ class LanguageModel(object):
 
             things = []
             for word in s.split(separator):
-                things.append(
-                    self.split_punctuation(word, rest))
+                things.append(self.split_punctuation(word, rest))
             return (separator + " ").join(things)
-
-
