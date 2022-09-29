@@ -43,10 +43,11 @@ class Annotator(RestPublisher, react):
 
                 yield from meta["layout_predictions"]
             else:
+
                 try:
                     for _p_m in queue_iter(
                         service_id="annotation",
-                        gen=(p_m for p_m in prediction_meta),
+                        gen=(p_m for p_m in meta["layout_predictions"]),
                         single=self.flags["from_function_only"]
                         if "from_function_only" in self.flags
                         else False,

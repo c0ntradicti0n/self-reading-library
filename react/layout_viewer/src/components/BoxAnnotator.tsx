@@ -1,4 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react'
+require('colors')
+
 import { pairwise, zip } from '../helpers/array'
 import { Button } from '@mui/material'
 import Router from 'next/router'
@@ -71,8 +73,8 @@ const TAG_COLOR = {
 }
 
 const BoxAnnotator = ({ service,     slot
- }: {service: Resource<any>, slot: Slot}) => {
-  service.setSlot( slot)
+ }: {service: Resource, slot: Slot}) => {
+  service.setSlot(slot)
   const [next_key, setNextKey] = useState('')
   const [finished, setFinished] = useState(false)
   const [imgOriginalSize, setImgOriginalSize] = useState(null)
@@ -123,14 +125,17 @@ const BoxAnnotator = ({ service,     slot
   }, [])
 
   let cols
+    console.log("meta".red, context.meta[slot].bbox, labels ?? context.meta[slot].LABEL)
   if (context?.meta[slot]?.bbox)
-    cols = zip([context.meta[slot].bbox, labels ?? context.meta[slot].labels])
+    cols = zip([context.meta[slot].bbox, labels ?? context.meta[slot].LABEL])
   else
-    return <pre>{JSON.stringify(context, null,  2)}</pre>
+    return <pre>Not rendering {slot}, missing bbox{JSON.stringify(context, null,  2)}</pre>
 
   console.log({ imgOriginalSize, imgRenderSize, service })
+    console.table(cols)
   return (
     <div style={{ fontSize: '1em !important', display: 'flex' }}>
+        box
       {finished ? (
         <div>
           <h2>
@@ -166,24 +171,25 @@ const BoxAnnotator = ({ service,     slot
                   position: 'absolute',
                   left:
                     (
-                      (row[0][0] / imgOriginalSize.width) *
-                      imgRenderSize.width
+                      (row[0][0] /1000) *
+                      imgRenderSize.width-
+                      imgRenderSize.height * 0.03
                     ).toString() + 'px',
                   top:
                     (
-                      (row[0][1] / imgOriginalSize.height) *
+                      (row[0][1] / 1000) *
                         imgRenderSize.height -
                       imgRenderSize.height * 0.003
                     ).toString() + 'px',
                   width:
                     (
-                      ((row[0][2] - row[0][0]) / imgOriginalSize.width) *
+                      ((row[0][2] - row[0][0]) / 1000) *
                       imgRenderSize.width *
                       1.02
                     ).toString() + 'px',
                   height:
                     (
-                      ((row[0][3] - row[0][1]) / imgOriginalSize.height) *
+                      ((row[0][3] - row[0][1]) /1000) *
                         imgRenderSize.height +
                       imgRenderSize.height * 0.003
                     ).toString() + 'px',

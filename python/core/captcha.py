@@ -1,4 +1,4 @@
-# add databse queue, that contains samples with scores, based on 2 visitor ratings or corrections
+# add database queue, that contains samples with scores, based on 2 visitor ratings or corrections
 # unpack pickle and offer it by that queue between page navigation
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec

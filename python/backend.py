@@ -4,6 +4,7 @@ from wsgiref import simple_server
 import threading
 from config import config
 from config.ant_imports import *
+from core.event_binding import queue_iter
 from layout.annotator.annotation_to_gold import AnnotatedToGoldQueueRest
 
 
@@ -70,6 +71,17 @@ def run_extra_threads():
                 break
 
     threading.Thread(target=fill_library, name="fill library").start()
+
+    def fill_annotation_thread():
+        gold_layout_pipe = ant(
+            "annotation.collection",
+            f"annotation.collection.gold",
+        )
+        gen = gold_layout_pipe(metaize(["x"] * 100))
+
+        list(queue_iter("gold_annotation", gen, single=False))
+
+    threading.Thread(target=fill_annotation_thread, name="layout gold").start()
 
 
 def create_app():

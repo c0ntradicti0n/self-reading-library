@@ -58,9 +58,7 @@ def unlabeled_not_existent_filter(x_m):
 
 ant = PathAnt()
 
-sample_pipe = ant(
-    "annotation.collection", "annotation.corrected", model_path=full_model_path
-)
+sample_pipe = ant("feature", "annotation.collection", model_path=full_model_path)
 
 model_pipe = ant(
     "annotation.corrected",

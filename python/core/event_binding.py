@@ -2,10 +2,13 @@ import traceback
 from collections import defaultdict
 import json
 import logging
+
+import numpy
 from PIL import Image
 
 from core.database import Queue
 from helpers import hash_tools
+from helpers.encode import jsonify
 
 logging.getLogger().setLevel(logging.INFO)
 import os
@@ -26,7 +29,7 @@ q = {}
 d = {}
 
 
-def init_queues(service_id, id):
+def init_queues(service_id, id=None):
     global q
     global d
     # samples to take from
@@ -34,7 +37,8 @@ def init_queues(service_id, id):
     # samples edited by user
     d[service_id] = Queue(service_id + "_d")
     # session dependent queue
-    q[id] = Queue(id + "_id")
+    if id:
+        q[id] = Queue(id + "_id")
 
 
 def encode_base64(image):
@@ -61,14 +65,22 @@ funs = defaultdict(
 
 
 def encode_some(k, v):
+    if isinstance(v, dict) and isinstance(list(v.keys())[0], tuple):
+        v = list(v.values())[0]
+    if isinstance(v, numpy.ndarray):
+        v = list(v)
     return funs[k]((v)) if k in funs else v
 
 
 def encode(obj_meta):
     obj, meta = obj_meta
     if "human_image_path" in meta and not "human_image" in meta:
+        if isinstance(meta["human_image_path"], numpy.ndarray):
+            meta["human_image_path"] = meta["human_image_path"][0]
         meta["human_image"] = Image.open(meta["human_image_path"])
     if "image_path" in meta and not "image" in meta:
+        if isinstance(meta["image_path"], numpy.ndarray):
+            meta["image_path"] = meta["image_path"][0]
         meta["image"] = Image.open(meta["image_path"])
     if isinstance(meta, dict):
         meta = {k: encode_some(k, v) for k, v in meta.items()}
@@ -83,7 +95,7 @@ class RestQueue:
         global all_rest_queues
         all_rest_queues.append(self)
         self.service_id = service_id
-        init_queues(service_id, service_id)
+        init_queues(service_id)
         self.update_data = update_data
         self.work_on_upload = work_on_upload
 
@@ -219,7 +231,7 @@ class RestQueue:
 
         self.get(id)
         if self.workbook.get(id):
-            resp.text = json.dumps(encode(self.workbook[id]), ensure_ascii=False)
+            resp.text = jsonify(encode(self.workbook[id]))
             resp.status = falcon.HTTP_OK
         else:
             resp.status = falcon.HTTP_OK
@@ -258,23 +270,18 @@ def queue_iter(service_id, gen, single=False):
     logging.info(f"Inserted samples in the queue {service_id}")
 
     while True:
-
         try:
-            logging.debug("Getting iterator")
             r = d[service_id].get(service_id, timeout=3)
-            logging.info("Got iterator item")
-
+            print(".", end="")
             if r:
                 d[service_id].task_done()
-            logging.info("Task done")
-
+                logging.info("Task done")
         except Exception as e:
             r = None
             logging.debug("Pulse", exc_info=True)
 
         if r:
             logging.debug("Yielding")
-
             yield r
             logging.debug("Yielded")
 

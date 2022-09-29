@@ -26,7 +26,7 @@ class Queue:
             [
                 ("doc_id", "string"),
                 ("date", "date"),
-                ("value", "bytes"),
+                ("value", "string"),
                 ("row_id", "string"),
             ]
         )
@@ -44,15 +44,17 @@ class Queue:
     def timeout(self, f, timeout=None):
         # Database polling until value appeared or not
         result = None
+        n = 0
         while not result:
+            n += 1
+            if n > timeout:
+                break
             try:
                 result = f()
             except Exception as e:
                 time.sleep(1)
 
                 continue
-
-        # print (f"got {result}")
         return result
 
     def get(self, id, timeout=None):
@@ -66,7 +68,7 @@ class Queue:
             .execute()
         )
         self.row_id = item.iloc[0].row_id
-        return decompress_pickle(item.iloc[0]["value"])
+        return decompress_pickle(bytes.fromhex(item.iloc[0]["value"]))
 
     def print(self):
         for table in self.connection.list_tables():
@@ -92,7 +94,14 @@ class Queue:
 
     def put(self, id, item, timeout=None):
         df_item = pandas.DataFrame(
-            [(id, datetime.datetime.now(), compressed_pickle(item), uuid.uuid4().hex)],
+            [
+                (
+                    id,
+                    datetime.datetime.now(),
+                    compressed_pickle(item).hex(),
+                    uuid.uuid4().hex,
+                )
+            ],
             columns=["doc_id", "date", "value", "row_id"],
         )
         self.connection.insert(self.service_id, df_item)

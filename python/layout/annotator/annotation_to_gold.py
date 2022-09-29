@@ -1,45 +1,46 @@
+import os
+from threading import Thread
+
+import pandas
+
+from config import config
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
-from core.rest.RestPublisher import RestPublisher
-from core.rest.RestPublisher import Resource
-from core.rest.react import react
 from core.event_binding import queue_iter, RestQueue, queue_put
+from helpers.cache_tools import configurable_cache
 from layout.model_helpers import changed_labels
 import logging
 
 
 AnnotatedToGoldQueueRest = RestQueue(
-    service_id="annotation_to_gold", update_data=changed_labels
+    service_id="gold_annotation", update_data=changed_labels
 )
 
 
 @converter(
     "annotation.collection",
-    "reading_order",
+    "annotation.collection.silver",
 )
-class Annotator(PathSpec):
+class AnnotationLoader(PathSpec):
+    @configurable_cache(
+        config.cache + os.path.basename(__file__),
+        from_path_glob=config.COLLECTION_PATH + "/*.pickle",
+    )
+    def __call__(self, prediction_metas, *args, **kwargs):
+        pass
+
+
+@converter(
+    "annotation.collection.silver",
+    "annotation.collection.gold",
+)
+class AnnotatorUnpacker(PathSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def __call__(self, prediction_metas, *args, **kwargs):
-        for prediction_meta, meta in prediction_metas:
-
-            if "from_function_only" in self.flags and self.flags["from_function_only"]:
-                queue_put(
-                    service_id=self.flags["service_id"],
-                    gen=(p_m for p_m in meta["layout_predictions"]),
-                )
-
-                yield from meta["layout_predictions"]
-            else:
-                try:
-                    for _p_m in queue_iter(
-                        service_id="annotation",
-                        gen=(p_m for p_m in prediction_meta),
-                        single=self.flags["from_function_only"]
-                        if "from_function_only" in self.flags
-                        else False,
-                    ):
-                        yield _p_m
-                except RuntimeError as e:
-                    logging.error("annotating next document", e)
+        for pickle_path, meta in prediction_metas:
+            df = pandas.read_pickle(pickle_path)
+            df["bbox"] = df.apply(lambda x: list(zip(*df.x0, *df.y0, *df.x1, *df.y1)), axis=1)
+            df["labels"] = df["LABEL"].apply(list)
+            yield pickle_path, df.to_dict(orient='records')[0]

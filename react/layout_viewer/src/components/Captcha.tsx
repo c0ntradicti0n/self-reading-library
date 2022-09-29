@@ -60,6 +60,7 @@ const Captcha = () => {
         </BootstrapDialogTitle>
         <DialogContent dividers>
             <MacroComponentSwitch component={kind} url={Kind[kind].url} slot={CAPTCHA} />
+
         </DialogContent>
         <Button variant="outlined" onClick={() => setOpen(false)}>
           Solved
