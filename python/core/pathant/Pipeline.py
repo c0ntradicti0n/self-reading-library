@@ -34,7 +34,7 @@ class Pipeline:
             name = functional_object.__class__.__name__
             start_message = f"Pipeline object '{name}' is started"
             logger = (
-                functional_object.logger.info
+                functional_object.logger.debug
                 if hasattr(functional_object, "logger")
                 else print
             )

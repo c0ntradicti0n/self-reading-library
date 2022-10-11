@@ -6,7 +6,7 @@ import logging
 import numpy
 from PIL import Image
 
-from core.database import Queue
+from core.database import Queue, RatingQueue
 from helpers import hash_tools
 from helpers.encode import jsonify
 
@@ -29,16 +29,20 @@ q = {}
 d = {}
 
 
-def init_queues(service_id, id=None):
+def init_queues(service_id, id=None, rated_queue=False):
     global q
     global d
     # samples to take from
-    q[service_id] = Queue(service_id + "_q")
+    if rated_queue:
+        Q = RatingQueue
+    else:
+        Q = Queue
+    q[service_id] = Q(service_id + "_q")
     # samples edited by user
-    d[service_id] = Queue(service_id + "_d")
+    d[service_id] = Q(service_id + "_d")
     # session dependent queue
     if id:
-        q[id] = Queue(id + "_id")
+        q[id] = Q(id + "_id")
 
 
 def encode_base64(image):
@@ -91,11 +95,17 @@ all_rest_queues = []
 
 
 class RestQueue:
-    def __init__(self, service_id, update_data=lambda x: x, work_on_upload=None):
+    def __init__(
+        self,
+        service_id,
+        update_data=lambda x: x,
+        work_on_upload=None,
+        rated_queue=False,
+    ):
         global all_rest_queues
         all_rest_queues.append(self)
         self.service_id = service_id
-        init_queues(service_id)
+        init_queues(service_id, rated_queue=rated_queue)
         self.update_data = update_data
         self.work_on_upload = work_on_upload
 
@@ -129,10 +139,10 @@ class RestQueue:
     def ok(self, id):
         try:
             logging.info(f"Ok {id}")
-            item = self.workbook.get(id)
+            self.workbook.get(id)
             item = self.workbook.pop(id)
             d[self.service_id].put(id, item)
-            q[id].task_done()
+            q[id if id else self.service_id].task_done()
         except Exception as e:
             print("Ok, but end of gen")
 
@@ -159,7 +169,7 @@ class RestQueue:
             resp.status = falcon.HTTP_300
             return
         data = encode(data)
-        resp.text = json.dumps(data, ensure_ascii=False)
+        resp.text = jsonify(data)
         resp.status = falcon.HTTP_OK
 
     def on_put(self, req, resp, id=None):  # edit, update image
@@ -253,29 +263,27 @@ def queue_iter(service_id, gen, single=False):
     global q, d
 
     for i in range(5):
-        try:
-            new_val = next(gen)
-            q[service_id].put(service_id, new_val)
+        if len(q[service_id]) < 5:
 
-        except Exception as e:
-            if not single:
-                traceback.print_exc()
-                # or
-                print(sys.exc_info()[2])
-                logging.error(e, exc_info=True)
-                raise e
-            else:
-                break
+            try:
+                new_val = next(gen)
+                q[service_id].put(service_id, new_val)
+
+            except Exception as e:
+                if not single:
+                    raise e
+                else:
+                    break
+        else:
+            logging.info("Not adding new samples, enough in queue")
 
     logging.info(f"Inserted samples in the queue {service_id}")
 
     while True:
         try:
-            r = d[service_id].get(service_id, timeout=3)
+            r = d[service_id].get(None, timeout=3)
             print(".", end="")
-            if r:
-                d[service_id].task_done()
-                logging.info("Task done")
+
         except Exception as e:
             r = None
             logging.debug("Pulse", exc_info=True)
@@ -285,17 +293,29 @@ def queue_iter(service_id, gen, single=False):
             yield r
             logging.debug("Yielded")
 
-            for i in range(3):
-                logging.debug("Inserting some new sample in the queue")
+            if r:
                 try:
-                    new_val = next(gen)
-                    q[service_id].put(service_id, new_val)
+
+                    d[service_id].task_done()
+                    logging.info("Task done")
 
                 except Exception as e:
-                    traceback.print_exc()
-                    # or
-                    print(sys.exc_info()[2])
-                    logging.error(e, exc_info=True)
+                    logging.debug("Was the task already done?", exc_info=True)
+
+            for i in range(3):
+                if len(q[service_id]) < 5:
+                    logging.debug("Inserting some new sample in the queue")
+                    try:
+                        new_val = next(gen)
+                        q[service_id].put(service_id, new_val)
+
+                    except Exception as e:
+                        traceback.print_exc()
+                        # or
+                        print(sys.exc_info()[2])
+                        logging.error(e, exc_info=True)
+                else:
+                    logging.info("Not adding new samples, enough in queue")
 
     print("ende")
 

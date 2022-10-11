@@ -91,5 +91,8 @@ class TopicsPublisher(RestPublisher, react):
             )
 
         logging.info("computed topics")
-        resp.text = json.dumps([value, {}], ensure_ascii=False)
+        resp.text = json.dumps(["topics", value], ensure_ascii=False)
         resp.status = falcon.HTTP_OK
+
+    def on_post(self, req, resp, *args, **kwargs):
+        return self.on_get(req, resp)

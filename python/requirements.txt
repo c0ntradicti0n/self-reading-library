@@ -3,7 +3,7 @@ torch
 git+https://github.com/c0ntradicti0n/listalign.git@master#listalign
 
 black
-psycopg2
+psycopg2-binary
 ibis-framework
 more_itertools
 torch
@@ -38,7 +38,7 @@ rapidfuzz
 parasail
 spacy
 spacy-transformers
-allennlp==2.8.0
+allennlp=2.8.0
 swalign
 nltk
 Cython

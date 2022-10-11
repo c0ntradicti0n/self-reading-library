@@ -1,3 +1,5 @@
+USER ?= $(shell id -u):$(shell id -g)
+
 .PHONY: format
 format:
 	python -m black python
@@ -12,11 +14,21 @@ dockerbuild:
 
 .PHONY: dockerup
 dockerup:
-	DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose up -d
+	CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain  docker-compose up -d
 
 .PHONY: dockerdown
 dockerdown:
 	DOCKER_BUILDKIT=1 docker-compose down -v
+
+.PHONY: dockerlogs
+dockerlogs:
+	docker logs -f rest
+
+dockerdebug:
+	docker exec -itd -p 2222:22 $SERVICE /usr/sbin/sshd -D
+
+
+docker: dockerdown dockerbuild dockerup
 
 .PHONY: backend
 backend:
@@ -26,3 +38,5 @@ backend:
 frontend:
 	cd react/layout_viewer_made/ && yarn run dev
 
+docker-fill:
+	docker-compose build fill && docker-compose up fill -d && docker logs -f fill

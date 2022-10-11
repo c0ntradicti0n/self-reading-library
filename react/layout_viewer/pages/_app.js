@@ -4,7 +4,7 @@ import * as glob from 'glob'
 import '../src/App.css'
 import NoSSR from '../src/components/NoSSR'
 import { AppWrapper } from '../src/contexts/DocumentContext.tsx'
-import { ContextWrapper } from '../src/contexts/ContextContext.tsx'
+import { ContextWrapper } from '../src/contexts/ContextContext'
 
 import Navigation from '../src/components/Navigation'
 import {NORMAL} from "../src/contexts/SLOTS";

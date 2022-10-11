@@ -2,9 +2,9 @@ import React, { createContext, useState } from 'react'
 import { Slot } from './SLOTS'
 
 export interface DocumentContextType {
-  value: string
+  value: any
   setValue?: (string) => void
-  meta: string
+  meta: any
   setMeta?: (any) => void
   setValueMetas?: (slot, [string, any]) => void
   setValueMeta?: (slot, string, any) => void
@@ -57,4 +57,5 @@ const AppWrapper = ({ children }) => {
   )
 }
 
-export { AppWrapper, DocumentContext }
+
+export { DocumentContext, AppWrapper}

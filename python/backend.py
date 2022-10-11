@@ -1,10 +1,10 @@
 import itertools
+import falcon
 import logging
 from wsgiref import simple_server
 import threading
 from config import config
 from config.ant_imports import *
-from core.event_binding import queue_iter
 from layout.annotator.annotation_to_gold import AnnotatedToGoldQueueRest
 
 
@@ -33,18 +33,21 @@ def run_extra_threads():
         num_labels=config.NUM_LABELS,
         layout_model_path=full_model_path,
     )
+    gold_annotation = ant("annotation.collection", "annotation.collection.platinum")
 
-    ant.info(
-        "workflow.png",
-        pipelines_to_highlight=[
-            elmo_difference_pipe,
-            sample_pipe,
-            model_pipe,
-            upload_pipe,
-            elmo_difference_model_pipe,
-            filling_pipe,
-        ],
-    )
+    if config.PAINT:
+        ant.info(
+            "workflow.png",
+            pipelines_to_highlight=[
+                elmo_difference_pipe,
+                sample_pipe,
+                model_pipe,
+                upload_pipe,
+                elmo_difference_model_pipe,
+                filling_pipe,
+                gold_annotation,
+            ],
+        )
 
     layout = threading.Thread(target=layout_annotate_train_model, name="layout_captcha")
     layout.start()
@@ -73,19 +76,13 @@ def run_extra_threads():
     threading.Thread(target=fill_library, name="fill library").start()
 
     def fill_annotation_thread():
-        gold_layout_pipe = ant(
-            "annotation.collection",
-            f"annotation.collection.gold",
-        )
-        gen = gold_layout_pipe(metaize(["x"] * 100))
+        gen = gold_annotation(metaize(["x"] * 100), service_id="gold_annotation")
+        list(gen)
 
-        list(queue_iter("gold_annotation", gen, single=False))
-
-    threading.Thread(target=fill_annotation_thread, name="layout gold").start()
+    threading.Thread(target=fill_annotation_thread, name="layout_gold").start()
 
 
 def create_app():
-    import falcon
 
     logging.info(f"STARTING APP")
 

@@ -2,6 +2,7 @@ import itertools
 import logging
 import os
 
+from config import config
 from core.rest.Resource import Resource
 from core.rest.react import react
 from core.pathant.PathAnt import PathAnt
@@ -73,40 +74,41 @@ class RestPublisher(PathSpec, react):
         self.port = port
         self.resource = resource
         self.contents = []
-        self.logger.warning(f"REST-publishing {self.resource.title}")
+        if config.create_frontend:
+            self.logger.warning(f"REST-publishing {self.resource.title}")
 
-        try:
-            with open(
-                "/".join([self.npm_resources, self.resource.Title + "Service.ts"]), "w"
-            ) as f:
-                f.write(
-                    self.server_resource_code.format(
-                        **self.resource,
-                        port=self.port,
-                        url=self.url,
-                        **self.resource.access,
+            try:
+                with open(
+                    "/".join([self.npm_resources, self.resource.Title + "Service.ts"]), "w"
+                ) as f:
+                    f.write(
+                        self.server_resource_code.format(
+                            **self.resource,
+                            port=self.port,
+                            url=self.url,
+                            **self.resource.access,
+                        )
                     )
+            except:
+                logging.error(
+                    f"Could not create javascript resource file {self.resource.Title}",
+                    exc_info=True,
                 )
-        except:
-            logging.error(
-                f"Could not create javascript resource file {self.resource.Title}",
-                exc_info=True,
-            )
 
-        try:
-            with open(
-                "/".join([self.npm_pages, self.resource.title + ".tsx"]), "w"
-            ) as f:
-                f.write(
-                    self.page_code.format(
-                        **self.resource,
-                        port=self.port,
-                        url=self.url,
-                        **self.resource.access,
+            try:
+                with open(
+                    "/".join([self.npm_pages, self.resource.title + ".tsx"]), "w"
+                ) as f:
+                    f.write(
+                        self.page_code.format(
+                            **self.resource,
+                            port=self.port,
+                            url=self.url,
+                            **self.resource.access,
+                        )
                     )
-                )
-        except:
-            logging.error(f"Could not write {self.resource.title}.tsx", exc_info=True)
+            except:
+                logging.error(f"Could not write {self.resource.title}.tsx", exc_info=True)
 
     def __iter__(self, incoming):
         if not self.contents:

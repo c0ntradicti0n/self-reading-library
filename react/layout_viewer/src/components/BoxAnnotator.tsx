@@ -1,6 +1,4 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react'
-require('colors')
-
 import { pairwise, zip } from '../helpers/array'
 import { Button } from '@mui/material'
 import Router from 'next/router'
@@ -94,7 +92,7 @@ const BoxAnnotator = ({ service,     slot
     const width = window.innerWidth
     const scaleW = width * 0.5
     const height = window.innerHeight
-    const scaleH = height
+    const scaleH = height * 1.01
 
     let im = new Image()
     im.src = 'data:image/jpeg;charset=utf-8;base64,' + context.meta[slot]?.image
@@ -125,9 +123,9 @@ const BoxAnnotator = ({ service,     slot
   }, [])
 
   let cols
-    console.log("meta".red, context.meta[slot].bbox, labels ?? context.meta[slot].LABEL)
+    console.log("meta", context.meta[slot].bbox, labels ?? context.meta[slot].LABEL ?? context.meta[slot].labels)
   if (context?.meta[slot]?.bbox)
-    cols = zip([context.meta[slot].bbox, labels ?? context.meta[slot].LABEL])
+    cols = zip([context.meta[slot].bbox, labels ?? context.meta[slot].LABEL ?? context.meta[slot].labels])
   else
     return <pre>Not rendering {slot}, missing bbox{JSON.stringify(context, null,  2)}</pre>
 
@@ -146,7 +144,7 @@ const BoxAnnotator = ({ service,     slot
                 Router.push({
                   pathname: '/difference/',
                   query: { id: context.value[slot] },
-                })
+                }).catch(console.error)
               }}>
               Return to document!
             </Button>
@@ -213,7 +211,7 @@ const BoxAnnotator = ({ service,     slot
                     service.change('[1].labels.[' + i + ']', label, (res) => {
                       console.log(res)
                       setLabels(res[1].labels)
-                    })
+                    }).catch(console.error)
                 }}></div>
             ))
           ) : (
@@ -248,7 +246,7 @@ const BoxAnnotator = ({ service,     slot
               </Button>
               <Button
                 style={{ backgroundColor: '#FED' }}
-                onClick={service.discard}>
+                onClick={service.cancel}>
                 Discard
               </Button>
             </>

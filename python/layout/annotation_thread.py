@@ -116,7 +116,7 @@ def layout_annotate_train_model():
                 metaize(args["samples_files"]), collection_step=args["training_rate"]
             )
         ),
-        service_id="annotation",
+        service_id="gold_annotation",
         on_predict=on_predict,
     )
 

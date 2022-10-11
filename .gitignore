@@ -2,5 +2,15 @@
 /python/language/transformer/output/
 /react/layout_viewer/node_modules/
 /react/layout_viewer/.next
-
+/python/.layouteagle
+/react/layout_viewer_made
+/tts
+/venv
+/venv3.9
+/.ssh
+/.env
+/.idea
+/.mypy_cache
+/back.git
 **/__pycache__/
+**/*.pickle

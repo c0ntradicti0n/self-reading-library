@@ -56,7 +56,7 @@ const MacroComponentSwitch   = ({ slot = NORMAL, ...props }: Props) : JSX.Elemen
     }, null, 2)}</pre>
   }
 
-  if (component === 'graph' && context.value) return <Graph />
+  if (component === 'graph' && context.meta["normal"]) return <Graph data={context.meta["normal"]}/>
 
   if (component === 'html')
     return <HtmlRenderer service={service} slot={slot} />

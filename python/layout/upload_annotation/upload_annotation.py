@@ -39,8 +39,7 @@ class UploadAnnotator(RestPublisher, react):
                 for _p_m in queue_iter(
                     service_id="upload_annotation", gen=(p_m for p_m in prediction_meta)
                 ):
-
-                    print(f"yieldin annotated {_p_m}")
+                    print(f"yielding annotated {_p_m}")
                     yield _p_m
             except RuntimeError as e:
                 logging.info("annotating next uploaded document")

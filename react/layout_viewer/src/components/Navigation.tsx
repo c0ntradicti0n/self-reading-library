@@ -25,7 +25,7 @@ const NavigationDiv = styled.div`
 const Navigation = ({slot}: Slot) => {
   const context = useContext<DocumentContext>(DocumentContext)
   const id = context.value[slot]
-  const shortId = id?.replace('.layouteagle/', '')
+  const shortId = (id??'').replace('.layouteagle/', '')
   return (
     <NavigationDiv>
       <div>

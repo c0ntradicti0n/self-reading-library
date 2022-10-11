@@ -1,24 +1,52 @@
 version: "3"
 services:
-  b:
+  rest:
     build: python
-    container_name: be
-    ports:
-      - "3815:3000"
+    container_name: rest
+
     tty: true
+    user: $USER_IDS
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      PORT: $PORT
+      DB_HOST: db
+    volumes:
+      - "$CWD/python/.layouteagle:/home/finn/Programming/self-reading-library/python/.layouteagle"
+    entrypoint: uwsgi --http 0.0.0.0:$PORT --module wsgi:application --memory-report  --workers 16 --threads 2  --memory-report --enable-threads --skip-atexit-teardown --max-worker-lifetime=300 --max-worker-lifetime-delta=320 --harakiri=500
+  fill:
+    build: python
+    container_name: fill
+    tty: true
+    environment:
+      DB_HOST: db
+    volumes:
+      - "$CWD/self-reading-library/python/.layouteagle:/home/finn/Programming/self-reading-library/python/.layouteagle"
+    entrypoint: python3 fill.py
+
   db:
     image: postgres
     container_name: db
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_DB: "db"
       POSTGRES_HOST_AUTH_METHOD: "trust"
-  f:
+      POSTGRES_USER: python
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST: "localhost"
+      CREATE_FRONTEND: True
+  fe:
     build: react
     container_name: fe
     ports:
       - "3210:3000"
     tty: true
+    volumes:
+      - "$CWD/self-reading-library/python/.layouteagle/pdfs/:/home/finn/Programming/self-reading-library/react/layout_viewer_made/public/pdfs"
+      - "$CWD/self-reading-library/python/.layouteagle/audio/:/home/finn/Programming/self-reading-library/react/layout_viewer_made/public/audio"
     environment:
       PORT: 3000
+
 
 

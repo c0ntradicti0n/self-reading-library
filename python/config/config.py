@@ -1,15 +1,18 @@
 import os
 import sys
+import logging
+import torch
+from traceback_with_variables import activate_by_import
+from traceback_with_variables import Format, ColorSchemes, is_ipython_global
+import numpy
+import tensorflow as tf
 
 sys.path.append("../core")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-import logging
 
 os.environ["LD_LIBRARY_PATH"] = "/usr/local/cuda-11.0/targets/x86_64-linux/lib/"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
-from traceback_with_variables import activate_by_import
-from traceback_with_variables import Format, ColorSchemes, is_ipython_global
 
 fmt = Format(
     before=5,
@@ -34,12 +37,10 @@ fmt = Format(
         ),  # by different things, print const str
     ],
 )
-import tensorflow as tf
 
 tf.config.list_physical_devices("GPU")
 tf.get_logger().setLevel(3)
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
-import numpy
 
 numpy.set_printoptions(threshold=sys.maxsize)
 
@@ -52,34 +53,7 @@ logging.basicConfig(
     format="""%(asctime)s-%(levelname)s: %(message)s""", datefmt="%H:%M:%S"
 )
 
-from GPUtil import showUtilization as gpu_usage
-import torch
-
 path_prefix = "../core/"
-
-
-def free_gpu_cache():
-    print("Initial GPU Usage")
-    gpu_usage()
-
-    torch.cuda.empty_cache()
-
-    cuda.select_device(0)
-    cuda.close()
-    cuda.select_device(0)
-
-    print("GPU Usage after emptying the cache")
-    gpu_usage()
-
-
-import torch
-
-torch.cuda.empty_cache()
-
-try:
-    free_gpu_cache()
-except Exception as e:
-    logging.info("No gpu available!", exc_info=True)
 
 feature_fuzz_ranges = ((-0.02, 0.04, 0.02),)
 sys.path.append(os.getcwd())
@@ -190,8 +164,12 @@ EPOCHS_LAYOUT = 84
 PDF_UPLOAD_DIR = hidden_folder + "/pdf_upload/"
 ELMO_DIFFERENCE_MODEL_PATH = hidden_folder + "elmo_difference_models"
 ELMO_DIFFERENCE_COLLECTION_PATH = hidden_folder + "elmo_difference_collection"
-PORT = 9999
+PORT = int(os.environ.get("PORT", default="9999"))
+DB_HOST = os.environ.get("DB_HOST", default="localhost")
+PAINT = False
+
 TOPIC_TEXT_LENGTH = 180
 spacy_model_name = "en_core_web_trf"
 audio_format = ".ogg"
 audio_path = hidden_folder + "audio/"
+create_frontend = os.environ.get("CREATE_FRONTEND", default=False)

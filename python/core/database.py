@@ -1,10 +1,13 @@
 import datetime
+import logging
 import uuid
 import time
 from threading import Thread
 import ibis
 import pandas
+import numpy
 
+from config import config
 # Threadsafe/processsafe replacement for queues, that will not sync in forked processes
 from helpers.cache_tools import compressed_pickle, decompress_pickle
 
@@ -14,24 +17,24 @@ ibis.options.interactive = True
 class Queue:
     connection = None
 
+    schema = [
+        ("doc_id", "string"),
+        ("user_id", "string"),
+        ("date", "date"),
+        ("value", "string"),
+        ("row_id", "string"),
+    ]
+
     def __init__(self, service_id):
         self.row_id = None
         self.service_id = self.id2tablename(service_id)
         if not Queue.connection:
             Queue.connection = ibis.postgres.connect(
-                url="postgresql://python:python@localhost:5432/postgres"
+                url=f"postgresql://python:python@{config.DB_HOST}:5432/postgres"
             )
-
-        sc = ibis.schema(
-            [
-                ("doc_id", "string"),
-                ("date", "date"),
-                ("value", "string"),
-                ("row_id", "string"),
-            ]
-        )
-
+        sc = ibis.schema(self.schema)
         try:
+
             self.table = self.connection.table(self.service_id)
 
         except:
@@ -61,14 +64,28 @@ class Queue:
         if timeout:
             return self.timeout(lambda: self.get(id), timeout=timeout)
 
+        item = self._get_df(id)
+        try:
+            return decompress_pickle(bytes.fromhex(item.iloc[0]["value"]))
+        except Exception as e:
+            raise ValueError(f"Strange value in {self.service_id}, {item}") from e
+
+    def _get_df(self, id):
         item = (
             self.table.filter(self.table["doc_id"] == id)
             .sort_by("date")
             .limit(10)
             .execute()
         )
+        if item.empty:
+            item = (
+                self.table.filter(self.table["user_id"] == id)
+                .sort_by("date")
+                .limit(10)
+                .execute()
+            )
         self.row_id = item.iloc[0].row_id
-        return decompress_pickle(bytes.fromhex(item.iloc[0]["value"]))
+        return item
 
     def print(self):
         for table in self.connection.list_tables():
@@ -93,18 +110,64 @@ class Queue:
         )
 
     def put(self, id, item, timeout=None):
+        if isinstance(item, tuple):
+            doc_id = item[0]
+        else:
+            raise ValueError(f"item must be a tuple of id and value! {item}")
         df_item = pandas.DataFrame(
             [
                 (
+                    doc_id,
                     id,
                     datetime.datetime.now(),
                     compressed_pickle(item).hex(),
                     uuid.uuid4().hex,
                 )
             ],
-            columns=["doc_id", "date", "value", "row_id"],
+            columns=["doc_id", "user_id", "date", "value", "row_id"],
         )
-        self.connection.insert(self.service_id, df_item)
+        try:
+            self.connection.insert(self.service_id, df_item)
+        except Exception as e:
+            raise ValueError("wrong datatype for table!") from e
+
+    def __len__(self):
+        # Idiots invented an incompatible IntegerScalar
+        return int(str(self.table.count()))
+
+
+class RatingQueue(Queue):
+    schema = Queue.schema + [
+        ("rating_trial", "int32"),
+        ("rating_score", "float"),
+    ]
+
+    def get(self, id, timeout=None):
+        db_id, meta = Queue.get(self, id, timeout=timeout)
+        rating_trial, rating_score = self.scores(  db_id)
+        meta["rating_trial"] = rating_trial
+        meta["rating_score"] = rating_score
+        return db_id, meta
+
+    def put(self, id, item, timeout=None):
+        db_id, meta =  item
+        Queue.put(self, id, item, timeout=timeout)
+        if score := meta.get("rating_score"):
+            self.rate(db_id if not id else id, score, new_trial=False)
+
+
+    def rate(self, id, score, new_trial=True):
+        self.connection.con.execute(
+            f"UPDATE {self.service_id} set rating_score = {score}, rating_trial = {'COALESCE(rating_trial, 0) + 1' if new_trial else 'COALESCE(rating_trial, 0)'} where doc_id = '{self.row_id if not id else id}' or user_id = '{self.row_id if not id else id}'"
+        )
+
+    def scores(self, id):
+        item = self._get_df(id)
+        if len(item) != 1:
+            logging.warning(f"Multiple items with the same id in {self.service_id}, {item.to_dict()}")
+        trials, scores = item["rating_trial"][0], item["rating_score"][0]
+
+        return trials if trials else 0, scores if not numpy.isnan(scores)  else 0.0
 
 
 if __name__ == "__main__":
@@ -144,3 +207,50 @@ if __name__ == "__main__":
     q.queue_done("2")
 
     q.print()
+
+    r = RatingQueue("rating_queue_TEST")
+    r.put("1", ("bla", {"k": "v"}))
+
+    id = str(uuid.uuid4())
+    r.put(id, ("bla", {"k": "v"}))
+    r.rate(
+        id,
+        0.123,
+    )
+    r.rate(
+        id,
+        0.567,
+    )
+    r.rate(
+        id,
+        0.789,
+    )
+
+    trial, score = r.scores(
+        id
+    )
+    assert trial == 3
+    assert score == 0.789
+
+    id2 = str(uuid.uuid4())
+    r.put(id2, ("bla", {"k": "v", "rating_score": 0.1234}))
+    trial, score = r.scores(
+        id2
+    )
+    assert trial == 0
+    assert score == 0.1234
+
+    trial, score = r.scores(
+        id
+    )
+    assert trial == 3
+    assert score == 0.789
+
+    doc_id, meta = r.get(
+        id2
+    )
+    assert meta["rating_score"] == 0.1234
+    assert meta["rating_trial"] == 0
+
+
+    assert len(r) > 2

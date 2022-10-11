@@ -101,7 +101,7 @@ def model_in_the_loop(
 
             try:
                 results = list(
-                    queue_iter(service_id=service_id, gen=(dictize(on_predict(args))))
+                    queue_iter(service_id=service_id, gen=((on_predict(args))))
                 )
                 pprint(results)
 
