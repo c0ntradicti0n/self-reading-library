@@ -25,25 +25,27 @@ RUN apt install libfreetype6-dev pkg-config pkg-config -y
 RUN   >&2 echo "$(python3 --version)"
 WORKDIR /home/finn/Programming/self-reading-library
 
-COPY requirements.txt .
 
 RUN --mount=type=cache,target=/root/.cache/pip pip install setuptools==57.5.0
-RUN --mount=type=cache,target=/root/.cache/pip pip install torch
-RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt --use-deprecated=legacy-resolver
+RUN --mount=type=cache,target=/root/.cache/pip pip install torch==1.10.2 spacy spacy-transformers
 RUN --mount=type=cache,target=/root/.cache/pip python3 -m spacy download en_core_web_trf
 RUN --mount=type=cache,target=/root/.cache/pip python3 -m spacy download en_core_web_md
-RUN  --mount=type=cache,target=/root/.cache/pip pip install git+https://github.com/facebookresearch/detectron2.git
+RUN --mount=type=cache,target=/root/.cache/pip python3 -m spacy download en_core_web_sm
+RUN --mount=type=cache,target=/root/.cache/pip pip install git+https://github.com/facebookresearch/detectron2.git
+RUN --mount=type=cache,target=/root/.cache/pip pip install uvicorn[standard]
 
-RUN apt update && apt install  openssh-server -y
-RUN service ssh start
+COPY requirements.txt .
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt --use-deprecated=legacy-resolver
 
-COPY . python
+#RUN apt update && apt install  openssh-server -y
+#RUN service ssh start
+
+# COPY . python
 
 RUN mkdir /.allennlp  && mkdir /.allennlp/cache  && chmod -R 777 /.allennlp
 RUN mkdir /nltk_data  && chmod -R 777 /nltk_data
 
+#RUN cp python/tokenization_layoutvm2_fast.py ../venv/lib/python3.9/site-packages/transformers/models/layoutlmv2/tokenization_layoutlmv2_fast.py
+
 WORKDIR /home/finn/Programming/self-reading-library/python
-
-
-# ENTRYPOINT uwsgi --http 0.0.0.0:9999 --module wsgi:application --memory-report  --workers 16 --threads 2  --memory-report --enable-threads --skip-atexit-teardown --max-worker-lifetime=300 --max-worker-lifetime-delta=320 --harakiri=500
 

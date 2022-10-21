@@ -50,7 +50,10 @@ export default class Resource {
 
     let id: string
 
-    if (typeof window !== 'undefined' && this.slot === NORMAL || ! this.slot && !no_id) {
+    if (
+      (typeof window !== 'undefined' && this.slot === NORMAL) ||
+      (!this.slot && !no_id)
+    ) {
       if (!localStorage.getItem(route)) {
         id = getRandomArbitrary(100000, 999999).toString()
         localStorage.setItem(route, id)
@@ -120,10 +123,7 @@ export default class Resource {
 
     console.log(this.id, request_query)
     try {
-      const response = await fetch(
-        request_query,
-        fetch_init
-      )
+      const response = await fetch(request_query, fetch_init)
 
       if (!response.ok) {
         throw response.statusText

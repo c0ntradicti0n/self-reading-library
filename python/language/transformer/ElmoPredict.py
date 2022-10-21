@@ -120,13 +120,16 @@ class ElmoPredict(PathSpec):
     def predict(self, words):
         global model
         if not model or not self.predictor:
+            self.logger.info("Loading difference model")
             model = Model.load(
                 config=Params.from_file(params_file=self.elmo_config),
                 serialization_dir=self.flags["difference_model_path"],
             )
+            self.logger.info("Loading predictor")
             self.default_predictor = Predictor.from_path(
                 self.flags["difference_model_path"]
             )
+            self.logger.info("Loading tagger_model")
             self.predictor = DifferenceTaggerPredictor(
                 self.default_predictor._model,
                 dataset_reader=self.default_predictor._dataset_reader,

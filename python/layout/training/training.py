@@ -68,7 +68,9 @@ class Training(PathSpec):
                 features=config.FEATURES,
             )
 
-            model_helpers.PROCESSOR.tokenizer.decode(train_dataset["input_ids"][0])
+            model_helpers.LayoutModelParts.PROCESSOR.tokenizer.decode(
+                train_dataset["input_ids"][0]
+            )
 
             train_dataset.set_format(type="torch", device=config.DEVICE)
             test_dataset.set_format(type="torch", device=config.DEVICE)
@@ -101,16 +103,13 @@ class Training(PathSpec):
 
             batch = next(iter(train_dataloader))
 
-            model = model_helpers.MODEL
+            model = model_helpers.LayoutModelParts.MODEL
 
             model.to(config.DEVICE)
             optimizer = AdamW(model.parameters(), lr=1e-5, weight_decay=0.17)
 
             global_step = 0
             num_train_epochs = config.EPOCHS_LAYOUT
-            t_total = (
-                len(train_dataloader) * num_train_epochs
-            )  # total number of training steps
 
             # put the model in training mode
             model.train()

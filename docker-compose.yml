@@ -12,8 +12,10 @@ services:
       PORT: $PORT
       DB_HOST: db
     volumes:
-      - "$CWD/python/.layouteagle:/home/finn/Programming/self-reading-library/python/.layouteagle"
-    entrypoint: uwsgi --http 0.0.0.0:$PORT --module wsgi:application --memory-report  --workers 16 --threads 2  --memory-report --enable-threads --skip-atexit-teardown --max-worker-lifetime=300 --max-worker-lifetime-delta=320 --harakiri=500
+      - "$CWD/python:/home/finn/Programming/self-reading-library/python"
+    #  - "$CWD/python/.layouteagle:/home/finn/Programming/self-reading-library/python/.layouteagle"
+    entrypoint: uwsgi  --py-autoreload=1 --http 0.0.0.0:$PORT --module wsgi:application --memory-report  --workers 16 --threads 2  --memory-report --enable-threads --skip-atexit-teardown --max-worker-lifetime=1000 --max-worker-lifetime-delta=2000 --harakiri=3000
+    #entrypoint: gunicorn --bind 0.0.0.0:$PORT --log-level info -w 4 -k uvicorn.workers.UvicornWorker wsgi:application  --timeout 600
   fill:
     build: python
     container_name: fill
@@ -21,7 +23,7 @@ services:
     environment:
       DB_HOST: db
     volumes:
-      - "$CWD/self-reading-library/python/.layouteagle:/home/finn/Programming/self-reading-library/python/.layouteagle"
+      - "$CWD/python:/home/finn/Programming/self-reading-library/python"
     entrypoint: python3 fill.py
 
   db:
@@ -45,6 +47,8 @@ services:
     volumes:
       - "$CWD/self-reading-library/python/.layouteagle/pdfs/:/home/finn/Programming/self-reading-library/react/layout_viewer_made/public/pdfs"
       - "$CWD/self-reading-library/python/.layouteagle/audio/:/home/finn/Programming/self-reading-library/react/layout_viewer_made/public/audio"
+      - "$CWD/react/layout_viewer_made/src:/app/src"
+
     environment:
       PORT: 3000
 

@@ -179,7 +179,17 @@ class RestQueue:
         path, value = result
         item = self.workbook[id]
 
-        item = self.change(item, path, value)
+        if path:
+            if isinstance(path, str):
+                item = self.change(item, path, value)
+            if isinstance(path, list):
+                for p in path:
+                    item = self.change(item, p, value)
+            else:
+                logging.error(f"{path} has no compatible type")
+                resp.text = json.dumps(encode(item), ensure_ascii=False)
+                resp.status = falcon.HTTP_400
+
         resp.text = json.dumps(encode(item), ensure_ascii=False)
         resp.status = falcon.HTTP_OK
 

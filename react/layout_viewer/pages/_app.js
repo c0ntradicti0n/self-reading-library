@@ -1,13 +1,15 @@
 import React, { version } from 'react'
 import App from 'next/app'
 import * as glob from 'glob'
+import 'antd/dist/antd.css'
 import '../src/App.css'
+
 import NoSSR from '../src/components/NoSSR'
 import { AppWrapper } from '../src/contexts/DocumentContext.tsx'
 import { ContextWrapper } from '../src/contexts/ContextContext'
 
 import Navigation from '../src/components/Navigation'
-import {NORMAL} from "../src/contexts/SLOTS";
+import { NORMAL } from '../src/contexts/SLOTS'
 
 console.log(version)
 
@@ -36,9 +38,7 @@ class MyApp extends App {
         <NoSSR>
           <ContextWrapper>
             <AppWrapper>
-              <Navigation
-               slot={NORMAL}
-              />
+              <Navigation slot={NORMAL} />
               <Component {...this.props.pageProps} slot={NORMAL} />
             </AppWrapper>
           </ContextWrapper>

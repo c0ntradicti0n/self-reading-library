@@ -5,6 +5,7 @@ from helpers.cache_tools import configurable_cache
 from core.pathant.Converter import converter
 from core.pathant.PathAnt import PathAnt
 from core.event_binding import RestQueue, queue_put
+from helpers.json_tools import json_file_update
 from helpers.model_tools import model_in_the_loop, BEST_MODELS
 from helpers.list_tools import metaize, forget_except
 from layout.annotation_thread import full_model_path
@@ -68,6 +69,8 @@ elmo_difference_model_pipe = ant(
 
 
 def annotate_uploaded_file(file, service_id, url):
+    BEST_MODELS = json_file_update(config.BEST_MODELS_PATH)
+
     result = forget_except(
         [
             next(

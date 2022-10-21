@@ -9,7 +9,7 @@
     "start": "next start",
     "test": "jest",
     "format": "prettier --check --ignore-path .gitignore .",
-    "format:fix": "prettier --write --ignore-path .prettierignore src"
+    "format:fix": "prettier --write --ignore-path .prettierignore ."
   },
   "dependencies": {
     "@emotion/react": "^11.9.0",
@@ -19,6 +19,7 @@
     "@react-three/drei": "^9.7.1",
     "@react-three/fiber": "^8.0.13",
     "@types/node": "^14.0.27",
+    "antd": "^4.23.5",
     "colors": "^1.4.0",
     "drei": "0.0.60",
     "glob": "^7.1.6",
@@ -37,6 +38,7 @@
     "react-loadable": "^5.5.0",
     "react-loader-spinner": "^6.0.0-0",
     "react-pro-sidebar": "^0.6.0",
+    "react-rectangle-selection": "^1.0.4",
     "react-three-fiber": "4.2.12",
     "three": "^0.140.2",
     "three-spritetext": "^1.5.2"

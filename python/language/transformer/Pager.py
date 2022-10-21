@@ -8,6 +8,7 @@ import chardet
 from config import config
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
+from helpers.str_tools import str_list_ascii
 from language.nlp_helpers.Regexes import SENTENCE_END_REGEX
 from language.nlp_helpers.split_interpunction import split_punctuation
 from language.transformer import ElmoPredict
@@ -146,7 +147,11 @@ class Pager(PathSpec):
                 ElmoPredict.q2[self.flags["service_id"]].put((None, None))
                 break
 
-            self.logger.info(" ".join([t for t in window]))
+            window = str_list_ascii(window)
+            try:
+                self.logger.info(" ".join([t for t in window]))
+            except:
+                self.logger.info("Encoding Error")
 
             if len(window) == 0:
                 self.logger.info("finishing?")
@@ -208,8 +213,7 @@ class Pager(PathSpec):
                     self.logger.error("error computing new beginning")
                     return
             else:
-
-                self.logger.info("...")
+                pass
 
             start_i2 = min(sentence_marks, key=lambda _m: abs(_m - start_i2))
             rest_text = real_tokens[start_i2 : start_i2 + 300]

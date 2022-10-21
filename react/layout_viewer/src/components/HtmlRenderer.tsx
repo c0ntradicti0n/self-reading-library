@@ -22,7 +22,10 @@ const HtmlRenderer = (props: Props) => {
 
   const context = useContext<DocumentContext>(DocumentContext)
   useEffect(() => {
-    if (context.value[props.slot] && !context.value[props.slot].includes('http')) {
+    if (
+      context.value[props.slot] &&
+      !context.value[props.slot].includes('http')
+    ) {
       console.log('fetching static html', context.value[props.slot])
       setHtmlContent(
         httpGet(

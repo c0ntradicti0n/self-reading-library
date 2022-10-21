@@ -1,96 +1,81 @@
-import React, { useContext } from 'react'
-import Button from '@mui/material/Button'
-import Router from 'next/router'
-import Url2Difference from './Url2Difference'
-import Audiobook from './Audiobook'
-
-import styled from 'styled-components'
+import React, { useContext, useState } from 'react'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
 import Captcha from './Captcha'
-import {Slot} from "../contexts/SLOTS";
+import { Slot } from '../contexts/SLOTS'
+import { Button, Popover } from 'antd'
+import Audiobook from './Audiobook'
+import Url2Difference from './Url2Difference'
+import UploadDocument from './Upload'
+import GoldenSnake from './GoldenSnake'
 
-const NavigationDiv = styled.div`
-  position: fixed;
-  margin-left: 70%;
-  margin-right: 0;
-  align: left;
-  background: #fff !important;
-  width: 17%;
-  column-count: 1;
-  flex-flow: column wrap;
-  padding: 3%;
-  z-index: 10000;
-`
+interface PropType {
+  slot: Slot
+}
 
-const Navigation = ({slot}: Slot) => {
+const NavigationContent = ({ slot }: PropType) => {
   const context = useContext<DocumentContext>(DocumentContext)
   const id = context.value[slot]
-  const shortId = (id??'').replace('.layouteagle/', '')
+  const shortId = (id ?? '').replace('.layouteagle/', '')
   return (
-    <NavigationDiv>
+    <GoldenSnake>
       <div>
-        <Button
-          style={{ marginLeft: '3vw' }}
-          href="https://self-reading-library.science">
-          <img
-            style={{ width: '5vw', borderRadius: '60px' }}
-            src="/logo.jpeg"
-            alt={'Logo'}
-          />
-        </Button>
-      </div>
-      <div>
-        <Button href="/library">Universe of documents</Button>
+        <a href="/library">Universe of documents</a>
       </div>
 
-      <h3>Interactive formats</h3>
       <div>
-        <Button href={'/difference?id=' + id}>Read annotated paper</Button>
+        <a href={'/difference?id=' + id}>Read annotated paper</a>
       </div>
       <div>
         <Audiobook />
       </div>
       <div>
-        <Button href={shortId}>Original PDF</Button>
+        <a href={shortId}>Original PDF</a>
       </div>
       <div>
-        <Button href={'/upload_annotation?id=' + id}>
-          Improve layout recognition
-        </Button>
+        <a href={'/upload_annotation?id=' + id}>Improve layout recognition</a>
       </div>
-
-      <h3>Navigate to other document</h3>
-
-      <h5>Captcha game</h5>
       <div>
         <Captcha />
       </div>
-
-      <h5>Read custom page here, paste URL</h5>
       <div>
         <Url2Difference />
       </div>
 
-      <h5>Upload your own document</h5>
-      <div>
-        <form
-          onSubmit={(e) => {
-            console.log(e)
-            Router.push({
-                pathname: '/difference/',
-                query: {id: (e.target as HTMLTextAreaElement).value},
-            })
-          }}>
-          <input type="file" id="myfile" name="myfile" />
-        </form>
-      </div>
-      <h3>Navigate to 3D-Library</h3>
-
-      <div>
-        <Button href={'/library'}>Library</Button>
-      </div>
-    </NavigationDiv>
+      <UploadDocument />
+    </GoldenSnake>
   )
 }
 
+const Navigation = (props: PropType) => {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <Popover
+      content={
+        <div>
+          <NavigationContent {...props} />
+        </div>
+      }
+      placement="rightBottom"
+      title={
+        <>
+          Navigation <a onClick={() => setOpen(false)}>✕</a>
+        </>
+      }
+      trigger="click"
+      open={open}>
+      <Button
+        style={{
+          zIndex: 100000000,
+          position: 'fixed',
+          top: '0px',
+          right: '0px',
+        }}
+        type="primary"
+        onClick={() => setOpen(true)}>
+        Navigation
+      </Button>
+    </Popover>
+  )
+}
 export default Navigation

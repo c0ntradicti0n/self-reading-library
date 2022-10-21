@@ -27,3 +27,11 @@ def remove_ugly_chars(string):
         string,
         regex.MULTILINE,
     )
+
+
+def str_ascii(s):
+    return s.encode("ascii", errors="namereplace").decode("utf-8")
+
+
+def str_list_ascii(l):
+    return [str_ascii(t) for t in l]

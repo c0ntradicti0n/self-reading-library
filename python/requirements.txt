@@ -28,7 +28,7 @@ traceback_with_variables
 paired
 coloredlogs
 pyyaml
-tensorflow
+tensorflow-cpu
 gunicorn
 wordninja
 overrides
@@ -38,7 +38,9 @@ rapidfuzz
 parasail
 spacy
 spacy-transformers
-allennlp=2.8.0
+allennlp==2.10.0
+allennlp-models==2.10.0
+
 swalign
 nltk
 Cython
@@ -77,7 +79,6 @@ transformers==4.10.1
 diff_match_patch
 python-Levenshtein
 pycallgraph
-allennlp-models
 hanging_threads
 zmq
 uwsgi

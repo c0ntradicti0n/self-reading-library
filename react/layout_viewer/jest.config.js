@@ -1,4 +1,4 @@
-const { defaults } = require('jest-config');
+const { defaults } = require('jest-config')
 
 module.exports = {
   bail: true,
@@ -9,4 +9,4 @@ module.exports = {
     '^.+\\.tsx?$': 'ts-jest',
   },
   verbose: true,
-};
+}

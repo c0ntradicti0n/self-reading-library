@@ -1,6 +1,6 @@
 # The AI-reading support framework: A self-reading library
 
-**Demo: [Self-reading library](https://self-reading-library.science/)**
+**BoxSelectCanvas: [Self-reading library](https://self-reading-library.science/)**
 
 Did you ever went to the library and asked yourself, why they don't read all those books and tell you about the important stuff - instead of allowing you read?
 

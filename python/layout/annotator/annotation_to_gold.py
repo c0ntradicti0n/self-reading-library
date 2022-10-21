@@ -79,4 +79,4 @@ class AnnotatorRate(PathSpec):
                 yield _p_m
             else:
                 q[self.service].put(self.service, _p_m)
-                q[self.service].rate(id, rating_score)
+                q[self.service].rate(id, rating_score, meta["labels"])

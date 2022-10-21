@@ -1,4 +1,4 @@
-import { getSpans } from '../src/util/annotation.ts';
+import { getSpans } from '../src/util/annotation.ts'
 
 describe('A suite is just a function', function () {
   const a = [
@@ -22,9 +22,9 @@ describe('A suite is just a function', function () {
     ['the', 'B-CONTRAST'],
     ['wall', 'B-CONTRAST'],
     [';', 'O'],
-  ];
+  ]
 
   it('aannotationnd so is a spec', function () {
-    expect(getSpans(a)).toBe(true);
-  });
-});
+    expect(getSpans(a)).toBe(true)
+  })
+})

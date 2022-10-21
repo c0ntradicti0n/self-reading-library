@@ -1,9 +1,6 @@
 import { useContext, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
-import Button from '@mui/material/Button'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Typography from '@mui/material/Typography'
+import { Button, Modal } from 'antd'
 import { Slider } from '@mui/material'
 import { ThreeDots } from 'react-loader-spinner'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
@@ -16,8 +13,6 @@ import {
   spans2annotation,
   valueText,
 } from '../helpers/span_tools'
-import { BootstrapDialogTitle } from './BootstrapDialogueTitle'
-import { BootstrapDialog } from './BootstrapDialogue'
 
 export function AnnotationTable(props: {
   annotation: string[][]
@@ -38,12 +33,6 @@ export function AnnotationTable(props: {
       })}
     </div>
   )
-}
-
-// @ts-ignore
-BootstrapDialogTitle.propTypes = {
-  children: PropTypes.node,
-  onClose: PropTypes.func.isRequired,
 }
 
 export default function SpanAnnotation({ text, onClose, service }) {
@@ -117,103 +106,94 @@ export default function SpanAnnotation({ text, onClose, service }) {
       <Button variant="outlined" onClick={handleClickOpen}>
         Open dialog
       </Button>
-      <BootstrapDialog
+      <Modal
         aria-labelledby="customized-dialog-title"
         open={open}
         fullWidth
         maxWidth={'xl'}
         style={{ marginRight: '30%' }}
+        title="Select the difference"
         onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
           console.log('stop it!')
-        }}
-      >
-        <BootstrapDialogTitle onClose={() => handleCloseDiscard()}>
-          Teach the difference
-        </BootstrapDialogTitle>
-        <DialogContent dividers>
-          {!annotation ? (
-            <ThreeDots />
-          ) : (
-            <>
-              <Typography gutterBottom>
-                <AnnotationTable
-                  annotation={annotation}
-                  spans={spanIndices}></AnnotationTable>
-              </Typography>
-              <Typography gutterBottom>
-                {spanIndices.map(([tag, i1, i2, ws], i) => (
-                  <div key={i}>
-                    <Button
-                      startIcon="minus"
-                      onClick={() => {
-                        popSpan(spanIndices, i, setSpanIndices)
-                      }}></Button>
-                    <b>{tag}</b>
-                    <b>{spanIndices[i].slice(1, 3)}</b>
-                    <br />
-                    <div
-                      style={{
-                        marginRight: '0px',
-                        marginLeft: '0px',
-                      }}>
-                      <div
-                        style={{
-                          wordWrap: 'break-word',
-                          whiteSpace: 'normal',
-                          width: '50vw',
-                        }}>
-                        {ws.map((w, iii) => (
-                          <span key={iii} className={'tag span_' + tag}>
-                            {w}
-                          </span>
-                        ))}
-                      </div>
+        }}>
+        {!annotation ? (
+          <ThreeDots />
+        ) : (
+          <>
+            <AnnotationTable
+              annotation={annotation}
+              spans={spanIndices}></AnnotationTable>
 
-                      <Slider
-                        aria-label="annotation"
-                        value={[i1, i2]}
-                        valueLabelDisplay="auto"
-                        style={{ width: '50vw !important' }}
-                        onChange={(event, newValue, activeThumb) => {
-                          const result = adjustSpanValue(
-                            newValue as [number, number],
-                            activeThumb,
-                            spanIndices,
-                            i,
-                            tag,
-                            annotation
-                          )
-                          console.log(result)
-                          setSpanIndices(result)
-                        }}
-                        step={1}
-                        marks
-                        min={0}
-                        max={annotation.length}
-                        disableSwap
-                        getAriaValueText={valueText}
-                      />
-                    </div>
+            {spanIndices.map(([tag, i1, i2, ws], i) => (
+              <div key={i}>
+                <Button
+                  startIcon="minus"
+                  onClick={() => {
+                    popSpan(spanIndices, i, setSpanIndices)
+                  }}></Button>
+                <b>{tag}</b>
+                <b>{spanIndices[i].slice(1, 3)}</b>
+                <br />
+                <div
+                  style={{
+                    marginRight: '0px',
+                    marginLeft: '0px',
+                  }}>
+                  <div
+                    style={{
+                      wordWrap: 'break-word',
+                      whiteSpace: 'normal',
+                      width: '50vw',
+                    }}>
+                    {ws.map((w, iii) => (
+                      <span key={iii} className={'tag span_' + tag}>
+                        {w}
+                      </span>
+                    ))}
                   </div>
-                ))}
-              </Typography>
-              <Button
-                startIcon="add"
-                onClick={() => {
-                  setSpanIndices(addSpan(spanIndices, annotation))
-                }}></Button>
-            </>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => handleCloseDiscard()}>
-            Discard changes/Cancel
-          </Button>
-          <Button onClick={() => handleCloseSave()}>Save changes</Button>
-        </DialogActions>
-      </BootstrapDialog>
+
+                  <Slider
+                    aria-label="annotation"
+                    value={[i1, i2]}
+                    valueLabelDisplay="auto"
+                    style={{ width: '50vw !important' }}
+                    onChange={(event, newValue, activeThumb) => {
+                      const result = adjustSpanValue(
+                        newValue as [number, number],
+                        activeThumb,
+                        spanIndices,
+                        i,
+                        tag,
+                        annotation
+                      )
+                      console.log(result)
+                      setSpanIndices(result)
+                    }}
+                    step={1}
+                    marks
+                    min={0}
+                    max={annotation.length}
+                    disableSwap
+                    getAriaValueText={valueText}
+                  />
+                </div>
+              </div>
+            ))}
+            <Button
+              startIcon="add"
+              onClick={() => {
+                setSpanIndices(addSpan(spanIndices, annotation))
+              }}></Button>
+          </>
+        )}
+
+        <Button onClick={() => handleCloseDiscard()}>
+          Discard changes/Cancel
+        </Button>
+        <Button onClick={() => handleCloseSave()}>Save changes</Button>
+      </Modal>
     </div>
   )
 }

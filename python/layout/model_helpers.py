@@ -1,3 +1,5 @@
+import types
+
 from PIL.Image import Resampling
 
 from layout.imports import *
@@ -73,25 +75,34 @@ def post_process_df(feature_df):
     return feature_df
 
 
-if os.path.isfile(config.PROCESSOR_PICKLE):
-    with open(config.PROCESSOR_PICKLE, "rb") as f:
-        PROCESSOR = pickle.load(f)
-else:
-    PROCESSOR = LayoutLMv2Processor.from_pretrained(
-        "microsoft/layoutlmv2-base-uncased", revision="no_ocr"
-    )
-    with open(config.PROCESSOR_PICKLE, "wb") as f:
-        pickle.dump(PROCESSOR, f)
+class LayoutModelParts(types.ModuleType):
+    @property
+    def PROCESSOR(self):
+        if not hasattr(self, "_PROCESSOR"):
+            if os.path.isfile(config.PROCESSOR_PICKLE):
+                with open(config.PROCESSOR_PICKLE, "rb") as f:
+                    self._PROCESSOR = pickle.load(f)
+            else:
+                self._PROCESSOR = LayoutLMv2Processor.from_pretrained(
+                    "microsoft/layoutlmv2-base-uncased", revision="no_ocr"
+                )
+                with open(config.PROCESSOR_PICKLE, "wb") as f:
+                    pickle.dump(self._PROCESSOR, f)
+        return self._PROCESSOR
 
-if os.path.isfile(config.MODEL_PICKLE):
-    with open(config.MODEL_PICKLE, "rb") as f:
-        MODEL = pickle.load(f)
-else:
-    MODEL = LayoutLMv2ForTokenClassification.from_pretrained(
-        "microsoft/layoutlmv2-base-uncased", num_labels=config.NUM_LABELS
-    )
-    with open(config.MODEL_PICKLE, "wb") as f:
-        pickle.dump(MODEL, f)
+    @property
+    def MODEL(self):
+        if not hasattr(self, "_MODEL"):
+            if os.path.isfile(config.MODEL_PICKLE):
+                with open(config.MODEL_PICKLE, "rb") as f:
+                    self._MODEL = pickle.load(f)
+            else:
+                self._MODEL = LayoutLMv2ForTokenClassification.from_pretrained(
+                    "microsoft/layoutlmv2-base-uncased", num_labels=config.NUM_LABELS
+                )
+                with open(config.MODEL_PICKLE, "wb") as f:
+                    pickle.dump(self._MODEL, f)
+        return self._MODEL
 
 
 def preprocess_data(training=False):

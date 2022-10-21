@@ -1,13 +1,13 @@
-import React from 'react';
-import Layout from '../src/components/Layout';
-import styled from 'styled-components';
-import { Button } from '@mui/material';
+import React from 'react'
+import Layout from '../src/components/Layout'
+import styled from 'styled-components'
+import { Button } from '@mui/material'
 
 const PageTitle = styled.div`
   align: right;
   margin: 2em;
   padding: 2em;
-`;
+`
 
 const H = styled.div`
   text-transform: capitalize;
@@ -16,16 +16,16 @@ const H = styled.div`
   border-radius: 30px;
   width: 55rem;
   height: 15rem;
-`;
+`
 
 const CenterHorizontallyVertically = styled.div`
   padding: 70px 0;
   text-align: center;
-`;
+`
 
 const Quote = styled.div`
   font-family: 'Roboto', mono;
-`;
+`
 
 export default class Index extends React.Component {
   render() {
@@ -98,6 +98,6 @@ export default class Index extends React.Component {
           </p>
         </PageTitle>
       </Layout>
-    );
+    )
   }
 }

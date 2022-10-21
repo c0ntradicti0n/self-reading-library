@@ -20,7 +20,10 @@ const DocumentContext = createContext<DocumentContextType>({
 })
 
 const AppWrapper = ({ children }) => {
-  let [state, setState] = useState<DocumentContextStateType>({captcha: undefined, normal: undefined})
+  let [state, setState] = useState<DocumentContextStateType>({
+    captcha: undefined,
+    normal: undefined,
+  })
 
   const setValueMeta = (slot: Slot, newValue: string, newMeta: any) => {
     state[slot] = { value: newValue, meta: newMeta }
@@ -43,13 +46,13 @@ const AppWrapper = ({ children }) => {
         value,
         meta,
         setValueMetas: (slot, [value, meta]) => {
-          console.log('setPlural',slot,  value, meta)
+          console.log('setPlural', slot, value, meta)
           setValueMeta(slot, value, meta)
         },
         setValueMeta: (slot, value, meta) => {
           console.log('setSingular', slot, value, meta)
 
-          setValueMeta(slot,value, meta)
+          setValueMeta(slot, value, meta)
         },
       }}>
       {children}
@@ -57,5 +60,4 @@ const AppWrapper = ({ children }) => {
   )
 }
 
-
-export { DocumentContext, AppWrapper}
+export { DocumentContext, AppWrapper }

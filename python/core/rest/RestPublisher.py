@@ -79,7 +79,8 @@ class RestPublisher(PathSpec, react):
 
             try:
                 with open(
-                    "/".join([self.npm_resources, self.resource.Title + "Service.ts"]), "w"
+                    "/".join([self.npm_resources, self.resource.Title + "Service.ts"]),
+                    "w",
                 ) as f:
                     f.write(
                         self.server_resource_code.format(
@@ -108,7 +109,9 @@ class RestPublisher(PathSpec, react):
                         )
                     )
             except:
-                logging.error(f"Could not write {self.resource.title}.tsx", exc_info=True)
+                logging.error(
+                    f"Could not write {self.resource.title}.tsx", exc_info=True
+                )
 
     def __iter__(self, incoming):
         if not self.contents:

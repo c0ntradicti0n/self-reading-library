@@ -5,7 +5,9 @@ import torch
 from traceback_with_variables import activate_by_import
 from traceback_with_variables import Format, ColorSchemes, is_ipython_global
 import numpy
-import tensorflow as tf
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 
 sys.path.append("../core")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -38,9 +40,10 @@ fmt = Format(
     ],
 )
 
-tf.config.list_physical_devices("GPU")
-tf.get_logger().setLevel(3)
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+# import tensorflow as tf
+# tf.config.list_physical_devices("GPU")
+# tf.get_logger().setLevel(3)
+# tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 numpy.set_printoptions(threshold=sys.maxsize)
 
@@ -173,3 +176,4 @@ spacy_model_name = "en_core_web_trf"
 audio_format = ".ogg"
 audio_path = hidden_folder + "audio/"
 create_frontend = os.environ.get("CREATE_FRONTEND", default=False)
+BEST_MODELS_PATH = hidden_folder + "/best_models.json"

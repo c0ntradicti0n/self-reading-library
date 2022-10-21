@@ -7,6 +7,7 @@ from core.rest.Resource import Resource
 from core.rest.RestPublisher import RestPublisher
 from core.pathant.Converter import converter
 from helpers.hash_tools import bas64encode, hashval
+from helpers.json_tools import json_file_update
 from helpers.list_tools import metaize
 from helpers.model_tools import BEST_MODELS
 from language.transformer.FilterAlignText import FilterAlignText
@@ -59,6 +60,7 @@ class DifferenceAnnotationPublisher(RestPublisher):
         self.kind = "difference_annotation"
 
     def on_post(self, req, resp, id=None):
+        BEST_MODELS = json_file_update(config.BEST_MODELS_PATH)
         print(f"Annotating {self.kind}")
         doc_id, text, pdf_path = req.media
         pipeline = self.ant(

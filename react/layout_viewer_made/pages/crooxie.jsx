@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 export default class Index extends React.Component {
   render() {
@@ -10,9 +10,8 @@ export default class Index extends React.Component {
         <iframe
           style={{ pageBreakAfter: 'always' }}
           src="http://www.differencebetween.net/technology/difference-between-spotify-and-soundcloud/"
-          title="Cookiefree page"
-        ></iframe>
+          title="Cookiefree page"></iframe>
       </>
-    );
+    )
   }
 }

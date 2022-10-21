@@ -39,7 +39,9 @@ class react:
                     "--example",
                     "with-three-js",
                 ]
-                subprocess.check_call(parts, stdout=sys.stdout, stderr=subprocess.STDOUT)
+                subprocess.check_call(
+                    parts, stdout=sys.stdout, stderr=subprocess.STDOUT
+                )
 
                 os.mkdir(self.npm_resources)
 

@@ -1,13 +1,16 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { pairwise, zip } from '../helpers/array'
-import { Button } from '@mui/material'
+import { Button } from 'antd'
 import Router from 'next/router'
 import { Watch } from 'react-loader-spinner'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
 import Resource from '../resources/Resource'
+import { Slot } from '../contexts/SLOTS'
+import dynamic from 'next/dynamic'
 
-import {Slot} from "../contexts/SLOTS";
-
+const RectangleSelection = dynamic(() => import('react-rectangle-selection'), {
+  ssr: false,
+})
 const LABELS = ['NONE', 'c1', 'c2', 'c3', 'wh', 'h', 'pn', 'fn', 'fg', 'tb']
 
 const LABEL_SWITCH = Object.fromEntries(pairwise([...LABELS, LABELS[0]]))
@@ -70,15 +73,14 @@ const TAG_COLOR = {
   tb: 'beige',
 }
 
-const BoxAnnotator = ({ service,     slot
- }: {service: Resource, slot: Slot}) => {
+const BoxAnnotator = ({ service, slot }: { service: Resource; slot: Slot }) => {
   service.setSlot(slot)
   const [next_key, setNextKey] = useState('')
   const [finished, setFinished] = useState(false)
   const [imgOriginalSize, setImgOriginalSize] = useState(null)
   const [imgRenderSize, setImgRenderSize] = useState(null)
   const [labels, setLabels] = useState(null)
-
+  const [rectangleSelection, setRectangleSelection] = useState(null)
   const context = useContext<DocumentContext>(DocumentContext)
 
   useEffect(() => {
@@ -90,9 +92,9 @@ const BoxAnnotator = ({ service,     slot
 
   useEffect(() => {
     const width = window.innerWidth
-    const scaleW = width * 0.5
+    const scaleW = width * 0.64
     const height = window.innerHeight
-    const scaleH = height * 1.01
+    const scaleH = height * 0.81
 
     let im = new Image()
     im.src = 'data:image/jpeg;charset=utf-8;base64,' + context.meta[slot]?.image
@@ -123,176 +125,230 @@ const BoxAnnotator = ({ service,     slot
   }, [])
 
   let cols
-    console.log("meta", context.meta[slot].bbox, labels ?? context.meta[slot].LABEL ?? context.meta[slot].labels)
+
   if (context?.meta[slot]?.bbox)
-    cols = zip([context.meta[slot].bbox, labels ?? context.meta[slot].LABEL ?? context.meta[slot].labels])
+    cols = zip([
+      context.meta[slot].bbox,
+      labels ?? context.meta[slot].LABEL ?? context.meta[slot].labels,
+    ])
   else
-    return <pre>Not rendering {slot}, missing bbox{JSON.stringify(context, null,  2)}</pre>
+    return (
+      <pre>
+        Not rendering {slot}, missing bbox{JSON.stringify(context, null, 2)}
+      </pre>
+    )
 
-  console.log({ imgOriginalSize, imgRenderSize, service })
-    console.table(cols)
-  return (
-    <div style={{ fontSize: '1em !important', display: 'flex' }}>
-        box
-      {finished ? (
-        <div>
-          <h2>
-            We have annotated the whole document!{' '}
-            <Button
-              onClick={(e) => {
-                console.log(e)
-                Router.push({
-                  pathname: '/difference/',
-                  query: { id: context.value[slot] },
-                }).catch(console.error)
-              }}>
-              Return to document!
-            </Button>
-          </h2>
-        </div>
-      ) : (
-        <div className="container" style={{ position: 'absolute' }}>
-          {context.meta[slot]?.image ? (
-            <img
-              id="annotation_canvas"
-              src={
-                'data:image/jpeg;charset=utf-8;base64,' + context.meta[slot]?.image
-              }
-              alt="layout annotation"
-            />
-          ) : null}
+  if (!imgRenderSize) return 'Not ready'
+  const renderRectTagsCoords = cols?.map((row, i) => [
+    row[1],
+    {
+      left:
+        (row[0][0] / 1000) * imgRenderSize.width - imgRenderSize.height * 0.03,
+      top:
+        (row[0][1] / 1000) * imgRenderSize.height -
+        imgRenderSize.height * 0.003,
+      width: ((row[0][2] - row[0][0]) / 1000) * imgRenderSize.width * 1.02,
+      height:
+        ((row[0][3] - row[0][1]) / 1000) * imgRenderSize.height +
+        imgRenderSize.height * 0.003,
+    },
+  ])
 
-          {imgOriginalSize ? (
-            cols?.map((row, i) => (
-              <div
-                style={{
-                  position: 'absolute',
-                  left:
-                    (
-                      (row[0][0] /1000) *
-                      imgRenderSize.width-
-                      imgRenderSize.height * 0.03
-                    ).toString() + 'px',
-                  top:
-                    (
-                      (row[0][1] / 1000) *
-                        imgRenderSize.height -
-                      imgRenderSize.height * 0.003
-                    ).toString() + 'px',
-                  width:
-                    (
-                      ((row[0][2] - row[0][0]) / 1000) *
-                      imgRenderSize.width *
-                      1.02
-                    ).toString() + 'px',
-                  height:
-                    (
-                      ((row[0][3] - row[0][1]) /1000) *
-                        imgRenderSize.height +
-                      imgRenderSize.height * 0.003
-                    ).toString() + 'px',
-                  //border: "1px solid black",
-                  zIndex: Math.ceil(
-                    9000000 - (row[0][2] - row[0][0]) * (row[0][3] - row[0][1])
-                  ),
-                  opacity: '0.5',
-                  background: TAG_COLOR[row[1]],
-                }}
-                onClick={() => {
-                  console.log('row', i)
-                  let label
-                  if (next_key) {
-                    label = next_key
-                  } else {
-                    label = LABEL_SWITCH[row[1]]
-                  }
-                  console.log({ label, ls: LABEL_SWITCH, service })
-                  if (label)
-                    service.change('[1].labels.[' + i + ']', label, (res) => {
-                      console.log(res)
-                      setLabels(res[1].labels)
-                    }).catch(console.error)
-                }}></div>
-            ))
-          ) : (
-            <Watch ariaLabel="Waiting for image" />
-          )}
+  return window ? (
+    <div
+      style={{ fontSize: '1em !important', display: 'flex', zIndex: 100000 }}>
+      <RectangleSelection
+        onSelect={(e, coords) => {
+          const [x1, x2] = [
+            Math.min(coords.origin[0], coords.target[0]),
+            Math.max(coords.origin[0], coords.target[0]),
+          ]
+          const [y1, y2] = [
+            Math.min(coords.origin[1], coords.target[1]),
+            Math.max(coords.origin[1], coords.target[1]),
+          ]
 
-          {cols ? (
-            <>
-              <Button
-                style={{ backgroundColor: '#DEF' }}
-                onClick={() => {
-                  ;(async () => {
-                    console.log('ok')
-                    await service.ok(
-                      [context.value[slot], context.meta[slot]],
-                      '',
-                      {},
-                      async (val) => {
-                        console.log(await val)
-                        if (!Object.keys(val).length) {
-                          setFinished(true)
-                        }
+          if (!next_key) {
+            alert(
+              'Please set Label by pressing key before selecting with the box'
+            )
+            return
+          }
 
-                        console.log('get new')
+          const jsonPathsToChange = renderRectTagsCoords
+            .map(([rowLabel, row], i) => [rowLabel, row, i])
+            .filter(([rowLabel, row, i]) => {
+              if (
+                row.left > x1 &&
+                row.left + row.width < x2 &&
+                row.top > y1 &&
+                row.top + row.height < y2
+              )
+                return true
+              else return false
+            })
+            .map(([rowLabel, row, i]) => '[1].labels.[' + i + ']')
 
-                        await service.fetch_all((val) => context.setValueMetas(slot, val))
-                      }
-                    )
-                  })()
-                }}>
-                OK
-              </Button>
-              <Button
-                style={{ backgroundColor: '#FED' }}
-                onClick={service.cancel}>
-                Discard
-              </Button>
-            </>
-          ) : null}
-
+          setRectangleSelection([jsonPathsToChange, next_key])
+        }}
+        onMouseUp={(event) => {
+          if (rectangleSelection)
+            service
+              .change(rectangleSelection[0], rectangleSelection[1], (res) => {
+                console.log('changed multiple labels', res[1].labels)
+                setLabels(res[1].labels)
+              })
+              .catch(console.error)
+          setRectangleSelection(null)
+        }}
+        style={{
+          backgroundColor: 'rgba(0,0,255,0.4)',
+          borderColor: 'blue',
+        }}>
+        {finished ? (
           <div>
-            <table style={{ width: '10%' }}>
-              <tr>
-                <td> KEY</td>
-                <td>TAG</td>
-              </tr>
-              {Object.entries(KEYS).map(([k, v], i) => (
-                <tr onClick={() => setNextKey(KEYS[k])}>
-                  <td
-                    key={i + '_1'}
-                    style={{
-                      border: '1px',
-                      fontFamily: 'keys',
-                      fontSize: '4em',
-                      verticalAlign: 'bottom',
-                    }}>
-                    {KEY_TRANSLATE[k]}
-                  </td>
-                  <td
-                    key={i + '_2'}
-                    style={{
-                      verticalAlign: 'top',
-                    }}>
-                    <div
-                      style={{
-                        backgroundColor: TAG_COLOR[v] as string,
-                        border: '10px solid ' + TAG_COLOR[v],
-                        display: 'block',
-                        borderRadius: '7px',
-                      }}>
-                      {' '}
-                      {TAG_TRANSLATE[v]}{' '}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </table>
+            <h2>
+              We have annotated the whole document!{' '}
+              <Button
+                onClick={(e) => {
+                  console.log(e)
+                  Router.push({
+                    pathname: '/difference/',
+                    query: { id: context.value[slot] },
+                  }).catch(console.error)
+                }}>
+                Return to document!
+              </Button>
+            </h2>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="container" style={{ position: 'absolute' }}>
+            {context.meta[slot]?.image ? (
+              <img
+                id="annotation_canvas"
+                src={
+                  'data:image/jpeg;charset=utf-8;base64,' +
+                  context.meta[slot]?.image
+                }
+                alt="layout annotation"
+                draggable="false"
+              />
+            ) : null}
+
+            {imgOriginalSize ? (
+              renderRectTagsCoords?.map(([rowLabel, row], i) => (
+                <div
+                  key={'row' + i.toString()}
+                  style={{
+                    position: 'absolute',
+                    left: row.left.toString() + 'px',
+                    top: row.top.toString() + 'px',
+                    width: row.width.toString() + 'px',
+                    height: row.height.toString() + 'px',
+                    zIndex: Math.ceil(9000000),
+                    opacity: '0.5',
+                    background: TAG_COLOR[rowLabel],
+                  }}
+                  onClick={() => {
+                    console.log('row', i)
+                    let label
+                    if (next_key) {
+                      label = next_key
+                    } else {
+                      label = LABEL_SWITCH[rowLabel]
+                    }
+                    console.log({ label, ls: LABEL_SWITCH, service })
+                    if (label)
+                      service
+                        .change('[1].labels.[' + i + ']', label, (res) => {
+                          console.log('changed single label', res)
+                          setLabels(res[1].labels)
+                        })
+                        .catch(console.error)
+                  }}></div>
+              ))
+            ) : (
+              <Watch ariaLabel="Waiting for image" />
+            )}
+
+            {cols ? (
+              <>
+                <Button
+                  style={{ backgroundColor: '#DEF' }}
+                  onClick={() => {
+                    ;(async () => {
+                      console.log('ok')
+                      await service.ok(
+                        [context.value[slot], context.meta[slot]],
+                        '',
+                        {},
+                        async (val) => {
+                          console.log(await val)
+                          if (!Object.keys(val).length) {
+                            setFinished(true)
+                          }
+
+                          console.log('get new')
+
+                          await service.fetch_all((val) =>
+                            context.setValueMetas(slot, val)
+                          )
+                        }
+                      )
+                    })()
+                  }}>
+                  Good
+                </Button>
+                <Button
+                  style={{ backgroundColor: '#FED' }}
+                  onClick={service.cancel}>
+                  Can't solve
+                </Button>
+              </>
+            ) : null}
+
+            <div>
+              <table style={{ width: '10%' }}>
+                <tr>
+                  <td> KEY</td>
+                  <td>TAG</td>
+                </tr>
+                {Object.entries(KEYS).map(([k, v], i) => (
+                  <tr onClick={() => setNextKey(KEYS[k])}>
+                    <td
+                      key={i + '_1'}
+                      style={{
+                        border: '1px',
+                        fontFamily: 'keys',
+                        fontSize: '2em',
+                        verticalAlign: 'bottom',
+                      }}>
+                      {KEY_TRANSLATE[k]}
+                    </td>
+                    <td
+                      key={i + '_2'}
+                      style={{
+                        verticalAlign: 'top',
+                      }}>
+                      <div
+                        style={{
+                          backgroundColor: TAG_COLOR[v] as string,
+                          border: '4px solid ' + TAG_COLOR[v],
+                          display: 'block',
+                          borderRadius: '7px',
+                        }}>
+                        {' '}
+                        {TAG_TRANSLATE[v]}{' '}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </table>
+            </div>
+          </div>
+        )}
+      </RectangleSelection>
     </div>
-  )
+  ) : null
 }
 export default BoxAnnotator

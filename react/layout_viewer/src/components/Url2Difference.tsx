@@ -1,26 +1,16 @@
 import React from 'react'
-import { Button } from '@mui/material'
+
+import Search from 'antd/lib/input/Search'
+import Router from 'next/router'
 
 export default class Url2Difference extends React.Component {
-  state = {
-    url: null,
-  }
-
   render() {
     return (
-      <form>
-        <input
-          onChange={(e) => this.setState({ url: e.target.value })}
-          name="id"
-          type="text"
-          style={{
-            margin: '10px',
-          }}
-        />
-        <Button href={'/difference?id=' + this.state.url} type="submit">
-          Go
-        </Button>
-      </form>
+      <Search
+        onSearch={(esearch) => Router.push('/difference?id=' + esearch)}
+        name="id"
+        placeholder="Put URL to be scanned as document"
+      />
     )
   }
 }

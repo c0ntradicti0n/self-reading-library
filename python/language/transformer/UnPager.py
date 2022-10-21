@@ -7,6 +7,8 @@ from core.pathant.PathSpec import PathSpec
 from listalign.word_pyalign import align
 import multiprocessing as mp
 
+from helpers.str_tools import str_list_ascii, str_ascii
+
 
 @converter("reading_order.page.*", "reading_order.*")
 class UnPager(PathSpec):
@@ -33,11 +35,14 @@ class UnPager(PathSpec):
                     whole_meta = {**meta}
                     continue
                 l_a = [iw[1] if iw[1] else "*" for iw in whole_meta["i_word"]]
+                l_a = str_list_ascii(l_a)
 
                 whole_meta["_i_to_i2"] = {}
 
                 for i_annotation, part_annotation in enumerate(whole_annotation):
                     l_b = [jw[1] if jw[1] else "~" for jw in part_annotation]
+                    l_b = str_list_ascii(l_b)
+
                     try:
                         assert l_b and l_a
 
@@ -53,8 +58,13 @@ class UnPager(PathSpec):
                         continue
 
                     print(
-                        alignment_table(
-                            alignment, l_a, l_b, info_b=lambda i_b: part_annotation[i_b]
+                        str_ascii(
+                            alignment_table(
+                                alignment,
+                                l_a,
+                                l_b,
+                                info_b=lambda i_b: part_annotation[i_b],
+                            )
                         )
                     )
 

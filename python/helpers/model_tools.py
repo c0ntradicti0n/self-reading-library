@@ -4,6 +4,7 @@ import regex
 
 from config import config
 from core.event_binding import queue_iter
+from helpers.json_tools import json_file_update
 from helpers.list_tools import dictize
 
 model_regex = r"(?P<shape>\d+)_(?P<f1>0,?\d*)_(?P<epoch>\d+)"
@@ -32,7 +33,7 @@ def find_best_model(model_dir):
 
 TRAINING_RATE = {}
 
-BEST_MODELS = {}
+BEST_MODELS = json_file_update(config.BEST_MODELS_PATH)
 
 
 def model_in_the_loop(
@@ -44,6 +45,7 @@ def model_in_the_loop(
     training_rate_mode="ls",
     training_rate_file=None,
 ):
+    global BEST_MODELS
     if not os.path.isdir(model_dir):
         os.makedirs(model_dir)
     if not os.path.isdir(collection_path):
@@ -84,6 +86,7 @@ def model_in_the_loop(
         }
 
         BEST_MODELS[service_id] = args
+        BEST_MODELS = json_file_update(config.BEST_MODELS_PATH, update=BEST_MODELS)
 
         logging.info(f"Having {training_rate = }")
         if training_rate < 0.8 or not full_model_path:
