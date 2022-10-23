@@ -16,14 +16,12 @@ mount-osx:
 
 .PHONY: dockerbuild
 dockerbuild:
-	CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose build
+	USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose build
 
-.PHONY: dockerup
-dockerup:
-	CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain  docker-compose up -d
+up:
+	USER=$$USER CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain  docker-compose up -d
 
-.PHONY: dockerdown
-dockerdown:
+down:
 	CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose down -v
 
 .PHONY: dockerlogs
@@ -31,12 +29,12 @@ dockerlogs:
 	docker logs -f rest
 
 dockerdebug:
-	docker exec -itd -p 2222:22 $SERVICE /usr/sbin/sshd -D
+	docker exec -itd rest /usr/sbin/sshd -D
 
 dbash:
 	docker exec -it rest bash
 
-d: dockerdown dockerbuild dockerup
+d: down dockerbuild up
 ddb:
 	CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain  docker-compose up -d db
 sync:

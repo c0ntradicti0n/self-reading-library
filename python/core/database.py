@@ -139,6 +139,12 @@ class Queue:
         except Exception as e:
             raise ValueError("wrong datatype for table!") from e
 
+    def update(self, id, item):
+        self.connection.con.execute(
+            f"UPDATE {self.service_id} set  value='{                    compressed_pickle(item).hex()}'"
+            f" where doc_id = '{self.row_id if not id else id}' or user_id = '{self.row_id if not id else id}'"
+        )
+
     def __len__(self):
         # Idiots invented an incompatible IntegerScalar
         return int(str(self.table.count()))
@@ -152,7 +158,10 @@ class RatingQueue(Queue):
     ]
 
     def get(self, id, timeout=None):
-        db_id, meta = Queue.get(self, id, timeout=timeout)
+        try:
+            db_id, meta = Queue.get(self, id, timeout=timeout)
+        except Exception as e:
+            raise
         rating_trial, rating_score, version = self.scores(id)
 
         meta["rating_trial"] = (
@@ -263,5 +272,9 @@ if __name__ == "__main__":
     assert meta["rating_score"] == 0.1234
     assert meta["rating_trial"] == 0
     assert meta["version"] == []
+
+    r.update(id2, (id2, {}))
+    doc_id, meta = r.get(id2)
+    assert meta == {"rating_trial": 0, "rating_score": 0.1234, "version": []}
 
     assert len(r) > 2

@@ -21,7 +21,7 @@ const cyrb53 = function (str, seed = 0) {
 }
 
 export default class Resource {
-  fetch_allowed: Boolean
+  get_allowed: Boolean
   read_allowed: Boolean
   correct_allowed: Boolean
   private readonly route: string
@@ -33,7 +33,7 @@ export default class Resource {
 
   constructor(
     route: string,
-    fetch_allowed = true,
+    get_allowed = true,
     read_allowed = true,
     upload_allowed = true,
     correct_allowed = true,
@@ -41,8 +41,8 @@ export default class Resource {
     no_id = false
   ) {
     this.route = route
-    this.fetch_allowed = fetch_allowed
-    this.correct_allowed = fetch_allowed
+    this.get_allowed = get_allowed
+    this.correct_allowed = get_allowed
     this.read_allowed = read_allowed
     this.correct_allowed = correct_allowed
     this.upload_allowed = upload_allowed
@@ -151,19 +151,19 @@ export default class Resource {
 
   exists = async (id, callback: Function) => {
     console.log('Fetch all resources')
-    if (this.fetch_allowed) {
+    if (this.get_allowed) {
       return await this.request('get', undefined, callback, null, 'id=' + id)
     }
   }
 
   fetch_one = async (id, callback: Function) => {
-    if (this.fetch_allowed) {
-      return await this.request('post', id, callback)
+    if (this.get_allowed) {
+      return await this.request('get', id, callback)
     }
   }
 
   fetch_all = async (callback) => {
-    if (this.fetch_allowed) {
+    if (this.get_allowed) {
       return await this.request('get', undefined, callback)
     }
   }

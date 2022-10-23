@@ -1,4 +1,4 @@
-export function httpGet(theUrl) {
+export function httpGet(theUrl, callback) {
   let xmlhttp
 
   if (window.XMLHttpRequest) {
@@ -11,10 +11,14 @@ export function httpGet(theUrl) {
       return xmlhttp.responseText
     }
   }
+  console.log(theUrl)
   xmlhttp.open('GET', theUrl, false)
+  xmlhttp.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
+  xmlhttp.setRequestHeader('Access-Control-Allow-Origin', '*')
+  console.log('beforesend')
   xmlhttp.send()
-
-  return xmlhttp.response
+  console.log('html', xmlhttp.response)
+  callback(xmlhttp.response)
 }
 
 export const getParam = (param) => {

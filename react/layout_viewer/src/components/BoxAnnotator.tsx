@@ -91,13 +91,13 @@ const BoxAnnotator = ({ service, slot }: { service: Resource; slot: Slot }) => {
   }, [])
 
   useEffect(() => {
-    const width = window.innerWidth
-    const scaleW = width * 0.64
-    const height = window.innerHeight
-    const scaleH = height * 0.81
-
     let im = new Image()
     im.src = 'data:image/jpeg;charset=utf-8;base64,' + context.meta[slot]?.image
+
+    const width = window.innerWidth
+    const scaleW = width * (im.width / im.height) * 0.5
+    const height = window.innerHeight
+    const scaleH = height * 0.81
     im.onload = () => {
       setImgOriginalSize({ width: im.width, height: im.height })
       setImgRenderSize({ width: scaleW, height: scaleH })
@@ -142,21 +142,21 @@ const BoxAnnotator = ({ service, slot }: { service: Resource; slot: Slot }) => {
   const renderRectTagsCoords = cols?.map((row, i) => [
     row[1],
     {
-      left:
-        (row[0][0] / 1000) * imgRenderSize.width - imgRenderSize.height * 0.03,
-      top:
-        (row[0][1] / 1000) * imgRenderSize.height -
-        imgRenderSize.height * 0.003,
-      width: ((row[0][2] - row[0][0]) / 1000) * imgRenderSize.width * 1.02,
-      height:
-        ((row[0][3] - row[0][1]) / 1000) * imgRenderSize.height +
-        imgRenderSize.height * 0.003,
+      left: (row[0][0] / 1200) * imgRenderSize.width,
+      top: (row[0][1] / 810) * imgRenderSize.height,
+      width: ((row[0][2] - row[0][0]) / 1150) * imgRenderSize.width,
+      height: ((row[0][3] - row[0][1]) / 810) * imgRenderSize.height,
     },
   ])
 
   return window ? (
     <div
-      style={{ fontSize: '1em !important', display: 'flex', zIndex: 100000 }}>
+      style={{
+        border: '2px solid black',
+        fontSize: '1em !important',
+        display: 'flex',
+        zIndex: 100000,
+      }}>
       <RectangleSelection
         onSelect={(e, coords) => {
           const [x1, x2] = [
@@ -222,7 +222,9 @@ const BoxAnnotator = ({ service, slot }: { service: Resource; slot: Slot }) => {
             </h2>
           </div>
         ) : (
-          <div className="container" style={{ position: 'absolute' }}>
+          <div
+            className="container"
+            style={{ position: 'absolute', width: imgRenderSize.width + 'px' }}>
             {context.meta[slot]?.image ? (
               <img
                 id="annotation_canvas"
@@ -232,6 +234,7 @@ const BoxAnnotator = ({ service, slot }: { service: Resource; slot: Slot }) => {
                 }
                 alt="layout annotation"
                 draggable="false"
+                style={{ border: '2px solid black' }}
               />
             ) : null}
 
@@ -270,42 +273,6 @@ const BoxAnnotator = ({ service, slot }: { service: Resource; slot: Slot }) => {
             ) : (
               <Watch ariaLabel="Waiting for image" />
             )}
-
-            {cols ? (
-              <>
-                <Button
-                  style={{ backgroundColor: '#DEF' }}
-                  onClick={() => {
-                    ;(async () => {
-                      console.log('ok')
-                      await service.ok(
-                        [context.value[slot], context.meta[slot]],
-                        '',
-                        {},
-                        async (val) => {
-                          console.log(await val)
-                          if (!Object.keys(val).length) {
-                            setFinished(true)
-                          }
-
-                          console.log('get new')
-
-                          await service.fetch_all((val) =>
-                            context.setValueMetas(slot, val)
-                          )
-                        }
-                      )
-                    })()
-                  }}>
-                  Good
-                </Button>
-                <Button
-                  style={{ backgroundColor: '#FED' }}
-                  onClick={service.cancel}>
-                  Can't solve
-                </Button>
-              </>
-            ) : null}
 
             <div>
               <table style={{ width: '10%' }}>
@@ -348,6 +315,39 @@ const BoxAnnotator = ({ service, slot }: { service: Resource; slot: Slot }) => {
           </div>
         )}
       </RectangleSelection>
+      {cols ? (
+        <>
+          <Button
+            style={{ backgroundColor: '#DEF' }}
+            onClick={() => {
+              ;(async () => {
+                console.log('ok')
+                await service.ok(
+                  [context.value[slot], context.meta[slot]],
+                  '',
+                  {},
+                  async (val) => {
+                    console.log(await val)
+                    if (!Object.keys(val).length) {
+                      setFinished(true)
+                    }
+
+                    console.log('get new')
+
+                    await service.fetch_all((val) =>
+                      context.setValueMetas(slot, val)
+                    )
+                  }
+                )
+              })()
+            }}>
+            Good
+          </Button>
+          <Button style={{ backgroundColor: '#FED' }} onClick={service.cancel}>
+            Can't solve
+          </Button>
+        </>
+      ) : null}
     </div>
   ) : null
 }

@@ -2,6 +2,7 @@ import traceback
 from collections import defaultdict
 import json
 import logging
+from queue import Empty
 
 import numpy
 from PIL import Image
@@ -9,6 +10,7 @@ from PIL import Image
 from core.database import Queue, RatingQueue
 from helpers import hash_tools
 from helpers.encode import jsonify
+from helpers.json_tools import np_encoder
 
 logging.getLogger().setLevel(logging.INFO)
 import os
@@ -114,21 +116,18 @@ class RestQueue:
     def get(self, id):
 
         try:
-            self.workbook[id] = q[id if id else self.service_id].get(
-                id if id else self.service_id, timeout=10
-            )
-            logging.info("Get new")
+            data = q[self.service_id].get(id)
+        except IndexError as e:
+            logging.info(f"No file prepared for {id}, getting default")
 
-        except Exception as e:
-            logging.error("Queue not ready, give old thing", exc_info=True)
-            if id in self.workbook:
-                return self.workbook[id]
-            else:
-                return None
+            data = q[self.service_id].get(self.service_id)
+            q[self.service_id].put(id, data)
+        return data
 
-    def change(self, item, path, value):
+    def change(self, id, item, path, value):
         self.apply(item, path, value)
         values = self.update_data(item)
+        q[self.service_id].update(id, item)
         return values
 
     def apply(self, item, path, value):
@@ -137,22 +136,17 @@ class RestQueue:
         jsonpath_expr.update(item, value)
 
     def ok(self, id):
+        logging.info(f"Ok {id}")
+        item = q[id if id in q else self.service_id].get(id)
+        d[self.service_id].put(id, item)
+        q[id if id in q else self.service_id].task_done()
         try:
-            logging.info(f"Ok {id}")
-            self.workbook.get(id)
-            item = self.workbook.pop(id)
-            d[self.service_id].put(id, item)
-            q[id if id else self.service_id].task_done()
-        except Exception as e:
-            print("Ok, but end of gen")
-
-            logging.error(f"Could not remove ${id} from {self.workbook}")
 
     def discard(self, id):
         try:
             print("Discarding")
 
-            item = self.workbook.pop(id)
+            self.workbook.pop(id)
             q[self.service_id].task_done()
         except Exception as e:
             print("Discarding error")
@@ -160,14 +154,12 @@ class RestQueue:
             logging.error(f"ould not remove ${id} from {self.workbook}")
 
     def on_get(self, req, resp, id=None):  # get image
-        data = self.workbook.get(id)
-        if not data:
-            logging.info(f"No file prepared for {id}, getting default")
-            data = self.get(self.service_id)
+        data = self.get(id)
 
         if not data:
             resp.status = falcon.HTTP_300
             return
+
         data = encode(data)
         resp.text = jsonify(data)
         resp.status = falcon.HTTP_OK
@@ -177,19 +169,21 @@ class RestQueue:
 
         result = req.media
         path, value = result
-        item = self.workbook[id]
+
+        item = self.get(id)
 
         if path:
             if isinstance(path, str):
-                item = self.change(item, path, value)
-            if isinstance(path, list):
+                item = self.change(id, item, path, value)
+            elif isinstance(path, list):
                 for p in path:
-                    item = self.change(item, p, value)
+                    item = self.change(id, item, p, value)
             else:
-                logging.error(f"{path} has no compatible type")
-                resp.text = json.dumps(encode(item), ensure_ascii=False)
+                logging.error(f"'{path}' has no compatible type")
+                resp.text = json.dumps(
+                    encode(item), ensure_ascii=False, default=np_encoder
+                )
                 resp.status = falcon.HTTP_400
-
         resp.text = json.dumps(encode(item), ensure_ascii=False)
         resp.status = falcon.HTTP_OK
 

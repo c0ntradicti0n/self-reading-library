@@ -1,8 +1,6 @@
-import itertools
 import falcon
 import logging
 from wsgiref import simple_server
-import threading
 from config import config
 from config.ant_imports import *
 from layout.annotator.annotation_to_gold import AnnotatedToGoldQueueRest

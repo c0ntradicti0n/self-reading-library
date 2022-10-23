@@ -32,15 +32,7 @@ const MacroComponentSwitch = ({
   const context = useContext<DocumentContextType>(DocumentContext)
 
   const component = props.component
-  const service = new Resource(
-    props.url,
-    true,
-    true,
-    true,
-    true,
-    true,
-    slot !== NORMAL
-  )
+  const service = new Resource(props.url, true, true, true, true, true)
   service.setSlot(slot)
   console.log('MacroComponentSwitch', props, slot)
   useEffect(() => {

@@ -69,7 +69,7 @@ class TopicsPublisher(RestPublisher, react):
 
         yield self.topics, text_ids
 
-    def on_get(self, req, resp):
+    def on_get(self, req, resp, id=None):
         logging.info("Computing topics")
         documents = list(self.ant("feature", "reading_order", from_cache_only=True)([]))
 

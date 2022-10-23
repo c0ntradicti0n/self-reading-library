@@ -26,14 +26,18 @@ const HtmlRenderer = (props: Props) => {
       context.value[props.slot] &&
       !context.value[props.slot].includes('http')
     ) {
-      console.log('fetching static html', context.value[props.slot])
-      setHtmlContent(
-        httpGet(
-          AppSettings.FRONTEND_HOST +
-            '/' +
-            context.value[props.slot].replace('.layouteagle/', '') +
-            '.html'
-        )
+      console.log(
+        'fetching static html',
+        AppSettings.FRONTEND_HOST,
+        '/' + context.value[props.slot].replace('.layouteagle/', '') + '.html',
+        context.value[props.slot]
+      )
+      httpGet(
+        AppSettings.FRONTEND_HOST +
+          '/' +
+          context.value[props.slot].replace('.layouteagle', '') +
+          '.html',
+        setHtmlContent
       )
     }
   }, [context.value[props.slot]])

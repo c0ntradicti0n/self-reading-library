@@ -8,9 +8,11 @@ services:
     user: $USER_IDS
     ports:
       - "${PORT}:${PORT}"
+      - "2222:22"
     environment:
       PORT: $PORT
       DB_HOST: db
+
     volumes:
       - "$CWD/python:/home/finn/Programming/self-reading-library/python"
     #  - "$CWD/python/.layouteagle:/home/finn/Programming/self-reading-library/python/.layouteagle"
@@ -37,7 +39,7 @@ services:
       POSTGRES_USER: python
       POSTGRES_PASSWORD: password
       POSTGRES_HOST: "localhost"
-      CREATE_FRONTEND: True
+      CREATE_FRONTEND: "True"
   fe:
     build: react
     container_name: fe
@@ -45,12 +47,17 @@ services:
       - "3210:3000"
     tty: true
     volumes:
-      - "$CWD/self-reading-library/python/.layouteagle/pdfs/:/home/finn/Programming/self-reading-library/react/layout_viewer_made/public/pdfs"
-      - "$CWD/self-reading-library/python/.layouteagle/audio/:/home/finn/Programming/self-reading-library/react/layout_viewer_made/public/audio"
+      - "$CWD/python/.layouteagle/pdfs/:/app/public/pdfs"
+      - "$CWD/python/.layouteagle/audio/:/app/public/audio"
       - "$CWD/react/layout_viewer_made/src:/app/src"
+      - "$CWD/react/layout_viewer_made/public:/app/public"
+
 
     environment:
       PORT: 3000
+      NEXT_PUBLIC_FRONTEND_HOST: "http://localhost:3210"
+      NEXT_PUBLIC_BACKEND_HOST: "http://localhost:9999"
+
 
 
 

@@ -20,7 +20,7 @@ RUN apt install libgraphviz-dev -y
 RUN apt install python3.9-distutils -y
 RUN apt install python3.9-dev -y
 RUN apt install libfreetype6-dev pkg-config pkg-config -y
-
+RUN apt install poppler-utils -y
 
 RUN   >&2 echo "$(python3 --version)"
 WORKDIR /home/finn/Programming/self-reading-library
@@ -37,8 +37,15 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install uvicorn[standard]
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt --use-deprecated=legacy-resolver
 
-#RUN apt update && apt install  openssh-server -y
-#RUN service ssh start
+RUN apt update && apt install  openssh-server  -y
+
+RUN useradd -rm -d /home/ubuntu -s /bin/bash -g root -u 123 test
+
+RUN  echo 'test:test' | chpasswd
+
+RUN service ssh start
+
+EXPOSE 22
 
 # COPY . python
 
