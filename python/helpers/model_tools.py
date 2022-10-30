@@ -5,7 +5,7 @@ import regex
 from config import config
 from core.event_binding import queue_iter
 from helpers.json_tools import json_file_update
-from helpers.list_tools import dictize
+
 
 model_regex = r"(?P<shape>\d+)_(?P<f1>0,?\d*)_(?P<epoch>\d+)"
 import logging

@@ -1,5 +1,8 @@
+import json
 import os
+import pdb
 from threading import Thread
+import gzip
 
 import pandas
 
@@ -8,6 +11,7 @@ from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from core.event_binding import queue_iter, RestQueue, queue_put, q, d
 from helpers.cache_tools import configurable_cache
+from helpers.json_tools import np_encoder
 from layout.model_helpers import changed_labels
 import logging
 
@@ -66,17 +70,43 @@ class AnnotatorRate(PathSpec):
             gen=(p_m for p_m in prediction_metas),
             single=False,
         ):
-
             id, meta = _p_m
             try:
                 rating_trial, rating_score = d[self.service].scores(id)
-            except:
+            except Exception as e:
                 rating_trial = 0
                 rating_score = 0.0
                 logging.error(f"Scores not found for {id}, {self.service}")
 
-            if rating_trial > 3 and rating_score > 0.8:
+            if rating_trial > 3:
                 yield _p_m
             else:
                 q[self.service].put(self.service, _p_m)
-                q[self.service].rate(id, rating_score, meta["labels"])
+                q[self.service].rate(id, rating_score)
+
+
+@converter(
+    "annotation.collection.platinum",
+    "annotation.collection.fix",
+)
+class AnnotatorSaveFinal(PathSpec):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def __call__(self, prediction_metas, *args, **kwargs):
+        self.service = self.flags["service_id"]
+
+        for path, meta in prediction_metas:
+            del meta["LABEL"]
+            meta["raw_dataset_pickle"] = path
+            image_path = meta["image_path"][0]
+            page_number = meta["page_number"][0]
+
+            old_folder, fname = os.path.split(image_path)
+            fname, endings = fname.split(".")[0], fname.split(".")[1:]
+
+            new_folder = config.GOLD_DATASET_PATH + "/"+self.flags["service_id"] + "/"
+            if not os.path.isdir(new_folder):
+                os.makedirs(new_folder)
+            with gzip.open(new_folder + fname + "." + str(page_number) + ".json.gz", 'wt', encoding="ascii") as zipfile:
+                json.dump(meta, zipfile, default=np_encoder)

@@ -75,7 +75,7 @@ const TAG_COLOR = {
 
 const BoxAnnotator = ({ service, slot }: { service: Resource; slot: Slot }) => {
   service.setSlot(slot)
-  const [next_key, setNextKey] = useState('')
+  const [next_key, setNextKey] = useState('W')
   const [finished, setFinished] = useState(false)
   const [imgOriginalSize, setImgOriginalSize] = useState(null)
   const [imgRenderSize, setImgRenderSize] = useState(null)
@@ -94,13 +94,24 @@ const BoxAnnotator = ({ service, slot }: { service: Resource; slot: Slot }) => {
     let im = new Image()
     im.src = 'data:image/jpeg;charset=utf-8;base64,' + context.meta[slot]?.image
 
-    const width = window.innerWidth
-    const scaleW = width * (im.width / im.height) * 0.5
-    const height = window.innerHeight
-    const scaleH = height * 0.81
     im.onload = () => {
+      const width = window.innerWidth
+      const scaleH = window.innerHeight / 1000
+      const scaleW = (scaleH * im.naturalWidth) / im.naturalHeight
+
+      console.log('loading image')
+      setLabels(context.meta[slot]?.labels)
       setImgOriginalSize({ width: im.width, height: im.height })
-      setImgRenderSize({ width: scaleW, height: scaleH })
+      setImgRenderSize({ width: scaleW, height: scaleH, window })
+      console.log(
+        'setting coordinates',
+        im.naturalHeight,
+        im.naturalWidth,
+        im,
+        scaleW,
+        window,
+        width
+      )
     }
   }, [context.meta[slot]?.image])
 
@@ -120,6 +131,16 @@ const BoxAnnotator = ({ service, slot }: { service: Resource; slot: Slot }) => {
     }
     if (next_key) {
       setNextKey(next_key)
+      console.log({
+        dep: context.meta[slot]?.image,
+        next_key,
+        finished,
+        imgOriginalSize,
+        imgRenderSize,
+        labels,
+        rectangleSelection,
+        context,
+      })
       event.preventDefault()
     }
   }, [])
@@ -138,14 +159,15 @@ const BoxAnnotator = ({ service, slot }: { service: Resource; slot: Slot }) => {
       </pre>
     )
 
+  console.log('imageRenderSize', imgRenderSize)
   if (!imgRenderSize) return 'Not ready'
   const renderRectTagsCoords = cols?.map((row, i) => [
     row[1],
     {
-      left: (row[0][0] / 1200) * imgRenderSize.width,
-      top: (row[0][1] / 810) * imgRenderSize.height,
-      width: ((row[0][2] - row[0][0]) / 1150) * imgRenderSize.width,
-      height: ((row[0][3] - row[0][1]) / 810) * imgRenderSize.height,
+      left: row[0][0] * imgRenderSize.width,
+      top: row[0][1] * imgRenderSize.height,
+      width: (row[0][2] - row[0][0]) * imgRenderSize.width,
+      height: (row[0][3] - row[0][1]) * imgRenderSize.height,
     },
   ])
 
@@ -154,7 +176,9 @@ const BoxAnnotator = ({ service, slot }: { service: Resource; slot: Slot }) => {
       style={{
         border: '2px solid black',
         fontSize: '1em !important',
-        display: 'flex',
+        position: 'absolute',
+        top: '0px',
+        left: '0px',
         zIndex: 100000,
       }}>
       <RectangleSelection
@@ -234,82 +258,104 @@ const BoxAnnotator = ({ service, slot }: { service: Resource; slot: Slot }) => {
                 }
                 alt="layout annotation"
                 draggable="false"
-                style={{ border: '2px solid black' }}
+                style={{
+                  left: '0px',
+                  top: '0px',
+                  border: '2px solid black',
+                  height: '190vh',
+                }}
               />
             ) : null}
-
             {imgOriginalSize ? (
-              renderRectTagsCoords?.map(([rowLabel, row], i) => (
-                <div
-                  key={'row' + i.toString()}
-                  style={{
-                    position: 'absolute',
-                    left: row.left.toString() + 'px',
-                    top: row.top.toString() + 'px',
-                    width: row.width.toString() + 'px',
-                    height: row.height.toString() + 'px',
-                    zIndex: Math.ceil(9000000),
-                    opacity: '0.5',
-                    background: TAG_COLOR[rowLabel],
-                  }}
-                  onClick={() => {
-                    console.log('row', i)
-                    let label
-                    if (next_key) {
-                      label = next_key
-                    } else {
-                      label = LABEL_SWITCH[rowLabel]
-                    }
-                    console.log({ label, ls: LABEL_SWITCH, service })
-                    if (label)
-                      service
-                        .change('[1].labels.[' + i + ']', label, (res) => {
-                          console.log('changed single label', res)
-                          setLabels(res[1].labels)
-                        })
-                        .catch(console.error)
-                  }}></div>
-              ))
+              renderRectTagsCoords?.map(([rowLabel, row], i) => {
+                console.log('bbox', row)
+                return (
+                  <div
+                    key={'row' + i.toString()}
+                    style={{
+                      position: 'absolute',
+                      left: row.left.toString() + 'px',
+                      top: row.top.toString() + 'px',
+                      width: row.width.toString() + 'px',
+                      height: row.height.toString() + 'px',
+                      zIndex: 900000000,
+                      opacity: '0.5',
+                      background: TAG_COLOR[rowLabel],
+                    }}
+                    onClick={() => {
+                      console.log('row', i)
+                      let label
+                      if (next_key) {
+                        label = next_key
+                      } else {
+                        label = LABEL_SWITCH[rowLabel]
+                      }
+                      console.log({ label, ls: LABEL_SWITCH, service })
+                      if (label)
+                        service
+                          .change('[1].labels.[' + i + ']', label, (res) => {
+                            console.log('changed single label', res)
+                            setLabels(res[1].labels)
+                          })
+                          .catch(console.error)
+                    }}></div>
+                )
+              })
             ) : (
               <Watch ariaLabel="Waiting for image" />
             )}
 
             <div>
+              <div
+                style={{
+                  backgroundColor: TAG_COLOR[next_key],
+                }}>
+                <span
+                  style={{
+                    filter: 'invert(100%)',
+                    fontWeight: 'bolder',
+                    color: TAG_COLOR[next_key],
+                  }}>
+                  {TAG_TRANSLATE[next_key]}
+                </span>
+              </div>
               <table style={{ width: '10%' }}>
-                <tr>
-                  <td> KEY</td>
-                  <td>TAG</td>
-                </tr>
-                {Object.entries(KEYS).map(([k, v], i) => (
-                  <tr onClick={() => setNextKey(KEYS[k])}>
-                    <td
-                      key={i + '_1'}
-                      style={{
-                        border: '1px',
-                        fontFamily: 'keys',
-                        fontSize: '2em',
-                        verticalAlign: 'bottom',
-                      }}>
-                      {KEY_TRANSLATE[k]}
-                    </td>
-                    <td
-                      key={i + '_2'}
-                      style={{
-                        verticalAlign: 'top',
-                      }}>
-                      <div
-                        style={{
-                          backgroundColor: TAG_COLOR[v] as string,
-                          border: '4px solid ' + TAG_COLOR[v],
-                          display: 'block',
-                          borderRadius: '7px',
-                        }}>
-                        {' '}
-                        {TAG_TRANSLATE[v]}{' '}
-                      </div>
-                    </td>
+                <tbody>
+                  <tr>
+                    <td> KEY</td>
+                    <td>TAG</td>
                   </tr>
-                ))}
+                  {Object.entries(KEYS).map(([k, v], i) => (
+                    <tr key={'k1' + i} onClick={() => setNextKey(KEYS[k])}>
+                      <td
+                        key={i + '_1'}
+                        style={{
+                          border: '1px',
+                          fontFamily: 'keys',
+                          fontSize: '2em',
+                          verticalAlign: 'bottom',
+                        }}>
+                        {KEY_TRANSLATE[k]}
+                      </td>
+                      <td
+                        key={i + '_2'}
+                        style={{
+                          verticalAlign: 'top',
+                        }}>
+                        <div
+                          style={{
+                            backgroundColor: TAG_COLOR[v] as string,
+                            border: '4px solid ' + TAG_COLOR[v],
+                            display: 'block',
+                            borderRadius: '7px',
+                          }}>
+                          {' '}
+                          {TAG_TRANSLATE[v]}{' '}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
               </table>
             </div>
           </div>

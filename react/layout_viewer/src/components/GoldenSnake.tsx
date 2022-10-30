@@ -5,13 +5,7 @@ function fibonacci(n) {
 }
 const GoldenSnake = ({ a = 20, children }) => {
   const n = children.length - 3
-  console.log(
-    'HEY GOLDEN SNAKE!',
-    n,
-    (1 / Phi) ** n,
-    (1 / Phi) ** n,
-    (1 / Phi) ** n
-  )
+
   let j = 0
   const writing_points = []
   const text_heights = []
@@ -33,7 +27,7 @@ const GoldenSnake = ({ a = 20, children }) => {
           width="100%"
           height="100%"
           preserveAspectRatio="xMinYMin meet">
-          {[...Array(n).keys()].map((i) => {
+          {[...Array(n).keys()].map((i, n) => {
             j += 1
             if (j > 2) j = -1
             h = old_val + h
@@ -48,24 +42,23 @@ const GoldenSnake = ({ a = 20, children }) => {
             let y2 = h + old_val
             let x2 = (x1 + val) * 2.7 + 100
 
-            console.log(j > 0 ? 'x' : 'y', j == 2 ? 'back' : 'forth')
-
             writing_points.push([(y1 + y2) / 2 + 100])
 
-            console.log(writing_points)
             box_or_line = !box_or_line
 
             text_heights.push([y1 + 5, y2 - 5])
 
             if (box_or_line)
-              return <line x1={x1} y1={y1} x2={x1} y2={y2}></line>
+              return (
+                <line key={'n1' + n} x1={x1} y1={y1} x2={x1} y2={y2}></line>
+              )
             else
               return (
-                <>
-                  <line x1={x1} y1={y1} x2={x2} y2={y1}></line>
-                  <line x1={x2} y1={y1} x2={x2} y2={y2}></line>
-                  <line x1={x2} y1={y2} x2={x1} y2={y2}></line>
-                </>
+                <g key={'g1' + n}>
+                  <line key={'n1' + n} x1={x1} y1={y1} x2={x2} y2={y1}></line>
+                  <line key={'n2' + n} x1={x2} y1={y1} x2={x2} y2={y2}></line>
+                  <line key={'n3' + n} x1={x2} y1={y2} x2={x1} y2={y2}></line>
+                </g>
               )
           })}
         </svg>
@@ -73,10 +66,10 @@ const GoldenSnake = ({ a = 20, children }) => {
           const fib_1 = fibonacci(i + 4) - 2
           const fib_0 = fibonacci(i + 3) - 2
           const nodes = children.slice(fib_0, fib_1)
-          console.log(fib_1, fib_0, nodes)
 
           return (
             <div
+              key={'b' + i}
               style={{
                 verticalAlign: 'middle',
                 display: 'table-cell',
@@ -86,7 +79,6 @@ const GoldenSnake = ({ a = 20, children }) => {
                 top: y1.toString() + 'px',
                 height: (y2 - y1).toString() + 'px',
               }}>
-              {' '}
               {nodes}
             </div>
           )

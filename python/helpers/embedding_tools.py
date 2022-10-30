@@ -1,6 +1,5 @@
 from scipy import signal
 from helpers.time_tools import timeit_context
-
 from bert_embedding import BertEmbedding
 
 bert_embedding = BertEmbedding(

@@ -7,6 +7,7 @@ from threading import Thread
 import ibis
 import pandas
 import numpy
+import sqlalchemy
 
 from config import config
 
@@ -78,20 +79,31 @@ class Queue:
         except Exception as e:
             raise ValueError(f"Strange value in {self.service_id}, {item}") from e
 
-    def _get_df(self, id):
-        item = (
-            self.table.filter(self.table["doc_id"] == id)
-            .sort_by("date")
-            .limit(10)
-            .execute()
-        )
-        if item.empty:
+    def _get_df(self, id, row_id=None):
+        if row_id:
             item = (
-                self.table.filter(self.table["user_id"] == id)
+                self.table.filter(self.table["row_id"] == row_id)
                 .sort_by("date")
                 .limit(10)
                 .execute()
             )
+        elif id:
+            item = (
+                self.table.filter(self.table["doc_id"] == id)
+                .sort_by("date")
+                .limit(10)
+                .execute()
+            )
+            if item.empty:
+                item = (
+                    self.table.filter(self.table["user_id"] == id)
+                    .sort_by("date")
+                    .limit(10)
+                    .execute()
+                )
+        else:
+            item = self.table.sort_by("date").limit(1).execute()
+
         self.row_id = item.iloc[0].row_id
         return item
 
@@ -127,7 +139,7 @@ class Queue:
                 (
                     doc_id,
                     id,
-                    datetime.datetime.now(),
+                    datetime.datetime.utcnow(),
                     compressed_pickle(item).hex(),
                     uuid.uuid4().hex,
                 )
@@ -154,55 +166,77 @@ class RatingQueue(Queue):
     schema = Queue.schema + [
         ("rating_trial", "int32"),
         ("rating_score", "float"),
-        ("version", "json"),
     ]
 
     def get(self, id, timeout=None):
         try:
             db_id, meta = Queue.get(self, id, timeout=timeout)
+        except TypeError as e:
+            logging.error(f"wrong object type in { self.service_id}", exc_info=True)
         except Exception as e:
             raise
-        rating_trial, rating_score, version = self.scores(id)
+        rating_trial, rating_score = self.scores(id, row_id=self.row_id)
 
         meta["rating_trial"] = (
-            float(rating_trial) if rating_trial and not numpy.isnan(trials) else 0
+            float(rating_trial) if rating_trial and not numpy.isnan(rating_trial) else 0
         )
         meta["rating_score"] = (
             float(rating_score) if not numpy.isnan(rating_score) else 0.0
         )
-        meta["version"] = version if version else []
 
         return db_id, meta
 
     def put(self, id, item, timeout=None):
-        db_id, meta = item
-        Queue.put(self, id, item, timeout=timeout)
-        if score := meta.get("rating_score"):
-            self.rate(db_id if not id else id, score, None, new_trial=False)
+        doc_id, meta = item
 
-    def rate(self, id, score, version, new_trial=True):
-        if version:
-            version_update = f"version= coalesce(version::jsonb, '[]'::jsonb)  || '[{json.dumps(version)}]'::jsonb,"
-        else:
-            version_update = ""
+        rating_trial = meta.get("rating_trial")
+        rating_score = meta.get("rating_score")
+
+        df_item = pandas.DataFrame(
+            [
+                (
+                    doc_id,
+                    id,
+                    datetime.datetime.utcnow(),
+                    compressed_pickle(item).hex(),
+                    uuid.uuid4().hex,
+                    rating_score,
+                    rating_trial,
+                )
+            ],
+            columns=[
+                "doc_id",
+                "user_id",
+                "date",
+                "value",
+                "row_id",
+                "rating_score",
+                "rating_trial",
+            ],
+        )
+        try:
+            self.connection.insert(self.service_id, df_item)
+
+        except Exception as e:
+            raise ValueError("wrong datatype for table!") from e
+
+    def rate(self, id, score, new_trial=True):
         self.connection.con.execute(
-            f"UPDATE {self.service_id} set  {version_update} rating_score = {score}, rating_trial = {'COALESCE(rating_trial, 0) + 1' if new_trial else 'COALESCE(rating_trial, 0)'} where doc_id = '{self.row_id if not id else id}' or user_id = '{self.row_id if not id else id}'"
+            f"UPDATE {self.service_id} set   rating_score = {score}, rating_trial = {'COALESCE(rating_trial, 0) + 1' if new_trial else 'COALESCE(rating_trial, 0)'} where doc_id = '{self.row_id if not id else id}' or user_id = '{self.row_id if not id else id}'"
         )
 
-    def scores(self, id):
-        item = self._get_df(id)
+    def scores(self, id, row_id=None):
+        item = self._get_df(id, row_id=row_id)
         if len(item) != 1:
             logging.warning(f"Multiple items with the same id in {self.service_id}")
-        trials, scores, version = (
+        trials, scores = (
             item["rating_trial"][0],
             item["rating_score"][0],
-            item["version"][0],
         )
 
         return (
             float(trials) if trials and not numpy.isnan(trials) else 0,
             float(scores) if not numpy.isnan(scores) else 0.0,
-            version if version else [],
         )
 
 
@@ -249,32 +283,30 @@ if __name__ == "__main__":
 
     id = str(uuid.uuid4())
     r.put(id, ("bla", {"k": "v", "labels": [1, 1, 0, 1]}))
-    r.rate(id, 0.123, [0, 1, 1, 0])
-    r.rate(id, 0.567, [0, 1, 1, 2])
-    r.rate(id, 0.789, [3, 1, 1, 0])
+    r.rate(id, 0.123)
+    r.rate(id, 0.567)
+    r.rate(id, 0.789)
 
-    trial, score, version = r.scores(id)
+    trial, score = r.scores(id)
     assert trial == 3
     assert score == 0.789
 
     id2 = str(uuid.uuid4())
     r.put(id2, ("bla", {"k": "v", "rating_score": 0.1234}))
-    trial, score, version = r.scores(id2)
+    trial, score = r.scores(id2)
     assert trial == 0
     assert score == 0.1234
 
-    trial, score, version = r.scores(id)
+    trial, score = r.scores(id)
     assert trial == 3
     assert score == 0.789
-    assert version == [[0, 1, 1, 0], [0, 1, 1, 2], [3, 1, 1, 0]]
 
     doc_id, meta = r.get(id2)
     assert meta["rating_score"] == 0.1234
     assert meta["rating_trial"] == 0
-    assert meta["version"] == []
 
     r.update(id2, (id2, {}))
     doc_id, meta = r.get(id2)
-    assert meta == {"rating_trial": 0, "rating_score": 0.1234, "version": []}
+    assert meta == {"rating_trial": 0, "rating_score": 0.1234}
 
     assert len(r) > 2

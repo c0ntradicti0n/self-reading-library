@@ -11,6 +11,14 @@ export const pairwise = (array) => {
 }
 export const zip = (rows) => rows[0].map((_, c) => rows.map((row) => row[c]))
 
+export const swap = (json) => {
+  var ret = {}
+  for (var key in json) {
+    ret[json[key]] = key
+  }
+  return ret
+}
+
 export const nest = function (seq, keys) {
   if (!keys.length) return seq
   const first = keys[0]

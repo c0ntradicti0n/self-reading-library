@@ -177,3 +177,5 @@ audio_format = ".ogg"
 audio_path = hidden_folder + "audio/"
 create_frontend = os.environ.get("CREATE_FRONTEND", default=False)
 BEST_MODELS_PATH = hidden_folder + "/best_models.json"
+
+GOLD_DATASET_PATH = hidden_folder + "/gold"

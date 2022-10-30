@@ -121,6 +121,8 @@ class RestQueue:
             logging.info(f"No file prepared for {id}, getting default")
 
             data = q[self.service_id].get(self.service_id)
+            q[self.service_id].task_done()
+
             q[self.service_id].put(id, data)
         return data
 
@@ -140,7 +142,6 @@ class RestQueue:
         item = q[id if id in q else self.service_id].get(id)
         d[self.service_id].put(id, item)
         q[id if id in q else self.service_id].task_done()
-        try:
 
     def discard(self, id):
         try:
@@ -165,13 +166,9 @@ class RestQueue:
         resp.status = falcon.HTTP_OK
 
     def on_put(self, req, resp, id=None):  # edit, update image
-        pprint(req)
-
         result = req.media
         path, value = result
-
         item = self.get(id)
-
         if path:
             if isinstance(path, str):
                 item = self.change(id, item, path, value)
@@ -184,7 +181,7 @@ class RestQueue:
                     encode(item), ensure_ascii=False, default=np_encoder
                 )
                 resp.status = falcon.HTTP_400
-        resp.text = json.dumps(encode(item), ensure_ascii=False)
+        resp.text = json.dumps(encode(item), ensure_ascii=False, default=np_encoder)
         resp.status = falcon.HTTP_OK
 
     def on_patch(self, req, resp, id=None):
@@ -243,12 +240,12 @@ class RestQueue:
 
             self.ok(id)
 
-        self.get(id)
-        if self.workbook.get(id):
-            resp.text = jsonify(encode(self.workbook[id]))
+        item = self.get(id)
+        if item:
+            resp.text = jsonify(encode(item))
             resp.status = falcon.HTTP_OK
         else:
-            resp.status = falcon.HTTP_OK
+            resp.status = falcon.HTTP_400
             resp.text = json.dumps({})
 
     def on_delete(self, req, resp, id=None):
@@ -290,7 +287,7 @@ def queue_iter(service_id, gen, single=False):
 
         except Exception as e:
             r = None
-            logging.debug("Pulse", exc_info=True)
+            logging.info("Pulse", exc_info=True)
 
         if r:
             logging.debug("Yielding")

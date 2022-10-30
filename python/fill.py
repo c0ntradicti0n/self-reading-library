@@ -1,6 +1,10 @@
 import itertools
 import logging
+import os
+import signal
 import threading
+import time
+
 from config import config
 from config.ant_imports import *
 
@@ -16,7 +20,7 @@ def run_extra_threads():
         num_labels=config.NUM_LABELS,
         layout_model_path=full_model_path,
     )
-    gold_annotation = ant("annotation.collection", "annotation.collection.platinum")
+    gold_annotation = ant("annotation.collection", "annotation.collection.fix")
 
     layout = threading.Thread(target=layout_annotate_train_model, name="layout_captcha")
     layout.start()
@@ -48,7 +52,7 @@ def run_extra_threads():
         gen = gold_annotation(metaize(["x"] * 100), service_id="gold_annotation")
         list(gen)
 
-    threading.Thread(target=fill_annotation_thread, name="layout_gold").start()
+    fill_annotation_thread()
 
 
 if __name__ == "__main__":

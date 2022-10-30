@@ -195,4 +195,4 @@ def repaint_image_from_labels(data_meta):
 
 def changed_labels(data_meta):
     id, data = data_meta
-    return (id, {"labels": data["labels"]})
+    return (id, {**data, "labels": data["labels"]})
