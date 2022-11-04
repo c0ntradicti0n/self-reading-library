@@ -1,10 +1,10 @@
 import json
 import os
-import pdb
-from threading import Thread
 import gzip
+from typing import Iterable
 
 import pandas
+import logging
 
 from config import config
 from core.pathant.Converter import converter
@@ -13,7 +13,6 @@ from core.event_binding import queue_iter, RestQueue, queue_put, q, d
 from helpers.cache_tools import configurable_cache
 from helpers.json_tools import np_encoder
 from layout.model_helpers import changed_labels
-import logging
 
 
 AnnotatedToGoldQueueRest = RestQueue(
@@ -29,6 +28,15 @@ class AnnotationLoader(PathSpec):
     @configurable_cache(
         config.cache + os.path.basename(__file__),
         from_path_glob=config.COLLECTION_PATH + "/*.pickle",
+        filter_path_glob=[
+            lambda self: config.GOLD_DATASET_PATH
+            + "/"
+            + self.flags["service_id"]
+            + "/*.json.gz",
+            lambda self: [
+                os.path.basename(p) for p in q[self.flags["service_id"]].get_doc_ids()
+            ],
+        ],
     )
     def __call__(self, prediction_metas, *args, **kwargs):
         # all annotation are comming from the cache, that is read from globbing the files
@@ -78,7 +86,7 @@ class AnnotatorRate(PathSpec):
                 rating_score = 0.0
                 logging.error(f"Scores not found for {id}, {self.service}")
 
-            if rating_trial > 3:
+            if rating_trial > config.MIN_CAPTCHA_TRIALS:
                 yield _p_m
             else:
                 q[self.service].put(self.service, _p_m)
@@ -93,20 +101,36 @@ class AnnotatorSaveFinal(PathSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    @staticmethod
+    def single(element):
+        if not isinstance(element, Iterable):
+            return element
+        else:
+            return element[0]
+
     def __call__(self, prediction_metas, *args, **kwargs):
         self.service = self.flags["service_id"]
 
         for path, meta in prediction_metas:
             del meta["LABEL"]
             meta["raw_dataset_pickle"] = path
-            image_path = meta["image_path"][0]
-            page_number = meta["page_number"][0]
+            meta["image_path"] = self.single(meta["image_path"])
+            meta["pickle_path"] = self.single(meta["image_path"])
 
-            old_folder, fname = os.path.split(image_path)
+            meta["page_number"] = self.single(meta["page_number"])
+            meta["text"] = list(meta["text"])
+
+            page_number = meta["page_number"]
+
+            old_folder, fname = os.path.split(path)
             fname, endings = fname.split(".")[0], fname.split(".")[1:]
 
-            new_folder = config.GOLD_DATASET_PATH + "/"+self.flags["service_id"] + "/"
+            new_folder = config.GOLD_DATASET_PATH + "/" + self.flags["service_id"] + "/"
             if not os.path.isdir(new_folder):
                 os.makedirs(new_folder)
-            with gzip.open(new_folder + fname + "." + str(page_number) + ".json.gz", 'wt', encoding="ascii") as zipfile:
+            with gzip.open(
+                new_folder + fname + "." + str(page_number) + ".json.gz",
+                "wt",
+                encoding="ascii",
+            ) as zipfile:
                 json.dump(meta, zipfile, default=np_encoder)

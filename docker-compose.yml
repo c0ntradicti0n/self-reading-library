@@ -40,6 +40,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_HOST: "localhost"
       CREATE_FRONTEND: "True"
+    restart: "unless-stopped"
   fe:
     build: react
     container_name: fe

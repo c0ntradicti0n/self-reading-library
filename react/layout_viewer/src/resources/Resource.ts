@@ -79,14 +79,18 @@ export default class Resource {
     method: String,
     data = {},
     callback: Function,
+    params = {},
     is_file = false,
     query: string = null
   ) => {
-    let querystring = ''
+    let querystring = new URLSearchParams(params).toString()
     if (this.slot === NORMAL) {
-      if (query) querystring = query
-      else if (typeof window !== 'undefined') {
-        querystring = window?.location.search.substring(1)
+      if (query) {
+        querystring = query
+      } else if (typeof window !== 'undefined') {
+        const add_query = window?.location.search.substring(1)
+        if (querystring) querystring = add_query + '&' + querystring
+        else querystring = window?.location.search.substring(1)
         console.log(querystring)
       }
     }
@@ -131,7 +135,9 @@ export default class Resource {
 
       let result = null
       try {
-        result = await response.json()
+        console.log('hallo', response)
+        if (response.status == 204) result = null
+        else result = await response.json()
         console.log({ result })
       } catch (e) {
         console.log('Did not get a json back', e, result)
@@ -150,21 +156,20 @@ export default class Resource {
   }
 
   exists = async (id, callback: Function) => {
-    console.log('Fetch all resources')
     if (this.get_allowed) {
       return await this.request('get', undefined, callback, null, 'id=' + id)
     }
   }
 
-  fetch_one = async (id, callback: Function) => {
+  getOne = async (id, callback: Function, params) => {
     if (this.get_allowed) {
-      return await this.request('get', id, callback)
+      return await this.request('get', id, callback, params)
     }
   }
 
-  fetch_all = async (callback) => {
+  get = async (callback, query={}) => {
     if (this.get_allowed) {
-      return await this.request('get', undefined, callback)
+      return await this.request('get', undefined, callback, query)
     }
   }
 
@@ -183,7 +188,7 @@ export default class Resource {
   save = async (id, data = {}, callback) => {
     console.log('save', id, data)
     if (this.upload_allowed) {
-      await this.request('put', [id, data], callback)
+      await this.request('post', [id, data], callback)
     }
   }
 

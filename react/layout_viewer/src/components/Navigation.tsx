@@ -10,39 +10,42 @@ import GoldenSnake from './GoldenSnake'
 
 interface PropType {
   slot: Slot
+  onClose: () => void
 }
 
-const NavigationContent = ({ slot }: PropType) => {
+const NavigationContent = ({ slot, onClose }: PropType) => {
   const context = useContext<DocumentContext>(DocumentContext)
   const id = context.value[slot]
   const shortId = (id ?? '').replace('.layouteagle/', '')
   return (
-    <GoldenSnake>
-      <div>
-        <a href="/library">Universe of documents</a>
-      </div>
+    <div onClick={onClose}>
+      <GoldenSnake>
+        <div>
+          <a href="/library">Universe of documents</a>
+        </div>
 
-      <div>
-        <a href={'/difference?id=' + id}>Read annotated paper</a>
-      </div>
-      <div>
-        <Audiobook />
-      </div>
-      <div>
-        <a href={shortId}>Original PDF</a>
-      </div>
-      <div>
-        <a href={'/upload_annotation?id=' + id}>Improve layout recognition</a>
-      </div>
-      <div>
-        <Captcha />
-      </div>
-      <div>
-        <Url2Difference />
-      </div>
+        <div>
+          <a href={'/difference?id=' + id}>Read annotated paper</a>
+        </div>
+        <div>
+          <Audiobook />
+        </div>
+        <div>
+          <a href={shortId}>Original PDF</a>
+        </div>
+        <div>
+          <a href={'/upload_annotation?id=' + id}>Improve layout recognition</a>
+        </div>
+        <div>
+          <Captcha />
+        </div>
+        <div>
+          <Url2Difference />
+        </div>
 
-      <UploadDocument />
-    </GoldenSnake>
+        <UploadDocument />
+      </GoldenSnake>
+    </div>
   )
 }
 
@@ -53,7 +56,7 @@ const Navigation = (props: PropType) => {
     <Popover
       content={
         <div>
-          <NavigationContent {...props} />
+          <NavigationContent {...props} onClose={() => setOpen(false)} />
         </div>
       }
       placement="rightBottom"

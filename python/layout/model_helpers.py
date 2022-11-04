@@ -76,6 +76,8 @@ def post_process_df(feature_df):
 
 
 class LayoutModelParts(types.ModuleType):
+    def __init__(self):
+        super(LayoutModelParts, self).__init__(name="LayoutModel")
     @property
     def PROCESSOR(self):
         if not hasattr(self, "_PROCESSOR"):
@@ -107,7 +109,7 @@ class LayoutModelParts(types.ModuleType):
 
 def preprocess_data(training=False):
     def _preprocess(examples, **kwargs):
-        global PROCESSOR
+
 
         words = [
             [" ".join(word.split()[:4]) for word in text]  # + word.split()[-2:]
@@ -129,7 +131,7 @@ def preprocess_data(training=False):
 
         images = [resize(image, 255) for image in images]
 
-        encoded_inputs = PROCESSOR(
+        encoded_inputs = LayoutModelParts().PROCESSOR(
             images,
             words,
             boxes=boxes,
@@ -155,9 +157,9 @@ def unnormalize_box(bbox, width, height):
 
 
 def resize(image, basesize):
-    wpercent = basesize / float(image.size[0])
-    hsize = int((float(image.size[1]) * float(wpercent)))
-    img = image.resize((basesize, hsize), Resampling.LANCZOS)
+    width_percent = basesize / float(image.size[0])
+    height_size = int((float(image.size[1]) * float(width_percent)))
+    img = image.resize((basesize, height_size), Resampling.LANCZOS)
     img = img.filter(ImageFilter.GaussianBlur(4))
     return img
 

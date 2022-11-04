@@ -38,7 +38,7 @@ def create_app():
         "/upload_annotation/{id}": UploadAnnotationQueueRest,
         "/layout/{id}": LayoutPublisher,
         # captcha
-        "/difference_captcha/{id}": ElmoDifferenceQueueRest,
+        "/difference_captcha/{id}": AnnotationSpanToGoldQueueRest,
         "/layout_captcha/{id}": AnnotatedToGoldQueueRest,
         "/layout_captcha": AnnotatedToGoldQueueRest,
         # topics

@@ -45,7 +45,8 @@ const AppWrapper = ({ children }) => {
       value={{
         value,
         meta,
-        setValueMetas: (slot, [value, meta]) => {
+        setValueMetas: (slot, value_meta) => {
+          const [value, meta] = value_meta ?? [null, null]
           console.log('setPlural', slot, value, meta)
           setValueMeta(slot, value, meta)
         },

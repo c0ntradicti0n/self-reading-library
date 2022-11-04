@@ -59,10 +59,12 @@ class DifferenceAnnotationPublisher(RestPublisher):
         self.dir = config.markup_dir
         self.kind = "difference_annotation"
 
-    def on_post(self, req, resp, id=None):
+    def on_get(self, req, resp, id=None):
         BEST_MODELS = json_file_update(config.BEST_MODELS_PATH)
         print(f"Annotating {self.kind}")
-        doc_id, text, pdf_path = req.media
+        doc_id = req.get_param("id")
+        text = req.get_param("text")
+        pdf_path = req.get_param("pdf_path")
         pipeline = self.ant(
             "arxiv.org",
             "reading_order.page.difference",

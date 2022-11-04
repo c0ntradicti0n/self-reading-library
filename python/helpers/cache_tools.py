@@ -7,6 +7,8 @@ import types
 import urllib
 import zlib
 from glob import glob
+from typing import Callable, Iterable
+
 import falcon
 import os
 import unittest
@@ -229,6 +231,7 @@ def write_cache(old_cache, path, result, overwrite_cache=False):
 def configurable_cache(
     filename,
     from_path_glob=None,
+    filter_path_glob=None,
     from_cache_only=False,
     from_cache_if_exists_else_run=False,
     from_function_only=False,
@@ -237,21 +240,29 @@ def configurable_cache(
     filename = filename.replace(".py", "")
 
     def decorator(original_func):
-        def new_func(cls, source, from_path_glob=from_path_glob, **kwargs):
+        def new_func(
+            self,
+            source,
+            from_path_glob=from_path_glob,
+            filter_path_glob=filter_path_glob,
+            **kwargs,
+        ):
 
-            _cls = cls if cls and cls.flags is not None else configurable_cache
-            _from_cache_only = _cls.flags.get("from_cache_only", from_cache_only)
-            _from_path_glob = _cls.flags.get("from_path_glob", from_path_glob)
-            _from_function_only = _cls.flags.get(
+            self = self if self and self.flags is not None else configurable_cache
+            _from_cache_only = self.flags.get("from_cache_only", from_cache_only)
+            _from_path_glob = self.flags.get("from_path_glob", from_path_glob)
+            _filter_path_glob = self.flags.get("filter_path_glob", filter_path_glob)
+
+            _from_function_only = self.flags.get(
                 "from_function_only", from_function_only
             )
-            _dont_append_to_cache = _cls.flags.get(
+            _dont_append_to_cache = self.flags.get(
                 "dont_append_to_cache", dont_append_to_cache
             )
 
             yield_cache = True if not _from_function_only else False
             yield_apply = not _from_cache_only and not _from_path_glob
-            append_cache = True  # not _dont_append_to_cache and not _from_path_glob
+            append_cache = True
             filter_by_cache = not _from_function_only
             cache = read_cache(filename)
 
@@ -267,14 +278,45 @@ def configurable_cache(
                     if isinstance(_from_path_glob, str):
                         _from_path_glob = [_from_path_glob]
                     cache = [fp for path in _from_path_glob for fp in glob(path)]
+
+                    blacklist = []
+                    if not isinstance(_filter_path_glob, Iterable):
+                        _filter_path_glob = [_filter_path_glob]
+                    if not _filter_path_glob:
+                        _filter_path_glob = []
+                    for i, p in enumerate(_filter_path_glob):
+                        if isinstance(p, Callable):
+                            result = p(self)
+                            if isinstance(result, str):
+                                _filter_path_glob[i] = result
+                            elif isinstance(result, Iterable):
+                                blacklist.extend(result)
+                                _filter_path_glob[i] = None
+                            else:
+                                logging.error(
+                                    f"dont know how to handle filter return type, {result}"
+                                )
+                    blacklist += [
+                        os.path.basename(fp)
+                        for path in _filter_path_glob
+                        if path
+                        for fp in glob(path)
+                    ]
+
                     if len(cache) == 0:
                         logging.info(
                             f"Found nothing via glob {_from_path_glob} from {os.getcwd()}"
                         )
-                    yield from [(p, {}) for p in cache]
+
+                    blacklisted = [p for p in cache if os.path.basename(p) in blacklist]
+                    logging.warning(f"{blacklisted=} {self.flags=}")
+
+                    yield from [
+                        (p, {}) for p in cache if not os.path.basename(p) in blacklist
+                    ]
                 else:
                     yield from apply(
-                        cls,
+                        self,
                         original_func,
                         source,
                         cache,
@@ -290,7 +332,7 @@ def configurable_cache(
                     yield from unroll_cache(filename, cache)
                 if yield_apply:
                     yield from apply(
-                        cls,
+                        self,
                         original_func,
                         source,
                         cache,

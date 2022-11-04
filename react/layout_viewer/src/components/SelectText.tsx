@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import SpanAnnotation from './SpanAnnotation'
+import AnnotationSpan, {AnnotationModal} from './AnnotationSpan'
 
 const SelectText = ({ service, children }) => {
   const [selected, setSelected] = useState(null)
@@ -12,7 +12,7 @@ const SelectText = ({ service, children }) => {
   return (
     <div onMouseUp={handleMouseUp}>
       {selected && (
-        <SpanAnnotation
+        <AnnotationModal
           text={selected}
           onClose={() => setSelected(null)}
           service={service}

@@ -1,11 +1,7 @@
 import itertools
-import logging
-import os
-import signal
 import threading
 import time
 
-from config import config
 from config.ant_imports import *
 
 
@@ -21,6 +17,9 @@ def run_extra_threads():
         layout_model_path=full_model_path,
     )
     gold_annotation = ant("annotation.collection", "annotation.collection.fix")
+    gold_span_annotation = ant(
+        "span_annotation.collection", "span_annotation.collection.fix"
+    )
 
     layout = threading.Thread(target=layout_annotate_train_model, name="layout_captcha")
     layout.start()
@@ -52,8 +51,24 @@ def run_extra_threads():
         gen = gold_annotation(metaize(["x"] * 100), service_id="gold_annotation")
         list(gen)
 
-    fill_annotation_thread()
+    threading.Thread(target=fill_annotation_thread, name="gold annotation").start()
+
+    def fill_span_annotation_thread():
+        gen = gold_span_annotation(
+            metaize(["x"] * 100), service_id="gold_span_annotation"
+        )
+        list(gen)
+
+    threading.Thread(target=fill_span_annotation_thread, name="gold annotation").start()
 
 
 if __name__ == "__main__":
     run_extra_threads()
+
+    # Cristian Ciupitu @ https://stackoverflow.com/a/50218501
+    for thread in threading.enumerate():
+        try:
+            thread.join()
+        except RuntimeError:
+            # trying to join the main thread, which would create a deadlock (see https://docs.python.org/3/library/threading.html#threading.Thread.join for details)
+            pass

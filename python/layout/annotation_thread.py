@@ -82,7 +82,7 @@ def annotate_uploaded_file(path_to_pdf, service_id=None, url=None):
     return next(
         forget_except(
             upload_pipe(metaize([path_to_pdf]), service_id=service_id, url=url),
-            keys=["labels", "image", "image_path", "used_text_boxes"],
+            keys=["bbox", "labels", "image", "image_path", "used_text_boxes"],
         ),
         None,
     )

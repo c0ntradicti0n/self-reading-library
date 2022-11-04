@@ -43,7 +43,7 @@ const Audiobook = () => {
   const load = async () => {
     if (context.value[props.slot] && id != context.value[props.slot]) {
       console.log('Request audiobook for', context.value[props.slot])
-      await service.fetch_one(context.value[props.slot], (res) => {
+      await service.getOne(context.value[props.slot], (res) => {
         console.log(res)
         setExists(true)
         setId(id)

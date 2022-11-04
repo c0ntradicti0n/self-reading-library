@@ -53,6 +53,9 @@ class Queue:
     def id2tablename(self, id):
         return f"queue_{id}".lower()
 
+    def get_doc_ids(self):
+        return set(self.table["doc_id"].execute())
+
     def timeout(self, f, timeout=None):
         # Database polling until value appeared or not
         result = None
@@ -74,6 +77,8 @@ class Queue:
             return self.timeout(lambda: self.get(id), timeout=timeout)
 
         item = self._get_df(id)
+        if item is None:
+            return item
         try:
             return decompress_pickle(bytes.fromhex(item.iloc[0]["value"]))
         except Exception as e:
@@ -104,8 +109,11 @@ class Queue:
         else:
             item = self.table.sort_by("date").limit(1).execute()
 
-        self.row_id = item.iloc[0].row_id
-        return item
+        try:
+            self.row_id = item.iloc[0].row_id
+            return item
+        except:
+            return None
 
     def print(self):
         for table in self.connection.list_tables():
@@ -170,11 +178,15 @@ class RatingQueue(Queue):
 
     def get(self, id, timeout=None):
         try:
-            db_id, meta = Queue.get(self, id, timeout=timeout)
-        except TypeError as e:
-            logging.error(f"wrong object type in { self.service_id}", exc_info=True)
+            result = Queue.get(self, id, timeout=timeout)
         except Exception as e:
             raise
+
+        if not result:
+            return None
+        else:
+            db_id, meta = result
+
         rating_trial, rating_score = self.scores(id, row_id=self.row_id)
 
         meta["rating_trial"] = (
@@ -227,8 +239,13 @@ class RatingQueue(Queue):
 
     def scores(self, id, row_id=None):
         item = self._get_df(id, row_id=row_id)
+
+        if item is None:
+            logging.warning(f"No item wit {id=} in {self.service_id}")
+            return 0, 0
         if len(item) != 1:
-            logging.warning(f"Multiple items with the same id in {self.service_id}")
+            logging.warning(f"Multiple items with the same {id=} in {self.service_id}")
+
         trials, scores = (
             item["rating_trial"][0],
             item["rating_score"][0],
@@ -310,3 +327,5 @@ if __name__ == "__main__":
     assert meta == {"rating_trial": 0, "rating_score": 0.1234}
 
     assert len(r) > 2
+
+    print(q.get_doc_ids())

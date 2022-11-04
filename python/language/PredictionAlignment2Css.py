@@ -8,6 +8,13 @@ from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 
 
+def window_overlap(i1, i2, j1, j2):
+    if i1 >= j1 and i2 <= j2:
+        return i1, i2
+    else:
+        return None
+
+
 @converter("reading_order.*", "css.*")
 class PredictionAlignment2Css(PathSpec):
     def __init__(self, *args, **kwargs):
@@ -26,12 +33,6 @@ class PredictionAlignment2Css(PathSpec):
 
         for key, value in children:
             self.write_css(selector + (key,), value, output)
-
-    def window_overlap(self, i1, i2, j1, j2):
-        if i1 >= j1 and i2 <= j2:
-            return (i1, i2)
-        else:
-            return None
 
     def __call__(self, feature_meta, *args, **kwargs):
         for _pdf_path, meta in feature_meta:
@@ -67,7 +68,7 @@ class PredictionAlignment2Css(PathSpec):
                     )
                 except Exception as e:
                     self.logger.error(
-                        f"did not find all original indices from all indice {e}"
+                        f"did not find all original indices from all indices {e}"
                     )
                     break
 
@@ -93,7 +94,8 @@ class PredictionAlignment2Css(PathSpec):
             meta["css"] = css
             yield _pdf_path, meta
 
-    def parse_to_css(self, css_obj, meta):
+    @staticmethod
+    def parse_to_css(css_obj, meta):
         try:
             return "\n".join(
                 [

@@ -90,7 +90,7 @@ def encode(obj_meta):
         meta["image"] = Image.open(meta["image_path"])
     if isinstance(meta, dict):
         meta = {k: encode_some(k, v) for k, v in meta.items()}
-    return (obj, meta)
+    return obj, meta
 
 
 all_rest_queues = []
@@ -113,17 +113,19 @@ class RestQueue:
 
     workbook = {}
 
-    def get(self, id):
+    def get(self, id, get_other=True):
 
-        try:
-            data = q[self.service_id].get(id)
-        except IndexError as e:
+        data = q[self.service_id].get(id)
+
+        if not data and get_other:
             logging.info(f"No file prepared for {id}, getting default")
 
             data = q[self.service_id].get(self.service_id)
-            q[self.service_id].task_done()
 
-            q[self.service_id].put(id, data)
+            if data:
+                q[self.service_id].task_done()
+                q[self.service_id].put(id, data)
+
         return data
 
     def change(self, id, item, path, value):
@@ -154,11 +156,29 @@ class RestQueue:
 
             logging.error(f"ould not remove ${id} from {self.workbook}")
 
-    def on_get(self, req, resp, id=None):  # get image
-        data = self.get(id)
+    def on_get(self, req, resp, id=None):
+        # get value from before
+        path_url = req.get_param("id", default=None)
+        data = self.get(id, get_other=not path_url)
+
+        if not data and path_url:
+            is_url = path_url.startswith("http")
+            url = path_url if is_url else None
+            doc_id = (
+                f"{config.hidden_folder}pdfs/{hash_tools.hashval(path_url)}.pdf"
+                if is_url
+                else path_url
+            )
+
+            logging.info(f"Annotate new document {doc_id=} {id=} {url=}")
+            init_queues(self.service_id, id)
+            data = self.work_on_upload(doc_id, service_id=id, url=url)
+            q[self.service_id].put(id, data)
+
 
         if not data:
-            resp.status = falcon.HTTP_300
+            logging.info("Returning No Content")
+            resp.status = falcon.HTTP_204
             return
 
         data = encode(data)
@@ -281,10 +301,9 @@ def queue_iter(service_id, gen, single=False):
     logging.info(f"Inserted samples in the queue {service_id}")
 
     while True:
+        # polling the q... TODO: make q blocking again
         try:
-            r = d[service_id].get(None, timeout=3)
-            print(".", end="")
-
+            r = d[service_id].get(None, timeout=30)
         except Exception as e:
             r = None
             logging.info("Pulse", exc_info=True)

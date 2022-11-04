@@ -207,8 +207,8 @@ class Layout2ReadingOrder(PathSpec):
 
     def load_model(self):
         if not Layout2ReadingOrder.model:
-            Layout2ReadingOrder.processor = model_helpers.PROCESSOR
-            Layout2ReadingOrder.model = model_helpers.MODEL
+            Layout2ReadingOrder.processor = model_helpers.LayoutModelParts().PROCESSOR
+            Layout2ReadingOrder.model = model_helpers.LayoutModelParts().MODEL
             logging.info(f"Loading {self.model_path}")
             Layout2ReadingOrder.model.load_state_dict(
                 torch.load(self.model_path, map_location="cpu")
