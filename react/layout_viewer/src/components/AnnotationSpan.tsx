@@ -2,7 +2,8 @@ import React, {
   forwardRef,
   useContext,
   useEffect,
-  useImperativeHandle, useRef,
+  useImperativeHandle,
+  useRef,
   useState,
 } from 'react'
 import { Button, Modal } from 'antd'
@@ -19,14 +20,10 @@ import {
   valueText,
 } from '../helpers/span_tools'
 import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons'
-import {CAPTCHA, NORMAL, Slot} from "../contexts/SLOTS";
-import Resource from "../resources/Resource";
+import { CAPTCHA, NORMAL, Slot } from '../contexts/SLOTS'
+import Resource from '../resources/Resource'
 
-export function AnnotationModal( {
-            text,
-          onClose,
-          service
-}) {
+export function AnnotationModal({ text, onClose, service }) {
   const ref = useRef(null) // ref => { current: null }
   const [open, setOpen] = useState(true)
 
@@ -56,7 +53,7 @@ export function AnnotationModal( {
           ]}>
           <AnnotationSpan
             ref={ref}
-            onClose={()=>setOpen(false)}
+            onClose={() => setOpen(false)}
             text={text}
             service={service}
             slot={NORMAL}
@@ -89,7 +86,10 @@ export function AnnotationTable(props: {
   )
 }
 
-const AnnotationSpan = forwardRef<{},  {text: string, onClose: () => void, service: Resource, slot: Slot}>(
+const AnnotationSpan = forwardRef<
+  {},
+  { text: string; onClose: () => void; service: Resource; slot: Slot }
+>(
   (
     {
       text = null,
@@ -125,22 +125,26 @@ const AnnotationSpan = forwardRef<{},  {text: string, onClose: () => void, servi
     }, [])
 
     useEffect(() => {
-      if (!text && (!meta?.annotation )) {
-        service.get((val) => {
-          context.setValueMetas(slot, val)
-        }, { doc_id: value, text: text, pdf_path: value })
+      if (!text && !meta?.annotation) {
+        service.get(
+          (val) => {
+            context.setValueMetas(slot, val)
+          },
+          { doc_id: value, text: text, pdf_path: value }
+        )
         return
       }
       if (meta?.annotation) {
         console.log(meta, meta?.annotation)
         setAnnotation(meta?.annotation)
         setSpanIndices([...annotation2spans(meta?.annotation)])
-      }}, [meta?.annotation])
+      }
+    }, [meta?.annotation])
 
     useImperativeHandle(inputRef, () => ({
       inputRef: inputRef,
-      onCloseSave: () => onCloseSave(),
-      onCloseDiscard: () => onCloseDiscard(),
+      onCloseSave: onCloseSave,
+      onCloseDiscard: onCloseDiscard,
     }))
 
     const onClickOpen = () => {
@@ -172,33 +176,34 @@ const AnnotationSpan = forwardRef<{},  {text: string, onClose: () => void, servi
     const onCloseDiscard = () => {
       setOpen(false)
       console.log('close discard')
+      service.cancel(value, {}, () => console.log('dicarded'))
       onClose()
     }
 
     console.log(spanIndices)
     return (
       <div
-          style={{height: "100%"}}
-            onClick={(e) => {
-        e.stopPropagation()
-        e.preventDefault()
-        console.log('stop it! click')
-      }}
-      onMouseUp={(e) => {
-        e.stopPropagation()
-        e.preventDefault()
-        console.log('stop it! up')
-      }}
-      onChange={(e) => {
-        e.stopPropagation()
-        e.preventDefault()
-        console.log('stop it! change')
-      }}
-      onBlur={(e) => {
-        e.stopPropagation()
-        e.preventDefault()
-        console.log('stop it! blur')
-      }}>
+        style={{ height: '100%' }}
+        onClick={(e) => {
+          e.stopPropagation()
+          e.preventDefault()
+          console.log('stop it! click')
+        }}
+        onMouseUp={(e) => {
+          e.stopPropagation()
+          e.preventDefault()
+          console.log('stop it! up')
+        }}
+        onChange={(e) => {
+          e.stopPropagation()
+          e.preventDefault()
+          console.log('stop it! change')
+        }}
+        onBlur={(e) => {
+          e.stopPropagation()
+          e.preventDefault()
+          console.log('stop it! blur')
+        }}>
         {!annotation ? (
           <>
             <pre>{JSON.stringify({ slot, context }, null, 2)}</pre>
@@ -217,8 +222,13 @@ const AnnotationSpan = forwardRef<{},  {text: string, onClose: () => void, servi
                   onClick={() => {
                     popSpan(spanIndices, i, setSpanIndices)
                   }}></Button>
+                <div style={{ width: '3%', display: 'inline-block' }}>
+                  {' '}
+                  <b>
+                    [{spanIndices[i][1]}:{spanIndices[i][2]}]
+                  </b>
+                </div>
                 <b>{tag}</b>
-                <b>{spanIndices[i].slice(1, 3)}</b>
                 <br />
                 <div
                   style={{

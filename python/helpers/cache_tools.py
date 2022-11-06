@@ -13,8 +13,10 @@ import falcon
 import os
 import unittest
 import numpy
+from regex import regex
 
 from config import config
+from helpers.os_tools import filename_only
 
 logger = logging.getLogger(__file__)
 import _pickle as cPickle
@@ -290,6 +292,7 @@ def configurable_cache(
                             if isinstance(result, str):
                                 _filter_path_glob[i] = result
                             elif isinstance(result, Iterable):
+                                result = [filename_only(r) for r in result]
                                 blacklist.extend(result)
                                 _filter_path_glob[i] = None
                             else:
@@ -297,7 +300,7 @@ def configurable_cache(
                                     f"dont know how to handle filter return type, {result}"
                                 )
                     blacklist += [
-                        os.path.basename(fp)
+                        filename_only(os.path.basename(fp))
                         for path in _filter_path_glob
                         if path
                         for fp in glob(path)
@@ -308,11 +311,13 @@ def configurable_cache(
                             f"Found nothing via glob {_from_path_glob} from {os.getcwd()}"
                         )
 
-                    blacklisted = [p for p in cache if os.path.basename(p) in blacklist]
+                    blacklisted = [p for p in cache if filename_only(p) in blacklist]
                     logging.warning(f"{blacklisted=} {self.flags=}")
 
                     yield from [
-                        (p, {}) for p in cache if not os.path.basename(p) in blacklist
+                        (p, {})
+                        for p in cache
+                        if not filename_only(os.path.basename(p)) in blacklist
                     ]
                 else:
                     yield from apply(

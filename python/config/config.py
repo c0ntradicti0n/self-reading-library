@@ -179,4 +179,6 @@ create_frontend = os.environ.get("CREATE_FRONTEND", default=False)
 BEST_MODELS_PATH = hidden_folder + "/best_models.json"
 
 GOLD_DATASET_PATH = hidden_folder + "/gold"
+TRASH_DATASET_PATH = hidden_folder + "/trash"
+
 MIN_CAPTCHA_TRIALS = 3

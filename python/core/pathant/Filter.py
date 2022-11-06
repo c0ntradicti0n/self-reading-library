@@ -1,4 +1,24 @@
+import os
+
+from config import config
+from core.event_binding import q
 from core.pathant.PathSpec import PathSpec
+
+
+def existing_in_dataset_or_database(extension):
+    return [
+        lambda self: config.GOLD_DATASET_PATH
+        + "/"
+        + self.flags["service_id"]
+        + extension,
+        lambda self: config.TRASH_DATASET_PATH
+        + "/"
+        + self.flags["service_id"]
+        + extension,
+        lambda self: [
+            os.path.basename(p) for p in q[self.flags["service_id"]].get_doc_ids()
+        ],
+    ]
 
 
 class Filter(PathSpec):

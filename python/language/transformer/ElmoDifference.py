@@ -72,25 +72,25 @@ def annotate_uploaded_file(file, service_id, url):
     BEST_MODELS = json_file_update(config.BEST_MODELS_PATH)
 
     result = next(
-            forget_except(
-                [
-                    next(
-                        elmo_difference_single_pipe(
-                            metaize(
-                                [file],
-                            ),
-                            difference_model_path=BEST_MODELS["difference"][
-                                "best_model_path"
-                            ],
-                            service_id=service_id,
-                            url=url,
+        forget_except(
+            [
+                next(
+                    elmo_difference_single_pipe(
+                        metaize(
+                            [file],
                         ),
-                        None,
-                    )
-                ],
-                keys=["css"],
-            )
+                        difference_model_path=BEST_MODELS["difference"][
+                            "best_model_path"
+                        ],
+                        service_id=service_id,
+                        url=url,
+                    ),
+                    None,
+                )
+            ],
+            keys=["css"],
         )
+    )
 
     return result
 

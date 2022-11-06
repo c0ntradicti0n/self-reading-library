@@ -148,13 +148,10 @@ class RestQueue:
     def discard(self, id):
         try:
             print("Discarding")
-
-            self.workbook.pop(id)
-            q[self.service_id].task_done()
+            q[self.service_id].rate(id, score=-1)
+            self.ok(id)
         except Exception as e:
-            print("Discarding error")
-
-            logging.error(f"ould not remove ${id} from {self.workbook}")
+            raise e
 
     def on_get(self, req, resp, id=None):
         # get value from before
@@ -174,7 +171,6 @@ class RestQueue:
             init_queues(self.service_id, id)
             data = self.work_on_upload(doc_id, service_id=id, url=url)
             q[self.service_id].put(id, data)
-
 
         if not data:
             logging.info("Returning No Content")
@@ -269,7 +265,6 @@ class RestQueue:
             resp.text = json.dumps({})
 
     def on_delete(self, req, resp, id=None):
-        print(req, resp)
         self.discard(id)
 
 

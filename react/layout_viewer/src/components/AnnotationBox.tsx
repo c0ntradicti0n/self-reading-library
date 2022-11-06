@@ -12,7 +12,7 @@ import Router from 'next/router'
 import { Watch } from 'react-loader-spinner'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
 import Resource from '../resources/Resource'
-import { Slot } from '../contexts/SLOTS'
+import { CAPTCHA, Slot } from '../contexts/SLOTS'
 import dynamic from 'next/dynamic'
 import { annotation2spans } from '../helpers/span_tools'
 
@@ -98,7 +98,7 @@ const AnnotationBox = forwardRef(
         document.removeEventListener('keydown', key, true)
       }
     }, [])
-    const meta = context?.[slot]?.meta
+    const meta = context?.meta[slot]
 
     useEffect(() => {
       if (!meta?.bbox) {
@@ -109,32 +109,6 @@ const AnnotationBox = forwardRef(
       }
       console.log(meta, meta?.bbox)
     }, [meta?.bbox])
-
-    useEffect(() => {
-      let im = new Image()
-      im.src =
-        'data:image/jpeg;charset=utf-8;base64,' + context.meta[slot]?.image
-
-      im.onload = () => {
-        const width = window.innerWidth
-        const scaleH = window.innerHeight / (im.height > 1000 ? im.height : 1000 )
-        const scaleW = (scaleH * im.naturalWidth) / (im.height > 1000 ? im.height : 1000 )
-
-        console.log('loading image')
-        setLabels(context.meta[slot]?.labels)
-        setImgOriginalSize({ width: im.width, height: im.height })
-        setImgRenderSize({ width: scaleW, height: scaleH, window })
-        console.log(
-          'setting coordinates',
-          im.naturalHeight,
-          im.naturalWidth,
-          im,
-          scaleW,
-          window,
-          width
-        )
-      }
-    }, [context.meta[slot]?.image])
 
     const key = useCallback((event) => {
       console.log(
@@ -202,16 +176,17 @@ const AnnotationBox = forwardRef(
       )
 
     console.log('imageRenderSize', imgRenderSize)
-    if (!imgRenderSize) return 'Not ready'
-    const renderRectTagsCoords = cols?.map((row, i) => [
-      row[1],
-      {
-        left: row[0][0] * imgRenderSize.width,
-        top: row[0][1] * imgRenderSize.height,
-        width: (row[0][2] - row[0][0]) * imgRenderSize.width,
-        height: (row[0][3] - row[0][1]) * imgRenderSize.height,
-      },
-    ])
+    const renderRectTagsCoords = imgRenderSize
+      ? cols?.map((row, i) => [
+          row[1],
+          {
+            left: row[0][0] * imgRenderSize.width,
+            top: row[0][1] * imgRenderSize.height,
+            width: (row[0][2] - row[0][0]) * imgRenderSize.width,
+            height: (row[0][3] - row[0][1]) * imgRenderSize.height,
+          },
+        ])
+      : []
 
     return window ? (
       <div
@@ -221,7 +196,6 @@ const AnnotationBox = forwardRef(
           position: 'absolute',
           top: '0px',
           left: '0px',
-          zIndex: 100000,
         }}>
         <RectangleSelection
           onSelect={(e, coords) => {
@@ -292,7 +266,7 @@ const AnnotationBox = forwardRef(
               className="container"
               style={{
                 position: 'absolute',
-                width: imgRenderSize.width + 'px',
+                width: imgRenderSize ? imgRenderSize.width + 'px' : '100%',
               }}>
               {context.meta[slot]?.image ? (
                 <img
@@ -303,17 +277,52 @@ const AnnotationBox = forwardRef(
                   }
                   alt="layout annotation"
                   draggable="false"
+                  onLoad={(event) => {
+                    const im = event.target
+                    const unNormalizedBbox =
+                      Math.max(...meta?.bbox.map((r) => Math.max(...r))) > 1000
+                    const width = window.innerWidth
+                    const scaleH =
+                      window.innerHeight /
+                      (unNormalizedBbox ? im.naturalHeight : 1000)
+
+                    // TODO Why is this difference between captcha and bbox with the scalinG????
+                    let scaleW
+                    if (slot === CAPTCHA)
+                      scaleW = scaleH * (im.naturalWidth / im.naturalHeight)
+                    else scaleW = scaleH
+
+                    console.log('loading image')
+                    setLabels(context.meta[slot]?.labels)
+                    setImgOriginalSize({
+                      width: im.naturalHeight,
+                      height: im.naturalHeight,
+                    })
+                    setImgRenderSize({ width: scaleW, height: scaleH, window })
+                    console.log(
+                      unNormalizedBbox,
+                      'setting coordinates',
+                      im.naturalHeight,
+                      im.naturalWidth,
+                      im.width,
+                      im.height,
+                      window.innerHeight,
+                      im,
+                      scaleW,
+                      window,
+                      width
+                    )
+                  }}
                   style={{
                     left: '0px',
                     top: '0px',
                     border: '2px solid black',
-                    height: '190vh',
+                    height: '100%',
                   }}
                 />
               ) : null}
               {imgOriginalSize ? (
                 renderRectTagsCoords?.map(([rowLabel, row], i) => {
-                  console.log('bbox', row)
                   return (
                     <div
                       key={'row' + i.toString()}
@@ -323,7 +332,6 @@ const AnnotationBox = forwardRef(
                         top: row.top.toString() + 'px',
                         width: row.width.toString() + 'px',
                         height: row.height.toString() + 'px',
-                        zIndex: 900000000,
                         opacity: '0.5',
                         background: TAG_COLOR[rowLabel],
                       }}

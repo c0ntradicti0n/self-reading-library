@@ -43,6 +43,12 @@ def get_filename_from_path(path):
     return os.path.basename(path)
 
 
+def filename_only(path):
+    return regex.match(
+        r"(?:(\/|^))(?P<fname>[^./]+)(?:\.)", os.path.basename(path)
+    ).group("fname")
+
+
 PathInfo = namedtuple(
     "PathInfo", ["path", "filename", "extension", "filename_without_extension"]
 )

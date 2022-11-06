@@ -40,10 +40,6 @@ export default class Layout extends React.Component {
             content="initial-scale=1.0, width=device-width"
           />
           <link rel="icon" href="/react/layout_viewer/public/favicon.ico" />
-          <style>
-            @import
-            url('https://fonts.googleapis.com/css2?family=Roboto+Serif:ital,opsz,wght@0,8..144,300;0,8..144,400;1,8..144,300&display=swap');
-          </style>
         </Head>
 
         <Mansonry>

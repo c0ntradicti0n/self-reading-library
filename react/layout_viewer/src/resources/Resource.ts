@@ -105,7 +105,7 @@ export default class Resource {
       query
     )
 
-    const fetch_init = {
+    const fetch_init: RequestInit = {
       method: method.toUpperCase(),
       headers: {
         ...(!is_file ? { 'Content-Type': 'application/json' } : {}),
@@ -113,7 +113,7 @@ export default class Resource {
         origin: 'localhost',
         'Accept-Encoding': 'gzip',
       },
-      body: !is_file ? JSON.stringify(data) : data,
+      body: (!is_file ? JSON.stringify(data) : data) as BodyInit,
     }
     if (method === 'get') {
       delete fetch_init.body
@@ -157,7 +157,7 @@ export default class Resource {
 
   exists = async (id, callback: Function) => {
     if (this.get_allowed) {
-      return await this.request('get', undefined, callback, null, 'id=' + id)
+      return await this.request('get', undefined, callback, 'id=' + id)
     }
   }
 
@@ -167,7 +167,7 @@ export default class Resource {
     }
   }
 
-  get = async (callback, query={}) => {
+  get = async (callback, query = {}) => {
     if (this.get_allowed) {
       return await this.request('get', undefined, callback, query)
     }
@@ -189,6 +189,13 @@ export default class Resource {
     console.log('save', id, data)
     if (this.upload_allowed) {
       await this.request('post', [id, data], callback)
+    }
+  }
+
+  cancel = async (id, data = {}, callback) => {
+    console.log('cancel', id, data)
+    if (this.upload_allowed) {
+      await this.request('delete', [id, data], callback)
     }
   }
 

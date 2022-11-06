@@ -78,6 +78,7 @@ def post_process_df(feature_df):
 class LayoutModelParts(types.ModuleType):
     def __init__(self):
         super(LayoutModelParts, self).__init__(name="LayoutModel")
+
     @property
     def PROCESSOR(self):
         if not hasattr(self, "_PROCESSOR"):
@@ -109,7 +110,6 @@ class LayoutModelParts(types.ModuleType):
 
 def preprocess_data(training=False):
     def _preprocess(examples, **kwargs):
-
 
         words = [
             [" ".join(word.split()[:4]) for word in text]  # + word.split()[-2:]

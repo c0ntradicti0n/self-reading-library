@@ -2,6 +2,7 @@ import os
 
 from config import config
 from core.pathant.Converter import converter
+from core.pathant.Filter import existing_in_dataset_or_database
 from core.pathant.PathSpec import PathSpec
 from core.event_binding import queue_iter, RestQueue, q, d
 from helpers.cache_tools import configurable_cache
@@ -22,15 +23,7 @@ class AnnotationSpanLoader(PathSpec):
     @configurable_cache(
         config.cache + os.path.basename(__file__),
         from_path_glob=config.ELMO_DIFFERENCE_COLLECTION_PATH + "/*.conll",
-        filter_path_glob=[
-            lambda self: config.GOLD_DATASET_PATH
-            + "/"
-            + self.flags["service_id"]
-            + "/*.conll",
-            lambda self: [
-                os.path.basename(p) for p in q[self.flags["service_id"]].get_doc_ids()
-            ],
-        ],
+        filter_path_glob=existing_in_dataset_or_database("/*.conll"),
     )
     def __call__(self, prediction_metas, *args, **kwargs):
         # all span_annotation are coming from the cache, that is read from globbing the files
@@ -115,7 +108,13 @@ class AnnotatorSaveFinal(PathSpec):
 
         for path, meta in prediction_metas:
             filename = path.replace(config.ELMO_DIFFERENCE_COLLECTION_PATH, "")
-            new_folder = config.GOLD_DATASET_PATH + "/" + self.flags["service_id"]
+
+            new_folder = config.GOLD_DATASET_PATH + "/" + self.flags["service_id"] + "/"
+            if meta["rating_score"] == -1:
+                new_folder = (
+                    config.TRASH_DATASET_PATH + "/" + self.flags["service_id"] + "/"
+                )
+
             if not os.path.isdir(new_folder):
                 os.makedirs(new_folder)
 

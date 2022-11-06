@@ -8,6 +8,7 @@ import logging
 
 from config import config
 from core.pathant.Converter import converter
+from core.pathant.Filter import existing_in_dataset_or_database
 from core.pathant.PathSpec import PathSpec
 from core.event_binding import queue_iter, RestQueue, queue_put, q, d
 from helpers.cache_tools import configurable_cache
@@ -28,15 +29,7 @@ class AnnotationLoader(PathSpec):
     @configurable_cache(
         config.cache + os.path.basename(__file__),
         from_path_glob=config.COLLECTION_PATH + "/*.pickle",
-        filter_path_glob=[
-            lambda self: config.GOLD_DATASET_PATH
-            + "/"
-            + self.flags["service_id"]
-            + "/*.json.gz",
-            lambda self: [
-                os.path.basename(p) for p in q[self.flags["service_id"]].get_doc_ids()
-            ],
-        ],
+        filter_path_glob=existing_in_dataset_or_database("/*.json.gz"),
     )
     def __call__(self, prediction_metas, *args, **kwargs):
         # all annotation are comming from the cache, that is read from globbing the files
@@ -116,16 +109,18 @@ class AnnotatorSaveFinal(PathSpec):
             meta["raw_dataset_pickle"] = path
             meta["image_path"] = self.single(meta["image_path"])
             meta["pickle_path"] = self.single(meta["image_path"])
-
             meta["page_number"] = self.single(meta["page_number"])
             meta["text"] = list(meta["text"])
-
             page_number = meta["page_number"]
-
             old_folder, fname = os.path.split(path)
             fname, endings = fname.split(".")[0], fname.split(".")[1:]
 
             new_folder = config.GOLD_DATASET_PATH + "/" + self.flags["service_id"] + "/"
+            if meta["rating_score"] == -1:
+                new_folder = (
+                    config.TRASH_DATASET_PATH + "/" + self.flags["service_id"] + "/"
+                )
+
             if not os.path.isdir(new_folder):
                 os.makedirs(new_folder)
             with gzip.open(

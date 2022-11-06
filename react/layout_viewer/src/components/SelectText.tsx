@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import AnnotationSpan, {AnnotationModal} from './AnnotationSpan'
+import AnnotationSpan, { AnnotationModal } from './AnnotationSpan'
 
 const SelectText = ({ service, children }) => {
   const [selected, setSelected] = useState(null)
