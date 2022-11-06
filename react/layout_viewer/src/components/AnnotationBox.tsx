@@ -375,7 +375,7 @@ const AnnotationBox = forwardRef(
                 <table style={{ width: '10%' }}>
                   <tbody>
                     <tr>
-                      <td> KEY</td>
+                      <td>KEY</td>
                       <td>TAG</td>
                     </tr>
                     {Object.entries(KEYS).map(([k, v], i) => (

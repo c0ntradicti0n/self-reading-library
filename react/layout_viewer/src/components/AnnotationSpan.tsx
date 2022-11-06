@@ -22,6 +22,7 @@ import {
 import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons'
 import { CAPTCHA, NORMAL, Slot } from '../contexts/SLOTS'
 import Resource from '../resources/Resource'
+import SelectText from './SelectText'
 
 export function AnnotationModal({ text, onClose, service }) {
   const ref = useRef(null) // ref => { current: null }
@@ -78,7 +79,7 @@ export function AnnotationTable(props: {
           )?.[0] ?? 'O'
         return (
           <span key={index} className={'tag span_' + span_no}>
-            {word}
+            {word}{' '}
           </span>
         )
       })}
@@ -210,18 +211,19 @@ const AnnotationSpan = forwardRef<
             <ThreeDots />
           </>
         ) : (
-          <>
-            <AnnotationTable
-              annotation={annotation}
-              spans={spanIndices}></AnnotationTable>
+          <SelectText onSelect={(x) => console.log(x)}>
+            <AnnotationTable annotation={annotation} spans={spanIndices} />
 
             {spanIndices.map(([tag, i1, i2, ws], i) => (
               <div key={i}>
-                <Button
-                  icon={<MinusCircleOutlined />}
-                  onClick={() => {
-                    popSpan(spanIndices, i, setSpanIndices)
-                  }}></Button>
+                <div style={{ width: '3%', display: 'inline-block' }}>
+                  <Button
+                    icon={<MinusCircleOutlined />}
+                    onClick={() => {
+                      popSpan(spanIndices, i, setSpanIndices)
+                    }}
+                  />
+                </div>
                 <div style={{ width: '3%', display: 'inline-block' }}>
                   {' '}
                   <b>
@@ -280,7 +282,7 @@ const AnnotationSpan = forwardRef<
               onClick={() => {
                 setSpanIndices(addSpan(spanIndices, annotation))
               }}></Button>
-          </>
+          </SelectText>
         )}
       </div>
     )

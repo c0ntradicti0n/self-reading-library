@@ -4,7 +4,7 @@ function fibonacci(n) {
   return n < 1 ? 0 : n <= 2 ? 1 : fibonacci(n - 1) + fibonacci(n - 2)
 }
 const GoldenSnake = ({ a = 20, children }) => {
-  const n = children.length - 3
+  const n = children.length + 3
 
   let j = 0
   const writing_points = []
@@ -19,7 +19,7 @@ const GoldenSnake = ({ a = 20, children }) => {
         style={{
           padding: '0px',
           height: '100vh',
-          width: '400px',
+          width: '900px',
           position: 'relative',
         }}>
         <svg

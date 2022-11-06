@@ -7,9 +7,10 @@ import Difference_AnnotationService from '../resources/Difference_AnnotationServ
 import { httpGet } from '../helpers/httpGet'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
 import { Slot } from '../contexts/SLOTS'
+import { AnnotationModal } from './AnnotationSpan'
 
 interface Props {
-  service: Resource<any>
+  service: Resource
   slot: Slot
 }
 
@@ -44,40 +45,51 @@ const HtmlRenderer = (props: Props) => {
 
   return (
     <div>
-      <SelectText service={difference_AnnotationService}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '9em',
-          }}>
-          {context.meta[props.slot] ? (
-            <style
-              dangerouslySetInnerHTML={{
-                __html:
-                  context.meta[props.slot].css +
-                  `\n\n
+      <SelectText>
+        {(selected, setSelected) => (
+          <>
+            {selected ? (
+              <AnnotationModal
+                text={selected}
+                onClose={() => setSelected(null)}
+                service={difference_AnnotationService}
+              />
+            ) : null}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '9em',
+              }}>
+              {context.meta[props.slot] ? (
+                <style
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      context.meta[props.slot].css +
+                      `\n\n
                    #page-container { 
                    background-color: transparent !important;
                    background-image: none !important;
                    }`,
-              }}
-            />
-          ) : (
-            <ThreeCircles
-              color="red"
-              outerCircleColor="blue"
-              middleCircleColor="green"
-              innerCircleColor="grey"
-            />
-          )}
-          {htmlContent ? (
-            <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
-          ) : (
-            <Triangle ariaLabel="loading-indicator" />
-          )}
-        </div>
+                  }}
+                />
+              ) : (
+                <ThreeCircles
+                  color="red"
+                  outerCircleColor="blue"
+                  middleCircleColor="green"
+                  innerCircleColor="grey"
+                />
+              )}
+              {htmlContent ? (
+                <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+              ) : (
+                <Triangle ariaLabel="loading-indicator" />
+              )}
+            </div>
+          </>
+        )}
       </SelectText>
     </div>
   )
