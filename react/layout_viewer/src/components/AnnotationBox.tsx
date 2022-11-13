@@ -157,8 +157,12 @@ const AnnotationBox = forwardRef(
             }
           )
         })()
+        return true
       },
-      onCloseDiscard: () => service.cancel(),
+      onCloseDiscard: () => {
+        service.cancel()
+        return false
+      },
     }))
 
     let cols

@@ -1,6 +1,5 @@
-import assert from 'assert'
-
-const intersectingRanges = require('intersecting-ranges')
+import { nest } from './array'
+import _ from 'lodash'
 
 const minDistance = 1
 
@@ -8,35 +7,76 @@ export function valueText(value) {
   return `${value}°C`
 }
 
+export const PRECEDENCE = {
+  ASPECT: 2,
+  SUBJECT: 1,
+  SUBJ: 1,
+  CONTRAST: 0,
+}
+
+export function sortSpans_precedence(spans) {
+  const sortedSpans = spans.sort((a, b) => PRECEDENCE[b[0]] - PRECEDENCE[a[0]])
+  console.log('PRECEDENCE', { before: spans, after: sortedSpans })
+  return sortedSpans
+}
+
+export function sortSpans_position(spans) {
+  const sortedSpans = spans.sort((a, b) => a[1] - b[1])
+  console.log('POSITION, sorting with ', { before: spans, after: sortedSpans })
+  return sortedSpans
+}
+
 export const spans2annotation = (annotation, spans) => {
-  return annotation.map(([word, tag], index) => {
-    let [_tag, begin, end] = spans.find(
-      ([, begin, end]) => index >= begin && index < end
-    ) ?? [null, null, null, null]
-    if (_tag == null) return [word, 'O']
-    let prefix = ''
-    if (index === begin) prefix = 'B-'
-    if (index === end - 1) prefix = 'L-'
-    if (index === begin && index === end - 1) prefix = 'U-'
-    if (index > begin && index < end - 1) prefix = 'I-'
-    return [word, prefix + _tag]
+  let result = annotation.map(([w]) => [w, 'O'])
+  const sortedSpans = sortSpans_precedence(spans).reverse()
+
+  sortedSpans.forEach(([_tag, begin, end, words]) => {
+    _.range(Math.round(begin), Math.round(end)).forEach((index) => {
+      let prefix = ''
+      if (index === begin) prefix = 'B-'
+      if (index === end - 1) prefix = 'L-'
+      if (index === begin && index === end - 1) prefix = 'U-'
+      if (index > begin && index < end - 1) prefix = 'I-'
+      if (index >= result.length) {
+        result[index] = ['.', 'O']
+        console.warn('Spans overflow on original annotations')
+      }
+      if (result[index] === undefined) {
+        result[index] = ['.', 'O']
+        console.warn('Annotation contained undefined at', result, index)
+      }
+      result[index][1] = prefix + _tag
+    })
   })
+  return result
 }
 
 export const annotation2spans = (annotation) => {
-  let groups: [string, number, number, string[]][] = annotation.reduce(
-    (acc, [w, t], i) => {
-      if (acc.length === 0) return [[tagStrip(t), 0, i + 1, [w]]]
-      let last = acc[acc.length - 1]
-      if (last[0] === tagStrip(t))
-        acc[acc.length - 1] = [tagStrip(t), last[1], i + 1, [...last[3], w]]
-      else acc.push([tagStrip(t), i, i + 1, [w]])
-      return acc
-    },
-    []
+  console.log('annotation2spans')
+
+  const value = annotation.map(([w, t], i) => [w, ...tagStrip(t), i])
+  const result = nest(
+    ['$..[2]', (item) => item[1] === 'B' || item[1] === 'U'],
+    value
   )
-  groups = groups.filter(([t]) => t.length > 2)
-  return groups
+  console.log(result)
+  const rawSpans = result.reduce((acc, sub) => {
+    return [
+      ...acc,
+      ...Object.entries(sub.value).map(([group, sub]) => {
+        // @ts-ignore
+        return sub.value
+      }),
+    ]
+  }, [])
+
+  const spans = rawSpans.map((l) => {
+    return [l[0][2], l[0][3], l[l.length - 1][3] + 1, l.map((a) => a[0])]
+  })
+
+  const sortedSpans = sortSpans_position(spans)
+
+  return sortedSpans
 }
 
 export function adjustSpanValue(
@@ -47,7 +87,15 @@ export function adjustSpanValue(
   tag: string,
   annotation: [string, string][]
 ) {
-  console.log(newValue, activeThumb, _spanIndices, i, tag, annotation)
+  console.log(
+    'adjustSpanValue',
+    newValue,
+    activeThumb,
+    _spanIndices,
+    i,
+    tag,
+    annotation
+  )
   let spanIndices = [..._spanIndices]
   if (!Array.isArray(newValue)) {
     return
@@ -73,92 +121,102 @@ export function adjustSpanValue(
   ]
 
   if (spanIndices.length === 1) return spanIndices
+  /*
+    const ranges = spanIndices.map(([tag, start, end], index) => [
+      start,
+      end,
+      { tag, index },
+    ])
 
-  const ranges = spanIndices.map(([tag, start, end], index) => [
-    start,
-    end,
-    { tag, index },
-  ])
-  const intersections_forwards = intersectingRanges(ranges, { withData: true })
-  const intersections_backward = intersectingRanges(ranges.reverse(), {
-    withData: true,
-  })
 
-  intersections_forwards.forEach(([i_start, i_end, data]) => {
-    if (data && data.index > i) {
-      const [tag, start, end, words] = spanIndices[data.index]
-      spanIndices[data.index] = [
-        data.tag,
-        Math.max(start, i_end),
-        Math.max(i_start, end),
-        words,
-      ]
-    }
-  })
+    const intersections_forwards = intersectingRanges(ranges, { withData: true })
+    const intersections_backward = intersectingRanges(ranges.reverse(), {
+      withData: true,
+    })
 
-  intersections_backward.forEach(([i_start, i_end, data]) => {
-    if (data && data.index < i) {
-      const [tag, start, end, words] = spanIndices[data.index]
-      spanIndices[data.index] = [
-        data.tag,
-        Math.min(start, i_end),
-        Math.min(i_start, end),
-        words,
-      ]
-    }
-  })
+    intersections_forwards.forEach(([i_start, i_end, data]) => {
+      if (data && data.index > i) {
+        const [tag, start, end, words] = spanIndices[data.index]
+        spanIndices[data.index] = [
+          data.tag,
+          Math.max(start, i_end)+1,
+          Math.max(i_start, end) ,
+          words,
+        ]
+      }
+    })
 
-  const changedRanges = spanIndices.map(([tag, start, end], index) => [
-    start,
-    end,
-    { tag, index },
-  ])
-  const checkIntersectingRanges = intersectingRanges(changedRanges, {
-    withData: true,
-  }).filter(([start, end]) => start - end !== 0)
-  assert.ok(
-    checkIntersectingRanges.length === 0,
-    'Had intersections after applying intersection remedying \n' +
-      'on changing ' +
-      i +
-      '\n' +
-      JSON.stringify(checkIntersectingRanges) +
-      '\n' +
-      JSON.stringify(spanIndices)
-  )
+    intersections_backward.forEach(([i_start, i_end, data]) => {
+      if (data && data.index < i) {
+        const [tag, start, end, words] = spanIndices[data.index]
+        spanIndices[data.index] = [
+          data.tag,
+          Math.min(start, i_end) + 1,
+          Math.min(i_start, end) ,
+          words,
+        ]
+      }
+    })
 
-  console.log('changed to ', spanIndices)
+    const changedRanges = spanIndices.map(([tag, start, end], index) => [
+      start,
+      end,
+      { tag, index },
+    ])
+    const checkIntersectingRanges = intersectingRanges(changedRanges, {
+      withData: true,F
+    }).filter(([start, end]) => start - end !== 0)
+    assert.ok(
+      checkIntersectingRanges.length === 0,
+      'Had intersections after applying intersection remedying \n' +
+        'on changing ' +
+        i +
+        '\n' +
+        JSON.stringify(checkIntersectingRanges) +
+        '\n' +
+        JSON.stringify(spanIndices)
+    )
 
+    console.log('changed to ', spanIndices)
+    */
   spanIndices = spanIndices.map(([tag, start, end, ws]) => [
     tag,
     start,
     end,
     annotation.slice(start, end).map(([w]) => w),
   ])
-  return spanIndices
+
+  console.log('result', spanIndices)
+
+  return spanIndices //.sort((a, b) => a[1] - b[1])
 }
 
 export const addSpan = (
   spanIndices: [string, number, number, string[]][],
-  annotation
+  annotation,
+  tag = null
 ) => {
   const tagOccurrences = spanIndices.reduce((acc, e) => {
     acc[e[0]] = (acc[e[0]] || 0) + 1
     return acc
   }, {})
+  let incompleteTags
+  if (!tag) {
+    incompleteTags = [...Object.entries(tagOccurrences)].filter(
+      ([, v]) => v !== 2
+    )
 
-  let incompleteTags = [...Object.entries(tagOccurrences)].filter(
-    ([, v]) => v !== 2
-  )
-
-  if (
-    Object.entries(tagOccurrences).every(([, len]) => len === 2) ||
-    Object.entries(tagOccurrences).length === 0
-  )
-    incompleteTags = [
-      ['SUBJECT', 0],
-      ['CONTRAST', 0],
-    ]
+    if (
+      Object.entries(tagOccurrences).every(([, len]) => len === 2) ||
+      Object.entries(tagOccurrences).length === 0
+    )
+      incompleteTags = [
+        ['SUBJECT', 0],
+        ['CONTRAST', 0],
+      ]
+  } else {
+    incompleteTags = [[tag, 0]]
+  }
 
   let newSpanIndices = spanIndices
   const averageSpanLength =
@@ -183,20 +241,127 @@ export const addSpan = (
 
 export function popSpan(
   spanIndices: [string, number, number, string[]][],
-  i: number,
-  setSpanIndices: (
-    value:
-      | ((
-          prevState: [string, number, number, string[]][]
-        ) => [string, number, number, string[]][])
-      | [string, number, number, string[]][]
-  ) => void
+  i: number
 ) {
   spanIndices.splice(i, 1)
-  setSpanIndices([...spanIndices])
+  console.log('popping', { after: spanIndices, i })
+  return [...spanIndices]
 }
 
 export const tagStrip = (t) => {
+  if (t.length < 2) return [t, '']
+  try {
+    return [t.slice(0, 1), t.slice(2)]
+  } catch (e) {
+    throw e
+  }
+}
+
+export const tagStripFlag = (t) => {
   if (t.length < 2) return ''
-  return t.slice(2)
+  try {
+    return t.slice(0, 1)
+  } catch (e) {
+    throw e
+  }
+}
+
+const check = (errors, yes_no, msg) => (yes_no ? null : errors.push(msg))
+
+export const validateSpans = (spans, annotation, TAG_SET) => {
+  let errors = []
+  check(
+    errors,
+    spans.length / TAG_SET.length > 1,
+    'Must have multiple sets of TAG_SET'
+  )
+
+  check(
+    errors,
+    spans.length % TAG_SET.length === 0,
+    'Must have length proportional to TAG_SET'
+  )
+  let new_annotation = spans2annotation(annotation, spans)
+  new_annotation = new_annotation.map((l) => [...l, tagStrip(l[1])])
+  const split_O = nest(
+    [
+      (span) => {
+        if (!span) return false
+        try {
+          return span[2][0] === 'O'
+        } catch (e) {
+          throw e
+        }
+      },
+      '$..[2][1]',
+    ],
+    new_annotation
+  ).filter((set) => !set.elements.every((span) => span[2][0] === 'O'))
+
+  check(
+    errors,
+    split_O.every((group) => group.value.find((v) => v.group === 'SUBJECT')),
+    'Must have annotations split with None-Tags'
+  )
+
+  check(
+    errors,
+    split_O.map((tag_set) => {
+      check(
+        errors,
+        tag_set.elements
+          .map((l) => l[2][0])
+          .filter((t) => ['B', 'U'].includes(t)).length === TAG_SET.length,
+        `${JSON.stringify(
+          tag_set.elements.map((l) => l[2][0])
+        )} does have more beginnings of tags than ${TAG_SET}`
+      )
+
+      check(
+        errors,
+        tag_set.elements
+          .map((l) => l[2][0])
+          .filter((t) => ['L', 'U'].includes(t)).length === TAG_SET.length,
+        `${JSON.stringify(
+          tag_set.elements.map((l) => l[2][0])
+        )} does have more last tokens than expected ${TAG_SET}`
+      )
+      return tag_set.value.length === TAG_SET
+    }),
+    'Must have annotations splitted with None-Tags'
+  )
+
+  return errors
+}
+
+export const mergeSpans = (spans, annotation) => {
+  let new_annotation = spans2annotation(annotation, spans)
+  new_annotation = new_annotation.map((l, i) => [...l, tagStrip(l[1]), i])
+  const split_O = nest(
+    [
+      (span) => {
+        return span[2][0] === 'O'
+      },
+
+      "$..[2][?(@ == 'SUBJECT' ||  @ == 'CONTRAST' )]",
+    ],
+    new_annotation
+  ).filter((set) => !set.elements.every((span) => span[2][0] === 'O'))
+
+  const newSpans = split_O
+    .map((g) =>
+      g.value
+        .filter((a) => a.group != 'undefined')
+        .map((l) => {
+          return [
+            l.group,
+            Math.min(...l.value.map((i) => i[3])),
+            Math.max(...l.value.map((i) => i[3])) + 1,
+            l.value.map((e) => e[0]),
+          ]
+        })
+    )
+    .flat()
+
+  return newSpans
 }

@@ -47,8 +47,7 @@ const Captcha = () => {
             <Button
               key="back"
               onClick={() => {
-                setKind(switch_it[kind])
-                ref?.current?.onCloseDiscard()
+                if (ref?.current?.onCloseDiscard()) setKind(switch_it[kind])
               }}>
               Unclear
             </Button>,
@@ -56,8 +55,7 @@ const Captcha = () => {
               key="submit"
               type="primary"
               onClick={() => {
-                setKind(switch_it[kind])
-                ref?.current?.onCloseSave()
+                if (ref?.current?.onCloseSave()) setKind(switch_it[kind])
               }}>
               Submit
             </Button>,

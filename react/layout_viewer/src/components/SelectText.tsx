@@ -11,8 +11,13 @@ const SelectText = ({ children, onSelect = null }) => {
   }
   console.log(children)
 
-  return <div onMouseUp={handleMouseUp}>{
-    (typeof children === 'function') ? children(selected, setSelected): children}</div>
+  return (
+    <div onMouseUp={handleMouseUp}>
+      {typeof children === 'function'
+        ? children(selected, setSelected)
+        : children}
+    </div>
+  )
 }
 
 export default SelectText

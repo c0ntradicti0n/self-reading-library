@@ -25,6 +25,8 @@
     "glob": "^7.1.6",
     "install": "^0.13.0",
     "intersecting-ranges": "^1.2.0",
+    "jsonpath": "^1.1.1",
+    "jsonpath-faster": "^0.0.12",
     "lodash": "^4.17.21",
     "next": "^12.2.4",
     "npm": "^8.12.1",

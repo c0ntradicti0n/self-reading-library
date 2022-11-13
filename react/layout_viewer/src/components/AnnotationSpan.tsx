@@ -15,8 +15,12 @@ import {
   addSpan,
   adjustSpanValue,
   annotation2spans,
+  mergeSpans,
   popSpan,
+  sortSpans_position,
+  sortSpans_precedence,
   spans2annotation,
+  validateSpans,
   valueText,
 } from '../helpers/span_tools'
 import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons'
@@ -70,12 +74,13 @@ export function AnnotationTable(props: {
   spans: [string, number, number, string[]][]
 }) {
   console.log('AnnotationTable', props)
+  const sortedSpans = sortSpans_precedence(props.spans)
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap' }}>
       {props.annotation.map(([word, tag], index) => {
         let span_no =
-          props.spans.find(
-            ([, begin, end]) => index >= begin && index < end
+          sortedSpans.find(
+            ([, begin, end]) => index >= begin && index <= end
           )?.[0] ?? 'O'
         return (
           <span key={index} className={'tag span_' + span_no}>
@@ -89,7 +94,13 @@ export function AnnotationTable(props: {
 
 const AnnotationSpan = forwardRef<
   {},
-  { text: string; onClose: () => void; service: Resource; slot: Slot }
+  {
+    text: string
+    onClose: () => void
+    service: Resource
+    slot: Slot
+    TAG_SET: string[]
+  }
 >(
   (
     {
@@ -97,11 +108,13 @@ const AnnotationSpan = forwardRef<
       onClose = () => console.log('close span_annotation'),
       service,
       slot,
+      TAG_SET = ['SUBJECT', 'CONTRAST'],
     },
     inputRef
   ) => {
-    const [open, setOpen] = useState(true)
     const [annotation, setAnnotation] = useState(null)
+    const [errors, setErrors] = useState(null)
+
     const context = useContext<DocumentContext>(DocumentContext)
     let value = context.value[slot]
     let meta = context.meta[slot]
@@ -152,16 +165,20 @@ const AnnotationSpan = forwardRef<
       setOpen(true)
     }
     const onCloseSave = () => {
-      console.log('save')
+      console.table('save', annotation, spanIndices)
+      let new_value = spans2annotation(annotation, spanIndices)
+      new_value = mergeSpans(spanIndices, new_value)
+      const _errors = validateSpans(new_value, annotation, TAG_SET)
+      console.log('ERRORS', _errors)
+      if (_errors) {
+        setErrors(_errors)
+        return false
+      }
+      console.log('validated')
       ;(async () => {
-        const new_value = spans2annotation(annotation, spanIndices)
-        await service.change(
-          '[1].annotation',
-          spans2annotation(annotation, spanIndices),
-          () => {
-            console.log('updated')
-          }
-        )
+        await service.change('[1].annotation', new_value, () => {
+          console.log('updated')
+        })
         await service.save(
           value,
           spans2annotation(annotation, spanIndices),
@@ -170,15 +187,15 @@ const AnnotationSpan = forwardRef<
           }
         )
       })()
-      setOpen(false)
       onClose()
+      return true
     }
 
     const onCloseDiscard = () => {
-      setOpen(false)
       console.log('close discard')
       service.cancel(value, {}, () => console.log('dicarded'))
       onClose()
+      return true
     }
 
     console.log(spanIndices)
@@ -211,17 +228,23 @@ const AnnotationSpan = forwardRef<
             <ThreeDots />
           </>
         ) : (
-          <SelectText onSelect={(x) => console.log(x)}>
-            <AnnotationTable annotation={annotation} spans={spanIndices} />
-
-            {spanIndices.map(([tag, i1, i2, ws], i) => (
-              <div key={i}>
+          <div>
+            <SelectText onSelect={(x) => console.log(x)}>
+              <AnnotationTable annotation={annotation} spans={spanIndices} />
+            </SelectText>
+            {sortSpans_position(spanIndices).map(([tag, i1, i2, ws], i) => (
+              <div
+                key={
+                  i.toString() + 'tag' + i1.toString() + '-' + i2.toString()
+                }>
                 <div style={{ width: '3%', display: 'inline-block' }}>
                   <Button
                     icon={<MinusCircleOutlined />}
-                    onClick={() => {
-                      popSpan(spanIndices, i, setSpanIndices)
-                    }}
+                    onClick={() =>
+                      setSpanIndices(
+                        popSpan(sortSpans_position(spanIndices), i)
+                      )
+                    }
                   />
                 </div>
                 <div style={{ width: '3%', display: 'inline-block' }}>
@@ -251,15 +274,19 @@ const AnnotationSpan = forwardRef<
                   </div>
 
                   <Slider
-                    aria-label="annotation"
+                    key={'sl-' + i.toString()}
                     value={[i1, i2]}
                     valueLabelDisplay="auto"
                     style={{ width: '50vw !important' }}
                     onChange={(event, newValue, activeThumb) => {
+                      newValue = [
+                        Math.round(newValue[0]),
+                        Math.round(newValue[1]),
+                      ]
                       const result = adjustSpanValue(
                         newValue as [number, number],
                         activeThumb,
-                        spanIndices,
+                        sortSpans_position(spanIndices),
                         i,
                         tag,
                         annotation
@@ -267,6 +294,7 @@ const AnnotationSpan = forwardRef<
                       console.log(result)
                       setSpanIndices(result)
                     }}
+                    onMouseUp={() => setSpanIndices(spanIndices)}
                     step={1}
                     marks
                     min={0}
@@ -277,12 +305,19 @@ const AnnotationSpan = forwardRef<
                 </div>
               </div>
             ))}
-            <Button
-              icon={<PlusCircleOutlined />}
-              onClick={() => {
-                setSpanIndices(addSpan(spanIndices, annotation))
-              }}></Button>
-          </SelectText>
+            {TAG_SET.map((tag) => (
+              <Button
+                icon={<PlusCircleOutlined />}
+                onClick={() => {
+                  setSpanIndices(addSpan(spanIndices, annotation, tag))
+                }}>
+                {tag}
+              </Button>
+            ))}
+            {errors?.map((e) => (
+              <div style={{ background: 'red' }}>{e}</div>
+            ))}
+          </div>
         )}
       </div>
     )
