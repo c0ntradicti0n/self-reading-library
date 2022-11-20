@@ -1,6 +1,6 @@
-import { AppSettings } from '../../config/connection'
 import { getRandomArbitrary } from '../helpers/array'
 import { NORMAL, Slot } from '../contexts/SLOTS'
+import { BACKEND_HOST } from '../../config/connection'
 
 const cyrb53 = function (str, seed = 0) {
   if (!str) return null
@@ -120,7 +120,7 @@ export default class Resource {
     }
 
     const request_query =
-      AppSettings.BACKEND_HOST +
+      BACKEND_HOST +
       this.route +
       this.id +
       (querystring ? '?' + querystring : '')

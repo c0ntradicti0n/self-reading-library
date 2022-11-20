@@ -167,7 +167,7 @@ EPOCHS_LAYOUT = 84
 PDF_UPLOAD_DIR = hidden_folder + "/pdf_upload/"
 ELMO_DIFFERENCE_MODEL_PATH = hidden_folder + "elmo_difference_models"
 ELMO_DIFFERENCE_COLLECTION_PATH = hidden_folder + "elmo_difference_collection"
-PORT = int(os.environ.get("PORT", default="9999"))
+PORT = int(os.environ.get("PORT", default="9876"))
 DB_HOST = os.environ.get("DB_HOST", default="localhost")
 PAINT = False
 

@@ -2,6 +2,7 @@ import {
   addSpan,
   adjustSpanValue,
   annotation2spans,
+  correctPrefix,
   mergeSpans,
   sortSpans_position,
   sortSpans_precedence,
@@ -54,7 +55,6 @@ const testNestAnnotation: [string, string][] = [
   ['wall', 'L-CONTRAST'],
   ['.', 'O'],
 ]
-//const testNestSpans = annotation2spans(testNestAnnotation)
 
 const testAnnotationNoSubj: [string, string][] = [
   ['the', 'B-SUBJECT'],
@@ -995,4 +995,51 @@ const y = [
 it('test validation real world', () => {
   const sanitized = mergeSpans(y, x)
   expect(validateSpans(x, sanitized, TAG_SET)).toEqual([])
+})
+
+it('spans without embedded B-prefix will be standardized', () => {
+  const testNestAnnotation: [string, string][] = [
+    ['the', 'B-CONTRAST'],
+    ['lazy', 'I-SUBJECT'],
+    ['yellow', 'I-SUBJECT'],
+    ['socks', 'L-SUBJECT'],
+    ['glued', 'I-CONTRAST'],
+    ['on', 'I-CONTRAST'],
+    ['the', 'I-CONTRAST'],
+    ['wall', 'L-CONTRAST'],
+    ['.', 'O'],
+    ['the', 'B-SUBJECT'],
+    ['lazy', 'I-SUBJECT'],
+    ['yellow', 'I-SUBJECT'],
+    ['socks', 'L-SUBJECT'],
+    ['glued', 'B-CONTRAST'],
+    ['on', 'I-CONTRAST'],
+    ['the', 'I-CONTRAST'],
+    ['wall', 'L-CONTRAST'],
+    ['.', 'O'],
+  ]
+  const a = correctPrefix(testNestAnnotation)
+  expect(a).toEqual([
+    ['the', 'B-CONTRAST'],
+    ['lazy', 'B-SUBJECT'],
+    ['yellow', 'I-SUBJECT'],
+    ['socks', 'L-SUBJECT'],
+    ['glued', 'I-CONTRAST'],
+    ['on', 'I-CONTRAST'],
+    ['the', 'I-CONTRAST'],
+    ['wall', 'L-CONTRAST'],
+    ['.', 'O'],
+    ['the', 'B-SUBJECT'],
+    ['lazy', 'I-SUBJECT'],
+    ['yellow', 'I-SUBJECT'],
+    ['socks', 'L-SUBJECT'],
+    ['glued', 'B-CONTRAST'],
+    ['on', 'I-CONTRAST'],
+    ['the', 'I-CONTRAST'],
+    ['wall', 'L-CONTRAST'],
+    ['.', 'O'],
+  ])
+
+  const spans = annotation2spans(testNestAnnotation)
+  expect(spans).toHaveLength(4)
 })

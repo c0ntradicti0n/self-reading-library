@@ -5,9 +5,12 @@ const SelectText = ({ children, onSelect = null }) => {
   const [selected, setSelected] = useState(null)
 
   const handleMouseUp = () => {
-    setSelected(window.getSelection().toString())
-    if (onSelect) onSelect(selected)
-    console.log(`Selected text: ${window.getSelection().toString()}`)
+    const text = window.getSelection().toString()
+    setSelected(text)
+    console.log(`Selected text: ${text}`)
+
+    if (onSelect) onSelect(text)
+    console.log(`Selected text: ${text}`)
   }
   console.log(children)
 

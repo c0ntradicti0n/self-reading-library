@@ -1,6 +1,9 @@
+import itertools
+import json
 import logging
 from collections import defaultdict, OrderedDict
-from typing import List
+from typing import List, Callable, Mapping
+from jsonpath_ng import parse
 
 import numpy
 
@@ -154,6 +157,56 @@ def flatten_optional_list_triple(triple_list):
                 yield _a, _b, o
 
 
+def group(seq, key):
+    if isinstance(key, str):
+        jsonpath_expr = parse(key)
+    i = 0
+    if isinstance(seq, Mapping):
+        seq = list([k, v] for k, v in seq.items())
+
+    def grouper(item):
+        nonlocal i
+        nonlocal jsonpath_expr
+        result = None
+        if isinstance(key, str):
+            # print (f"{jsonpath_expr.find(item)} \n\n {json.dumps(item)}")
+            result = jsonpath_expr.find(item)[0].value
+
+        elif callable(key):
+            if key(item):
+                i = 0 if i is None else i + 1
+            result = i
+
+        elif result is None:
+            raise ValueError(
+                f"don't know grouper type! {str(key)=} {str(key(item))=} {str(item)}"
+            )
+        return result
+
+    new_seq = sorted(seq, key=grouper)
+    i = 0
+    return itertools.groupby(new_seq, grouper)
+
+
+def nest(keys, seq):
+    if isinstance(keys, str):
+        keys = [keys]
+    key = keys[:1]
+    rest = keys[1:]
+    if not key:
+        return seq
+
+    result = [
+        {
+            "group": k,
+            "value": nest(rest, list(g)) if rest else list(g),
+        }
+        for k, g in group(seq, key[0])
+        if k
+    ]
+    return result
+
+
 import unittest
 
 
@@ -162,7 +215,6 @@ class ListToolsTest(unittest.TestCase):
         s_tuple = (10, 40, 70)
         for s in s_tuple:
             new_range = nd_fractal(s, s_tuple)
-            print(new_range)
             s1, s2, s3 = s_tuple
             ds = s3 - s1
             logging.error(f" {s_tuple} is now {new_range}")

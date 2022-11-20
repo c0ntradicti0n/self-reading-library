@@ -8,7 +8,8 @@ from core.event_binding import queue_iter, RestQueue, q, d
 from helpers.cache_tools import configurable_cache
 import logging
 
-from language.transformer.core.bio_annotation import conll_line
+from helpers.conll_tools import conll_file2annotation
+from helpers.span_tools import annotation2span_sets
 
 AnnotationSpanToGoldQueueRest = RestQueue(
     service_id="gold_span_annotation", update_data=lambda x: print(x), rated_queue=True
@@ -42,21 +43,9 @@ class AnnotatorUnpacker(PathSpec):
         super().__init__(*args, **kwargs)
 
     def __call__(self, prediction_metas, *args, **kwargs):
-        for pickle_path, meta in prediction_metas:
-            with open(pickle_path) as f:
-                content = f.read()
-            cols = list(
-                zip(
-                    *[
-                        conll_line.match(line.replace("\t", "  ")).groups()
-                        for i, line in enumerate(content.split("\n"))
-                        if i and line
-                    ]
-                )
-            )
-            result = {"annotation": list(zip(cols[0], cols[-1])), "pos": cols[1]}
-
-            yield pickle_path, result
+        for conll_path, meta in prediction_metas:
+            result = conll_file2annotation(conll_path)
+            yield conll_path, result
 
 
 @converter(
@@ -131,3 +120,33 @@ class AnnotatorSaveFinal(PathSpec):
             with open(new_path, "w") as f:
                 f.write(content)
             yield new_path, meta
+
+
+@converter(
+    "span_annotation.collection.fix",
+    "span_annotation.collection.load",
+)
+class AnnotationSpanLoader(PathSpec):
+    @configurable_cache(
+        config.cache + os.path.basename(__file__),
+        from_path_glob=lambda self: config.GOLD_DATASET_PATH
+        + "/"
+        + self.flags["service_id"]
+        + "/**.conll",
+    )
+    def __call__(self, prediction_metas, *args, **kwargs):
+        raise NotImplementedError("Should come from cache")
+
+
+@converter(
+    "span_annotation.collection.load",
+    "span_annotation.collection.span_set",
+)
+class AnnotationSpanSet(PathSpec):
+    def __call__(self, prediction_metas, *args, **kwargs):
+        for path, meta in prediction_metas:
+            self.logger.debug(f"Reading annotation from '{path}'")
+            result = conll_file2annotation(path)
+            self.logger.debug(f"Read '{result}'")
+            result["span_set"] = annotation2span_sets(result["annotation"])
+            yield path, result

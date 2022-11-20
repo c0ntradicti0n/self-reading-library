@@ -1,0 +1,65 @@
+error_log /dev/stdout info;
+rewrite_log on;
+
+
+
+# Virtual Host configuration for self-reading-library.science
+#
+# You can move that to a different file under sites-available/ and symlink that
+# to sites-enabled/ to enable it.
+#
+server {
+  access_log /dev/stdout;
+
+    listen 80;
+    listen [::]:80;
+
+    server_name _;
+
+	server_name self-reading-library.science www.self-reading-library.science;
+
+    # for public asset into _next directory
+    location _next/static {
+        alias /next/.next/static;
+        add_header Cache-Control "public, max-age=3600, immutable";
+    }
+
+    location /pdfs {
+        alias /pdfs;
+    }
+
+    location /audio {
+        alias /audio;
+    }
+
+    location / {
+        # reverse proxy for next server
+        proxy_pass http://fe:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+
+    location ^~ /api/ {
+        # reverse proxy for backend server
+        proxy_pass http://be:9999/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header Origin localhost;
+    }
+
+    location ^~ /dash/ {
+        # reverse proxy for backend server
+        proxy_pass http://dash:12345/dash/;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header Origin localhost;
+    }
+
+   proxy_read_timeout 300;
+   proxy_connect_timeout 300;
+   proxy_send_timeout 300;
+}
+
+
+

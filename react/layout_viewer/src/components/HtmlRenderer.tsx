@@ -2,12 +2,12 @@ import React, { useContext, useEffect, useState } from 'react'
 import Resource from '../resources/Resource'
 import { ThreeCircles, Triangle } from 'react-loader-spinner'
 import SelectText from './SelectText'
-import { AppSettings } from '../../config/connection'
 import Difference_AnnotationService from '../resources/Difference_AnnotationService'
 import { httpGet } from '../helpers/httpGet'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
 import { Slot } from '../contexts/SLOTS'
 import { AnnotationModal } from './AnnotationSpan'
+import { FRONTEND_HOST } from '../../config/connection'
 
 interface Props {
   service: Resource
@@ -29,12 +29,12 @@ const HtmlRenderer = (props: Props) => {
     ) {
       console.log(
         'fetching static html',
-        AppSettings.FRONTEND_HOST,
+        FRONTEND_HOST,
         '/' + context.value[props.slot].replace('.layouteagle/', '') + '.html',
         context.value[props.slot]
       )
       httpGet(
-        AppSettings.FRONTEND_HOST +
+        FRONTEND_HOST +
           '/' +
           context.value[props.slot].replace('.layouteagle', '') +
           '.html',

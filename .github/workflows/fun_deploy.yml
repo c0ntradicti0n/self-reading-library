@@ -79,17 +79,6 @@ jobs:
 
               mkdir python/.layouteagle/prediction
               ls python/.layouteagle/
-
-              pip install wheel
-              pip install torch
-              pip install numpy --upgrade
-              python -m spacy download en_core_web_trf
-           
-              cp python/tokenization_layoutvm2_fast.py ../venv/lib/python3.8/site-packages/transformers/models/layoutlmv2/tokenization_layoutlmv2_fast.py
-              
-              echo \" export class AppSettings {  public static BACKEND_HOST = 'https://self-reading-library.science/api' ; public static FRONTEND_HOST = 'https://self-reading-library.science';  } \" > react/layout_viewer/config/connection.ts
-              echo \"PORT=9999\" >> python/core/config.py
-              killall -9 uwsgi || echo 'backend not running'
           "
 
       - name: InstallTts
@@ -104,34 +93,15 @@ jobs:
                   pip install -r requirements.txt
                 fi
             '
-      - name: StartBackend
+      - name: Build
         run: |
-          ssh staging '   screen -L  -Logfile backend.log -S backend -dm bash -c " . venv/bin/activate; cd LayoutEagle/python; uwsgi --http 0.0.0.0:9999 --module wsgi:application --memory-report  --workers 16 --threads 2  --memory-report --enable-threads --skip-atexit-teardown --max-worker-lifetime=300 --max-worker-lifetime-delta=320 --harakiri=500 "  &  '
-          
-      - name: StartFrontend
+          ssh staging '   
+              make build
+          '
+      - name: Build
         run: |
-          ssh staging '  
-              
-              sleep 20
-              cd LayoutEagle/react/layout_viewer_made/ 
-              yarn install
-              yarn run build
-              cd ~
-              screen  -L  -Logfile frontend.log -S frontend -dm bash -c " cd LayoutEagle/react/layout_viewer_made/ ;  export PUBLIC_URL=self-reading-library.science; yarn run start "   &  '
-
-      - name: Glance at backend logs
-        run: |
-          ssh staging '              set -x ;  cat backend.log     '
-
-      - name: Glance at frontend logs
-        run: |
-          ssh staging '              set -x;  cat frontend.log     '
-
-
-      - name: DocTest
-        run: |
-          ssh staging '        
-              screen -S fullend -dm bash -c "cd fullend/LayoutEagle/python; pip install -U pytest; pytest --doctest-modules"
+          ssh staging '   
+              make down up
           '
       - name: RestTest
         run: |

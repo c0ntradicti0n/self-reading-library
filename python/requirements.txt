@@ -2,13 +2,24 @@ torch
 git+https://github.com/facebookresearch/detectron2.git
 git+https://github.com/c0ntradicti0n/listalign.git@master#listalign
 
+dashvis
+dash-extensions
+visdcc
+
+weasyprint
+pdfminer.six
+bs4~=0.0.1
+beautifultable
+texttable
+
 black
+
 psycopg2-binary
 ibis-framework
 more_itertools
+
 torch
-pdfminer.six
-bs4~=0.0.1
+
 matplotlib~=3.2.1
 regex
 seaborn~=0.10.0
@@ -21,6 +32,8 @@ chardet
 falcon
 falcon-cors
 falcon-multipart
+
+
 torchaudio
 networkx
 scipy
@@ -53,8 +66,7 @@ requests
 gensim
 tk
 scispacy
-beautifultable
-texttable
+
 pylcs
 colorama
 pdf2image

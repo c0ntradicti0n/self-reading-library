@@ -72,4 +72,21 @@ const iter = function* (iterable) {
   }
 }
 
+// https://gist.github.com/Daniel-Hug/930d5d2370bc6aab88ef
+export const indexSubsequence = (seq, subseq) => {
+  console.log( {seq, subseq})
+  const subseqLen = subseq.length - 1
+  let i = -1
+  let c
+  let indexes = []
+  if (!subseqLen) return indexes
+
+  while ((i = seq.indexOf(subseq[0], i + 1)) >= 0) {
+    c = subseq.reduce((p, el, j) => (seq[i + j] === el ? p + 1 : p), 0)
+
+    if (c >= subseqLen) indexes.push([i, i + subseqLen + 1])
+  }
+  return indexes
+}
+
 export { nest, zip, pairwise, swap, getRandomArbitrary, iter }

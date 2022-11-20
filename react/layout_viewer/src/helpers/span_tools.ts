@@ -1,5 +1,7 @@
 import { nest } from './array'
 import _ from 'lodash'
+import webpack from 'webpack'
+import prefix = webpack.Template.prefix
 
 const minDistance = 1
 
@@ -253,7 +255,8 @@ export const tagStrip = (t) => {
   try {
     return [t.slice(0, 1), t.slice(2)]
   } catch (e) {
-    throw e
+    console.trace()
+    throw `No 't.slice of ${t}`
   }
 }
 
@@ -364,4 +367,25 @@ export const mergeSpans = (spans, annotation) => {
     .flat()
 
   return newSpans
+}
+
+export const correctPrefix = (annotation) => {
+  let open = {}
+  annotation.forEach(([w, pt], i) => {
+    let [prefix, tag] = tagStrip(pt)
+    switch (prefix) {
+      case 'B':
+      case 'I':
+        if (!open[tag]) {
+          open[tag] = true
+          annotation[i] = [w, 'B-' + tag]
+        }
+        break
+      case 'O':
+        open = {}
+        break
+    }
+  })
+
+  return annotation
 }

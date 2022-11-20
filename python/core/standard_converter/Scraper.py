@@ -44,7 +44,7 @@ class Scraper(PathSpec):
                 meta["url"] = self.flags["url"]
 
                 if not os.path.exists(path):
-                    os.system(f"wkhtmltopdf  {url} {path}")
+                    os.system(f"weasyprint  {url} {path}")
                 yield id, meta
             elif os.path.exists(id) and regex.match(self.file_regex, id) is not None:
                 yield id, meta

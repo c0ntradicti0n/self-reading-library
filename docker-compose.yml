@@ -1,8 +1,27 @@
 version: "3"
 services:
-  rest:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: unless-stopped
+    depends_on:
+      - be
+      - dash
+      - fe
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/sites-enabled/:/etc/nginx/sites-enabled/
+      - ./react/layout_viewer_made/.next/:/next/.next/
+      - "$CWD/python/.layouteagle/pdfs/:/pdfs"
+      - "$CWD/python/.layouteagle/audio/:/audio"
+
+
+  be:
     build: python
-    container_name: rest
+    container_name: be
 
     tty: true
     user: $USER_IDS
@@ -15,9 +34,24 @@ services:
 
     volumes:
       - "$CWD/python:/home/finn/Programming/self-reading-library/python"
-    #  - "$CWD/python/.layouteagle:/home/finn/Programming/self-reading-library/python/.layouteagle"
-    entrypoint: uwsgi  --py-autoreload=1 --http 0.0.0.0:$PORT --module wsgi:application --memory-report  --workers 16 --threads 2  --memory-report --enable-threads --skip-atexit-teardown --max-worker-lifetime=1000 --max-worker-lifetime-delta=2000 --harakiri=3000
-    #entrypoint: gunicorn --bind 0.0.0.0:$PORT --log-level info -w 4 -k uvicorn.workers.UvicornWorker wsgi:application  --timeout 600
+    entrypoint: uwsgi  --py-autoreload=1 --http 0.0.0.0:$PORT --module wsgi:application --memory-report  --workers 16 --threads 2  --memory-report --enable-threads --skip-atexit-teardown --max-worker-lifetime=1000 --max-worker-lifetime-delta=2000 --harakiri=3000 -post-buffering=1
+  dash:
+    build: python
+    container_name: dash
+
+    tty: true
+    user: $USER_IDS
+    ports:
+      - "54321:12345"
+      - "22222:22"
+    environment:
+      PORT: 12345
+      DB_HOST: db
+      BASE_URL: "/dash/"
+    volumes:
+      - "$CWD/python:/home/finn/Programming/self-reading-library/python"
+    entrypoint: uwsgi  --py-autoreload=1 --http 0.0.0.0:12345 --module dash_wsgi:application --memory-report  --workers 16 --threads 2  --memory-report --enable-threads --skip-atexit-teardown --max-worker-lifetime=1000 --max-worker-lifetime-delta=2000 --harakiri=3000
+
   fill:
     build: python
     container_name: fill
@@ -53,11 +87,12 @@ services:
       - "$CWD/react/layout_viewer_made/src:/app/src"
       - "$CWD/react/layout_viewer_made/public:/app/public"
 
-
     environment:
       PORT: 3000
-      NEXT_PUBLIC_FRONTEND_HOST: "http://localhost:3210"
-      NEXT_PUBLIC_BACKEND_HOST: "http://localhost:9999"
+      NEXT_PUBLIC_FRONTEND_HOST: "http://localhost"
+      NEXT_PUBLIC_BACKEND_HOST: "http://localhost/api"
+      NEXT_PUBLIC_DASH_HOST: "http://localhost/dash"
+
 
 
 

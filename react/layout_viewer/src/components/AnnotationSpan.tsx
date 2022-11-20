@@ -1,5 +1,6 @@
 import React, {
   forwardRef,
+  useCallback,
   useContext,
   useEffect,
   useImperativeHandle,
@@ -15,6 +16,7 @@ import {
   addSpan,
   adjustSpanValue,
   annotation2spans,
+  correctPrefix,
   mergeSpans,
   popSpan,
   sortSpans_position,
@@ -27,6 +29,9 @@ import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons'
 import { CAPTCHA, NORMAL, Slot } from '../contexts/SLOTS'
 import Resource from '../resources/Resource'
 import SelectText from './SelectText'
+import { KeySelect } from './KeySelect'
+import { indexSubsequence } from '../helpers/array'
+import { ClickBoundary } from './ClickBoundary'
 
 export function AnnotationModal({ text, onClose, service }) {
   const ref = useRef(null) // ref => { current: null }
@@ -80,7 +85,7 @@ export function AnnotationTable(props: {
       {props.annotation.map(([word, tag], index) => {
         let span_no =
           sortedSpans.find(
-            ([, begin, end]) => index >= begin && index <= end
+            ([, begin, end]) => index >= begin && index < end
           )?.[0] ?? 'O'
         return (
           <span key={index} className={'tag span_' + span_no}>
@@ -114,6 +119,7 @@ const AnnotationSpan = forwardRef<
   ) => {
     const [annotation, setAnnotation] = useState(null)
     const [errors, setErrors] = useState(null)
+    const [kind, setKind] = useState(TAG_SET[0])
 
     const context = useContext<DocumentContext>(DocumentContext)
     let value = context.value[slot]
@@ -121,20 +127,23 @@ const AnnotationSpan = forwardRef<
 
     console.log('AnnotationSpan', slot, value, meta, context)
 
+    const initializeFromAnnotation = (annotation) => {
+      const sanitized = correctPrefix(annotation)
+      setAnnotation(sanitized)
+      setSpanIndices([...annotation2spans(sanitized)])
+    }
+
     const [spanIndices, setSpanIndices] = useState<
       [string, number, number, string[]][]
     >([])
     useEffect(() => {
       ;(async () => {
         if (text)
-          await service.getOne(
-            null,
-            (res) => {
-              setAnnotation(res)
-              setSpanIndices([...annotation2spans(res)])
-            },
-            { doc_id: value, text: text, pdf_path: value }
-          )
+          await service.getOne(null, initializeFromAnnotation, {
+            doc_id: value,
+            text: text,
+            pdf_path: value,
+          })
       })()
     }, [])
 
@@ -150,8 +159,7 @@ const AnnotationSpan = forwardRef<
       }
       if (meta?.annotation) {
         console.log(meta, meta?.annotation)
-        setAnnotation(meta?.annotation)
-        setSpanIndices([...annotation2spans(meta?.annotation)])
+        initializeFromAnnotation(meta?.annotation)
       }
     }, [meta?.annotation])
 
@@ -161,31 +169,25 @@ const AnnotationSpan = forwardRef<
       onCloseDiscard: onCloseDiscard,
     }))
 
-    const onClickOpen = () => {
-      setOpen(true)
-    }
     const onCloseSave = () => {
-      console.table('save', annotation, spanIndices)
-      let new_value = spans2annotation(annotation, spanIndices)
-      new_value = mergeSpans(spanIndices, new_value)
-      const _errors = validateSpans(new_value, annotation, TAG_SET)
-      console.log('ERRORS', _errors)
-      if (_errors) {
+      console.log('save', annotation, spanIndices)
+      const updatedAnnotation = spans2annotation(annotation, spanIndices)
+      const newSpans = mergeSpans(spanIndices, updatedAnnotation)
+      const newAnnotation = spans2annotation(annotation, newSpans)
+
+      const _errors = validateSpans(newSpans, newAnnotation, TAG_SET)
+      if (_errors.length > 0) {
+        console.log('ERRORS', _errors)
+
         setErrors(_errors)
         return false
       }
       console.log('validated')
       ;(async () => {
-        await service.change('[1].annotation', new_value, () => {
-          console.log('updated')
+        await service.change('[1].annotation', newAnnotation, (r) => {
+          console.log('updated', r)
         })
-        await service.save(
-          value,
-          spans2annotation(annotation, spanIndices),
-          () => {
-            console.log('saved')
-          }
-        )
+        await service.save(value, newAnnotation, (r) => console.log('saved', r))
       })()
       onClose()
       return true
@@ -200,28 +202,7 @@ const AnnotationSpan = forwardRef<
 
     console.log(spanIndices)
     return (
-      <div
-        style={{ height: '100%' }}
-        onClick={(e) => {
-          e.stopPropagation()
-          e.preventDefault()
-          console.log('stop it! click')
-        }}
-        onMouseUp={(e) => {
-          e.stopPropagation()
-          e.preventDefault()
-          console.log('stop it! up')
-        }}
-        onChange={(e) => {
-          e.stopPropagation()
-          e.preventDefault()
-          console.log('stop it! change')
-        }}
-        onBlur={(e) => {
-          e.stopPropagation()
-          e.preventDefault()
-          console.log('stop it! blur')
-        }}>
+      <ClickBoundary>
         {!annotation ? (
           <>
             <pre>{JSON.stringify({ slot, context }, null, 2)}</pre>
@@ -229,7 +210,45 @@ const AnnotationSpan = forwardRef<
           </>
         ) : (
           <div>
-            <SelectText onSelect={(x) => console.log(x)}>
+            <SelectText
+              onSelect={(x) => {
+                console.log('selected:', kind, x)
+                if (!kind) {
+                  alert(`First set the tag to be set ${kind}`)
+                  return
+                }
+                const words = annotation.map(([w, t]) => w)
+                const selectedWords = x
+                  .split('\n')
+                  .map((s) => s.split(" "))
+                  .flat()
+                  .map((s) => s.trim())
+                const subIndexes = indexSubsequence(words, selectedWords)
+                if (!subIndexes) {
+                  alert(`Subsequence not found ${kind}`)
+                  return
+                }
+                console.log("subIndexes", subIndexes)
+                const newSpanIndices = sortSpans_position([
+                  ...spanIndices,
+                  [kind, ...subIndexes[0], words.slice(...subIndexes[0])],
+                ])
+                if (!newSpanIndices) {
+                  console.log(
+                    'Selection could not be found in annotation',
+                    selectedWords,
+                    words
+                  )
+                }
+                console.log(
+                  'new Span:',
+                  newSpanIndices,
+                  subIndexes[0],
+                  words.slice(...subIndexes[0])
+                )
+
+                setSpanIndices(newSpanIndices)
+              }}>
               <AnnotationTable annotation={annotation} spans={spanIndices} />
             </SelectText>
             {sortSpans_position(spanIndices).map(([tag, i1, i2, ws], i) => (
@@ -314,12 +333,14 @@ const AnnotationSpan = forwardRef<
                 {tag}
               </Button>
             ))}
+            <pre>{kind}</pre>
+            <KeySelect set={TAG_SET} onSelect={setKind} />
             {errors?.map((e) => (
               <div style={{ background: 'red' }}>{e}</div>
             ))}
           </div>
         )}
-      </div>
+      </ClickBoundary>
     )
   }
 )

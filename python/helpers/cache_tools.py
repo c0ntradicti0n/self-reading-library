@@ -277,9 +277,13 @@ def configurable_cache(
                             f"Could not create cache file for {filename} (race conditions)"
                         )
                 if yield_cache:
-                    if isinstance(_from_path_glob, str):
+                    if isinstance(_from_path_glob, str) or callable(_from_path_glob):
                         _from_path_glob = [_from_path_glob]
-                    cache = [fp for path in _from_path_glob for fp in glob(path)]
+                    cache = [
+                        fp
+                        for path in _from_path_glob
+                        for fp in glob(path if not callable(path) else path(self))
+                    ]
 
                     blacklist = []
                     if not isinstance(_filter_path_glob, Iterable):

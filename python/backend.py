@@ -1,7 +1,5 @@
 import falcon
-import logging
 from wsgiref import simple_server
-from config import config
 from config.ant_imports import *
 from layout.annotator.annotation_to_gold import AnnotatedToGoldQueueRest
 
@@ -75,4 +73,6 @@ if __name__ == "__main__":
     logging.debug(get_all_routes(api))
 
     httpd = simple_server.make_server("0.0.0.0", config.PORT, api)
+    logging.info(f"Starting with simple server at 0.0.0.0:{config.PORT}")
+
     httpd.serve_forever()
