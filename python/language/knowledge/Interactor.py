@@ -1,7 +1,4 @@
-import os
-
 from more_itertools import pairwise
-
 from config.ant_imports import *
 import math
 from functools import reduce
@@ -55,7 +52,7 @@ def node_id(kind, a_num, s_num, words):
 
 
 gold_span_annotation = ant(
-    "span_annotation.collection.fix", "span_annotation.collection.span_set"
+    "span_annotation.collection.fix", "span_annotation.collection.analysed"
 )
 
 

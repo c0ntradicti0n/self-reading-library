@@ -13,7 +13,7 @@ from nym_embeddings.pywsd.tokenize import word_tokenize
 
 SS_PARAMETERS_TYPE_MAP = {
     "definition": str,
-    "lemma_names": list,  # list(str)
+    "lemma_names": list,
     "examples": list,
     "hypernyms": list,
     "hyponyms": list,

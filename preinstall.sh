@@ -1,6 +1,5 @@
 # bash
 
-sudo apt-get install wkhtmltopdf
 pip install setuptools==57.5.0
 sudo apt-get install  libgraphviz-dev
 git clone https://github.com/c0ntradicti0n/pdf2htmlEX-1.git

@@ -220,7 +220,7 @@ const AnnotationSpan = forwardRef<
                 const words = annotation.map(([w, t]) => w)
                 const selectedWords = x
                   .split('\n')
-                  .map((s) => s.split(" "))
+                  .map((s) => s.split(' '))
                   .flat()
                   .map((s) => s.trim())
                 const subIndexes = indexSubsequence(words, selectedWords)
@@ -228,7 +228,7 @@ const AnnotationSpan = forwardRef<
                   alert(`Subsequence not found ${kind}`)
                   return
                 }
-                console.log("subIndexes", subIndexes)
+                console.log('subIndexes', subIndexes)
                 const newSpanIndices = sortSpans_position([
                   ...spanIndices,
                   [kind, ...subIndexes[0], words.slice(...subIndexes[0])],

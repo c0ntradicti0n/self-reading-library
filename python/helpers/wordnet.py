@@ -131,11 +131,6 @@ def get_synonyms(synset):
     return synset.synonyms()
 
 
-# derivationally_related_forms and pertainyms definitions
-
-alle = list(wordnet.all_synsets())
-
-
 def compute_word_net_mapping():
     g = Dict()
     for s in alle:

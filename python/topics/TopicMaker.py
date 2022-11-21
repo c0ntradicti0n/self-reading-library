@@ -2,12 +2,10 @@ import collections
 import logging
 import os
 from collections import defaultdict
-import nltk
 from sklearn import mixture
 from sklearn.manifold import TSNE
 
 from config import config
-from nltk.corpus import wordnet as wn
 import numpy as np
 import spacy
 from core.standard_converter.Dict2Graph import Dict2Graph

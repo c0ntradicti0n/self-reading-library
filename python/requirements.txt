@@ -32,7 +32,7 @@ chardet
 falcon
 falcon-cors
 falcon-multipart
-
+spacy_wordnet
 
 torchaudio
 networkx
