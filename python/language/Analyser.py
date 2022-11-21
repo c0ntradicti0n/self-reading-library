@@ -1,10 +1,7 @@
-import itertools
-from collections import defaultdict
-import nltk
 from core.pathant.PathSpec import PathSpec
 from core.pathant.Converter import converter
-from nltk.corpus import wordnet
 import spacy
+from spacy_wordnet.wordnet_annotator import WordnetAnnotator
 
 SUBJECT = "SUBJECT"
 CONTRAST = "CONTRAST"

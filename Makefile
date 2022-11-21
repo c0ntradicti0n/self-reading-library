@@ -15,7 +15,7 @@ mount-osx:
 	sudo bindfs  ./python/.layouteagle/pdfs/ ./react/layout_viewer_made/public/pdfs
 
 .PHONY: dockerbuild
-dockerbuild:
+build:
 	USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose build
 build_fe:
 	USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose build fe

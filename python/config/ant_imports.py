@@ -39,5 +39,6 @@ from language.transformer.ElmoDifference import (
 from language.text2speech.Txt2Mp3 import Txt2Mp3
 from layout.annotator.annotation_to_gold import AnnotatedToGoldQueueRest
 from language.span_annotation_to_gold import *
+from language.Analyser import *
 
 # from language.heuristic.heuristic_difference import HeurisiticalLogician
