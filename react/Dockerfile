@@ -9,7 +9,8 @@ RUN --mount=type=cache,id=yarn,sharing=locked,target=/usr/local/share/.cache/yar
 
 # Rebuild the source code only when needed
 FROM node:14-alpine AS builder
-COPY --from=deps /app/node_modules ./node_modules
 WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+
 
 CMD ["yarn", "run", "dev"]
