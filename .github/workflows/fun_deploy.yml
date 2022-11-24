@@ -49,7 +49,12 @@ jobs:
               git pull
           "
 
-
+      - name: Build
+        run: |
+          ssh staging '   
+              cd self-reading-library
+              make build
+          '
       - name: Start
         run: |
           ssh staging '   
