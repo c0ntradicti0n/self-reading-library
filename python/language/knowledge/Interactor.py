@@ -1,10 +1,13 @@
 from more_itertools import pairwise
+from wasabi import wrap
+
 from config.ant_imports import *
 import math
 from functools import reduce
 
 import matplotlib as matplotlib
-import dashvis
+import visdcc
+
 from dash import html, dcc
 from dash_extensions.enrich import (
     DashProxy as Dash,
@@ -13,8 +16,6 @@ from dash_extensions.enrich import (
     Output,
 )
 from flask import Flask
-from helpers.hash_tools import hashval
-from helpers.span_tools import span_sets2kind_sets
 
 server = Flask(__name__)
 
@@ -26,12 +27,13 @@ app = Dash(
 
 time_range = [20, 500]
 
-cmap = matplotlib.cm.get_cmap("plasma", 30)
+COLOR_MAP_RANGE = 100
+cmap = matplotlib.cm.get_cmap("plasma", COLOR_MAP_RANGE)
 
 
 app.layout = html.Div(
     [
-        dashvis.DashNetwork(
+        visdcc.Network(
             id="net",
             options=dict(
                 height="800px",
@@ -47,20 +49,11 @@ app.layout = html.Div(
 ant = PathAnt()
 
 
-def node_id(kind, a_num, s_num, words):
-    return f"{hashval(words)}"  # f"{kind}+{a_num}-{s_num}"
-
-
-gold_span_annotation = ant(
-    "span_annotation.collection.fix", "span_annotation.collection.analysed"
-)
-
-
 def generate_nodes_edges():
 
     gold_span_annotation = ant(
         "span_annotation.collection.fix",
-        "span_annotation.collection.span_set",
+        "span_annotation.collection.analysed",
         service_id="gold_span_annotation",
     )
 
@@ -68,37 +61,61 @@ def generate_nodes_edges():
         nodes = []
         edges = []
 
+
         span_sets = meta["span_set"]
-        for j, (span_set) in span_sets.items():
+        rgba = cmap(span_sets.subject_hash_int % COLOR_MAP_RANGE)
+        rgba = [c / math.sin(c * math.pi / 2) for c in rgba]
+        color = matplotlib.colors.rgb2hex(rgba)
+        add_rgba = [abs(math.cos((c * math.pi ))) for c in rgba]
+        add_color = matplotlib.colors.rgb2hex(add_rgba)
+
+        for j, (span_set) in enumerate(span_sets.side_sets):
             set_ids = []
-            for kind, annotation_slice in span_set:
-                words = tags2_words(annotation_slice)
-
-                rgba = cmap(i)
-                color = matplotlib.colors.rgb2hex(rgba)
-
+            for span in span_set:
                 nodes.append(
                     {
-                        "id": node_id(kind, i, j, words),
-                        "label": " ".join(words),
+                        "id": span.nlp_id,
+                        "label": wrap(span.text),
                         "color": color,
                     }
                 )
-                set_ids.append(node_id(kind, i, j, words))
+                set_ids.append(span.nlp_id)
 
             for a, b in pairwise(sorted(set_ids)):
-                edges.append({"id": f"arm-{a}-{b}", "from": a, "to": b})
+                edges.append({"id": f"arm-{a}-{b}", "from": a, "to": b, "label": "-->"})
 
-        for group in span_sets2kind_sets(span_sets):
-            for a, b in pairwise(group["value"]):
-                id_a = node_id(a[0], 0, 0, tags2_words(a[1]))
-                id_b = node_id(b[0], 0, 0, tags2_words(b[1]))
-                edges.append({"id": f"arm-{id_a}-{id_b}", "from": id_a, "to": id_b})
+        for values in span_sets.kind_sets:
+            for a, b in pairwise(values):
+                id_a, id_b = a.nlp_id, b.nlp_id
+                edges.append({"id": f"arm-{id_a}-{id_b}", "from": id_a, "to": id_b, "label": a.kind + "s"})
 
-            yield {
-                "nodes": nodes,
-                "edges": edges,
-            }
+        analysed_links = meta["analysed_links"]
+        for a1, a2, c1, c2, l1, l2 in analysed_links:
+            k1_id = c1.nlp_id + "krit"
+            k2_id = c2.nlp_id + "krit"
+            nodes.extend(
+                [
+                    {
+                        "id": k1_id,
+                        "label": a1,
+                        "color": add_color,
+                    },
+                    {
+                        "id": k2_id,
+                        "label": a2,
+                        "color": add_color,
+                    },
+                ]
+            )
+            edges.append({"id": f"arm-{k1_id}-{k2_id}-krit", "from": k2_id, "to": k1_id, "label": "krit"})
+
+            edges.append({"id": f"arm-{k1_id}-{k2_id}-k1", "from": k1_id, "to": c1.nlp_id})
+            edges.append({"id": f"arm-{k1_id}-{k2_id}-k2", "from": k2_id, "to": c2.nlp_id})
+
+        yield {
+            "nodes": nodes,
+            "edges": edges,
+        }
 
 
 def tags2_words(annotation_slice):
@@ -135,4 +152,5 @@ def myfun(start, end):
 
 
 if __name__ == "__main__":
+    merge_nested(generate_nodes_edges())
     server.run("0.0.0.0", 12345)

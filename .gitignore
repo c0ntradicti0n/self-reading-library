@@ -3,7 +3,9 @@
 /react/layout_viewer/node_modules/
 /react/layout_viewer/.next
 /python/.layouteagle/
-/react/layout_viewer_made
+/react/layout_viewer_made/node_modules
+/react/layout_viewer_made/.next
+
 /tts
 /venv
 /venv3.9

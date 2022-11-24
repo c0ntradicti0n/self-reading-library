@@ -1,23 +1,17 @@
+import itertools
+from collections import defaultdict
+
+from nltk.corpus.reader import Lemma
+
 from core.pathant.PathSpec import PathSpec
 from core.pathant.Converter import converter
 import spacy
 from spacy_wordnet.wordnet_annotator import WordnetAnnotator
 
+from language.DifferenceSpanSet import DifferenceSpanSet
+
 SUBJECT = "SUBJECT"
 CONTRAST = "CONTRAST"
-
-
-def get_wordnet_pos(word):
-    """Map POS tag to first character lemmatize() accepts"""
-    tag = nltk.pos_tag([word])[0][1][0].upper()
-    tag_dict = {
-        "J": wordnet.ADJ,
-        "N": wordnet.NOUN,
-        "V": wordnet.VERB,
-        "R": wordnet.ADV,
-    }
-
-    return tag_dict.get(tag, wordnet.NOUN)
 
 
 @converter(
@@ -33,6 +27,8 @@ class AnnotationAnalyser(PathSpec):
         self.nlp.add_pipe("spacy_wordnet", after="tagger")
 
     def __call__(self, prediction_metas, *args, **kwargs):
+        from core.pathant.PathAnt import PathAnt
+
         ant = PathAnt()
         gold_span_annotation = ant(
             "span_annotation.collection.fix",
@@ -43,45 +39,20 @@ class AnnotationAnalyser(PathSpec):
         extra_antonyms = defaultdict(lambda: set())
 
         for i, (path, meta) in enumerate(gold_span_annotation([])):
-            span_sets = meta["span_set"]
-            subjects = [
-                " ".join([tw[0] for tw in tag_words])
-                for _set in span_sets.values()
-                for kind, tag_words in _set
-                if kind == SUBJECT
-            ]
+            span_set = meta["span_set"]
 
-            for subject_a, subject_b in itertools.permutations(subjects, 2):
+            for subject_a, subject_b in itertools.permutations(
+                span_set.subjects.text, 2
+            ):
                 extra_antonyms[subject_a].add(subject_b)
 
         for path, meta in prediction_metas:
             span_sets = meta["span_set"]
-            subjects = [
-                " ".join([tw[0] for tw in tag_words])
-                for _set in span_sets.values()
-                for kind, tag_words in _set
-                if kind == SUBJECT
-            ]
-
-            contrasts = [
-                " ".join([tw[0] for tw in tag_words])
-                for _set in span_sets.values()
-                for kind, tag_words in _set
-                if kind == CONTRAST
-            ]
 
             antonyms_to_look_for = []
             new_links = []
-            for i, contrast in enumerate(contrasts):
-                try:
-                    contrast = self.nlp(contrast)
-                except LookupError:
-                    import nltk
-
-                    nltk.download("omw-1.4")
-                    contrast = self.nlp(contrast)
-
-                for token in contrast:
+            for i, contrast in enumerate(span_sets.contrasts):
+                for token in contrast.doc:
                     antonyms = [
                         (i, (l, a), (str(l.name()), str(a.name())))
                         for l in token._.wordnet.lemmas()
@@ -98,16 +69,27 @@ class AnnotationAnalyser(PathSpec):
                             ]
                         )
 
+                # exclude if explained opposites appear in explanation
+                antonyms_to_look_for = [a for a in antonyms_to_look_for if not any(aa in span_sets.subjects.text for aa in a[-1] ) ]
+
                 for (
                     i,
                     (nym_lemma, antonym_lemma),
                     (nym_text, antonym_text),
                 ) in antonyms_to_look_for:
                     other_contrasts = [
-                        (j, o) for j, o in enumerate(contrasts) if j != i
+                        (j, o) for j, o in enumerate(span_sets.contrasts) if j != i
                     ]
                     for j, other_contrast in other_contrasts:
-                        if antonym_text in other_contrast:
+
+
+                        if isinstance(antonym_lemma, Lemma):
+                            antonym_lemma_text = antonym_lemma.name()
+                        elif isinstance(antonym_lemma, str):
+                            antonym_lemma_text =  antonym_lemma
+
+                        # TODO use right POS-LEMMA?
+                        if antonym_lemma_text in other_contrast.lemmas:
                             if not any(
                                 l[0] == antonym_text or l[0] == nym_text
                                 for l in new_links
@@ -116,14 +98,14 @@ class AnnotationAnalyser(PathSpec):
                                     (
                                         antonym_text,
                                         nym_text,
-                                        contrasts[i],
-                                        contrasts[j],
+                                        span_sets.contrasts[i],
+                                        span_sets.contrasts[j],
                                         nym_lemma,
                                         antonym_lemma,
                                     )
                                 )
 
-            meta["analysed_links "] = new_links
+            meta["analysed_links"] = new_links
             yield path, meta
 
 

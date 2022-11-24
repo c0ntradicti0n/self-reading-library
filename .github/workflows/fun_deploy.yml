@@ -45,20 +45,12 @@ jobs:
         run: |
           ssh staging "
               set -x
-              killall screen
               rm -rf *.log
               rm -rf ./cache
               cp -R ./LayoutEagle/python/.layouteagle ./cache
-              kill -9 $(lsof -t -i:9999) || echo 'backend not running'
-              killall -9 uwsgi || echo 'backend not running'
-              killall -9 python || echo 'backend not running'
-
               rm -rf LayoutEagle
-              git clone https://github.com/c0ntradicti0n/LayoutEagle.git 
-                        
-              python3 -m venv venv
-              . venv/bin/activate
           
+              git clone https://github.com/c0ntradicti0n/LayoutEagle.git 
               [[ ! -d ./models ]] && mkdir models && cd models && wget https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_options.json && wget https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_weights.hdf5 && cd ..
               ln -s /home/deploy/models/ /home/deploy/LayoutEagle/python/language/transformer/models
 
@@ -66,7 +58,6 @@ jobs:
           
               mkdir python/.layouteagle
               mkdir python/.layouteagle/pdfs || echo 'exists'
-
           
               tar -xf ~/arXiv_pdf_9912_002.tar -C python/.layouteagle/pdfs 
 
@@ -76,10 +67,24 @@ jobs:
               
               mkdir python/.layouteagle/cache || echo 'exists'
             
-
               mkdir python/.layouteagle/prediction
               ls python/.layouteagle/
           "
+
+      - name: Build
+        run: |
+          ssh staging '   
+              export DOCKER_BUILDKIT=1 # or configure in daemon.json
+              export COMPOSE_DOCKER_CLI_BUILD=1
+              make build
+          '
+      - name: Build
+        run: |
+          ssh staging '   
+              export DOCKER_BUILDKIT=1 # or configure in daemon.json
+              export COMPOSE_DOCKER_CLI_BUILD=1
+              make down up
+          '
 
       - name: InstallTts
         run: |
@@ -93,16 +98,6 @@ jobs:
                   pip install -r requirements.txt
                 fi
             '
-      - name: Build
-        run: |
-          ssh staging '   
-              make build
-          '
-      - name: Build
-        run: |
-          ssh staging '   
-              make down up
-          '
       - name: RestTest
         run: |
           echo $(curl http://$SSH_HOST:80) 

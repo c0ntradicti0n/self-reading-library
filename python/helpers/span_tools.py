@@ -19,7 +19,10 @@ def tagStrip(t):
 
 
 def annotation2spans(annotation):
-    value = [[w, *tagStrip(t), i] for i, [w, t] in enumerate(annotation)]
+    try:
+        value = [[w, *tagStrip(t), i] for i, [w, t] in enumerate(annotation)]
+    except Exception as e:
+        raise e
 
     return [
         (g["group"], sp["value"])

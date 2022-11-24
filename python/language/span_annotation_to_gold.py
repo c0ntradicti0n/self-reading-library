@@ -9,7 +9,7 @@ from helpers.cache_tools import configurable_cache
 import logging
 
 from helpers.conll_tools import conll_file2annotation
-from helpers.span_tools import annotation2span_sets
+from language.DifferenceSpanSet import DifferenceSpanSet
 
 AnnotationSpanToGoldQueueRest = RestQueue(
     service_id="gold_span_annotation", update_data=lambda x: print(x), rated_queue=True
@@ -148,5 +148,5 @@ class AnnotationSpanSet(PathSpec):
             self.logger.debug(f"Reading annotation from '{path}'")
             result = conll_file2annotation(path)
             self.logger.debug(f"Read '{result}'")
-            result["span_set"] = annotation2span_sets(result["annotation"])
+            result["span_set"] = DifferenceSpanSet(result["annotation"])
             yield path, result
