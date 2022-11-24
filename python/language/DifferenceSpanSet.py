@@ -33,12 +33,14 @@ class Span:
             try:
                 Span._nlp("test this text")
             except LookupError:
-                import nltk
-
-                nltk.download("omw-1.4")
+                self.post_install()
                 Span._nlp("test this text")
         return Span._nlp
 
+    def __post_install(self):
+        import nltk
+        nltk.download('wordnet')
+        nltk.download("omw-1.4")
     def __init__(self, kind, word_tags):
         self.kind = kind
         self.word_tags = word_tags
@@ -53,7 +55,7 @@ class Span:
 
     @cached_property
     def nlp_id(self):
-        return f"{hashval(self.lemmas)}"    \
+        return f"{hashval(self.lemmas)}"
 
     @cached_property
     def lemmas(self):
@@ -61,7 +63,12 @@ class Span:
 
     @cached_property
     def doc(self):
-        return self.nlp(self.text)
+        try:
+            return self.nlp(self.text)
+        except:
+            self.__post_install()
+            return self.nlp(self.text)
+
 
     @cached_property
     def __hash__(self):

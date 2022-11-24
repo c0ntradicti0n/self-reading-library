@@ -90,8 +90,8 @@ services:
     environment:
       PORT: 3000
       NEXT_PUBLIC_FRONTEND_HOST: "http://localhost"
-      NEXT_PUBLIC_BACKEND_HOST: "http://localhost/api"
-      NEXT_PUBLIC_DASH_HOST: "http://localhost/dash"
+      NEXT_PUBLIC_BACKEND_HOST: "/api"
+      NEXT_PUBLIC_DASH_HOST: "/dash"
 
 
 
