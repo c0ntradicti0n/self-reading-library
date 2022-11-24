@@ -55,7 +55,6 @@ export default class Layout extends React.Component {
             <Lib>
               Read a webpage for me:
               <Url2Difference />
-              <img src="/read_it.jpeg" />
             </Lib>
           </ul>
 
@@ -64,9 +63,10 @@ export default class Layout extends React.Component {
           <Lib>
             Some source of papers:{' '}
             <Button href={'http://arxiv.org'}>http://arxiv.org</Button>
-            <br />
-            <img src="/source_of_papers.jpeg" />
           </Lib>
+          <Lib>        <Button href="https://plato.stanford.edu/entries/categories/">
+          what is different and what the same.
+        </Button></Lib>
           <Lib>
             Some other websites featuring <i> differences </i>
             <ul>

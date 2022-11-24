@@ -84,7 +84,7 @@ services:
     volumes:
       - "$CWD/python/.layouteagle/pdfs/:/app/public/pdfs"
       - "$CWD/python/.layouteagle/audio/:/app/public/audio"
-      - "$CWD/react/layout_viewer_made/src:/app/src"
+      - "$CWD/react/layout_viewer_made:/app"
       - "$CWD/react/layout_viewer_made/public:/app/public"
 
     environment:

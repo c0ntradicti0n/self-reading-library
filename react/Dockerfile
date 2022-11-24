@@ -9,8 +9,7 @@ RUN --mount=type=cache,id=yarn,sharing=locked,target=/usr/local/share/.cache/yar
 
 # Rebuild the source code only when needed
 FROM node:14-alpine AS builder
-WORKDIR /app
-COPY layout_viewer_made .
 COPY --from=deps /app/node_modules ./node_modules
+WORKDIR /app
 
 CMD ["yarn", "run", "dev"]

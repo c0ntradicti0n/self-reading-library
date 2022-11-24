@@ -33,10 +33,7 @@ export default class Index extends React.Component {
   render() {
     return (
       <Layout title="Home" pages={this.props.pages}>
-        <Button href="https://plato.stanford.edu/entries/categories/">
-          what is different and what the same.
-        </Button>
-        <iframe src={DASH_HOST} width="700" height="600">
+        <iframe style={{width: "60vw", border: "none"}} src={DASH_HOST} width="60vw" height="100%">
           {' '}
         </iframe>
         <PageTitle>

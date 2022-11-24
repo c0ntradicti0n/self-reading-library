@@ -1,3 +1,4 @@
+import visdcc
 from more_itertools import pairwise
 from wasabi import wrap
 
@@ -6,7 +7,6 @@ import math
 from functools import reduce
 
 import matplotlib as matplotlib
-import visdcc
 
 from dash import html, dcc
 from dash_extensions.enrich import (
@@ -30,27 +30,10 @@ time_range = [20, 500]
 COLOR_MAP_RANGE = 100
 cmap = matplotlib.cm.get_cmap("plasma", COLOR_MAP_RANGE)
 
-
-app.layout = html.Div(
-    [
-        visdcc.Network(
-            id="net",
-            options=dict(
-                height="800px",
-                width="100%",
-            ),
-        ),
-        dcc.Input(id="start", type="range", value=0),
-        dcc.Input(id="end", type="range", value=200),
-    ]
-)
-
-
 ant = PathAnt()
 
 
 def generate_nodes_edges():
-
     gold_span_annotation = ant(
         "span_annotation.collection.fix",
         "span_annotation.collection.analysed",
@@ -61,12 +44,11 @@ def generate_nodes_edges():
         nodes = []
         edges = []
 
-
         span_sets = meta["span_set"]
         rgba = cmap(span_sets.subject_hash_int % COLOR_MAP_RANGE)
         rgba = [c / math.sin(c * math.pi / 2) for c in rgba]
         color = matplotlib.colors.rgb2hex(rgba)
-        add_rgba = [abs(math.cos((c * math.pi ))) for c in rgba]
+        add_rgba = [abs(math.cos((c * math.pi))) for c in rgba]
         add_color = matplotlib.colors.rgb2hex(add_rgba)
 
         for j, (span_set) in enumerate(span_sets.side_sets):
@@ -82,12 +64,19 @@ def generate_nodes_edges():
                 set_ids.append(span.nlp_id)
 
             for a, b in pairwise(sorted(set_ids)):
-                edges.append({"id": f"arm-{a}-{b}", "from": a, "to": b, "label": "-->"})
+                edges.append({"id": f"arm-{a}-{b}", "from": a, "to": b, "label": "..."})
 
         for values in span_sets.kind_sets:
             for a, b in pairwise(values):
                 id_a, id_b = a.nlp_id, b.nlp_id
-                edges.append({"id": f"arm-{id_a}-{id_b}", "from": id_a, "to": id_b, "label": a.kind + "s"})
+                edges.append(
+                    {
+                        "id": f"arm-{id_a}-{id_b}",
+                        "from": id_a,
+                        "to": id_b,
+                        "arrows": "to;from",
+                    }
+                )
 
         analysed_links = meta["analysed_links"]
         for a1, a2, c1, c2, l1, l2 in analysed_links:
@@ -107,10 +96,21 @@ def generate_nodes_edges():
                     },
                 ]
             )
-            edges.append({"id": f"arm-{k1_id}-{k2_id}-krit", "from": k2_id, "to": k1_id, "label": "krit"})
+            edges.append(
+                {
+                    "id": f"arm-{k1_id}-{k2_id}-krit",
+                    "from": k2_id,
+                    "to": k1_id,
+                    "label": "krit",
+                }
+            )
 
-            edges.append({"id": f"arm-{k1_id}-{k2_id}-k1", "from": k1_id, "to": c1.nlp_id})
-            edges.append({"id": f"arm-{k1_id}-{k2_id}-k2", "from": k2_id, "to": c2.nlp_id})
+            edges.append(
+                {"id": f"arm-{k1_id}-{k2_id}-k1", "from": k1_id, "to": c1.nlp_id}
+            )
+            edges.append(
+                {"id": f"arm-{k1_id}-{k2_id}-k2", "from": k2_id, "to": c2.nlp_id}
+            )
 
         yield {
             "nodes": nodes,
@@ -129,28 +129,46 @@ def merge_nested(dicts):
     return reduce(merge, dicts, {})
 
 
-@app.callback(Output("net", "options"), [Input("start", "value")])
-def myfunc(x):
-    time_range[0] = math.ceil(float(x))
-    print(time_range)
-    return {"nodes": {"color": x}}
+options = (
+    dict(
+        height="800px",
+        width="100%",
+        layout=dict(
+            hierarchical=dict(
+                sortMethod="directed",
+            ),
+        ),
+    ),
+)
+
+data = merge_nested(generate_nodes_edges())
 
 
-@app.callback(Output("net", "options"), [Input("end", "value")])
-def myfunc(x):
-    time_range[1] = math.ceil(float(x))
-    print(time_range)
-    return {"nodes": {"color": x}}
-
-
-@app.callback(Output("net", "data"), [Input("start", "value"), Input("end", "value")])
-def myfun(start, end):
-    print("hallo")
-    data = merge_nested(generate_nodes_edges())
-
+def search(text):
     return data
 
 
+@app.callback(Output("net", "data"), [Input("search", "value")])
+def search_callback(text):
+    return search(text)
+
+
+app.layout = html.Div(
+    [
+        visdcc.Network(
+            id="net",
+            options=dict(
+                height="800px",
+                width="100%",
+                layout=dict(
+                    randomSeed=0,
+                    improvedLayout=False
+                ),
+            ),
+        ),
+        dcc.Input(id="search", type="text", value="hallo"),
+    ]
+)
+
 if __name__ == "__main__":
-    merge_nested(generate_nodes_edges())
     server.run("0.0.0.0", 12345)

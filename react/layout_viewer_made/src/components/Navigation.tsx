@@ -18,8 +18,7 @@ const NavigationContent = ({ slot, onClose }: PropType) => {
   const id = context.value[slot]
   const shortId = (id ?? '').replace('.layouteagle/', '')
   return (
-    <div onClick={onClose}>
-      <GoldenSnake>
+      <GoldenSnake onClick={onClose}>
         <div>
           <a href="/library">Universe of documents</a>
         </div>
@@ -45,7 +44,6 @@ const NavigationContent = ({ slot, onClose }: PropType) => {
 
         <UploadDocument />
       </GoldenSnake>
-    </div>
   )
 }
 

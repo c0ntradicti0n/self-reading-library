@@ -1,14 +1,11 @@
 import itertools
 from collections import defaultdict
 
+import spacy
 from nltk.corpus.reader import Lemma
 
 from core.pathant.PathSpec import PathSpec
 from core.pathant.Converter import converter
-import spacy
-from spacy_wordnet.wordnet_annotator import WordnetAnnotator
-
-from language.DifferenceSpanSet import DifferenceSpanSet
 
 SUBJECT = "SUBJECT"
 CONTRAST = "CONTRAST"
@@ -25,6 +22,7 @@ class AnnotationAnalyser(PathSpec):
         self.nlp = spacy.load("en_core_web_sm")
 
         self.nlp.add_pipe("spacy_wordnet", after="tagger")
+
 
     def __call__(self, prediction_metas, *args, **kwargs):
         from core.pathant.PathAnt import PathAnt
@@ -70,7 +68,11 @@ class AnnotationAnalyser(PathSpec):
                         )
 
                 # exclude if explained opposites appear in explanation
-                antonyms_to_look_for = [a for a in antonyms_to_look_for if not any(aa in span_sets.subjects.text for aa in a[-1] ) ]
+                antonyms_to_look_for = [
+                    a
+                    for a in antonyms_to_look_for
+                    if not any(aa in span_sets.subjects.text for aa in a[-1])
+                ]
 
                 for (
                     i,
@@ -82,11 +84,10 @@ class AnnotationAnalyser(PathSpec):
                     ]
                     for j, other_contrast in other_contrasts:
 
-
                         if isinstance(antonym_lemma, Lemma):
                             antonym_lemma_text = antonym_lemma.name()
                         elif isinstance(antonym_lemma, str):
-                            antonym_lemma_text =  antonym_lemma
+                            antonym_lemma_text = antonym_lemma
 
                         # TODO use right POS-LEMMA?
                         if antonym_lemma_text in other_contrast.lemmas:

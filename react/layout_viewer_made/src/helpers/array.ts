@@ -74,7 +74,7 @@ const iter = function* (iterable) {
 
 // https://gist.github.com/Daniel-Hug/930d5d2370bc6aab88ef
 export const indexSubsequence = (seq, subseq) => {
-  console.log( {seq, subseq})
+  console.log({ seq, subseq })
   const subseqLen = subseq.length - 1
   let i = -1
   let c
