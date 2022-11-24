@@ -7,10 +7,4 @@ WORKDIR /app
 COPY layout_viewer_made/package.json layout_viewer_made/yarn.lock ./
 RUN --mount=type=cache,id=yarn,sharing=locked,target=/usr/local/share/.cache/yarn yarn install --frozen-lockfile
 
-# Rebuild the source code only when needed
-FROM node:14-alpine AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-
-
 CMD ["yarn", "run", "dev"]
