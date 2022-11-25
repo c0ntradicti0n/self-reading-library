@@ -18,32 +18,32 @@ const NavigationContent = ({ slot, onClose }: PropType) => {
   const id = context.value[slot]
   const shortId = (id ?? '').replace('.layouteagle/', '')
   return (
-      <GoldenSnake onClick={onClose}>
-        <div>
-          <a href="/library">Universe of documents</a>
-        </div>
+    <GoldenSnake onClick={onClose}>
+      <div>
+        <a href="/library">Universe of documents</a>
+      </div>
 
-        <div>
-          <a href={'/difference?id=' + id}>Read annotated paper</a>
-        </div>
-        <div>
-          <Audiobook />
-        </div>
-        <div>
-          <a href={shortId}>Original PDF</a>
-        </div>
-        <div>
-          <a href={'/upload_annotation?id=' + id}>Improve layout recognition</a>
-        </div>
-        <div>
-          <Captcha />
-        </div>
-        <div>
-          <Url2Difference />
-        </div>
+      <div>
+        <a href={'/difference?id=' + id}>Read annotated paper</a>
+      </div>
+      <div>
+        <Audiobook />
+      </div>
+      <div>
+        <a href={shortId}>Original PDF</a>
+      </div>
+      <div>
+        <a href={'/upload_annotation?id=' + id}>Improve layout recognition</a>
+      </div>
+      <div>
+        <Captcha />
+      </div>
+      <div>
+        <Url2Difference />
+      </div>
 
-        <UploadDocument />
-      </GoldenSnake>
+      <UploadDocument />
+    </GoldenSnake>
   )
 }
 

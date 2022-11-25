@@ -23,7 +23,6 @@ class AnnotationAnalyser(PathSpec):
 
         self.nlp.add_pipe("spacy_wordnet", after="tagger")
 
-
     def __call__(self, prediction_metas, *args, **kwargs):
         from core.pathant.PathAnt import PathAnt
 

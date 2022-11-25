@@ -69,10 +69,35 @@ def create_app():
 
 if __name__ == "__main__":
     api = create_app()
-
     logging.debug(get_all_routes(api))
-
     httpd = simple_server.make_server("0.0.0.0", config.PORT, api)
-    logging.info(f"Starting with simple server at 0.0.0.0:{config.PORT}")
-
     httpd.serve_forever()
+
+    import gunicorn.app.base
+
+    class StandaloneApplication(gunicorn.app.base.BaseApplication):
+        def __init__(self, app, options=None):
+            self.options = options or {}
+            self.application = app
+            super().__init__()
+
+        def load_config(self):
+            config = {
+                key: value
+                for key, value in self.options.items()
+            }
+            for key, value in config.items():
+                self.cfg.set(key.lower(), value)
+
+        def load(self):
+            return self.application
+
+    options = {
+        "bind": f"0.0.0.0:{PORT}",
+        "workers": 1,
+        "timeout": 500,
+    }
+
+    logging.info(f"Starting with simple server at 0.0.0.0:{config.PORT}")
+    logging.info(get_all_routes(api))
+    StandaloneApplication(api, options).run()

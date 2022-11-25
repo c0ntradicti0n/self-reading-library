@@ -78,11 +78,8 @@ class Span:
     def __repr__(self):
         return f"{self.kind}: '{self.text}' {self.nlp_id}"
 
-
-    def __getstate__ (self):
-        return {
-            0: self.kind, 1: self.word_tags
-        }
+    def __getstate__(self):
+        return {0: self.kind, 1: self.word_tags}
 
     def __setstate__(self, d):
         kind, word_tags = d[0], d[1]
@@ -99,7 +96,7 @@ class DifferenceSpanSet:
         else:
             self.span_sets = annotation2span_sets(annotation=d)
 
-    def __getstate__ (self):
+    def __getstate__(self):
         return self.span_sets
 
     def __setstate__(self, span_sets):

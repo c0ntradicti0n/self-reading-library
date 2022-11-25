@@ -56,17 +56,16 @@ export default class Layout extends React.Component {
               Read a webpage for me:
               <Url2Difference />
             </Lib>
-          </ul>
-
-          {this.props.children}
-
-          <Lib>
+                      <Lib>
             Some source of papers:{' '}
             <Button href={'http://arxiv.org'}>http://arxiv.org</Button>
           </Lib>
-          <Lib>        <Button href="https://plato.stanford.edu/entries/categories/">
-          what is different and what the same.
-        </Button></Lib>
+          <Lib>
+            {' '}
+            <Button href="https://plato.stanford.edu/entries/categories/">
+              what is different and what the same.
+            </Button>
+          </Lib>
           <Lib>
             Some other websites featuring <i> differences </i>
             <ul>
@@ -82,6 +81,11 @@ export default class Layout extends React.Component {
               </li>
             </ul>
           </Lib>
+          </ul>
+
+          {this.props.children}
+
+
         </Mansonry>
       </div>
     )

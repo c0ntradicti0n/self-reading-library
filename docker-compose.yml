@@ -34,7 +34,7 @@ services:
 
     volumes:
       - "$CWD/python:/home/finn/Programming/self-reading-library/python"
-    entrypoint: uwsgi  --py-autoreload=1 --http 0.0.0.0:$PORT --module wsgi:application --memory-report  --workers 16 --threads 2  --memory-report --enable-threads --skip-atexit-teardown --max-worker-lifetime=1000 --max-worker-lifetime-delta=2000 --harakiri=3000 -post-buffering=1
+    entrypoint: uwsgi  --py-autoreload=1 --http 0.0.0.0:$PORT --module wsgi:application --memory-report  --workers 16 --threads 2  --memory-report --enable-threads --skip-atexit-teardown --max-worker-lifetime=1000 --max-worker-lifetime-delta=2000 --harakiri=3000
   dash:
     build: python
     container_name: dash
@@ -82,10 +82,12 @@ services:
       - "3210:3000"
     tty: true
     volumes:
-      - "$CWD/python/.layouteagle/pdfs/:/app/public/pdfs"
-      - "$CWD/python/.layouteagle/audio/:/app/public/audio"
-      - "$CWD/react/layout_viewer_made:/app"
+
+      - "$CWD/react/layout_viewer_made/config:/app/config"
       - "$CWD/react/layout_viewer_made/public:/app/public"
+      - "$CWD/react/layout_viewer_made/pages:/app/pages"
+      - "$CWD/react/layout_viewer_made/spec:/app/spec"
+      - "$CWD/react/layout_viewer_made/src:/app/src"
 
     environment:
       PORT: 3000

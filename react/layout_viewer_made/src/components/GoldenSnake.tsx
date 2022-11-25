@@ -3,7 +3,7 @@ const golden_cut = (n, a) => a * Phi ** n
 function fibonacci(n) {
   return n < 1 ? 0 : n <= 2 ? 1 : fibonacci(n - 1) + fibonacci(n - 2)
 }
-const GoldenSnake = ({ a = 20, children , ...props}) => {
+const GoldenSnake = ({ a = 20, children, ...props }) => {
   const n = children.length + 3
 
   let j = 0

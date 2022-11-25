@@ -158,15 +158,11 @@ app.layout = html.Div(
         visdcc.Network(
             id="net",
             options=dict(
-                height="800px",
-                width="100%",
-                layout=dict(
-                    randomSeed=0,
-                    improvedLayout=False
-                ),
+                height="1000px",
+                layout=dict(randomSeed=0),
             ),
         ),
-        dcc.Input(id="search", type="text", value="hallo"),
+        dcc.Input(id="search", type="text", value=""),
     ]
 )
 

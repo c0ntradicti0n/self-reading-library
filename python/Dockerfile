@@ -52,6 +52,10 @@ EXPOSE 22
 RUN mkdir /.allennlp  && mkdir /.allennlp/cache  && chmod -R 777 /.allennlp
 RUN mkdir /nltk_data  && chmod -R 777 /nltk_data
 
+RUN ls
+
+RUN python3 -c 'import nltk; nltk.download("wordnet"); nltk.download("omw-1.4")'
+RUN pip install dash==2.3.0 dash-extensions visdcc werkzeug==2.0.3
 #RUN cp python/tokenization_layoutvm2_fast.py ../venv/lib/python3.9/site-packages/transformers/models/layoutlmv2/tokenization_layoutlmv2_fast.py
 
 WORKDIR /home/finn/Programming/self-reading-library/python
