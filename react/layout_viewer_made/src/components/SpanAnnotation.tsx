@@ -70,8 +70,19 @@ export default function SpanAnnotation({
 
     useEffect(() => {
         console.log(meta, meta?.annotation)
-        setAnnotation(meta?.annotation)
-        setSpanIndices([...annotation2spans(meta?.annotation)])
+        if (meta.annotation) {
+            setAnnotation(meta?.annotation)
+            setSpanIndices([...annotation2spans(meta?.annotation)])
+        } else {
+            await service.fetch_one(
+        null,
+        (res) => {
+          setAnnotation(res)
+          setSpanIndices([...annotation2spans(res)])
+        },
+        { doc_id: value, text: text, pdf_path: value }
+      )
+        }
     }, [meta?.annotation])
 
   const handleClickOpen = () => {
