@@ -106,10 +106,10 @@ def generate_nodes_edges():
             )
 
             edges.append(
-                {"id": f"arm-{k1_id}-{k2_id}-k1", "from": k1_id, "to": c1.nlp_id}
+                {"id": f"arm-{k1_id}-{k2_id}-k1", "from": k1_id, "to": c2.nlp_id}
             )
             edges.append(
-                {"id": f"arm-{k1_id}-{k2_id}-k2", "from": k2_id, "to": c2.nlp_id}
+                {"id": f"arm-{k1_id}-{k2_id}-k2", "from": k2_id, "to": c1.nlp_id}
             )
 
         yield {

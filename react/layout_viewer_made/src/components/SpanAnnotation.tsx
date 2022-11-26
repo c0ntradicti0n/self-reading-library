@@ -13,6 +13,7 @@ import {
   valueText,
 } from '../helpers/span_tools'
 import {MinusCircleOutlined, PlusCircleOutlined} from "@ant-design/icons";
+import {ClickBoundary} from "./ClickBoundary";
 
 export function AnnotationTable(props: {
   annotation: string[][]
@@ -74,7 +75,7 @@ export default function SpanAnnotation({
             setAnnotation(meta?.annotation)
             setSpanIndices([...annotation2spans(meta?.annotation)])
         } else {
-            await service.fetch_one(
+             service.fetch_one(
         null,
         (res) => {
           setAnnotation(res)
@@ -111,42 +112,16 @@ export default function SpanAnnotation({
 
   console.log(spanIndices)
   return (
-    <div
-      onClick={(e) => {
-        e.stopPropagation()
-        e.preventDefault()
-        console.log('stop it! click')
-      }}
-      onMouseUp={(e) => {
-        e.stopPropagation()
-        e.preventDefault()
-        console.log('stop it! up')
-      }}
-      onChange={(e) => {
-        e.stopPropagation()
-        e.preventDefault()
-        console.log('stop it! change')
-      }}
-      onBlur={(e) => {
-        e.stopPropagation()
-        e.preventDefault()
-        console.log('stop it! blur')
-      }}>
-      <Button variant="outlined" onClick={handleClickOpen}>
+    <ClickBoundary>
+      <Button onClick={handleClickOpen}>
         Open dialog
       </Button>
       <Modal
         aria-labelledby="customized-dialog-title"
         open={open}
-        fullWidth
-        maxWidth={'xl'}
         style={{ marginRight: '30%' }}
         title="Select the difference"
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          console.log('stop it!')
-        }}>
+        >
         {!annotation ? (
           <ThreeDots />
         ) : (
@@ -160,7 +135,7 @@ export default function SpanAnnotation({
                 <Button
               icon={<MinusCircleOutlined />}
                   onClick={() => {
-                    popSpan(spanIndices, i, setSpanIndices)
+                    setSpanIndices(popSpan(spanIndices, i))
                   }}></Button>
                 <b>{tag}</b>
                 <b>{spanIndices[i].slice(1, 3)}</b>
@@ -223,6 +198,6 @@ export default function SpanAnnotation({
         </Button>
         <Button onClick={() => handleCloseSave()}>Save changes</Button>
       </Modal>
-    </div>
+    </ClickBoundary>
   )
 }

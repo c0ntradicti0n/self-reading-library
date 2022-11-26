@@ -96,6 +96,17 @@ def encode(obj_meta):
 all_rest_queues = []
 
 
+def path_or_url_encoded(path_url):
+    is_url = path_url.startswith("http")
+    url = path_url if is_url else None
+    doc_id = (
+        f"{config.hidden_folder}pdfs/{hash_tools.hashval(path_url)}.pdf"
+        if is_url
+        else path_url
+    )
+    return doc_id, url
+
+
 class RestQueue:
     def __init__(
         self,
@@ -159,13 +170,7 @@ class RestQueue:
         data = self.get(id, get_other=not path_url)
 
         if not data and path_url:
-            is_url = path_url.startswith("http")
-            url = path_url if is_url else None
-            doc_id = (
-                f"{config.hidden_folder}pdfs/{hash_tools.hashval(path_url)}.pdf"
-                if is_url
-                else path_url
-            )
+            doc_id, url = path_or_url_encoded(path_url)
 
             logging.info(f"Annotate new document {doc_id=} {id=} {url=}")
             init_queues(self.service_id, id)
@@ -240,13 +245,7 @@ class RestQueue:
     def on_post(self, req, resp, id=None, *args, **kwargs):
         if isinstance(req.media, str):
             doc_id = req.media
-            is_url = doc_id.startswith("http")
-            url = doc_id if is_url else None
-            doc_id = (
-                f"{config.hidden_folder}pdfs/{hash_tools.hashval(doc_id)}.pdf"
-                if is_url
-                else doc_id
-            )
+            doc_id, url = path_or_url_encoded(doc_id)
 
             logging.info(f"Annotate new document {doc_id=} {id=} {url=}")
             init_queues(self.service_id, id)

@@ -3,6 +3,7 @@ import falcon
 import nltk
 
 from config import config
+from core.event_binding import path_or_url_encoded
 from core.rest.Resource import Resource
 from core.rest.RestPublisher import RestPublisher
 from core.pathant.Converter import converter
@@ -62,18 +63,18 @@ class DifferenceAnnotationPublisher(RestPublisher):
     def on_get(self, req, resp, id=None):
         BEST_MODELS = json_file_update(config.BEST_MODELS_PATH)
         print(f"Annotating {self.kind}")
-        doc_id = req.get_param("id")
+        id = req.get_param("id")
         text = req.get_param("text")
-        pdf_path = req.get_param("pdf_path")
         pipeline = self.ant(
             "arxiv.org",
             "reading_order.page.difference",
             via="reading_order.filter_align_text",
             from_function_only=True,
         )
+        doc_id, url = path_or_url_encoded(id)
         result = list(
             pipeline(
-                metaize([doc_id if doc_id else pdf_path]),
+                metaize([doc_id]),
                 filter_text=text,
                 service_id=__file__,
                 difference_model_path=BEST_MODELS["difference"]["best_model_path"],
@@ -84,7 +85,7 @@ class DifferenceAnnotationPublisher(RestPublisher):
         resp.text = json.dumps(annotation)
         resp.status = falcon.HTTP_OK
 
-    def on_put(self, req, resp, id=None):
+    def on_post(self, req, resp, id=None):
         print(f"Saving Annotation {self.kind}")
         print(req.media)
         id, annotation = req.media

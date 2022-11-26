@@ -1,6 +1,4 @@
-import itertools
 import threading
-import time
 
 from config.ant_imports import *
 

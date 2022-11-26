@@ -5,7 +5,7 @@ format: format-python format-react
 format-python:
 	python -m black python
 format-react:
-	cd react/layout_viewer/ && npm run format:fix
+	cd react/layout_viewer_made/ && npm run format:fix
 
 
 mount:
@@ -14,7 +14,6 @@ mount:
 mount-osx:
 	sudo bindfs  ./python/.layouteagle/pdfs/ ./react/layout_viewer_made/public/pdfs
 
-.PHONY: dockerbuild
 build:
 	USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose build
 build_fe:
@@ -26,7 +25,6 @@ up:
 down:
 	CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose down -v
 
-.PHONY: dockerlogs
 dockerlogs:
 	docker logs -f rest
 
@@ -45,11 +43,19 @@ fe:
 	cd react/layout_viewer_made/ && yarn run dev
 
 
-.PHONY: backend
+
+
+sync_from_host:
+	rsync -av --progress  -r python/.layouteagle/ deploy@self-reading-library.science:/home/deploy/self-reading-library/python/.layouteagle/
+
+sync_from_romote:
+	rsync -av --progress  -r deploy@self-reading-library.science:/home/deploy/self-reading-library/python/.layouteagle/ python/.layouteagle/
+
+
+
 backend:
 	cd python && python backend.py
 
-.PHONY: frontend
 frontend: sync fe
 
 

@@ -1,9 +1,9 @@
 module.exports = {
   webpack: (config, { isServer }) => {
     if (!isServer) {
-      config.resolve.fallback.fs = false
+      config.resolve.fallback.fs = false;
     }
-    return config
+    return config;
   },
   typescript: {
     // !! WARN !!
@@ -13,4 +13,4 @@ module.exports = {
     // but if not, too time consuming, if it runs locally...
     ignoreBuildErrors: true,
   },
-}
+};

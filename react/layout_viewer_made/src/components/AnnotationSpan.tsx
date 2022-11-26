@@ -37,10 +37,13 @@ export function AnnotationModal({ text, onClose, service }) {
   const ref = useRef(null) // ref => { current: null }
   const [open, setOpen] = useState(true)
 
+
   return (
+                          <ClickBoundary>
     <div data-backdrop="false">
-      <a onClick={() => setOpen(open)}>Captcha</a>
+      <a onClick={() => setOpen(open)}>Mark the opposites and explanations</a>
       {open ? (
+
         <Modal
           open={open}
           footer={[
@@ -59,18 +62,20 @@ export function AnnotationModal({ text, onClose, service }) {
               }}>
               Submit
             </Button>,
-            <Button onClick={() => setOpen(false)}>Finish game</Button>,
+            <Button onClick={() => setOpen(false)}>Back</Button>,
           ]}>
+
           <AnnotationSpan
             ref={ref}
-            onClose={() => setOpen(false)}
             text={text}
             service={service}
             slot={NORMAL}
-          />
+           />
         </Modal>
       ) : null}
     </div>
+                                        </ClickBoundary>
+
   )
 }
 
@@ -211,18 +216,18 @@ const AnnotationSpan = forwardRef<
         ) : (
           <div>
             <SelectText
-              onSelect={(x) => {
-                console.log('selected:', kind, x)
+              onSelect={(text) => {
+                console.log('selected:', kind, text)
                 if (!kind) {
                   alert(`First set the tag to be set ${kind}`)
                   return
                 }
                 const words = annotation.map(([w, t]) => w)
-                const selectedWords = x
+                const selectedWords = text
                   .split('\n')
                   .map((s) => s.split(' '))
                   .flat()
-                  .map((s) => s.trim())
+                  .map((s) => s.trim()).filter(s => s)
                 const subIndexes = indexSubsequence(words, selectedWords)
                 if (!subIndexes) {
                   alert(`Subsequence not found ${kind}`)
@@ -231,7 +236,7 @@ const AnnotationSpan = forwardRef<
                 console.log('subIndexes', subIndexes)
                 const newSpanIndices = sortSpans_position([
                   ...spanIndices,
-                  [kind, ...subIndexes[0], words.slice(...subIndexes[0])],
+                  [kind, ...subIndexes, words.slice(...subIndexes)],
                 ])
                 if (!newSpanIndices) {
                   console.log(
@@ -244,7 +249,7 @@ const AnnotationSpan = forwardRef<
                   'new Span:',
                   newSpanIndices,
                   subIndexes[0],
-                  words.slice(...subIndexes[0])
+                  words.slice(...subIndexes)
                 )
 
                 setSpanIndices(newSpanIndices)

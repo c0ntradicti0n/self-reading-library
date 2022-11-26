@@ -285,6 +285,9 @@ def configurable_cache(
                         for fp in glob(path if not callable(path) else path(self))
                     ]
 
+                    cache.sort(key=os.path.getctime)
+                    cache.reverse()
+
                     blacklist = []
                     if not isinstance(_filter_path_glob, Iterable):
                         _filter_path_glob = [_filter_path_glob]

@@ -32,7 +32,7 @@ class Scraper(PathSpec):
             if "url" in self.flags and self.flags["url"]:
                 url = self.flags["url"]
             else:
-                url = None
+                url = id
 
             if url and url.startswith("http") and regex.match(self.http_regex, url):
                 path = id

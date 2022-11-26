@@ -1,10 +1,8 @@
-
-import React, {useContext, useEffect, useState} from 'react'
-import MacroComponentSwitch from './../src/components/MacroComponentSwitch'
+import React, { useContext, useEffect, useState } from "react";
+import MacroComponentSwitch from "./../src/components/MacroComponentSwitch";
 
 const Audiobook = () => {
-     return <MacroComponentSwitch component={"download"} url={'/audiobook'} />
-}
+  return <MacroComponentSwitch component={"download"} url={"/audiobook"} />;
+};
 
-export default Audiobook    
-    
+export default Audiobook;

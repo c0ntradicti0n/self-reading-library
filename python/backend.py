@@ -82,10 +82,7 @@ if __name__ == "__main__":
             super().__init__()
 
         def load_config(self):
-            config = {
-                key: value
-                for key, value in self.options.items()
-            }
+            config = {key: value for key, value in self.options.items()}
             for key, value in config.items():
                 self.cfg.set(key.lower(), value)
 
