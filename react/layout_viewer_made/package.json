@@ -19,7 +19,7 @@
     "@react-three/drei": "^9.7.1",
     "@react-three/fiber": "^8.0.13",
     "@types/node": "^14.0.27",
-    "antd": "^4.23.5",
+    "antd": "^5.0.1",
     "colors": "^1.4.0",
     "drei": "0.0.60",
     "glob": "^7.1.6",

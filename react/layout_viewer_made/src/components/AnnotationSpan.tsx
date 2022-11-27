@@ -7,9 +7,9 @@ import React, {
    useRef,
    useState,
 } from 'react'
-import { Button, Modal } from 'antd'
+import { Button, Card, Modal } from 'antd'
 import { Slider } from '@mui/material'
-import { ThreeDots } from 'react-loader-spinner'
+import { ThreeCircles, ThreeDots } from 'react-loader-spinner'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
 
 import {
@@ -29,9 +29,10 @@ import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons'
 import { CAPTCHA, NORMAL, Slot } from '../contexts/SLOTS'
 import Resource from '../resources/Resource'
 import SelectText from './SelectText'
-import { KeySelect } from './KeySelect'
 import { indexSubsequence } from '../helpers/array'
 import { ClickBoundary } from './ClickBoundary'
+import { KeySelect } from './KeySelect'
+import Meta from 'antd/lib/card/Meta'
 
 export function AnnotationModal({ text, onClose, service }) {
    const ref = useRef(null) // ref => { current: null }
@@ -210,8 +211,7 @@ const AnnotationSpan = forwardRef<
          <ClickBoundary>
             {!annotation ? (
                <>
-                  <pre>{JSON.stringify({ slot, context }, null, 2)}</pre>
-                  <ThreeDots />
+                  <ThreeCircles />
                </>
             ) : (
                <div>
@@ -360,12 +360,27 @@ const AnnotationSpan = forwardRef<
                         onClick={() => {
                            setSpanIndices(addSpan(spanIndices, annotation, tag))
                         }}
+                        type="primary" value="large"
+                        style={{margin: "10px"}}
                      >
                         {tag}
                      </Button>
                   ))}
-                  <pre>{kind}</pre>
-                  <KeySelect set={TAG_SET} onSelect={setKind} />
+                  <Card
+                     hoverable
+                     style={{ width: '20vw',  margin:"10px"}}
+                  >
+                     <Meta
+                        title={<span>On selecting text
+                           <br />the text will get a tag</span>}
+                        description={
+                           <div style={{ padding: '10px', margin: '10px' }}>
+                              <span className={'tag span_' + kind}>{kind}</span>
+                           </div>
+                        }
+                     />
+                     <KeySelect set={TAG_SET} onSelect={setKind} />
+                  </Card>
                   {errors?.map((e) => (
                      <div style={{ background: 'red' }}>{e}</div>
                   ))}

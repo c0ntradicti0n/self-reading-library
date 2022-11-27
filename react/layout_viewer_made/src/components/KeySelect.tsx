@@ -50,8 +50,7 @@ export const KeySelect = ({
                   style={{
                      border: '1px',
                      fontFamily: 'keys',
-                     fontSize: '2rem !important',
-                     verticalAlign: 'bottom',
+                     fontSize: 'xxx-large',
                   }}
                >
                   {key[0]}
@@ -65,8 +64,9 @@ export const KeySelect = ({
                   }}
                >
                   {' '}
-                  {key}{' '}
+                  {key.slice(1)}{' '}
                </span>
+               <br />
             </span>
          ))}
       </>

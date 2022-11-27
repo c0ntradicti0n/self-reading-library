@@ -1,7 +1,6 @@
 import React, { version } from "react";
 import App from "next/app";
 import * as glob from "glob";
-import "antd/dist/antd.css";
 import "../src/App.css";
 
 import NoSSR from "../src/components/NoSSR";
@@ -10,6 +9,7 @@ import { ContextWrapper } from "../src/contexts/ContextContext";
 
 import Navigation from "../src/components/Navigation";
 import { NORMAL } from "../src/contexts/SLOTS";
+import {ConfigProvider, theme} from "antd";
 
 console.log(version);
 
@@ -36,12 +36,18 @@ class MyApp extends App {
     return (
       <div id="comp-wrapp">
         <NoSSR>
+          <ConfigProvider
+    theme={{
+      algorithm: theme.defaultAlgorithm,
+    }}
+  >
           <ContextWrapper>
             <AppWrapper>
               <Navigation slot={NORMAL} />
               <Component {...this.props.pageProps} slot={NORMAL} />
             </AppWrapper>
           </ContextWrapper>
+          </ConfigProvider>
         </NoSSR>
       </div>
     );

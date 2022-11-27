@@ -9,7 +9,7 @@ import React, {
 import { pairwise, zip } from '../helpers/array'
 import { Button } from 'antd'
 import Router from 'next/router'
-import { Watch } from 'react-loader-spinner'
+import { ThreeCircles, Watch } from 'react-loader-spinner'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
 import Resource from '../resources/Resource'
 import { CAPTCHA, Slot } from '../contexts/SLOTS'
@@ -171,13 +171,7 @@ const AnnotationBox = forwardRef(
             context.meta[slot].bbox,
             labels ?? context.meta[slot].LABEL ?? context.meta[slot].labels,
          ])
-      else
-         return (
-            <pre>
-               Not rendering {slot}, missing bbox
-               {JSON.stringify(context, null, 2)}
-            </pre>
-         )
+      else return <ThreeCircles />
 
       console.debug('imageRenderSize', imgRenderSize)
       const renderRectTagsCoords = imgRenderSize
