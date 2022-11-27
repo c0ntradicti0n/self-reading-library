@@ -85,28 +85,32 @@ class Queue:
             raise ValueError(f"Strange value in {self.service_id}, {item}") from e
 
     def _get_df(self, id, row_id=None):
-        if row_id:
-            item = (
-                self.table.filter(self.table["row_id"] == row_id)
-                .sort_by("date")
-                .limit(10)
-                .execute()
-            )
-        elif id:
-            item = (
-                self.table.filter(self.table["doc_id"] == id)
-                .sort_by("date")
-                .limit(10)
-                .execute()
-            )
-            if item.empty:
+        try:
+            if row_id:
                 item = (
-                    self.table.filter(self.table["user_id"] == id)
+                    self.table.filter(self.table["row_id"] == row_id)
                     .sort_by("date")
                     .limit(10)
                     .execute()
                 )
-        else:
+            elif id:
+                item = (
+                    self.table.filter(self.table["doc_id"] == id)
+                    .sort_by("date")
+                    .limit(10)
+                    .execute()
+                )
+                if item.empty:
+                    item = (
+                        self.table.filter(self.table["user_id"] == id)
+                        .sort_by("date")
+                        .limit(10)
+                        .execute()
+                    )
+            else:
+                item = self.table.sort_by("date").limit(1).execute()
+        except sqlalchemy.exc.DatabaseError:
+            logging.error(f"Database error {row_id=} {id=}", exc_info=True)
             item = self.table.sort_by("date").limit(1).execute()
 
         try:

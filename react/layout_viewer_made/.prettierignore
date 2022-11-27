@@ -1,8 +1,7 @@
 # Ignore everything:
-node_modules
-.next
+/*
 
-# Except myapp folder:
-!src/
-!test/
-!helpers/
+# Except:
+!src
+!test
+!helpers

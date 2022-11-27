@@ -6,32 +6,28 @@ import * as serviceWorker from './serviceWorker'
 require('colors')
 
 if (window) {
-  console.log(window)
-  window.addEventListener('beforeunload', function (e) {
-    window.sessionStorage.tabId = window.tabId
-    console.log('beforeunload', window)
+   window.addEventListener('beforeunload', function (e) {
+      window.sessionStorage.tabId = window.tabId
+      return null
+   })
 
-    return null
-  })
+   window.addEventListener('load', function (e) {
+      if (window.sessionStorage.tabId) {
+         window.tabId = window.sessionStorage.tabId
+         window.sessionStorage.removeItem('tabId')
+      } else {
+         window.tabId = Math.floor(Math.random() * 1000000)
+      }
 
-  window.addEventListener('load', function (e) {
-    if (window.sessionStorage.tabId) {
-      window.tabId = window.sessionStorage.tabId
-      window.sessionStorage.removeItem('tabId')
-    } else {
-      window.tabId = Math.floor(Math.random() * 1000000)
-    }
-    console.log('load', window)
-
-    return null
-  })
+      return null
+   })
 }
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+   <React.StrictMode>
+      <App />
+   </React.StrictMode>,
+   document.getElementById('root'),
 )
 
 // If you want your app to work offline and load faster, you can change
