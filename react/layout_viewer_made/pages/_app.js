@@ -11,28 +11,15 @@ import Navigation from "../src/components/Navigation";
 import { NORMAL } from "../src/contexts/SLOTS";
 import {ConfigProvider, theme} from "antd";
 
-console.log(version);
 
 class MyApp extends App {
   static async getInitialProps(appContext) {
-    if (process.browser) {
-      return __NEXT_DATA__.props.pageProps;
-    }
-    console.log("apps get initial props is run...");
-    const pages = glob
-      .sync("pages/**/*", { cwd: "./" })
-      .map((path) => path.match("pages\\/(.+)..sx?")[1])
-      .filter((fname) => !fname.startsWith("_"));
-
-    // calls page's `getInitialProps` and fills `appProps.pageProps`
     const appProps = await App.getInitialProps(appContext);
-    return { pageProps: { pages } };
+    return { pageProps: {  } , appProps};
   }
 
   render() {
     const { Component, appProps } = this.props;
-    // Workaround for https://github.com/zeit/next.js/issues/8592
-
     return (
       <div id="comp-wrapp">
         <NoSSR>

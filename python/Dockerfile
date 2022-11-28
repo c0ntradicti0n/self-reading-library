@@ -21,6 +21,7 @@ RUN apt install python3.9-distutils -y
 RUN apt install python3.9-dev -y
 RUN apt install libfreetype6-dev pkg-config pkg-config -y
 RUN apt install poppler-utils -y
+RUN apt install -y pandoc texlive-latex-base texlive-fonts-recommended texlive-fonts-extra texlive-latex-extra
 
 RUN   >&2 echo "$(python3 --version)"
 WORKDIR /home/finn/Programming/self-reading-library
