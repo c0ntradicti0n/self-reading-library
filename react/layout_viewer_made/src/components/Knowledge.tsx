@@ -24,6 +24,7 @@ export const Knowledge = ({ service, slot }) => {
                top: '0px',
                left: '0px',
                margin: '1%',
+                right: "1%"
             }}
          />
          <SceletonGraph data={context.value[slot][1]} />

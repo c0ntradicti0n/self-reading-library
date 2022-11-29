@@ -37,7 +37,7 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install uvicorn[standard]
 
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt --use-deprecated=legacy-resolver
-RUN pip3 install torch-1.12.1-cpu torchvision==1.12.1+cpu torchaudio==1.12.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
+RUN pip3 install  torch==1.12.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
 
 RUN apt update && apt install  openssh-server  -y
 

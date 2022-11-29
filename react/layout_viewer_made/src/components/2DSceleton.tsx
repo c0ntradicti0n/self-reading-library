@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import * as d3 from 'd3'
 import {
    invalidation,
@@ -6,7 +6,8 @@ import {
    forceLink,
    forceManyBody,
 } from 'd3-force'
-import { DocumentContext } from '../contexts/DocumentContext.tsx'
+import { textwrap } from 'd3-textwrap';
+
 
 const drag = (simulation) => {
    function dragstarted(event, d) {
@@ -33,22 +34,54 @@ const drag = (simulation) => {
       .on('end', dragended)
 }
 function linkArc(d) {
-   const r = Math.hypot(d.to.x - d.from.x, d.to.y - d.from.y)
+   const r = Math.hypot(d.target.x - d.source.x, d.target.y - d.source.y)
    return `
-    M${d.from.x},${d.from.y}
-    A${r},${r} 0 0,1 ${d.to.x},${d.to.y}
+    M${d.source.x},${d.source.y}
+    A${r},${r} 0 0,1 ${d.target.x},${d.target.y}
   `
 }
+
+function wrap(text, width = 200) {
+    text.each(function () {
+        var text = d3.select(this),
+            words = text.text().split(/\s+/).reverse(),
+            word,
+            line = [],
+            lineNumber = 0,
+            lineHeight = 1.1, // ems
+            x = text.attr("x"),
+            y = text.attr("y"),
+            dy = 0, //parseFloat(text.attr("dy")),
+            tspan = text.text(null)
+                        .append("tspan")
+                        .attr("x", x)
+                        .attr("y", y)
+                        .attr("dy", dy + "em");
+        while (word = words.pop()) {
+            line.push(word);
+            tspan.text(line.join(" "));
+            if (tspan.node().getComputedTextLength() > width) {
+                line.pop();
+                tspan.text(line.join(" "));
+                line = [word];
+                tspan = text.append("tspan")
+                            .attr("x", x)
+                            .attr("y", y)
+                            .attr("dy", ++lineNumber * lineHeight + dy + "em")
+                            .text(word);
+            }
+        }
+    });
+}
+
 const chart = (ref, { data, height, width, color }) => {
    console.log("Chart", { data, height, width, color })
    const links = data.edges.map((d) => Object.create(d))
    const nodes = data.nodes.map((d) => Object.create(d))
-
-   const idsEdges = links.map(l => [l.from, l.to]).flat()
-   const idsNodes = nodes.map(n => n.id)
-   const notIn = idsEdges.filter(i => ! idsNodes.includes(i))
-
-   console.log(notIn, idsNodes, idsEdges)
+   function handleZoom(e) {
+      d3.select(ref.current).attr('transform', e.transform)
+   }
+   let zoom = d3.zoom().on('zoom', handleZoom)
    
    const simulation = d3
       .forceSimulation(nodes)
@@ -56,7 +89,7 @@ const chart = (ref, { data, height, width, color }) => {
          'link',
          d3.forceLink(links).id((d) => d.id),
       )
-      .force('charge', d3.forceManyBody().strength(-400))
+      .force('charge', d3.forceManyBody().strength(-1000))
       .force('x', d3.forceX())
       .force('y', d3.forceY())
 
@@ -98,6 +131,8 @@ const chart = (ref, { data, height, width, color }) => {
       .data(nodes)
       .join('g')
       .call(drag(simulation))
+         .call(zoom)
+
 
    node
       .append('circle')
@@ -109,12 +144,14 @@ const chart = (ref, { data, height, width, color }) => {
       .append('text')
       .attr('x', 8)
       .attr('y', '0.31em')
-      .text((d) => d.id)
+      .text((d) => d.label)
       .clone(true)
       .lower()
       .attr('fill', 'none')
       .attr('stroke', 'white')
       .attr('stroke-width', 3)
+
+   d3.selectAll('text').call(wrap);
 
    simulation.on('tick', () => {
       link.attr('d', linkArc)
@@ -183,8 +220,8 @@ const d = {
 
 export default function SceletonGraph({
    data = d,
-   height = 1000,
-   width = 1000,
+   height = window.innerHeight,
+   width = window.innerWidth,
 }) {
    const svgRef = React.useRef(null)
    console.log(data)
@@ -192,8 +229,8 @@ export default function SceletonGraph({
       chart(svgRef, {
          data,
          color: (d) => '#678',
-         width: 500,
-         height: 100,
+         width: 2000,
+         height:2000,
       })
    }, [])
    return (

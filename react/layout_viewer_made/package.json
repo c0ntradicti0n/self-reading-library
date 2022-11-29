@@ -21,6 +21,9 @@
     "@types/node": "^14.0.27",
     "antd": "^5.0.1",
     "colors": "^1.4.0",
+    "d3": "^7.6.1",
+    "d3-textwrap": "^3.0.0",
+    "d3plus": "^2.0.2",
     "drei": "0.0.60",
     "glob": "^7.1.6",
     "install": "^0.13.0",
@@ -44,8 +47,7 @@
     "react-rectangle-selection": "^1.0.4",
     "react-three-fiber": "4.2.12",
     "three": "^0.140.2",
-    "three-spritetext": "^1.5.2",
-    "d3": "^7.6.1"
+    "three-spritetext": "^1.5.2"
   },
   "devDependencies": {
     "@loadable/component": "^5.13.0",
