@@ -1,7 +1,4 @@
-torch
-git+https://github.com/facebookresearch/detectron2.git
 git+https://github.com/c0ntradicti0n/listalign.git@master#listalign
-
 dash==2.3.0
 dash-extensions
 visdcc
