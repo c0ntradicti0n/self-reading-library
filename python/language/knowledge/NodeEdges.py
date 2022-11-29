@@ -1,10 +1,13 @@
+import os
 from functools import reduce
-from itertools import pairwise
 from textwrap import wrap
 
-from pathspec import PathSpec
+from more_itertools import pairwise
 
+from config import config
 from core.pathant.Converter import converter
+from core.pathant.PathSpec import PathSpec
+from helpers.cache_tools import configurable_cache
 
 
 @converter(
@@ -15,8 +18,15 @@ class AnnotationAnalyser(PathSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    @configurable_cache(
+        filename=config.cache + os.path.basename(__file__),
+    )
     def __call__(self, prediction_metas, *args, **kwargs):
-        yield AnnotationAnalyser.merge_nested(self.generate_nodes_edges())
+        res = AnnotationAnalyser.merge_nested(
+            self.generate_nodes_edges(prediction_metas)
+        )
+        yield self.flags["search"], res
+
 
     def generate_nodes_edges(self, prediction_metas):
         for i, (path, meta) in enumerate(prediction_metas):
@@ -38,7 +48,7 @@ class AnnotationAnalyser(PathSpec):
 
                 for a, b in pairwise(sorted(set_ids)):
                     edges.append(
-                        {"id": f"arm-{a}-{b}", "from": a, "to": b, "label": "..."}
+                        {"id": f"arm-{a}-{b}", "source": a, "target": b, "label": "..."}
                     )
 
             for values in span_sets.kind_sets:
@@ -47,9 +57,8 @@ class AnnotationAnalyser(PathSpec):
                     edges.append(
                         {
                             "id": f"arm-{id_a}-{id_b}",
-                            "from": id_a,
-                            "to": id_b,
-                            "arrows": "to;from",
+                            "source": id_a,
+                            "target": id_b,
                         }
                     )
 
@@ -72,17 +81,17 @@ class AnnotationAnalyser(PathSpec):
                 edges.append(
                     {
                         "id": f"arm-{k1_id}-{k2_id}-krit",
-                        "from": k2_id,
-                        "to": k1_id,
+                        "source": k2_id,
+                        "target": k1_id,
                         "label": "krit",
                     }
                 )
 
                 edges.append(
-                    {"id": f"arm-{k1_id}-{k2_id}-k1", "from": k1_id, "to": c2.nlp_id}
+                    {"id": f"arm-{k1_id}-{k2_id}-k1", "source": k1_id, "target": c2.nlp_id}
                 )
                 edges.append(
-                    {"id": f"arm-{k1_id}-{k2_id}-k2", "from": k2_id, "to": c1.nlp_id}
+                    {"id": f"arm-{k1_id}-{k2_id}-k2", "source": k2_id, "target": c1.nlp_id}
                 )
 
             yield {
@@ -97,6 +106,7 @@ class AnnotationAnalyser(PathSpec):
     @staticmethod
     def merge_nested(dicts):
         def merge(acc, d):
+
             return {k: v + (acc[k] if k in acc else []) for k, v in d.items()}
 
         return reduce(merge, dicts, {})

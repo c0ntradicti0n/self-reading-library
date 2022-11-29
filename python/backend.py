@@ -3,6 +3,7 @@ import logging
 import falcon
 from wsgiref import simple_server
 from config.ant_imports import *
+from language.knowledge.KnowledgePublisher import KnowledgePublisher
 from layout.annotator.annotation_to_gold import AnnotatedToGoldQueueRest
 
 
@@ -29,7 +30,6 @@ def create_app():
     from core.rest.LayoutPublisher import LayoutPublisher
 
     publishing = {
-        "/ant/{id}": AntPublisher,
         # difference
         "/difference/{id}": ElmoDifferenceQueueRest,
         "/difference_annotation/{id}": DifferenceAnnotationPublisher,
@@ -41,10 +41,11 @@ def create_app():
         "/difference_captcha/{id}": AnnotationSpanToGoldQueueRest,
         "/layout_captcha/{id}": AnnotatedToGoldQueueRest,
         "/layout_captcha": AnnotatedToGoldQueueRest,
-        # topics
+        # ----
         "/library/{id}": TopicsPublisher,
-        # audiobook
         "/audiobook/{id}": AudioPublisher,
+        "/knowledge/{id}": KnowledgePublisher,
+        "/ant/{id}": AntPublisher,
     }
 
     from falcon_cors import CORS

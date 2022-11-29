@@ -124,7 +124,7 @@ class PathAnt:
     def info(self, path="pathant.png", pipelines_to_highlight=None):
         import pylab as plt
 
-        pylab.rcParams["figure.figsize"] = 23, 23
+        pylab.rcParams["figure.figsize"] = 35, 23
 
         dG = self.G.copy()
         dG = nx.MultiDiGraph(dG, directed=True)

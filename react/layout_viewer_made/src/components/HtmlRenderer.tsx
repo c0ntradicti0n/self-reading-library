@@ -8,6 +8,7 @@ import { DocumentContext } from '../contexts/DocumentContext.tsx'
 import { Slot } from '../contexts/SLOTS'
 import { AnnotationModal } from './AnnotationSpan'
 import { FRONTEND_HOST } from '../../config/connection'
+import Captcha from './Captcha'
 
 interface Props {
    service: Resource
@@ -15,12 +16,15 @@ interface Props {
 }
 
 const HtmlRenderer = (props: Props) => {
-   const [htmlContent, setHtmlContent] = useState<string>('')
+   const context = useContext<DocumentContext>(DocumentContext)
+
+   const [htmlContent, setHtmlContent] = useState('')
+   const [loading, setLoading] = useState(false)
+
    const [difference_AnnotationService] =
       useState<Difference_AnnotationService>(new Difference_AnnotationService())
    difference_AnnotationService.setSlot(props.slot)
 
-   const context = useContext<DocumentContext>(DocumentContext)
    useEffect(() => {
       if (
          context.value[props.slot] &&
@@ -41,6 +45,9 @@ const HtmlRenderer = (props: Props) => {
                '.html',
             setHtmlContent,
          )
+         setLoading(false)
+      } else {
+         setLoading(true)
       }
    }, [context.value[props.slot]])
 
@@ -77,12 +84,7 @@ const HtmlRenderer = (props: Props) => {
                            }}
                         />
                      ) : (
-                        <ThreeCircles
-                           color="red"
-                           outerCircleColor="blue"
-                           middleCircleColor="green"
-                           innerCircleColor="grey"
-                        />
+                        <Captcha />
                      )}
                      {htmlContent ? (
                         <div

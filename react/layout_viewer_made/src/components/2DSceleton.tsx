@@ -6,10 +6,11 @@ import {
    forceLink,
    forceManyBody,
 } from 'd3-force'
+import { DocumentContext } from '../contexts/DocumentContext.tsx'
 
 const drag = (simulation) => {
    function dragstarted(event, d) {
-      if (!event.active) simulation.alphaTarget(0.3).restart()
+      if (!event.active) simulation.alphato(0.3).restart()
       d.fx = d.x
       d.fy = d.y
    }
@@ -20,7 +21,7 @@ const drag = (simulation) => {
    }
 
    function dragended(event, d) {
-      if (!event.active) simulation.alphaTarget(0)
+      if (!event.active) simulation.alphato(0)
       d.fx = null
       d.fy = null
    }
@@ -32,16 +33,23 @@ const drag = (simulation) => {
       .on('end', dragended)
 }
 function linkArc(d) {
-   const r = Math.hypot(d.target.x - d.source.x, d.target.y - d.source.y)
+   const r = Math.hypot(d.to.x - d.from.x, d.to.y - d.from.y)
    return `
-    M${d.source.x},${d.source.y}
-    A${r},${r} 0 0,1 ${d.target.x},${d.target.y}
+    M${d.from.x},${d.from.y}
+    A${r},${r} 0 0,1 ${d.to.x},${d.to.y}
   `
 }
-const chart = (ref, { data, height, width, types, color }) => {
-   const links = data.links.map((d) => Object.create(d))
+const chart = (ref, { data, height, width, color }) => {
+   console.log("Chart", { data, height, width, color })
+   const links = data.edges.map((d) => Object.create(d))
    const nodes = data.nodes.map((d) => Object.create(d))
 
+   const idsEdges = links.map(l => [l.from, l.to]).flat()
+   const idsNodes = nodes.map(n => n.id)
+   const notIn = idsEdges.filter(i => ! idsNodes.includes(i))
+
+   console.log(notIn, idsNodes, idsEdges)
+   
    const simulation = d3
       .forceSimulation(nodes)
       .force(
@@ -55,12 +63,10 @@ const chart = (ref, { data, height, width, types, color }) => {
    const svg = d3
       .select(ref.current)
       .attr('viewBox', [-width / 2, -height / 2, width, height])
-      .style('font', '12px sans-serif')
 
    // Per-type markers, as they don't inherit styles.
    svg.append('defs')
       .selectAll('marker')
-      .data(types)
       .join('marker')
       .attr('id', (d) => `arrow-${d}`)
       .attr('viewBox', '0 -5 10 10')
@@ -81,10 +87,7 @@ const chart = (ref, { data, height, width, types, color }) => {
       .data(links)
       .join('path')
       .attr('stroke', (d) => color(d.type))
-      .attr(
-         'marker-end',
-         (d) => d.type,
-      )
+      .attr('marker-end', (d) => d.type)
 
    const node = svg
       .append('g')
@@ -123,74 +126,74 @@ const chart = (ref, { data, height, width, types, color }) => {
    return svg.node()
 }
 
-const data = {
-   types: ['licensing', 'suit', 'resolved'],
-   data: {
-      nodes: [
-         { id: 'Microsoft' },
-         { id: 'Amazon' },
-         { id: 'HTC' },
-         { id: 'Samsung' },
-         { id: 'Apple' },
-         { id: 'Motorola' },
-         { id: 'Nokia' },
-         { id: 'Kodak' },
-         { id: 'Barnes & Noble' },
-         { id: 'Foxconn' },
-         { id: 'Oracle' },
-         { id: 'Google' },
-         { id: 'Inventec' },
-         { id: 'LG' },
-         { id: 'RIM' },
-         { id: 'Sony' },
-         { id: 'Qualcomm' },
-         { id: 'Huawei' },
-         { id: 'ZTE' },
-         { id: 'Ericsson' },
-      ],
-      links: [
-         { source: 'Microsoft', target: 'Amazon', type: 'licensing' },
-         { source: 'Microsoft', target: 'HTC', type: 'licensing' },
-         { source: 'Samsung', target: 'Apple', type: 'suit' },
-         { source: 'Motorola', target: 'Apple', type: 'suit' },
-         { source: 'Nokia', target: 'Apple', type: 'resolved' },
-         { source: 'HTC', target: 'Apple', type: 'suit' },
-         { source: 'Kodak', target: 'Apple', type: 'suit' },
-         { source: 'Microsoft', target: 'Barnes & Noble', type: 'suit' },
-         { source: 'Microsoft', target: 'Foxconn', type: 'suit' },
-         { source: 'Oracle', target: 'Google', type: 'suit' },
-         { source: 'Apple', target: 'HTC', type: 'suit' },
-         { source: 'Microsoft', target: 'Inventec', type: 'suit' },
-         { source: 'Samsung', target: 'Kodak', type: 'resolved' },
-         { source: 'LG', target: 'Kodak', type: 'resolved' },
-         { source: 'RIM', target: 'Kodak', type: 'suit' },
-         { source: 'Sony', target: 'LG', type: 'suit' },
-         { source: 'Kodak', target: 'LG', type: 'resolved' },
-         { source: 'Apple', target: 'Nokia', type: 'resolved' },
-         { source: 'Qualcomm', target: 'Nokia', type: 'resolved' },
-         { source: 'Apple', target: 'Motorola', type: 'suit' },
-         { source: 'Microsoft', target: 'Motorola', type: 'suit' },
-         { source: 'Motorola', target: 'Microsoft', type: 'suit' },
-         { source: 'Huawei', target: 'ZTE', type: 'suit' },
-         { source: 'Ericsson', target: 'ZTE', type: 'suit' },
-         { source: 'Kodak', target: 'Samsung', type: 'resolved' },
-         { source: 'Apple', target: 'Samsung', type: 'suit' },
-         { source: 'Kodak', target: 'RIM', type: 'suit' },
-         { source: 'Nokia', target: 'Qualcomm', type: 'suit' },
-      ],
-   },
+const d = {
+   nodes: [
+      { id: 'Microsoft' },
+      { id: 'Amazon' },
+      { id: 'HTC' },
+      { id: 'Samsung' },
+      { id: 'Apple' },
+      { id: 'Motorola' },
+      { id: 'Nokia' },
+      { id: 'Kodak' },
+      { id: 'Barnes & Noble' },
+      { id: 'Foxconn' },
+      { id: 'Oracle' },
+      { id: 'Google' },
+      { id: 'Inventec' },
+      { id: 'LG' },
+      { id: 'RIM' },
+      { id: 'Sony' },
+      { id: 'Qualcomm' },
+      { id: 'Huawei' },
+      { id: 'ZTE' },
+      { id: 'Ericsson' },
+   ],
+   edges: [
+      { source: 'Microsoft', target: 'Amazon', type: 'licensing' },
+      { source: 'Microsoft', target: 'HTC', type: 'licensing' },
+      { source: 'Samsung', target: 'Apple', type: 'suit' },
+      { source: 'Motargetrola', target: 'Apple', type: 'suit' },
+      { source: 'Nokia', target: 'Apple', type: 'resolved' },
+      { source: 'HTC', target: 'Apple', type: 'suit' },
+      { source: 'Kodak', target: 'Apple', type: 'suit' },
+      { source: 'Microsoft', target: 'Barnes & Noble', type: 'suit' },
+      { source: 'Microsoft', target: 'Foxconn', type: 'suit' },
+      { source: 'Oracle', target: 'Google', type: 'suit' },
+      { source: 'Apple', target: 'HTC', type: 'suit' },
+      { source: 'Microsoft', target: 'Inventec', type: 'suit' },
+      { source: 'Samsung', target: 'Kodak', type: 'resolved' },
+      { source: 'LG', target: 'Kodak', type: 'resolved' },
+      { source: 'RIM', target: 'Kodak', type: 'suit' },
+      { source: 'Sony', target: 'LG', type: 'suit' },
+      { source: 'Kodak', target: 'LG', type: 'resolved' },
+      { source: 'Apple', target: 'Nokia', type: 'resolved' },
+      { source: 'Qualcomm', target: 'Nokia', type: 'resolved' },
+      { source: 'Apple', target: 'Motargetrola', type: 'suit' },
+      { source: 'Microsoft', target: 'Motargetrola', type: 'suit' },
+      { source: 'Motargetrola', target: 'Microsoft', type: 'suit' },
+      { source: 'Huawei', target: 'ZTE', type: 'suit' },
+      { source: 'Ericsson', target: 'ZTE', type: 'suit' },
+      { source: 'Kodak', target: 'Samsung', type: 'resolved' },
+      { source: 'Apple', target: 'Samsung', type: 'suit' },
+      { source: 'Kodak', target: 'RIM', type: 'suit' },
+      { source: 'Nokia', target: 'Qualcomm', type: 'suit' },
+   ],
 }
 
-export default function SceletonGraph({ height = 1000, width = 1000 }) {
+export default function SceletonGraph({
+   data = d,
+   height = 1000,
+   width = 1000,
+}) {
    const svgRef = React.useRef(null)
-
-   const [svg, setSvg] = useState(null)
+   console.log(data)
    useEffect(() => {
       chart(svgRef, {
-         ...data,
+         data,
          color: (d) => '#678',
-         width: window.innerWidth,
-         height: window.innerHeight,
+         width: 500,
+         height: 100,
       })
    }, [])
    return (

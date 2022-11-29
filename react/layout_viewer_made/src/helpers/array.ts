@@ -1,7 +1,12 @@
 import _ from 'lodash'
 import * as jp from 'jsonpath-faster'
 
-function getRandomArbitrary(min, max) {
+const choice = (choices) => {
+   let index = Math.floor(Math.random() * choices.length)
+   return choices[index]
+}
+
+const getRandomArbitrary = (min, max) => {
    return Math.round(Math.random() * (max - min) + min)
 }
 
@@ -100,4 +105,4 @@ export const indexSubsequence = (seq, subseq) => {
    return [Math.min(...result), Math.max(...result) + 1]
 }
 
-export { nest, zip, pairwise, swap, getRandomArbitrary, iter }
+export { nest, zip, pairwise, swap, getRandomArbitrary, iter, choice }

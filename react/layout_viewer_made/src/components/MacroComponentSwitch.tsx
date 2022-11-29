@@ -11,6 +11,7 @@ import dynamic from 'next/dynamic'
 import Resource from '../resources/Resource'
 import { NORMAL, Slot } from '../contexts/SLOTS'
 import AnnotationSpan from './AnnotationSpan'
+import { Knowledge } from './Knowledge'
 
 const Graph = dynamic(async () => await import('./Graph.js'), {
    loading: () => <p>...</p>,
@@ -21,7 +22,7 @@ interface Props {
    component: string
    url: string
    value?: string
-   slot: Slot
+   slot?: Slot
    input?: any
 }
 
@@ -58,6 +59,10 @@ const MacroComponentSwitch = forwardRef(
 
       if (component === 'download') {
          return <DownloadFile data={context.value[slot]} />
+      }
+
+      if (component === 'knowledge') {
+         return <Knowledge service={service} slot={slot} />
       }
 
       if (component === 'text') {

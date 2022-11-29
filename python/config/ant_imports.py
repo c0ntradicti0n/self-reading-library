@@ -37,3 +37,4 @@ from language.text2speech.Txt2Mp3 import Txt2Mp3
 from layout.annotator.annotation_to_gold import AnnotatedToGoldQueueRest
 from language.span.SpanGold import *
 from language.knowledge.Analyser import *
+from language.knowledge.NodeEdges import *

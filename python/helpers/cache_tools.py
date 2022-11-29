@@ -88,6 +88,21 @@ def dig_generator_ground_for_next_value(gen):
             return []
 
 
+def try_read_cache_file(cache_folder, value):
+    try:
+        return read_cache_file(
+            cache_folder,
+            value
+            if value.endswith(".pdf")
+            else config.tex_data + urllib.parse.quote_plus(value) + ".pdf",
+        )
+    except:
+        return read_cache_file(
+            cache_folder,
+            value
+        )
+
+
 def yield_cache_instead_apply(cls, f, gen, cache, cache_folder, **kwargs):
     try:
         incoming_gen = dig_generator_ground_for_next_value(gen)
@@ -103,12 +118,7 @@ def yield_cache_instead_apply(cls, f, gen, cache, cache_folder, **kwargs):
             (
                 value,
                 decompress_pickle(
-                    read_cache_file(
-                        cache_folder,
-                        value
-                        if value.endswith(".pdf")
-                        else config.tex_data + urllib.parse.quote_plus(value) + ".pdf",
-                    )
+                    try_read_cache_file(cache_folder, value)
                 ),
             )
             for value in values_from_future
