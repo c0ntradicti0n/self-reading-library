@@ -4,6 +4,7 @@ import tracemalloc
 
 from helpers.cache_tools import configurable_cache
 from helpers.hash_tools import hashval
+from helpers.str_tools import str_ascii
 from layout.imports import *
 from config import config
 from core.pathant.Converter import converter
@@ -183,7 +184,9 @@ class Layout2ReadingOrder(PathSpec):
                 for i, ul in enumerate(used_label_is)
             ]
 
+            used_texts = list(map(lambda l: map(str_ascii, l), used_texts))
             sorted_texts = self.sort_by_box(used_texts, used_boxes)
+
 
             meta["used_text_boxes"] = sorted_texts
 

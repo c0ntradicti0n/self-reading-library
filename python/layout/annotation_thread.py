@@ -9,7 +9,7 @@ from core.standard_converter.HTML2PDF import HTML2PDF
 from core.standard_converter.PDF2ETC import PDF2ETC
 from core.standard_converter.PDF2HTML import PDF2HTML
 from core.standard_converter.Dict2Graph import Dict2Graph
-from language.PredictionAlignment2Css import PredictionAlignment2Css
+from language.span.PredictionAlignment2Css import PredictionAlignment2Css
 from core.pathant.PathAnt import PathAnt
 from language.transformer.Pager import Pager
 from language.transformer.UnPager import UnPager

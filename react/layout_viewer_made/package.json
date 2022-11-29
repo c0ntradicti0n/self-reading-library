@@ -33,6 +33,7 @@
     "postcss": "^8.3.11",
     "prettier": "2.7.1",
     "react": "^18.1.0",
+    "react-d3-tree": "^3.3.5",
     "react-dom": "^18.1.0",
     "react-force-graph": "^1.36.5",
     "react-h5-audio-player": "^3.8.4",
@@ -43,7 +44,8 @@
     "react-rectangle-selection": "^1.0.4",
     "react-three-fiber": "4.2.12",
     "three": "^0.140.2",
-    "three-spritetext": "^1.5.2"
+    "three-spritetext": "^1.5.2",
+    "d3": "^7.6.1"
   },
   "devDependencies": {
     "@loadable/component": "^5.13.0",

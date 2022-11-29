@@ -76,7 +76,11 @@ services:
       CREATE_FRONTEND: "True"
     restart: "unless-stopped"
   fe:
-    build: react
+    build:
+      context: react
+      dockerfile: Dockerfile.${ENV}
+      args:
+        NEXT_PUBLIC_FRONTEND_HOST: ${FRONTEND_HOST}
     container_name: fe
     ports:
       - "3210:3000"

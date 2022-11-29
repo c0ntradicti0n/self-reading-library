@@ -79,7 +79,10 @@ def encode_some(k, v):
 
 
 def encode(obj_meta):
-    obj, meta = obj_meta
+    try:
+        obj, meta = obj_meta
+    except TypeError:
+        return obj_meta
     if "human_image_path" in meta and not "human_image" in meta:
         if isinstance(meta["human_image_path"], numpy.ndarray):
             meta["human_image_path"] = meta["human_image_path"][0]

@@ -8,14 +8,11 @@ from core.pathant.ConfigRest import ConfigRest
 from core.layout_eagle import LayoutEagle
 from core.standard_converter.Scraper import Scraper
 from core.standard_converter.HTML2PDF import HTML2PDF
-
-# from core.standard_converter.PDF2HTML import PDF2HTML
 from helpers.list_tools import metaize, forget_except
 from helpers.model_tools import TRAINING_RATE
 from language.text2speech.AudioPublisher import AudioPublisher
 from topics.TopicsPublisher import TopicsPublisher
 from core.captcha import Captcha
-
 from layout.annotator.annotation import Annotator, AnnotationQueueRest
 from layout.upload_annotation.upload_annotation import UploadAnnotator
 from layout.upload_annotation.upload_annotation import UploadAnnotator
@@ -27,7 +24,7 @@ from layout.annotation_thread import (
     upload_pipe,
     full_model_path,
 )
-from language.PredictionAlignment2Css import PredictionAlignment2Css
+from language.span.PredictionAlignment2Css import PredictionAlignment2Css
 from layout.Layout2ReadingOrder import Layout2ReadingOrder
 from language.transformer.ElmoDifference import (
     ElmoDifference,
@@ -38,8 +35,6 @@ from language.transformer.ElmoDifference import (
 )
 from language.text2speech.Txt2Mp3 import Txt2Mp3
 from layout.annotator.annotation_to_gold import AnnotatedToGoldQueueRest
-from language.span_annotation_to_gold import *
-from language.Analyser import *
+from language.span.SpanGold import *
+from language.knowledge.Analyser import *
 
-
-# from language.heuristic.heuristic_difference import HeurisiticalLogician

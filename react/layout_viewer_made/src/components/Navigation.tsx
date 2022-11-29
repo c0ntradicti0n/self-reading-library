@@ -70,7 +70,6 @@ const Navigation = (props: PropType) => {
       >
          <Button
             style={{
-               zIndex: 100000000,
                position: 'fixed',
                top: '0px',
                right: '0px',

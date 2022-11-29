@@ -17,7 +17,6 @@ class FilterAlignText(PathSpec):
             texts = meta["enumerated_texts"]
             filter_text = self.flags["filter_text"]
             filter_text = str_ascii(filter_text)
-            texts = list(map(str_ascii, texts))
             all_tokens = preprocess_text(texts)
             filter_text_tokens = filter_text.split()
             alignment = align(all_tokens, filter_text_tokens)[0]

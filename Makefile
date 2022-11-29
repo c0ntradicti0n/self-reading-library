@@ -1,7 +1,6 @@
 USER ?= $(shell id -u):$(shell id -g)
 
 format: format-python format-react
-
 format-python:
 	python -m black python
 format-react:
@@ -14,6 +13,10 @@ mount:
 mount-osx:
 	sudo bindfs  ./python/.layouteagle/pdfs/ ./react/layout_viewer_made/public/pdfs
 
+prod:
+	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose build
+dev:
+	ENV=dev USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose build
 build:
 	USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose build
 build_fe:
@@ -21,16 +24,13 @@ build_fe:
 
 up:
 	USER=$$USER CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain  docker-compose up -d
-
 down:
 	CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose down -v
 
 dockerlogs:
 	docker logs -f rest
-
 dockerdebug:
 	docker exec -itd rest /usr/sbin/sshd -D
-
 dbash:
 	docker exec -it rest bash
 
@@ -43,21 +43,12 @@ fe:
 	cd react/layout_viewer_made/ && yarn run dev
 
 
+docker-fill:
+	docker-compose build fill && docker-compose up fill -d && docker logs -f fill
+
 
 
 sync_from_host:
 	rsync -av --progress  -r python/.layouteagle/ deploy@self-reading-library.science:/home/deploy/self-reading-library/python/.layouteagle/
-
 sync_from_romote:
 	rsync -av --progress  -r deploy@self-reading-library.science:/home/deploy/self-reading-library/python/.layouteagle/ python/.layouteagle/
-
-
-
-backend:
-	cd python && python backend.py
-
-frontend: sync fe
-
-
-docker-fill:
-	docker-compose build fill && docker-compose up fill -d && docker logs -f fill
