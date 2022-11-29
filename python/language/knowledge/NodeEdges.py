@@ -37,7 +37,9 @@ class AnnotationAnalyser(PathSpec):
                     set_ids.append(span.nlp_id)
 
                 for a, b in pairwise(sorted(set_ids)):
-                    edges.append({"id": f"arm-{a}-{b}", "from": a, "to": b, "label": "..."})
+                    edges.append(
+                        {"id": f"arm-{a}-{b}", "from": a, "to": b, "label": "..."}
+                    )
 
             for values in span_sets.kind_sets:
                 for a, b in pairwise(values):
@@ -87,7 +89,6 @@ class AnnotationAnalyser(PathSpec):
                 "nodes": nodes,
                 "edges": edges,
             }
-
 
     @staticmethod
     def tags2_words(annotation_slice):

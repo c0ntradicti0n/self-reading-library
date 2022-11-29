@@ -360,19 +360,22 @@ const AnnotationSpan = forwardRef<
                         onClick={() => {
                            setSpanIndices(addSpan(spanIndices, annotation, tag))
                         }}
-                        type="primary" value="large"
-                        style={{margin: "10px"}}
+                        type="primary"
+                        value="large"
+                        style={{ margin: '10px' }}
                      >
                         {tag}
                      </Button>
                   ))}
-                  <Card
-                     hoverable
-                     style={{ width: '20vw',  margin:"10px"}}
-                  >
+                  <Card hoverable style={{ width: '20vw', margin: '10px' }}>
                      <Meta
-                        title={<span>On selecting text
-                           <br />the text will get a tag</span>}
+                        title={
+                           <span>
+                              On selecting text
+                              <br />
+                              the text will get a tag
+                           </span>
+                        }
                         description={
                            <div style={{ padding: '10px', margin: '10px' }}>
                               <span className={'tag span_' + kind}>{kind}</span>

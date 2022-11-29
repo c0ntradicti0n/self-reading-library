@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
 import MacroComponentSwitch from "./../src/components/MacroComponentSwitch";
-import BubbleGraph from "../src/components/2DGraph";
+import SceletonGraph from "../src/components/2DSceleton";
 
 const Science = () => {
-  return <BubbleGraph />;
+  return <SceletonGraph />;
 };
 
 export default Science;

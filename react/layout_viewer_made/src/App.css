@@ -84,8 +84,6 @@ span.span_SUBJECT {
    box-shadow: 0 0 0 0px rgba(251, 237, 78, 0.92);
 }
 
-
-
 .App {
    text-align: center;
 }
@@ -204,10 +202,10 @@ line {
 }
 
 .w0 {
-  width: 900px;
+   width: 900px;
 }
 
-::selection{
-   background: rgba(0,0,0,1) !important;
-    color: #fff;
+::selection {
+   background: rgba(0, 0, 0, 1) !important;
+   color: #fff;
 }

@@ -3,7 +3,7 @@ import Head from 'next/head'
 import styled from 'styled-components'
 import Url2Difference from './Url2Difference'
 import { Button } from '@mui/material'
-import OrgChartTree from "./2DGraph";
+import OrgChartTree from './2DGraph'
 
 const layoutStyle = {
    margin: 20,
@@ -89,8 +89,9 @@ export default class Layout extends React.Component {
                   </Lib>
                </ul>
 
-               {null//this.props.children
-                    }
+               {
+                  null //this.props.children
+               }
             </Mansonry>
          </div>
       )

@@ -1,5 +1,5 @@
 FROM docker.io/c0ntradiction/pdf2htmlex
-# c0ntradicti0n/pdf2htmlex:0.18.8.rc2-x-tag-feature-file-css-20220911-ubuntu-22.04-x86_64
+
 RUN apt update
 RUN apt install software-properties-common -y
 RUN add-apt-repository ppa:deadsnakes/ppa
@@ -37,6 +37,7 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install uvicorn[standard]
 
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt --use-deprecated=legacy-resolver
+RUN pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
 
 RUN apt update && apt install  openssh-server  -y
 

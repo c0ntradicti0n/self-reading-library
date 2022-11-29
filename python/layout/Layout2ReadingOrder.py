@@ -187,7 +187,6 @@ class Layout2ReadingOrder(PathSpec):
             used_texts = list(map(lambda l: map(str_ascii, l), used_texts))
             sorted_texts = self.sort_by_box(used_texts, used_boxes)
 
-
             meta["used_text_boxes"] = sorted_texts
 
             enumerated_texts = self.enumerate_words(sorted_texts)
@@ -212,7 +211,7 @@ class Layout2ReadingOrder(PathSpec):
         if not Layout2ReadingOrder.model:
             Layout2ReadingOrder.processor = model_helpers.LayoutModelParts().PROCESSOR
             Layout2ReadingOrder.model = model_helpers.LayoutModelParts().MODEL
-            logging.info(f"Loading {self.model_path}")
+            logging.info(f"Loading layout model {self.model_path=}")
             Layout2ReadingOrder.model.load_state_dict(
                 torch.load(self.model_path, map_location="cpu")
             )
