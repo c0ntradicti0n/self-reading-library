@@ -81,6 +81,8 @@ services:
       dockerfile: Dockerfile.${ENV}
       args:
         NEXT_PUBLIC_FRONTEND_HOST: ${FRONTEND_HOST}
+        NEXT_PUBLIC_BACKEND_HOST: "/api"
+        NEXT_PUBLIC_DASH_HOST: "/dash"
     container_name: fe
     ports:
       - "3210:3000"
