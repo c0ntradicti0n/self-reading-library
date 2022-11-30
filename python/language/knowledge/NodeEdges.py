@@ -8,13 +8,14 @@ from config import config
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from helpers.cache_tools import configurable_cache
+from helpers.list_tools import unique
 
 
 @converter(
-    "span_annotation.collection.analysed",
+    "span_annotation.collection.analysed.filter",
     "span_annotation.collection.nodes_edges",
 )
-class AnnotationAnalyser(PathSpec):
+class NodeEdges(PathSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -22,11 +23,9 @@ class AnnotationAnalyser(PathSpec):
         filename=config.cache + os.path.basename(__file__),
     )
     def __call__(self, prediction_metas, *args, **kwargs):
-        res = AnnotationAnalyser.merge_nested(
-            self.generate_nodes_edges(prediction_metas)
-        )
+        res = NodeEdges.merge_nested(self.generate_nodes_edges(prediction_metas))
+        res["nodes"] = unique(res["nodes"], key=lambda n: n["id"])
         yield self.flags["search"], res
-
 
     def generate_nodes_edges(self, prediction_metas):
         for i, (path, meta) in enumerate(prediction_metas):
@@ -88,10 +87,18 @@ class AnnotationAnalyser(PathSpec):
                 )
 
                 edges.append(
-                    {"id": f"arm-{k1_id}-{k2_id}-k1", "source": k1_id, "target": c2.nlp_id}
+                    {
+                        "id": f"arm-{k1_id}-{k2_id}-k1",
+                        "source": k1_id,
+                        "target": c2.nlp_id,
+                    }
                 )
                 edges.append(
-                    {"id": f"arm-{k1_id}-{k2_id}-k2", "source": k2_id, "target": c1.nlp_id}
+                    {
+                        "id": f"arm-{k1_id}-{k2_id}-k2",
+                        "source": k2_id,
+                        "target": c1.nlp_id,
+                    }
                 )
 
             yield {

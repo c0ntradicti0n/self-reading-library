@@ -35,7 +35,7 @@ class KnowledgePublisher(RestPublisher):
         )
 
     def on_get(self, req, resp, id=None):
-        result = list(self.pipeline(metaize([id]), search=id))
+        result = list(self.pipeline(metaize([id]), search="premise"))
         resp.status = falcon.HTTP_OK
         resp.text = jsonify(result)
 

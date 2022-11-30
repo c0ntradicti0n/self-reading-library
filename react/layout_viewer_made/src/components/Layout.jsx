@@ -50,6 +50,9 @@ export default class Layout extends React.Component {
 
             <Mansonry>
                <ul>
+                                    <Lib>
+                     <Button href="/knowledge">Browse differences</Button>
+                  </Lib>
                   <Lib>
                      <Button href="/library">Universe of documents</Button>
                   </Lib>

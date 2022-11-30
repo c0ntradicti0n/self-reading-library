@@ -545,8 +545,8 @@ export default function BubbleGraph({ height = 1000, width = 1000 }) {
                .map(({ data: d }) => d.name)
                .join('.')}\n${n.value.toLocaleString('en')}`,
          link: (d, n) => console.log(d, n),
-         width: window.innerWidth,
-         height: window.innerHeight,
+         width: window.innerWidth * 0.9,
+         height: window.innerHeight * 0.9,
       })
    }, [])
    return (
@@ -555,7 +555,13 @@ export default function BubbleGraph({ height = 1000, width = 1000 }) {
          id="treeWrapper"
          style={{ width: '100%', height: '94%', overflow: 'hidden' }}
       >
-         <svg ref={svgRef} width={width} height={height} />;
+         <svg
+            style={{ width: '100%', height: '94%', overflow: 'hidden' }}
+            ref={svgRef}
+            width={width}
+            height={height}
+         />
+         ;
       </div>
    )
 }

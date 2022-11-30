@@ -57,7 +57,7 @@ class Span:
 
     @cached_property
     def nlp_id(self):
-        return f"{hashval(self.lemmas)}"
+        return f"{hashval(self.words)}"
 
     @cached_property
     def lemmas(self):
@@ -151,6 +151,9 @@ class DifferenceSpanSet:
 
     def flat(self):
         return self._filter_kind(kind=None)
+
+    def __contains__(self, item):
+        return any(item in span for span in self.flat().text)
 
 
 class TestSpanMethods(unittest.TestCase):

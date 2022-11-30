@@ -97,10 +97,7 @@ def try_read_cache_file(cache_folder, value):
             else config.tex_data + urllib.parse.quote_plus(value) + ".pdf",
         )
     except:
-        return read_cache_file(
-            cache_folder,
-            value
-        )
+        return read_cache_file(cache_folder, value)
 
 
 def yield_cache_instead_apply(cls, f, gen, cache, cache_folder, **kwargs):
@@ -117,9 +114,7 @@ def yield_cache_instead_apply(cls, f, gen, cache, cache_folder, **kwargs):
         future_yield_values = [
             (
                 value,
-                decompress_pickle(
-                    try_read_cache_file(cache_folder, value)
-                ),
+                decompress_pickle(try_read_cache_file(cache_folder, value)),
             )
             for value in values_from_future
             if value in cache
