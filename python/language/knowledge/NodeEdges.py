@@ -40,7 +40,7 @@ class NodeEdges(PathSpec):
                     nodes.append(
                         {
                             "id": span.nlp_id,
-                            "label": wrap(span.text),
+                            "label": span.text,
                         }
                     )
                     set_ids.append(span.nlp_id)
@@ -62,9 +62,9 @@ class NodeEdges(PathSpec):
                     )
 
             analysed_links = meta["analysed_links"]
-            for a1, a2, c1, c2, l1, l2 in analysed_links:
-                k1_id = c1.nlp_id + "krit"
-                k2_id = c2.nlp_id + "krit"
+            for a1, a2, as1, as2, c1, c2, l1, l2 in analysed_links:
+                k1_id = as1.nlp_id
+                k2_id = as2.nlp_id
                 nodes.extend(
                     [
                         {

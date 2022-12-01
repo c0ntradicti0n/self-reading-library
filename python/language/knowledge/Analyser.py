@@ -6,6 +6,7 @@ from nltk.corpus.reader import Lemma
 
 from core.pathant.PathSpec import PathSpec
 from core.pathant.Converter import converter
+from language.span.DifferenceSpanSet import Span
 
 SUBJECT = "SUBJECT"
 CONTRAST = "CONTRAST"
@@ -98,6 +99,8 @@ class AnnotationAnalyser(PathSpec):
                                     (
                                         antonym_text,
                                         nym_text,
+                                        Span(SUBJECT, antonym_text),
+                                        Span(SUBJECT, nym_text),
                                         span_sets.contrasts[i],
                                         span_sets.contrasts[j],
                                         nym_lemma,

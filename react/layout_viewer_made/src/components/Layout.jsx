@@ -50,7 +50,7 @@ export default class Layout extends React.Component {
 
             <Mansonry>
                <ul>
-                                    <Lib>
+                  <Lib>
                      <Button href="/knowledge">Browse differences</Button>
                   </Lib>
                   <Lib>

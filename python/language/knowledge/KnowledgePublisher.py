@@ -35,13 +35,13 @@ class KnowledgePublisher(RestPublisher):
         )
 
     def on_get(self, req, resp, id=None):
-        result = list(self.pipeline(metaize([id]), search="premise"))
+        result = list(self.pipeline(metaize(["premise"]), search="premise"))
         resp.status = falcon.HTTP_OK
         resp.text = jsonify(result)
 
     def on_post(self, req, resp, id=None):
-        search = id
-        self.logger.info(f"Searching for {search}")
-        result = list(self.pipeline(metaize([search]), search=id))
+        search = req.media[0]
+        self.logger.info(f"Searching for {search=}")
+        result = list(self.pipeline(metaize([search]), search=search)).reverse()
         resp.status = falcon.HTTP_OK
         resp.text = jsonify(result)

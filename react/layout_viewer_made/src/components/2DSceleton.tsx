@@ -249,6 +249,7 @@ function ForceGraph(
    function zoomed(e) {
       node.attr('transform', e.transform)
       link.attr('transform', e.transform)
+      texts.attr('transform', e.transform)
    }
 
    return Object.assign(svg.node(), { scales: { color } })
@@ -270,7 +271,7 @@ export default function SceletonGraph({
          nodeGroup: (d) => d.group,
          nodeTitle: (d) => `${d.label}`,
          linkStrokeWidth: (l) => Math.sqrt(l.value),
-         nodeStrength: -700,
+         nodeStrength: -900,
          linkStrength: 0.2,
          width,
          height,

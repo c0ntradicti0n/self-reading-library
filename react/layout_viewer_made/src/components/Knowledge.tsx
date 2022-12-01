@@ -1,5 +1,5 @@
 import Search from 'antd/lib/input/Search'
-import Router from 'next/router'
+import Router, { useRouter } from 'next/router'
 import React, { useContext, useEffect, useState } from 'react'
 import { choice } from '../helpers/array'
 import SceletonGraph from './2DSceleton'
@@ -9,11 +9,12 @@ const STD_SEARCH = 'premise'
 
 export const Knowledge = ({ service, slot }) => {
    const context = useContext<DocumentContext>(DocumentContext)
+   const router = useRouter()
 
-   const [search, setSearch] = useState(STD_SEARCH)
+   const [search, setSearch] = useState(router.query.search ?? STD_SEARCH)
    useEffect(() => {
       if (search !== STD_SEARCH)
-         service.save('search').then((val) => context.setValueMetas(slot, val))
+         service.save(search, search, (val) => context.setValueMetas(slot, val))
    }, [search])
    return (
       <>

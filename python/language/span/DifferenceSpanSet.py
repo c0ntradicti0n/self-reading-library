@@ -45,7 +45,18 @@ class Span:
 
     def __init__(self, kind, word_tags):
         self.kind = kind
-        self.word_tags = word_tags
+        if isinstance(word_tags, str):
+            words = word_tags.split(" ")
+            self.word_tags = [
+                [
+                    w,
+                    "B" if i == 0 else ("I" if i < len(words) - 1 else "L"),
+                    kind,
+                ]
+                for i, w in enumerate(words)
+            ]
+        else:
+            self.word_tags = word_tags
 
     @cached_property
     def words(self):
