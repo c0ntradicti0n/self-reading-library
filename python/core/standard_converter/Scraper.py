@@ -44,9 +44,75 @@ class Scraper(PathSpec):
                 meta["url"] = self.flags["url"]
 
                 if not os.path.exists(path):
-                    os.system(f"pandoc {url} --to pdf > {path}")
+                    self.scrape(url, path)
                 yield id, meta
             elif os.path.exists(id) and regex.match(self.file_regex, id) is not None:
                 yield id, meta
             else:
                 logging.error(f"{id} is not a valid url/path")
+
+    def scrape(self, url, path):
+        import os
+        import time
+
+        import selenium
+        from selenium import webdriver
+        from selenium.webdriver.chrome.options import Options
+        from selenium.webdriver.common.by import By
+
+        chrome_options = Options()
+        chrome_options.add_argument("--disable-extensions")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--window-size=1920,1080")
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument('--disable-dev-shm-usage')
+
+        driver = webdriver.Chrome(options=chrome_options)
+        driver.get(url)
+
+        time.sleep(3)
+        print (driver.page_source.encode("utf8", "ignore").decode('utf8'))
+
+
+        elements = driver.find_elements(By.CSS_SELECTOR, "svg")
+        time.sleep(3)
+
+        for element in elements:
+            try:
+                with open("infile.svg", "w") as f:
+                    f.write(element.text)
+
+                driver.execute_script(
+                    f"""
+                var img = document.createElement('img');
+                img.width = {element.size['width']}
+                img.src =\"data:image/png;base64, {element.screenshot_as_base64}\"
+                arguments[0].outerHTML = img.outerHTML
+                """,
+                    element,
+                )
+            except selenium.common.exceptions.WebDriverException:
+                driver.execute_script(
+                    f"""
+                        arguments[0].remove()
+                        """,
+                    element,
+                )
+        bad_images = driver.find_elements("xpath", "//*[starts-with(@src,'data')]")
+        for element in bad_images:
+            driver.execute_script(
+                f"""
+                            arguments[0].remove()
+                            """,
+                element,
+            )
+        try:
+            button = driver.find_element("xpath", "//*[text()='Accept']")
+            button.click()
+        except:
+            self.logger.warning("Found no cookie banner, but cool")
+
+        with open(f"./{path}.htm", "w") as f:
+            f.write(driver.page_source.encode("utf-8").decode())
+        os.system(f"pandoc {path}.htm --pdf-engine xelatex --to pdf -o {path}")

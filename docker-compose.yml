@@ -31,6 +31,9 @@ services:
     environment:
       PORT: $PORT
       DB_HOST: db
+      LC_ALL: en_US.UTF-8
+      LANG: en_US.UTF-8
+      LANGUAGE: en_US.UTF-8
 
     volumes:
       - "$CWD/python:/home/finn/Programming/self-reading-library/python"
@@ -62,6 +65,10 @@ services:
       - "$CWD/python:/home/finn/Programming/self-reading-library/python"
     entrypoint: python3 fill.py
 
+  tiger:
+    image: tigergraph/tigergraph:latest
+    ports:
+      - "14240:14240"
   db:
     image: postgres
     container_name: db

@@ -18,9 +18,6 @@ class Filter(PathSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    @configurable_cache(
-        filename=config.cache + os.path.basename(__file__),
-    )
     def __call__(self, prediction_metas, *args, **kwargs):
 
         for i, (path, meta) in enumerate(prediction_metas):

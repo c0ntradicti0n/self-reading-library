@@ -16,6 +16,7 @@ import numpy
 from regex import regex
 
 from config import config
+from helpers.list_tools import metaize
 from helpers.os_tools import filename_only
 
 logger = logging.getLogger(__file__)
@@ -282,55 +283,16 @@ def configurable_cache(
                             f"Could not create cache file for {filename} (race conditions)"
                         )
                 if yield_cache:
-                    if isinstance(_from_path_glob, str) or callable(_from_path_glob):
-                        _from_path_glob = [_from_path_glob]
-                    cache = [
-                        fp
-                        for path in _from_path_glob
-                        for fp in glob(path if not callable(path) else path(self))
-                    ]
+                    blacklist, cache = generate_glob_cache(_filter_path_glob, _from_path_glob, cache, self)
+                    yielded = []
+                    while not all(c in yielded for c in cache):
+                        c = next((c for c in cache if c not in yielded and not filename_only(os.path.basename(c)) in blacklist))
+                        yield (c, {})
+                        yielded.append(c)
+                        blacklist, cache = generate_glob_cache(_filter_path_glob, _from_path_glob, cache, self)
+                        print (cache)
+                        print (yielded)
 
-                    cache.sort(key=os.path.getctime)
-                    cache.reverse()
-
-                    blacklist = []
-                    if not isinstance(_filter_path_glob, Iterable):
-                        _filter_path_glob = [_filter_path_glob]
-                    if not _filter_path_glob:
-                        _filter_path_glob = []
-                    for i, p in enumerate(_filter_path_glob):
-                        if isinstance(p, Callable):
-                            result = p(self)
-                            if isinstance(result, str):
-                                _filter_path_glob[i] = result
-                            elif isinstance(result, Iterable):
-                                result = [filename_only(r) for r in result]
-                                blacklist.extend(result)
-                                _filter_path_glob[i] = None
-                            else:
-                                logging.error(
-                                    f"dont know how to handle filter return type, {result}"
-                                )
-                    blacklist += [
-                        filename_only(os.path.basename(fp))
-                        for path in _filter_path_glob
-                        if path
-                        for fp in glob(path)
-                    ]
-
-                    if len(cache) == 0:
-                        logging.info(
-                            f"Found nothing via glob {_from_path_glob} from {os.getcwd()}"
-                        )
-
-                    blacklisted = [p for p in cache if filename_only(p) in blacklist]
-                    logging.warning(f"{blacklisted=} {self.flags=}")
-
-                    yield from [
-                        (p, {})
-                        for p in cache
-                        if not filename_only(os.path.basename(p)) in blacklist
-                    ]
                 else:
                     yield from apply(
                         self,
@@ -358,6 +320,48 @@ def configurable_cache(
                         filename,
                         **kwargs,
                     )
+
+        def generate_glob_cache(_filter_path_glob, _from_path_glob, cache, self):
+            if isinstance(_from_path_glob, str) or callable(_from_path_glob):
+                _from_path_glob = [_from_path_glob]
+            cache = [
+                fp
+                for path in _from_path_glob
+                for fp in glob(path if not callable(path) else path(self))
+            ]
+            cache.sort(key=os.path.getctime)
+            cache.reverse()
+            blacklist = []
+            if not isinstance(_filter_path_glob, Iterable):
+                _filter_path_glob = [_filter_path_glob]
+            if not _filter_path_glob:
+                _filter_path_glob = []
+            for i, p in enumerate(_filter_path_glob):
+                if isinstance(p, Callable):
+                    result = p(self)
+                    if isinstance(result, str):
+                        _filter_path_glob[i] = result
+                    elif isinstance(result, Iterable):
+                        result = [filename_only(r) for r in result]
+                        blacklist.extend(result)
+                        _filter_path_glob[i] = None
+                    else:
+                        logging.error(
+                            f"dont know how to handle filter return type, {result}"
+                        )
+            blacklist += [
+                filename_only(os.path.basename(fp))
+                for path in _filter_path_glob
+                if path
+                for fp in glob(path)
+            ]
+            if len(cache) == 0:
+                logging.info(
+                    f"Found nothing via glob {_from_path_glob} from {os.getcwd()}"
+                )
+            blacklisted = [p for p in cache if filename_only(p) in blacklist]
+            logging.warning(f"{blacklisted=} {self.flags=}")
+            return blacklist, cache
 
         functools.update_wrapper(new_func, original_func)
 
@@ -399,7 +403,7 @@ def uri_with_cache(fun):
 
 
 class TestCache(unittest.TestCase):
-    def run_cached(self, x, filename, *args, f_=None, cargs=[], ckwargs={}, **kwargs):
+    def run_cached(self, x, filename, *args, f_=None, cargs=[], ckwargs={}, listify=True, **kwargs):
 
         if not f_:
 
@@ -411,7 +415,10 @@ class TestCache(unittest.TestCase):
         else:
             f = f_
 
-        y = list(f(None, x, *args, **kwargs))
+        if listify:
+            y = list(f(None, x, *args, **kwargs))
+        else:
+            y = f(None, x, *args, **kwargs)
         return x, y, f
 
     def check_cached(self, f, x, y, filename, *args, **kwargs):
@@ -447,6 +454,34 @@ class TestCache(unittest.TestCase):
             )
             > 3
         )
+
+    def test_cache_glob_update_while_running(self):
+        os.system("rm *._wtf_")
+
+        y = self.run_test_cache(
+            None,
+            from_path_glob="*._wtf_",
+            listify=False
+        )
+        with open(f"_._wtf_", "w") as f:
+            f.write("{\"text\":\"hallo\"")
+
+        v = f"_._wtf_"
+        for i in range(5):
+            path = f"{i}._wtf_"
+            with open(path, "w") as f:
+                f.write("{\"text\":\"hallo\"")
+
+            print(f"loop {i=} {v=}", flush=True)
+            val, meta = next(y)
+            print(f"-> {val}", flush=True)
+
+            self.assertEqual(val ,v )
+            v = path
+
+
+        os.system("rm *._wtf_")
+
 
     def test_cache1_gen(self):
         assert len(list(self.run_test_cache(((str(i), {}) for i in range(1, 4))))) == 3
@@ -562,7 +597,7 @@ class TestCache(unittest.TestCase):
         )
 
     def test_uncompress_decompress(self):
-        decompress_pickle(compressed_pickle([1, 2, 3, 4])) == [1, 2, 3, 4]
+        assert decompress_pickle(compressed_pickle([1, 2, 3, 4])) == [1, 2, 3, 4]
 
     def test_keyword_arg(self):
         @configurable_cache(filename="t_k")

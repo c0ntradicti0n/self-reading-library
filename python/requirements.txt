@@ -5,7 +5,9 @@ dash==2.3.0
 dash-extensions
 visdcc
 
-weasyprint
+selenium
+chromedriver-binary
+
 pdfminer.six
 bs4~=0.0.1
 beautifultable

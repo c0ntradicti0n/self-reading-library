@@ -62,7 +62,7 @@ function ForceGraph(
       nodeStroke = '#fff', // node stroke color
       nodeStrokeWidth = 1.5, // node stroke width, in pixels
       nodeStrokeOpacity = 1, // node stroke opacity
-      nodeRadius = 5, // node radius, in pixels
+      nodeRadius = 25, // node radius, in pixels
       nodeStrength,
       linkSource = ({ source }) => source, // given d in links, returns a node identifier string
       linkTarget = ({ target }) => target, // given d in links, returns a node identifier string
@@ -112,17 +112,14 @@ function ForceGraph(
       .forceSimulation(nodes)
       .force('link', forceLink)
       .force('charge', forceNode)
-      .force(
-         'box',
-         forceBoundary(-width / 2, -height / 2, width / 2, height / 2),
-      )
+      .force('box', forceBoundary(0, -height / 2, width, height / 2))
       .on('tick', ticked)
 
    const svg = d3
       .select(ref.current)
       .attr('width', width)
       .attr('height', height)
-      .attr('viewBox', [-width / 2, -height / 2, width, height])
+      .attr('viewBox', [-0.1 * width, -height / 2, width, height])
       .attr('style', 'max-width: 100%; height: auto; height: intrinsic;')
 
    const link = svg
@@ -158,19 +155,13 @@ function ForceGraph(
       .attr('class', 'label')
       .attr('fill', 'black')
       .text(function (d) {
-         console.log('NOIDE', d)
          return T[d.index]
       })
 
    if (W) link.attr('stroke-width', ({ index: i }) => W[i])
    if (L) link.attr('stroke', ({ index: i }) => L[i])
    if (G) node.attr('fill', ({ index: i }) => color(G[i]))
-   if (T)
-      node
-         .append('text')
-         .text(({ index: i }) => T[i].slice(0, 5))
-         .attr('fill', 'black')
-         .call(wrap, 30)
+
    if (invalidation != null) invalidation.then(() => simulation.stop())
 
    function intern(value) {
@@ -187,6 +178,10 @@ function ForceGraph(
          .attr('y2', (d) => d.target.y)
 
       node.attr('cx', (d) => d.x).attr('cy', (d) => d.y)
+
+      texts.attr('transform', function (d) {
+         return 'translate(' + d.x + ',' + d.y + ')'
+      })
    }
 
    function drag(simulation) {
@@ -243,7 +238,7 @@ function ForceGraph(
       .on('zoom', zoomed)
 
    //ZOOM
-   zoomRect.call(zoom).call(zoom.translateTo, 0, 0)
+   //zoomRect.call(zoom).call(zoom.translateTo, 0, 0)
 
    //ZOOM
    function zoomed(e) {
@@ -277,7 +272,7 @@ export default function SceletonGraph({
          height,
          invalidation, // a promise to stop the simulation when the cell is re-run
       })
-   }, [])
+   }, [data])
    return (
       <div style={{ width: '94%', height: '94%', overflow: 'hidden' }}>
          <svg

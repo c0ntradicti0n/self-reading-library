@@ -19,9 +19,6 @@ class NodeEdges(PathSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    @configurable_cache(
-        filename=config.cache + os.path.basename(__file__),
-    )
     def __call__(self, prediction_metas, *args, **kwargs):
         res = NodeEdges.merge_nested(self.generate_nodes_edges(prediction_metas))
         res["nodes"] = unique(res["nodes"], key=lambda n: n["id"])

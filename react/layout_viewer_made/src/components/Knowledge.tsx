@@ -1,9 +1,8 @@
-import Search from 'antd/lib/input/Search'
-import Router, { useRouter } from 'next/router'
+import { useRouter } from 'next/router'
 import React, { useContext, useEffect, useState } from 'react'
-import { choice } from '../helpers/array'
 import SceletonGraph from './2DSceleton'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
+import { Input } from 'antd'
 
 const STD_SEARCH = 'premise'
 
@@ -18,20 +17,21 @@ export const Knowledge = ({ service, slot }) => {
    }, [search])
    return (
       <>
-         <Search
+         <Input.Search
             onSearch={(search) => setSearch(search)}
-            name="id"
-            placeholder='What do you want to "know" about?'
+            allowClear
             style={{
-               zIndex: 123,
                position: 'absolute',
                top: '0px',
                left: '0px',
                margin: '1%',
-               right: '1%',
+               width: '90%',
             }}
+            defaultValue={''}
+            placeholder='What do you want to "know" about?'
          />
-         <SceletonGraph data={context.value[slot][1]} />
+
+         <SceletonGraph data={context.meta[slot]} />
       </>
    )
 }
