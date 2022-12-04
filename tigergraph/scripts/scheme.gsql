@@ -1,0 +1,15 @@
+CREATE VERTEX Person(PRIMARY_ID person_id STRING, id STRING, location_id STRING, skill_set SET<INT>, skill_list LIST<INT>, interest_set SET<STRING>, interest_list LIST<STRING>)
+CREATE VERTEX Company(PRIMARY_ID client_id STRING, id STRING, country STRING)
+CREATE DIRECTED EDGE Works(FROM Person, TO Company)
+CREATE GRAPH Work_Net(*)
+
+USE GRAPH Work_Net
+CREATE LOADING JOB load_member FOR GRAPH Work_Net {  DEFINE FILENAME f;  LOAD f    TO VERTEX Person VALUES($0, $0, $1, _, _, SPLIT($3,"|"), SPLIT($3,"|") ),    TO TEMP_TABLE t2(id, skill) VALUES ($0, flatten($2,"|",1));  LOAD TEMP_TABLE t2    TO VERTEX Person VALUES($0, _, _, $"skill", $"skill", _, _);}
+
+CREATE LOADING JOB load_company FOR GRAPH Work_Net {  DEFINE FILENAME f;  LOAD f TO VERTEX Company VALUES($0, $0, $1);}
+
+CREATE LOADING JOB load_member_company FOR GRAPH Work_Net {  DEFINE FILENAME f;  LOAD f TO EDGE Works VALUES  ($0, $1)  USING SEPARATOR=",";}
+
+RUN LOADING JOB load_member USING f="./data/persons"
+RUN LOADING JOB load_company USING f="./data/company"
+RUN LOADING JOB load_member_company USING f="./data/company_persons"

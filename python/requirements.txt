@@ -8,6 +8,10 @@ visdcc
 selenium
 chromedriver-binary
 
+pyTigerGraph[gds]
+
+
+
 pdfminer.six
 bs4~=0.0.1
 beautifultable

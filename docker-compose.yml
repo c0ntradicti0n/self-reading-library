@@ -66,9 +66,33 @@ services:
     entrypoint: python3 fill.py
 
   tiger:
-    image: tigergraph/tigergraph:latest
+    container_name: tiger
+    image:  docker.tigergraph.com/tigergraph:latest
+    restart: unless-stopped
+    user: $USER_IDS
+
+
     ports:
-      - "14240:14240"
+      - '9000:9000'
+      - '14240:14240'
+      - '8123:8123'
+
+    ulimits:
+      nofile:
+        soft: 1000000
+        hard: 1000000
+
+    volumes:
+      - ./tigergraph/data:/home/tigergraph//data/
+      - ./tigergraph/scripts:/home/tigergraph//scripts
+      - ./tigergraph/start.sh:/home/tigergraph/start.sh
+
+    working_dir: /home/tigergraph
+
+    stdin_open: true
+    tty: true
+    entrypoint: bash -i start.sh
+
   db:
     image: postgres
     container_name: db

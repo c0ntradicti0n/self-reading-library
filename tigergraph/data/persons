@@ -1,0 +1,12 @@
+person1,us,1|2|3,management|financial
+person2,chn,2|3|5|6,engineering
+person3,jp,4|1|6,teaching
+person4,us,4|1|10,football
+person5,can,|8|2|5,sport|financial|engineering
+person6,jp,7|10,music|art
+person7,us,8|6,art|sport
+person8,chn,1|5|2,management
+person9,us,4|7|2,financial|teaching
+person10,us,3,football|sport
+person11,can,10,sport|football
+person12,jp,1|5|2|2|2,music|engineering|teaching|teaching|teaching
