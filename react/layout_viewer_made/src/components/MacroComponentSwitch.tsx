@@ -1,4 +1,4 @@
-import React, { forwardRef, useContext, useEffect } from 'react'
+import React, {forwardRef, useContext, useEffect, useState} from 'react'
 import { useRouter } from 'next/router'
 import HtmlRenderer from './HtmlRenderer'
 import AnnotationBox from './AnnotationBox'
@@ -12,11 +12,8 @@ import Resource from '../resources/Resource'
 import { NORMAL, Slot } from '../contexts/SLOTS'
 import AnnotationSpan from './AnnotationSpan'
 import { Knowledge } from './Knowledge'
-
-const Graph = dynamic(async () => await import('./Graph.js'), {
-   loading: () => <p>...</p>,
-   ssr: false,
-})
+import boolean from "async-validator/dist-types/validator/boolean";
+import Captcha from "./Captcha";
 
 interface Props {
    component: string
@@ -28,8 +25,13 @@ interface Props {
 
 const MacroComponentSwitch = forwardRef(
    ({ slot = NORMAL, ...props }: Props, ref): JSX.Element => {
+      const Graph = dynamic(async () => await import('./Graph.js'), {
+         loading: () => <p>...</p>,
+         ssr: false,
+      })
       const router = useRouter()
       const context = useContext<DocumentContextType>(DocumentContext)
+       const [loading, setLoading] = useState(false)
 
       const component = props.component
       const service = new Resource(props.url, true, true, true, true, true)
@@ -39,15 +41,26 @@ const MacroComponentSwitch = forwardRef(
          const valueToFetch =
             props.value ?? (slot === NORMAL ? router.query.id : null)
 
-         if (!props.input)
-            service
-               .getOne(valueToFetch, (val) => context?.setValueMetas(slot, val))
-               .catch((e) => console.error('fetching ', e))
-         else context?.setValueMetas(slot, props.input)
+         if (!props.input) {
+             setLoading(true)
+             service
+                 .getOne(valueToFetch, (val) => {
+                     setLoading(false)
+                     context?.setValueMetas(slot, val)
+                 }, null
+                 )
+                 .catch((e) => console.error('fetching ', e))
+         } else context?.setValueMetas(slot, props.input)
       }, [])
 
       console.debug(context, props)
       if (!context.value[slot]) return null
+
+
+       if (loading) {
+           console.log("Display captcha, load is taking some time")
+         return <Captcha  />
+      }
 
       if (['upload_annotation', 'annotation'].includes(component)) {
          return <AnnotationBox ref={ref} service={service} slot={slot} />

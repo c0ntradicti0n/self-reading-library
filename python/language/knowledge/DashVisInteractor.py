@@ -36,7 +36,7 @@ ant = PathAnt()
 def generate_nodes_edges():
     gold_span_annotation = ant(
         "span_annotation.collection.fix",
-        "span_annotation.collection.analysed",
+        "span_annotation.collection.linked",
         service_id="gold_span_annotation",
     )
 

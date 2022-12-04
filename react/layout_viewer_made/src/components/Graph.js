@@ -10,6 +10,7 @@ const ForceGraph3D = dynamic(() => import('./ForceGraph3d.js'), {
 })
 
 const ForwardedRefForceGraph3D = React.forwardRef((props, ref) => (
+   // @ts-ignore
    <ForceGraph3D {...props} forwardedRef={ref} />
 ))
 

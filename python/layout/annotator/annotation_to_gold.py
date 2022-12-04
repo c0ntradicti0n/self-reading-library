@@ -1,3 +1,4 @@
+import _pickle
 import json
 import os
 import gzip
@@ -14,6 +15,7 @@ from core.event_binding import queue_iter, RestQueue, queue_put, q, d
 from helpers.cache_tools import configurable_cache
 from helpers.json_tools import np_encoder
 from layout.model_helpers import changed_labels
+import pyarrow.parquet as pq
 
 
 AnnotatedToGoldQueueRest = RestQueue(
@@ -28,7 +30,7 @@ AnnotatedToGoldQueueRest = RestQueue(
 class AnnotationLoader(PathSpec):
     @configurable_cache(
         config.cache + os.path.basename(__file__),
-        from_path_glob=config.COLLECTION_PATH + "/*.pickle",
+        from_path_glob=[config.COLLECTION_PATH + "/*.pickle", config.tex_data + "/*.df"],
         filter_path_glob=existing_in_dataset_or_database("/*.json.gz"),
     )
     def __call__(self, prediction_metas, *args, **kwargs):
@@ -47,7 +49,11 @@ class AnnotatorUnpacker(PathSpec):
 
     def __call__(self, prediction_metas, *args, **kwargs):
         for pickle_path, meta in prediction_metas:
-            df = pandas.read_pickle(pickle_path)
+            try:
+                df = pandas.read_pickle(pickle_path)
+            except _pickle.UnpicklingError:
+                df = pq.read_table(pickle_path).to_pandas()
+
             df["bbox"] = df.apply(
                 lambda x: list(zip(*df.x0, *df.y0, *df.x1, *df.y1)), axis=1
             )

@@ -149,7 +149,6 @@ span.span_SUBJECT {
 }
 
 canvas {
-   border: 1px solid blue;
    width: 640px;
    height: 480px;
 }
@@ -208,4 +207,13 @@ line {
 ::selection {
    background: rgba(0, 0, 0, 1) !important;
    color: #fff;
+}
+
+.node-label {
+   font-size: 12px;
+   padding: 1px 4px;
+   border-radius: 4px;
+   color: #0f0f5f;
+   background-color: rgba(0, 0, 0, 0.5);
+   user-select: none;
 }

@@ -9,11 +9,12 @@ export default class Url2Difference extends React.Component {
       return (
          <ClickBoundary>
             <Search
-               onSearch={(search) =>
+               onSearch={(search) => {
+                   console.log("Search", search)
                   Router.push('/difference?id=' + search).then(() =>
                      Router.reload(),
                   )
-               }
+               }}
                name="id"
                placeholder="Put URL to be scanned as document"
             />

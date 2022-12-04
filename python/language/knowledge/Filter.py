@@ -11,8 +11,8 @@ from helpers.cache_tools import configurable_cache
 
 
 @converter(
-    "span_annotation.collection.analysed",
-    "span_annotation.collection.analysed.filter",
+    "span_annotation.collection.linked",
+    "span_annotation.collection.linked.filter",
 )
 class Filter(PathSpec):
     def __init__(self, *args, **kwargs):

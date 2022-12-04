@@ -13,8 +13,8 @@ CONTRAST = "CONTRAST"
 
 
 @converter(
-    "span_annotation.collection.span_set",
-    "span_annotation.collection.analysed",
+    "span_annotation.collection.identity",
+    "span_annotation.collection.linked",
 )
 class AnnotationAnalyser(PathSpec):
     def __init__(self, *args, **kwargs):
@@ -124,7 +124,7 @@ if __name__ == "__main__":
 
     gold_span_annotation = ant(
         "span_annotation.collection.fix",
-        "span_annotation.collection.analysed",
+        "span_annotation.collection.linked",
         service_id="gold_span_annotation",
     )
 

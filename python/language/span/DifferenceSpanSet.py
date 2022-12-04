@@ -1,9 +1,13 @@
 import hashlib
+import itertools
 import unittest
 from functools import cached_property
 
+import nltk
 import spacy
+from nltk import SnowballStemmer
 
+from helpers.cache_tools import compressed_pickle, decompress_pickle
 from helpers.hash_tools import hashval
 from spacy_wordnet.wordnet_annotator import WordnetAnnotator
 
@@ -11,6 +15,8 @@ from helpers.span_tools import annotation2span_sets
 
 SUBJECT = "SUBJECT"
 CONTRAST = "CONTRAST"
+stemmer = SnowballStemmer("english")
+lemma = nltk.wordnet.WordNetLemmatizer()
 
 
 class SuperList(list):
@@ -22,7 +28,6 @@ class SuperList(list):
 
 
 class Span:
-
     _nlp = None
 
     @cached_property
@@ -43,7 +48,7 @@ class Span:
         nltk.download("wordnet")
         nltk.download("omw-1.4")
 
-    def __init__(self, kind, word_tags):
+    def __init__(self, kind, word_tags=None):
         self.kind = kind
         if isinstance(word_tags, str):
             words = word_tags.split(" ")
@@ -58,6 +63,9 @@ class Span:
         else:
             self.word_tags = word_tags
 
+    def wordnet_lemmas(self):
+        return [token._.wordnet.lemmas() for token in self.doc]
+
     @cached_property
     def words(self):
         return [" ".join([tw[0] for tw in self.word_tags])]
@@ -66,9 +74,26 @@ class Span:
     def text(self):
         return " ".join(self.words)
 
+    def stems(self):
+        return [lemma.lemmatize(w) for w in self.words]
+
+    def same_root(self, other):
+        return any(l in self.derived for l in other.lemmas)
+
+    @cached_property
+    def derived(self):
+        return list(
+            itertools.chain(
+                *[
+                    map(lambda d: d._name, l.derivationally_related_forms())
+                    for l in self.doc[0]._.wordnet.lemmas()
+                ]
+            )
+        )
+
     @cached_property
     def nlp_id(self):
-        return f"{hashval(self.words)}"
+        return f"{hashval(self.stems())}"
 
     @cached_property
     def lemmas(self):
@@ -88,6 +113,9 @@ class Span:
 
     def __repr__(self):
         return f"{self.kind}: '{self.text}' {self.nlp_id}"
+
+    def __eq__(self, other):
+        return self.word_tags == other.word_tags and self.kind == other.kind
 
     def __getstate__(self):
         return {0: self.kind, 1: self.word_tags}
@@ -219,6 +247,12 @@ class TestSpanMethods(unittest.TestCase):
     }
     dss = DifferenceSpanSet(v)
 
+    def test_pickle(self):
+        self.assertEqual(
+            decompress_pickle(compressed_pickle(TestSpanMethods.dss)).subjects,
+            self.dss.subjects,
+        )
+
     def test_subjects(self):
         self.assertEqual(self.dss.subjects.text, ["Catholicism", "Buddhism"])
 
@@ -226,15 +260,15 @@ class TestSpanMethods(unittest.TestCase):
         self.assertEqual(
             self.dss.subjects.nlp_id,
             [
-                "e3ef22cc849bb1c42487ad348e9a8968c5e2bc3704be4b06080dc3f54b880e3c",
-                "61ec49b2f01f80373b48baac46459bf964a638374606264bf8701b94884df7f6",
+                "eba3e5c681e84bc26e3a3544bf9b0a37bbf627cdbc60e2afb9ff081d97718660",
+                "ec9e19bda8bfce78abb29dee3228fa696681b07f759d836770989b6c5e2b5375",
             ],
         )
 
     def test_subj_hash(self):
         self.assertEqual(
             self.dss.subject_hash,
-            "530147de47c462a1ed178ac02794db62f1849d3328b05276a9944c28cc5bde72",
+            "488dbb73798839778a1f3f0078b63025cb9760f13fc5be1d8ec11de60d7f5edb",
         )
 
     def test_subj_hash_int(self):
@@ -242,6 +276,17 @@ class TestSpanMethods(unittest.TestCase):
             self.dss.subject_hash_int,
             605655766414173305614492906248267245040171940863844408278379738501985147138083118269722709201217,
         )
+
+    def test_truth(self):
+        errors = []
+        for _a, _b in [("truth", "true"), ("valid", "validity"), ("proof", "prove")]:
+            a = Span(SUBJECT, _a)
+            b = Span(SUBJECT, _b)
+            print(a.stems(), b.stems())
+            if not a.same_root(b):
+
+                errors.append((a, b))
+        self.assertEqual(errors, [], "not equal")
 
     def test_lemmas(self):
         self.assertEqual(

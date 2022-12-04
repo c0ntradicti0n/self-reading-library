@@ -283,15 +283,30 @@ def configurable_cache(
                             f"Could not create cache file for {filename} (race conditions)"
                         )
                 if yield_cache:
-                    blacklist, cache = generate_glob_cache(_filter_path_glob, _from_path_glob, cache, self)
+                    blacklist, cache = generate_glob_cache(
+                        _filter_path_glob, _from_path_glob, cache, self
+                    )
                     yielded = []
                     while not all(c in yielded for c in cache):
-                        c = next((c for c in cache if c not in yielded and not filename_only(os.path.basename(c)) in blacklist))
+                        try:
+                            c = next(
+                                (
+                                    c
+                                    for c in cache
+                                    if c not in yielded
+                                    and not filename_only(os.path.basename(c)) in blacklist
+                                )
+                            )
+                        except StopIteration:
+                            break
+
                         yield (c, {})
                         yielded.append(c)
-                        blacklist, cache = generate_glob_cache(_filter_path_glob, _from_path_glob, cache, self)
-                        print (cache)
-                        print (yielded)
+                        """blacklist, cache = generate_glob_cache(
+                            _filter_path_glob, _from_path_glob, cache, self
+                        )"""
+                        print(cache)
+                        print(yielded)
 
                 else:
                     yield from apply(
@@ -403,7 +418,9 @@ def uri_with_cache(fun):
 
 
 class TestCache(unittest.TestCase):
-    def run_cached(self, x, filename, *args, f_=None, cargs=[], ckwargs={}, listify=True, **kwargs):
+    def run_cached(
+        self, x, filename, *args, f_=None, cargs=[], ckwargs={}, listify=True, **kwargs
+    ):
 
         if not f_:
 
@@ -458,30 +475,24 @@ class TestCache(unittest.TestCase):
     def test_cache_glob_update_while_running(self):
         os.system("rm *._wtf_")
 
-        y = self.run_test_cache(
-            None,
-            from_path_glob="*._wtf_",
-            listify=False
-        )
+        y = self.run_test_cache(None, from_path_glob="*._wtf_", listify=False)
         with open(f"_._wtf_", "w") as f:
-            f.write("{\"text\":\"hallo\"")
+            f.write('{"text":"hallo"')
 
         v = f"_._wtf_"
         for i in range(5):
             path = f"{i}._wtf_"
             with open(path, "w") as f:
-                f.write("{\"text\":\"hallo\"")
+                f.write('{"text":"hallo"')
 
             print(f"loop {i=} {v=}", flush=True)
             val, meta = next(y)
             print(f"-> {val}", flush=True)
 
-            self.assertEqual(val ,v )
+            self.assertEqual(val, v)
             v = path
 
-
         os.system("rm *._wtf_")
-
 
     def test_cache1_gen(self):
         assert len(list(self.run_test_cache(((str(i), {}) for i in range(1, 4))))) == 3

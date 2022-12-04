@@ -1,3 +1,4 @@
+import itertools
 import os
 from functools import reduce
 from textwrap import wrap
@@ -12,13 +13,16 @@ from helpers.list_tools import unique
 
 
 @converter(
-    "span_annotation.collection.analysed.filter",
+    "span_annotation.collection.linked.filter",
     "span_annotation.collection.nodes_edges",
 )
 class NodeEdges(PathSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    @configurable_cache(
+        filename=config.cache + os.path.basename(__file__),
+    )
     def __call__(self, prediction_metas, *args, **kwargs):
         res = NodeEdges.merge_nested(self.generate_nodes_edges(prediction_metas))
         res["nodes"] = unique(res["nodes"], key=lambda n: n["id"])
@@ -57,6 +61,16 @@ class NodeEdges(PathSpec):
                             "target": id_b,
                         }
                     )
+            identity_links = meta["identity_links"]
+            for a,b in itertools.permutations(identity_links, 2):
+                edges.append(
+                    {
+                        "id": f"{a.nlp_id}-{b.nlp_id}-eq",
+                        "source": a.nlp_id,
+                        "target": b.nlp_id,
+                        "label": "equal",
+                    }
+                )
 
             analysed_links = meta["analysed_links"]
             for a1, a2, as1, as2, c1, c2, l1, l2 in analysed_links:
@@ -76,10 +90,10 @@ class NodeEdges(PathSpec):
                 )
                 edges.append(
                     {
-                        "id": f"arm-{k1_id}-{k2_id}-krit",
+                        "id": f"{k1_id}-{k2_id}-krit",
                         "source": k2_id,
                         "target": k1_id,
-                        "label": "krit",
+                        "label": "opposite",
                     }
                 )
 
