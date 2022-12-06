@@ -54,13 +54,14 @@ const MacroComponentSwitch = forwardRef(
       }, [])
 
       console.debug(context, props)
-      if (!context.value[slot]) return null
-
-
-       if (loading) {
+      if (loading) {
            console.log("Display captcha, load is taking some time")
          return <Captcha  />
       }
+      if (!context.value[slot]) return null
+
+
+
 
       if (['upload_annotation', 'annotation'].includes(component)) {
          return <AnnotationBox ref={ref} service={service} slot={slot} />

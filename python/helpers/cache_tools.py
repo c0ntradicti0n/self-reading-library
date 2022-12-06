@@ -41,7 +41,7 @@ def decompress_pickle(value):
 def unroll_cache(path, cache):
     for m in cache:
         uncompressed = decompress_pickle(read_cache_file(path, m))
-        if uncompressed:
+        if uncompressed is not None:
             yield m, uncompressed
 
 
@@ -302,9 +302,9 @@ def configurable_cache(
 
                         yield (c, {})
                         yielded.append(c)
-                        """blacklist, cache = generate_glob_cache(
+                        blacklist, cache = generate_glob_cache(
                             _filter_path_glob, _from_path_glob, cache, self
-                        )"""
+                        )
                         print(cache)
                         print(yielded)
 
@@ -472,27 +472,6 @@ class TestCache(unittest.TestCase):
             > 3
         )
 
-    def test_cache_glob_update_while_running(self):
-        os.system("rm *._wtf_")
-
-        y = self.run_test_cache(None, from_path_glob="*._wtf_", listify=False)
-        with open(f"_._wtf_", "w") as f:
-            f.write('{"text":"hallo"')
-
-        v = f"_._wtf_"
-        for i in range(5):
-            path = f"{i}._wtf_"
-            with open(path, "w") as f:
-                f.write('{"text":"hallo"')
-
-            print(f"loop {i=} {v=}", flush=True)
-            val, meta = next(y)
-            print(f"-> {val}", flush=True)
-
-            self.assertEqual(val, v)
-            v = path
-
-        os.system("rm *._wtf_")
 
     def test_cache1_gen(self):
         assert len(list(self.run_test_cache(((str(i), {}) for i in range(1, 4))))) == 3

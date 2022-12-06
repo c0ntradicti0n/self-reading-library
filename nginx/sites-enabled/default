@@ -47,14 +47,7 @@ server {
         proxy_set_header Origin localhost;
     }
 
-    location ^~ /dash/ {
-        # reverse proxy for backend server
-        proxy_pass http://dash:12345/dash/;
-        proxy_http_version 1.1;
 
-        proxy_set_header Host $host;
-        proxy_set_header Origin localhost;
-    }
 
    proxy_read_timeout 300;
    proxy_connect_timeout 300;

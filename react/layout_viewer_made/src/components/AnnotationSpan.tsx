@@ -36,23 +36,18 @@ import Meta from 'antd/lib/card/Meta'
 
 export function AnnotationModal({ text, onClose, service }) {
    const ref = useRef(null) // ref => { current: null }
-   const [open, setOpen] = useState(true)
 
    return (
       <ClickBoundary>
          <div data-backdrop="false">
-            <a onClick={() => setOpen(open)}>
-               Mark the opposites and explanations
-            </a>
-            {open ? (
+
                <Modal
-                  open={open}
+                  open={true}
                   footer={[
                      <Button
                         key="back"
                         onClick={() => {
                            ref?.current?.onCloseDiscard()
-                           setOpen(false)
                         }}
                      >
                         Unclear
@@ -62,12 +57,11 @@ export function AnnotationModal({ text, onClose, service }) {
                         type="primary"
                         onClick={() => {
                            ref?.current?.onCloseSave()
-                           setOpen(false)
                         }}
                      >
                         Submit
                      </Button>,
-                     <Button onClick={() => setOpen(false)}>Back</Button>,
+                     <Button onClick={() => onClose()}>Back</Button>,
                   ]}
                >
                   <AnnotationSpan
