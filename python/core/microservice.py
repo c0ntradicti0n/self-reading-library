@@ -29,7 +29,7 @@ class microservice:
             try:
                 with open("../docker-compose.override.yaml") as f:
                     compose = f.read()
-            except FileNotFoundError:
+            except Exception:
                 compose = ""
 
             compose = addict.addict.Dict(ruamel.yaml.load(compose))
@@ -57,8 +57,11 @@ class microservice:
                 }
             )
             compose = compose.to_dict()
-            with open("../docker-compose.override.yaml", "w") as f:
-                ruamel.yaml.dump(compose, f)
+            try:
+                with open("../docker-compose.override.yaml", "w") as f:
+                    ruamel.yaml.dump(compose, f)
+            except Exception as e:
+                logging.error("Could not update docker-compose.override!")
 
 
 
