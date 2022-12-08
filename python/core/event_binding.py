@@ -292,7 +292,7 @@ def queue_iter(service_id, gen, single=False):
     global q, d
 
     for i in range(5):
-        if len(q[service_id]) < 5:
+        if len(q[service_id]) < 14:
 
             try:
                 new_val = next(gen)

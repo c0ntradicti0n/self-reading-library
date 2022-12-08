@@ -126,7 +126,7 @@ COLLECTION_PATH = hidden_folder + "collection/"
 LABELS = ["NONE", "c1", "c2", "c3", "wh", "h", "pn", "fn", "fg", "tb"]
 TEXT_LABELS = ["c1", "c2", "c3", "wh"]
 TITLE = ["h"]
-MAX_PAGES_PER_DOCUMENT = 25
+MAX_PAGES_PER_DOCUMENT = 100
 label2id = {t: i for i, t in enumerate(LABELS)}
 label2color = {
     "c1": "blue",
