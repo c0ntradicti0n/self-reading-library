@@ -21,6 +21,13 @@ build:
 	USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose build
 build_fe:
 	USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose build fe
+over:
+	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose -f docker-compose.override.yaml  build
+overup:
+	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose -f docker-compose.override.yaml  up
+overdown:
+	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose -f docker-compose.override.yaml down
+
 
 up:
 	USER=$$USER CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain  docker-compose up -d

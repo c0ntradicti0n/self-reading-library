@@ -294,7 +294,8 @@ def configurable_cache(
                                     c
                                     for c in cache
                                     if c not in yielded
-                                    and not filename_only(os.path.basename(c)) in blacklist
+                                    and not filename_only(os.path.basename(c))
+                                    in blacklist
                                 )
                             )
                         except StopIteration:
@@ -302,9 +303,9 @@ def configurable_cache(
 
                         yield (c, {})
                         yielded.append(c)
-                        blacklist, cache = generate_glob_cache(
-                            _filter_path_glob, _from_path_glob, cache, self
-                        )
+                        # blacklist, cache = generate_glob_cache(
+                        #    _filter_path_glob, _from_path_glob, cache, self
+                        # )
                         print(cache)
                         print(yielded)
 
@@ -471,7 +472,6 @@ class TestCache(unittest.TestCase):
             )
             > 3
         )
-
 
     def test_cache1_gen(self):
         assert len(list(self.run_test_cache(((str(i), {}) for i in range(1, 4))))) == 3

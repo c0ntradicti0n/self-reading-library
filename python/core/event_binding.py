@@ -84,11 +84,11 @@ def encode(obj_meta):
     except TypeError:
         return obj_meta
     if "human_image_path" in meta and not "human_image" in meta:
-        if isinstance(meta["human_image_path"], numpy.ndarray):
+        if isinstance(meta["human_image_path"], (numpy.ndarray, list)):
             meta["human_image_path"] = meta["human_image_path"][0]
         meta["human_image"] = Image.open(meta["human_image_path"])
     if "image_path" in meta and not "image" in meta:
-        if isinstance(meta["image_path"], numpy.ndarray):
+        if isinstance(meta["image_path"], (numpy.ndarray, list)):
             meta["image_path"] = meta["image_path"][0]
         meta["image"] = Image.open(meta["image_path"])
     if isinstance(meta, dict):
@@ -140,6 +140,17 @@ class RestQueue:
                 q[self.service_id].task_done()
                 q[self.service_id].put(id, data)
 
+        try:
+            data = data[0], dict(
+                map(
+                    lambda kv: (kv[0], list(kv[1]))
+                    if isinstance(kv[1], numpy.ndarray)
+                    else kv,
+                    data[1].items(),
+                )
+            )
+        except:
+            pass
         return data
 
     def change(self, id, item, path, value):

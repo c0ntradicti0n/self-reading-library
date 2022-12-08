@@ -1,3 +1,3 @@
-import {SpriteText }from 'three-spritetext'
+import { SpriteText } from 'three-spritetext'
 
 export default SpriteText

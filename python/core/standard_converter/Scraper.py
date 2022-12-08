@@ -110,10 +110,12 @@ class Scraper(PathSpec):
             self.logger.warning("Found no cookie banner, but cool")
 
         source = driver.page_source.encode("utf-8").decode()
-        if not "Occasionally, you may see this page while the site ensures that the connection is secure." in source:
+        if (
+            not "Occasionally, you may see this page while the site ensures that the connection is secure."
+            in source
+        ):
             with open(f"./{path}.htm", "w") as f:
                 f.write(source)
             os.system(f"pandoc {path}.htm --pdf-engine xelatex --to pdf -o {path}")
         else:
             os.system(f"pandoc {url} --pdf-engine xelatex --to pdf -o {path}")
-

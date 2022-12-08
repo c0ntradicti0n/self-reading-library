@@ -99,7 +99,7 @@ difference_model_train_output = hidden_folder + f"/over_{model_config}/"
 difference_model_config = f"language/transformer/experiment_configs/{model_config}"
 
 wordninjalanguagemodel = "language/english.txt.gz"
-layout_model_path = hidden_folder + "/layout_model/"
+layout_model_path = hidden_folder + "/text_box_models//_1782_0,8268912618438863_14"
 saved_layout_model_dir = hidden_folder + "/layout_model_saved/"
 collected_features_path = ".core/labeled_features.pickle"
 use_pdf2htmlex_features = False

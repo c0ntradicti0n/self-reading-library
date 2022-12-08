@@ -62,7 +62,7 @@ class NodeEdges(PathSpec):
                         }
                     )
             identity_links = meta["identity_links"]
-            for a,b in itertools.permutations(identity_links, 2):
+            for a, b in itertools.permutations(identity_links, 2):
                 edges.append(
                     {
                         "id": f"{a.nlp_id}-{b.nlp_id}-eq",

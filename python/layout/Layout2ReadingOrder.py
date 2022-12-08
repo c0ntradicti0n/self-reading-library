@@ -2,6 +2,9 @@ import gc
 import logging
 import tracemalloc
 
+import numpy
+
+
 from helpers.cache_tools import configurable_cache
 from helpers.hash_tools import hashval
 from helpers.str_tools import str_ascii
@@ -16,6 +19,14 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 
+def cast_array_list(sample):
+    if isinstance(sample, dict):
+        for k, v in sample.items():
+            sample[k] = cast_array_list(v)
+    if isinstance(sample, list):
+        return numpy.asarray(sample, dtype=object)
+    else:
+        return sample
 @converter("feature", "reading_order")
 class Layout2ReadingOrder(PathSpec):
     def __init__(self, *args, num_labels=config.NUM_LABELS, **kwargs):
@@ -30,17 +41,7 @@ class Layout2ReadingOrder(PathSpec):
         filename=config.cache + os.path.basename(__file__),
     )
     def __call__(self, x_meta, *args, **kwargs):
-        if "model_path" not in self.flags and "layout_model_path" not in self.flags:
-            raise Exception(
-                f"layout model path must be set via pipeline flags, these are the keywords in the call args, {self.flags=}"
-            )
-        model_path = (
-            self.flags["model_path"]
-            if "model_path" in self.flags
-            else self.flags["layout_model_path"]
-        )
-
-        self.model_path = model_path
+        self.load()
 
         for pdf_path, meta in x_meta:
 
@@ -67,45 +68,20 @@ class Layout2ReadingOrder(PathSpec):
 
             for page_number in range(len(dataset)):
                 example = dataset[page_number : page_number + 1]
-
-                self.load_model()
-
-                encoded_inputs = model_helpers.preprocess_data(training=False)(
-                    example, return_tensors="pt"
-                )
-
-                labels = encoded_inputs.pop("labels").squeeze().tolist()
-
-                for k, v in encoded_inputs.items():
-                    encoded_inputs[k] = v.to(config.DEVICE)
-                outputs = Layout2ReadingOrder.model(**encoded_inputs)
-                predictions = outputs.logits.argmax(-1).squeeze().tolist()
-                token_boxes = encoded_inputs.bbox.squeeze().tolist()
-
                 image = Image.open(example["image_path"][0][0])
                 image = image.convert("RGB")
                 width, height = image.size
 
-                box_predictions = [
-                    config.id2label[prediction]
-                    for prediction, label in zip(predictions, labels)
-                    if label != -100
-                ]
-                enc_boxes = [
-                    model_helpers.unnormalize_box(box, width, height)
-                    for box, label in zip(token_boxes, labels)
-                    if label != -100
-                ]
+                box_predictions, prediction = self.predict(example, height, width)
 
-                prediction = {}
-                prediction["labels"] = box_predictions
-                prediction["bbox"] = enc_boxes
                 prediction["df"] = df.iloc[page_number : page_number + 1]
                 prediction["image"] = Image.open(example["image_path"][0][0])
                 prediction["page_number"] = page_number
                 prediction["text"] = prediction["df"]["text"].tolist()[0]
 
                 del prediction["df"]["chars_and_char_boxes"]
+                prediction["df"]["LABEL"] = [box_predictions]
+
                 prediction[
                     "df_path"
                 ] = f"{config.tex_data}--{hashval(pdf_path)}-{page_number}.df"
@@ -207,16 +183,62 @@ class Layout2ReadingOrder(PathSpec):
 
             yield pdf_path, meta
 
-    def load_model(self):
-        if not Layout2ReadingOrder.model:
-            Layout2ReadingOrder.processor = model_helpers.LayoutModelParts().PROCESSOR
-            Layout2ReadingOrder.model = model_helpers.LayoutModelParts().MODEL
-            logging.info(f"Loading layout model {self.model_path=}")
-            Layout2ReadingOrder.model.load_state_dict(
-                torch.load(self.model_path, map_location="cpu")
-            )
-            Layout2ReadingOrder.model.eval()
-            Layout2ReadingOrder.model.to(config.DEVICE)
+    def predict(self, example, height, width):
+        print (example, height, width)
+        cast_array_list(example)
+
+        encoded_inputs = model_helpers.preprocess_data(training=False)(
+            example, return_tensors="pt"
+        )
+        labels = encoded_inputs.pop("labels").squeeze().tolist()
+
+        for k, v in encoded_inputs.items():
+            encoded_inputs[k] = v.to(config.DEVICE)
+
+        print ("now models turn:")
+        outputs = self.model(**encoded_inputs)
+        print("outputs")
+
+        predictions = outputs.logits.argmax(-1).squeeze().tolist()
+        print(predictions)
+
+        token_boxes = encoded_inputs.bbox.squeeze().tolist()
+        box_predictions = [
+            config.id2label[prediction]
+            for prediction, label in zip(predictions, labels)
+            if label != -100
+        ]
+        enc_boxes = [
+            model_helpers.unnormalize_box(box, width, height)
+            for box, label in zip(token_boxes, labels)
+            if label != -100
+        ]
+        prediction = {}
+        prediction["labels"] = box_predictions
+        prediction["bbox"] = enc_boxes
+        return box_predictions, prediction
+
+    def load(self):
+        print("LOADING MODEL")
+        self.model_path = config.layout_model_path
+        print(f" - {config.layout_model_path}")
+
+        self.processor = model_helpers.LayoutModelParts().PROCESSOR
+        print(f" - {self.processor=}")
+
+        self.model = model_helpers.LayoutModelParts().MODEL
+
+        self.model.load_state_dict(
+            torch.load(self.model_path, map_location="cpu")
+        )
+        logging.info(f" - loaded state dict")
+
+        self.model.eval()
+        logging.info(f" - eval")
+
+        self.model.to(config.DEVICE)
+        logging.info(f" - using {config.DEVICE}")
+
 
     def sort_by_label(self, i_l):
         return [i for i, l in sorted(i_l, key=lambda x: config.TEXT_LABELS.index(x[1]))]
@@ -240,3 +262,6 @@ class Layout2ReadingOrder(PathSpec):
             all_enumeration.append(enumeration)
 
         return all_enumeration
+
+if __name__ == "__main__":
+    application.run()

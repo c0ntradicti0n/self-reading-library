@@ -5,6 +5,7 @@ from core.pathant.Converter import converter
 from helpers.list_tools import nest
 from language.span.DifferenceSpanSet import Span, SuperList
 from helpers.list_tools import unique
+
 SUBJECT = "SUBJECT"
 CONTRAST = "CONTRAST"
 
@@ -57,7 +58,9 @@ class AnnotationAnalyser(PathSpec):
 
         clusters = [v for k, v in groups.items() if len(v) > 1]
 
-        identity_clusters = unique(clusters, key=lambda c: str(list(sorted(n.nlp_id for n in c))))
+        identity_clusters = unique(
+            clusters, key=lambda c: str(list(sorted(n.nlp_id for n in c)))
+        )
 
         id2span = {s.nlp_id: c for c in identity_clusters for s in c}
         for path, meta in prediction_metas:
@@ -67,10 +70,7 @@ class AnnotationAnalyser(PathSpec):
                 if subject.nlp_id in id2span:
                     new_links.extend(id2span[subject.nlp_id])
 
-            meta["identity_links"] = unique(
-                new_links,
-                                            key=lambda s: s.nlp_id
-            )
+            meta["identity_links"] = unique(new_links, key=lambda s: s.nlp_id)
             yield path, meta
 
 

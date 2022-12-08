@@ -30,7 +30,10 @@ AnnotatedToGoldQueueRest = RestQueue(
 class AnnotationLoader(PathSpec):
     @configurable_cache(
         config.cache + os.path.basename(__file__),
-        from_path_glob=[config.COLLECTION_PATH + "/*.pickle", config.tex_data + "/*.df"],
+        from_path_glob=[
+            config.COLLECTION_PATH + "/*.pickle",
+            config.tex_data + "/*.df",
+        ],
         filter_path_glob=existing_in_dataset_or_database("/*.json.gz"),
     )
     def __call__(self, prediction_metas, *args, **kwargs):
@@ -57,8 +60,10 @@ class AnnotatorUnpacker(PathSpec):
             df["bbox"] = df.apply(
                 lambda x: list(zip(*df.x0, *df.y0, *df.x1, *df.y1)), axis=1
             )
-            df["labels"] = df["LABEL"].apply(list)
-            yield pickle_path, df.to_dict(orient="records")[0]
+            df["label"] = df["LABEL"]
+            df["labels"] = df["LABEL"]
+            if not df["bbox"].empty:
+                yield pickle_path, df.to_dict(orient="records")[0]
 
 
 @converter(

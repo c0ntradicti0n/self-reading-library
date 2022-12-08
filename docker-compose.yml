@@ -20,6 +20,8 @@ services:
 
 
   be:
+    image: full_python
+
     build: python
     container_name: be
 
