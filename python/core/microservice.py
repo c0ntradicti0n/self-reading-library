@@ -42,7 +42,6 @@ class microservice:
                             "container_name": self.service_name,
                             "image": "full_python",
                             "build": "python",
-                            "ports": ["7777:7777"],
                             "entrypoint": f"python3 -c 'from {full_path} import {name}; from wsgiref import simple_server ; simple_server.make_server(\"0.0.0.0\", 7777, {name}.application).serve_forever()'",
                             "environment": {"INSIDE": "true",
                                             "LC_ALL": "en_US.UTF-8",

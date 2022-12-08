@@ -3,6 +3,8 @@ from allennlp.predictors import Predictor
 from texttable import Texttable
 from core.pathant.PathSpec import PathSpec
 from allennlp.models.model import Model
+
+from helpers.model_tools import BEST_MODELS
 from language.transformer.difference_predictor.difference_predictor import (
     DifferenceTaggerPredictor,
 )
@@ -10,8 +12,6 @@ from queue import Queue, Empty
 
 q2 = {}
 q1 = {}
-
-model = None
 
 
 class ElmoPredict(PathSpec):
@@ -118,27 +118,29 @@ class ElmoPredict(PathSpec):
             self.init_queues()
 
     def predict(self, words):
-        global model
-        if not model or not self.predictor:
-            self.logger.info("Loading difference model")
-            model = Model.load(
-                config=Params.from_file(params_file=self.elmo_config),
-                serialization_dir=self.flags["difference_model_path"],
-            )
-            self.logger.info("Loading predictor")
-            self.default_predictor = Predictor.from_path(
-                self.flags["difference_model_path"]
-            )
-            self.logger.info("Loading tagger_model")
-            self.predictor = DifferenceTaggerPredictor(
-                self.default_predictor._model,
-                dataset_reader=self.default_predictor._dataset_reader,
-            )
         annotation = self.predictor.predict_json({"sentence": words})
         subj_annotation = [(t, w) for t, w in annotation if "SUBJ" in t]
         self.info(subj_annotation)
         return annotation
 
+    def load(self):
+        from allennlp_models.tagging.models import crf_tagger
+
+        self.logger.info("Loading difference model")
+        self.model = Model.load(
+            config=Params.from_file(params_file=self.elmo_config),
+            serialization_dir=BEST_MODELS["difference"]["best_model_path"],
+        )
+        self.logger.info("Loading predictor")
+        self.default_predictor = Predictor.from_path(
+            BEST_MODELS["difference"]["best_model_path"]
+        )
+        self.logger.info("Loading tagger_model")
+        self.predictor = DifferenceTaggerPredictor(
+            self.default_predictor._model,
+            dataset_reader=self.default_predictor._dataset_reader,
+        )
+        self.logger.info("Model loaded")
     def info(self, annotation):
         table = Texttable()
         table.set_deco(Texttable.HEADER)

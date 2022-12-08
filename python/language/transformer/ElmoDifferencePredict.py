@@ -1,8 +1,9 @@
+from core.microservice import microservice
 from core.pathant.Converter import converter
 from language.transformer.ElmoPredict import ElmoPredict
 from config import config
 
-
+@microservice
 @converter(
     ["reading_order.page", "reading_order.filter_align_text"],
     "reading_order.page.difference",
