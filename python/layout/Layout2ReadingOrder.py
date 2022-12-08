@@ -4,7 +4,7 @@ import tracemalloc
 
 import numpy
 
-
+from core.microservice import microservice
 from helpers.cache_tools import configurable_cache
 from helpers.hash_tools import hashval
 from helpers.str_tools import str_ascii
@@ -27,6 +27,8 @@ def cast_array_list(sample):
         return numpy.asarray(sample, dtype=object)
     else:
         return sample
+
+@microservice
 @converter("feature", "reading_order")
 class Layout2ReadingOrder(PathSpec):
     def __init__(self, *args, num_labels=config.NUM_LABELS, **kwargs):
@@ -41,7 +43,7 @@ class Layout2ReadingOrder(PathSpec):
         filename=config.cache + os.path.basename(__file__),
     )
     def __call__(self, x_meta, *args, **kwargs):
-        self.load()
+        #self.load()
 
         for pdf_path, meta in x_meta:
 

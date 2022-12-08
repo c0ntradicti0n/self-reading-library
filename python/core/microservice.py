@@ -6,10 +6,9 @@ import os
 import sys
 
 import addict as addict
+import falcon
 import requests
 import ruamel.yaml
-
-from helpers.list_tools import metaize
 
 
 class microservice:
@@ -44,7 +43,7 @@ class microservice:
                             "image": "full_python",
                             "build": "python",
                             "ports": ["7777:7777"],
-                            "entrypoint": f"uwsgi  --py-autoreload=1 --http 0.0.0.0:7777 --module {full_path}:application   --memory-report --enable-threads -b 32768  --gevent 40 --gevent-monkey-patch",
+                            "entrypoint": f"python3 -c 'from {full_path} import {name}; from wsgiref import simple_server ; simple_server.make_server(\"0.0.0.0\", 7777, {name}.application).serve_forever()'",
                             "environment": {"INSIDE": "true",
                                             "LC_ALL": "en_US.UTF-8",
                                             "LANG": "en_US.UTF - 8",
@@ -66,19 +65,34 @@ class microservice:
         else:
             self.app = {self.service_name: self}
             import falcon
+            from falcon_cors import CORS
 
-            application = falcon.App()
+            cors = CORS(
+                allow_origins_list=["*"],
+                allow_all_origins=True,
+                allow_all_headers=True,
+                allow_credentials_all_origins=True,
+                allow_all_methods=falcon.HTTP_METHODS,
+                log_level="DEBUG",
+            )
+
+            from falcon_multipart.middleware import MultipartMiddleware
+
+            application = falcon.App(middleware=[cors.middleware, MultipartMiddleware()])
             application.add_route("/" + self.service_name, self)
             print ("Service at /" +  self.service_name)
 
             importlib.import_module(self.converter.__module__).application = application
+            converter.application = application
+            self.application = application
 
             converter.load()
 
     def remote_call(self,  *args, **kwargs):
         send_data = json.dumps((args, kwargs))
         resp = requests.post(
-            "http://localhost:7777/" + self.service_name, send_data
+            "http://localhost:7777/" + self.service_name, send_data,
+            headers={"content-Type": "application/json"}
         )
         if not resp.status_code == 200:
             logging.error(f"Error on microservice request {resp.text}")
@@ -93,14 +107,13 @@ class microservice:
             res = self.p(*args, **kwargs)
             print(res)
             resp.text = json.dumps(res)
-            resp.status = "200"
+            resp.status = falcon.HTTP_200
             print(resp)
         except Exception as e:
             print (e)
             logging.error("Could not calculate result", exc_info=True)
-            resp.status = "500"
+            resp.status = falcon.HTTP_500
             resp.text = str(e)
-        resp.status = "200"
 
     def __call__(self, *args, **kwargs):
         return self.converter(*args, **kwargs)

@@ -1,0 +1,10 @@
+services:
+  micro_layout2readingorder:
+    build: python
+    container_name: micro_layout2readingorder
+    entrypoint: uwsgi  --py-autoreload=1 --http 0.0.0.0:7777 --module __main__:application  -b
+      32768  --gevent 40 --gevent-monkey-patch
+    environment: {INSIDE: 'true', LANG: en_US.UTF - 8, LANGUAGE: en_US.UTF-8, LC_ALL: en_US.UTF-8}
+    image: full_python
+    ports: [7777:7777]
+    volumes: [$CWD/python:/home/finn/Programming/self-reading-library/python]
