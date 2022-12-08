@@ -94,7 +94,7 @@ class microservice:
     def remote_call(self,  *args, **kwargs):
         send_data = json.dumps((args, kwargs))
         resp = requests.post(
-            "http://localhost:7777/" + self.service_name, send_data,
+            f"http://{self.service_name}:7777/{self.service_name}", send_data,
             headers={"content-Type": "application/json"}
         )
         if not resp.status_code == 200:
