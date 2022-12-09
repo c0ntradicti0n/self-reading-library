@@ -14,6 +14,7 @@ import AnnotationSpan from './AnnotationSpan'
 import { Knowledge } from './Knowledge'
 import boolean from 'async-validator/dist-types/validator/boolean'
 import Captcha from './Captcha'
+import CirclePack from "./2DCirclePack";
 
 interface Props {
    component: string
@@ -95,7 +96,7 @@ const MacroComponentSwitch = forwardRef(
       }
 
       if (component === 'graph' && context.meta['normal'])
-         return <Graph data={context.meta['normal']} />
+         return <CirclePack data={context.meta['normal']} />
 
       if (component === 'html')
          return <HtmlRenderer service={service} slot={slot} />

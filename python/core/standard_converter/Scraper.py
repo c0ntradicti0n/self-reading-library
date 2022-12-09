@@ -1,4 +1,7 @@
 import os
+if __name__== "__main__":
+    import sys
+    sys.path.append(os.getcwd())
 
 from regex import regex
 
@@ -52,6 +55,7 @@ class Scraper(PathSpec):
                 logging.error(f"{id} is not a valid url/path")
 
     def scrape(self, url, path):
+
         import os
         import time
 
@@ -72,7 +76,6 @@ class Scraper(PathSpec):
         driver.get(url)
 
         time.sleep(3)
-        print(driver.page_source.encode("utf8", "ignore").decode("utf8"))
 
         elements = driver.find_elements(By.CSS_SELECTOR, "svg")
         time.sleep(3)
@@ -116,6 +119,29 @@ class Scraper(PathSpec):
         ):
             with open(f"./{path}.htm", "w") as f:
                 f.write(source)
-            os.system(f"pandoc {path}.htm --pdf-engine xelatex --to pdf -o {path}")
+            os.system(f"pandoc {path}.htm  --pdf-engine xelatex --to pdf -o {path}")
         else:
             os.system(f"pandoc {url} --pdf-engine xelatex --to pdf -o {path}")
+
+import unittest
+class T(unittest.TestCase):
+    def case(self, url, pdf):
+        Scraper.scrape(url,pdf)
+        self.assertTrue(os.path.exists(pdf))
+
+    def test_db_com(self):
+        self.case(
+            "https://www.differencebetween.com/what-is-the-difference-between-total-solids-and-total-suspended-solids/",
+            "differencebetween.com.pdf")
+
+    def test_db_net(self):
+        self.case(
+            "http://www.differencebetween.net/miscellaneous/difference-between-ambivalent-sexism-and-social-dominance/",
+            "differencebetween.net.pdf")
+
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+

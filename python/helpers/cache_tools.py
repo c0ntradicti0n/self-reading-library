@@ -303,12 +303,6 @@ def configurable_cache(
 
                         yield (c, {})
                         yielded.append(c)
-                        # blacklist, cache = generate_glob_cache(
-                        #    _filter_path_glob, _from_path_glob, cache, self
-                        # )
-                        print(cache)
-                        print(yielded)
-
                 else:
                     yield from apply(
                         self,

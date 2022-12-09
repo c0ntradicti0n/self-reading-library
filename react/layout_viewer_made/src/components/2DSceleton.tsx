@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, {useEffect, useState} from 'react'
 
 import dynamic from 'next/dynamic'
 
@@ -19,14 +19,25 @@ export default function SceletonGraph({
    width = window.innerWidth * 0.95,
 }) {
    const svgRef = React.useRef(null)
+   const [trick, setTrick] = useState(false)
    console.log(data)
+
    useEffect(() => {
       data.links = data.edges
+         const unknow_nodes_s = data.edges.filter(e => ! data.nodes.find(n=> n.id == e.source)).map(e => [{id:e.source, label:e.label,  }]).flat()
+            const unknow_nodes_t = data.edges.filter(e => ! data.nodes.find(n=> n.id == e.target)).map(e => [{id:e.target, label:e.label,  }]).flat()
+
+      console.log("unknown nodes", unknow_nodes_t, unknow_nodes_s)
+      data.nodes = [...data.nodes, ...unknow_nodes_s, ...unknow_nodes_t]
       data.nodes = data.nodes.map((n) => ({ ...n, x: 0, y: 0 })).reverse()
+      setTrick(!trick)
+
+
    }, [data])
+
    return (
       <div style={{ width: '94%', height: '94%', overflow: 'hidden' }}>
-         <ForceGraph2D
+         {data.links && <ForceGraph2D
             graphData={data}
             onNodeDragEnd={(node) => {
                node.fx = node.x
@@ -65,7 +76,7 @@ export default function SceletonGraph({
                      ...bckgDimensions,
                   )
             }}
-         />
+         />}
       </div>
    )
 }
