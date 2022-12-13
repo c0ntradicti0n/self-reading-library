@@ -1,6 +1,4 @@
-import collections
 import logging
-import os
 from collections import defaultdict
 from sklearn import mixture
 from sklearn.manifold import TSNE
@@ -8,15 +6,23 @@ from sklearn.manifold import TSNE
 from config import config
 import numpy as np
 import spacy
+
+from core.pathant.Converter import converter
+from core.pathant.PathSpec import PathSpec
 from core.standard_converter.Dict2Graph import Dict2Graph
 from topics.TextRank4Keywords import TextRank4Keyword
+from core.microservice import microservice
 
 
-class TopicMaker:
+@microservice
+@converter("documents", "topics")
+class TopicMaker(PathSpec):
     options_file = "https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x1024_128_2048cnn_1xhighway/elmo_2x1024_128_2048cnn_1xhighway_options.json"
     weight_file = "https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x1024_128_2048cnn_1xhighway/elmo_2x1024_128_2048cnn_1xhighway_weights.hdf5"
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
         self.alphabet = [f"{chr(value)}" for value in range(ord("a"), ord("a") + 26)]
         self.numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
         self.stop_words = [
@@ -67,8 +73,14 @@ class TopicMaker:
         return texts, [{"text": text} for text in texts]
 
     def __call__(self, texts, meta, *args, **kwargs):
-        self.nlp = spacy.load("en_core_web_md")
+        return self.predict(meta, texts)
 
+    def load(self):
+        logging.info("Loading spacy model")
+        self.nlp = spacy.load("en_core_web_md")
+        logging.info("Loaded")
+
+    def predict(self, meta, texts):
         embeddingl = []
         logging.info(f"Making embeedings")
         for i, text in enumerate(texts):
@@ -82,21 +94,15 @@ class TopicMaker:
                 logging.error(f"could not create embedding", exc_info=True)
                 embedding = np.random.random(shape)
             embeddingl.append(embedding)
-
         embeddings = np.vstack(embeddingl)
-
         n_components = 3
         logging.info(f"Reducing from {embeddings.shape} to {n_components} dimensions")
-
         tsne = TSNE(n_components, method="exact")
         tsne_result = tsne.fit_transform(embeddings)
         logging.info(f"Reduced embeddings to {tsne_result.shape=}")
-
         del embeddingl
         del embeddings
-
         topics = self.topicize_recursively(tsne_result, meta, texts)
-
         return topics, meta
 
     def topicize_recursively(

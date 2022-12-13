@@ -6,7 +6,7 @@ import { Button } from '@mui/material'
 import OrgChartTree from './2DGraph'
 
 const layoutStyle = {
-   margin: 20,
+   marginLeft: "35%",
    padding: 20,
    display: 'flex',
 }
@@ -46,8 +46,6 @@ export default class Layout extends React.Component {
                />
             </Head>
 
-            <OrgChartTree />
-
             <Mansonry>
                <ul>
                   <Lib>
@@ -62,11 +60,11 @@ export default class Layout extends React.Component {
                      </Button>
                   </Lib>
                   <Lib>
-                     Read a webpage for me:
+                     Browse a page with annotation
                      <Url2Difference />
                   </Lib>
                   <Lib>
-                     Some source of papers:{' '}
+                     Some source of papers
                      <Button href={'http://arxiv.org'}>http://arxiv.org</Button>
                   </Lib>
                   <Lib>

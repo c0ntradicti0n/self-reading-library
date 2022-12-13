@@ -9,12 +9,12 @@ import {
 } from '../contexts/DocumentContext.tsx'
 import dynamic from 'next/dynamic'
 import Resource from '../resources/Resource'
-import { NORMAL, Slot } from '../contexts/SLOTS'
+import {CAPTCHA, NORMAL, Slot} from '../contexts/SLOTS'
 import AnnotationSpan from './AnnotationSpan'
 import { Knowledge } from './Knowledge'
 import boolean from 'async-validator/dist-types/validator/boolean'
 import Captcha from './Captcha'
-import CirclePack from "./2DCirclePack";
+import CirclePack from './2DCirclePack'
 
 interface Props {
    component: string
@@ -58,9 +58,9 @@ const MacroComponentSwitch = forwardRef(
       }, [])
 
       console.debug(context, props)
-      if (loading) {
+      if (loading && !slot === CAPTCHA) {
          console.log('Display captcha, load is taking some time')
-         return <Captcha />
+         return <Captcha is_open={true}/>
       }
       if (!context.value[slot]) return null
 

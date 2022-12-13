@@ -22,12 +22,8 @@ const NavigationContent = ({ slot, onClose }: PropType) => {
          <div>
             <a href="/library">Universe of documents</a>
          </div>
-
          <div>
             <a href={'/difference?id=' + id}>Read annotated paper</a>
-         </div>
-         <div>
-            <Audiobook />
          </div>
          <div>
             <a href={shortId}>Original PDF</a>
@@ -38,13 +34,15 @@ const NavigationContent = ({ slot, onClose }: PropType) => {
             </a>
          </div>
          <div>
-            <Captcha />
+            <Captcha is_open={false} />
          </div>
          <div>
             <Url2Difference />
          </div>
-
-         <UploadDocument />
+          <div><UploadDocument /></div>
+                   <div>
+            <Audiobook />
+         </div>
       </GoldenSnake>
    )
 }
@@ -69,15 +67,17 @@ const Navigation = (props: PropType) => {
          open={open}
       >
          <Button
+             id={"nav"}
             style={{
                position: 'fixed',
                top: '0px',
                right: '0px',
+                fontSize: "1.5rem"
             }}
             type="primary"
             onClick={() => setOpen(true)}
          >
-            Navigation
+            Menu
          </Button>
       </Popover>
    )

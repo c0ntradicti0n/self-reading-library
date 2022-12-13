@@ -10,7 +10,18 @@
 
    transform: translate(-50%, -50%);
 }
-
+* {
+   font-family:Computer modern !important;
+}
+#nav {
+   border-bottom-left-radius: 500px;
+   padding-left:5%;
+   padding-bottom: 5%;
+   padding-top: 1%;
+   padding-right: 2%;
+   font-size: 1rem;
+   background-color: #000 !important;
+}
 .buttonGood {
    background-color: greenyellow;
 }

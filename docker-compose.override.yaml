@@ -18,3 +18,11 @@ services:
     image: full_python
     ports: [7777:7777]
     volumes: [$CWD/python:/home/finn/Programming/self-reading-library/python]
+  micro_topicmaker:
+    build: python
+    container_name: micro_topicmaker
+    entrypoint: python3 -c 'from topics.TopicMaker import TopicMaker; from wsgiref
+      import simple_server ; simple_server.make_server("0.0.0.0", 7777, TopicMaker.application).serve_forever()'
+    environment: {INSIDE: 'true', LANG: en_US.UTF - 8, LANGUAGE: en_US.UTF-8, LC_ALL: en_US.UTF-8}
+    image: full_python
+    volumes: [$CWD/python:/home/finn/Programming/self-reading-library/python]

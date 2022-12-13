@@ -1,3 +1,4 @@
+import gc
 import traceback
 from collections import defaultdict
 import json
@@ -292,7 +293,8 @@ def queue_iter(service_id, gen, single=False):
     global q, d
 
     for i in range(5):
-        if len(q[service_id]) < 14:
+        if len(q[service_id]) < 8:
+            gc.collect()
 
             try:
                 new_val = next(gen)
@@ -331,8 +333,9 @@ def queue_iter(service_id, gen, single=False):
                     logging.debug("Was the task already done?", exc_info=True)
 
             for i in range(3):
-                if len(q[service_id]) < 5:
+                if len(q[service_id]) < config.captcha_queue_size:
                     logging.debug("Inserting some new sample in the queue")
+                    gc.collect()
                     try:
                         new_val = next(gen)
                         q[service_id].put(service_id, new_val)

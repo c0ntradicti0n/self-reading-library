@@ -26,7 +26,7 @@ export const Knowledge = ({ service, slot }) => {
                left: '0px',
                margin: '1%',
                width: '90%',
-                zIndex: 5768
+               zIndex: 5768,
             }}
             defaultValue={''}
             placeholder='What do you want to "know" about?'

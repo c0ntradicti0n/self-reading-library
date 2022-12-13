@@ -1,6 +1,8 @@
 import os
-if __name__== "__main__":
+
+if __name__ == "__main__":
     import sys
+
     sys.path.append(os.getcwd())
 
 from regex import regex
@@ -123,25 +125,27 @@ class Scraper(PathSpec):
         else:
             os.system(f"pandoc {url} --pdf-engine xelatex --to pdf -o {path}")
 
+
 import unittest
+
+
 class T(unittest.TestCase):
     def case(self, url, pdf):
-        Scraper.scrape(url,pdf)
+        Scraper.scrape(url, pdf)
         self.assertTrue(os.path.exists(pdf))
 
     def test_db_com(self):
         self.case(
             "https://www.differencebetween.com/what-is-the-difference-between-total-solids-and-total-suspended-solids/",
-            "differencebetween.com.pdf")
+            "differencebetween.com.pdf",
+        )
 
     def test_db_net(self):
         self.case(
             "http://www.differencebetween.net/miscellaneous/difference-between-ambivalent-sexism-and-social-dominance/",
-            "differencebetween.net.pdf")
-
+            "differencebetween.net.pdf",
+        )
 
 
 if __name__ == "__main__":
     unittest.main()
-
-

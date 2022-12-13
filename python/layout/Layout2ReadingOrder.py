@@ -5,6 +5,7 @@ import tracemalloc
 import numpy
 
 from core.microservice import microservice
+
 from helpers.cache_tools import configurable_cache
 from helpers.hash_tools import hashval
 from helpers.str_tools import str_ascii
@@ -28,6 +29,7 @@ def cast_array_list(sample):
     else:
         return sample
 
+
 @microservice
 @converter("feature", "reading_order")
 class Layout2ReadingOrder(PathSpec):
@@ -43,7 +45,7 @@ class Layout2ReadingOrder(PathSpec):
         filename=config.cache + os.path.basename(__file__),
     )
     def __call__(self, x_meta, *args, **kwargs):
-        #self.load()
+        # self.load()
 
         for pdf_path, meta in x_meta:
 
@@ -186,7 +188,7 @@ class Layout2ReadingOrder(PathSpec):
             yield pdf_path, meta
 
     def predict(self, example, height, width):
-        print (example, height, width)
+        print(example, height, width)
         cast_array_list(example)
 
         encoded_inputs = model_helpers.preprocess_data(training=False)(
@@ -197,7 +199,7 @@ class Layout2ReadingOrder(PathSpec):
         for k, v in encoded_inputs.items():
             encoded_inputs[k] = v.to(config.DEVICE)
 
-        print ("now models turn:")
+        print("now models turn:")
         outputs = self.model(**encoded_inputs)
         print("outputs")
 
@@ -230,9 +232,7 @@ class Layout2ReadingOrder(PathSpec):
 
         self.model = model_helpers.LayoutModelParts().MODEL
 
-        self.model.load_state_dict(
-            torch.load(self.model_path, map_location="cpu")
-        )
+        self.model.load_state_dict(torch.load(self.model_path, map_location="cpu"))
         logging.info(f" - loaded state dict")
 
         self.model.eval()
@@ -240,7 +240,6 @@ class Layout2ReadingOrder(PathSpec):
 
         self.model.to(config.DEVICE)
         logging.info(f" - using {config.DEVICE}")
-
 
     def sort_by_label(self, i_l):
         return [i for i, l in sorted(i_l, key=lambda x: config.TEXT_LABELS.index(x[1]))]
@@ -264,6 +263,7 @@ class Layout2ReadingOrder(PathSpec):
             all_enumeration.append(enumeration)
 
         return all_enumeration
+
 
 if __name__ == "__main__":
     application.run()

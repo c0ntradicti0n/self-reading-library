@@ -1,4 +1,3 @@
-
 import unittest
 
 from core.microservice import microservice
@@ -19,10 +18,9 @@ class C(PathSpec):
         for d, m in d_m:
             print(d, m)
             n = 1
-            o= 2
+            o = 2
             res = self.predict(m, n, o)
             yield d, res
-
 
     def predict(self, m, n, o):
         print(f"predicting on {m}")

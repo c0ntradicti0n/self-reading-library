@@ -18,10 +18,12 @@ class microservice:
         self.converter = converter
 
         f = converter.predict
+
         def p(*args, **kwargs):
             return f(*args, **kwargs)
+
         self.p = p
-        self.converter.predict= self.remote_call
+        self.converter.predict = self.remote_call
 
         if not os.environ.get("INSIDE", False):
             self.converter = converter
@@ -43,11 +45,12 @@ class microservice:
                             "image": "full_python",
                             "build": "python",
                             "entrypoint": f"python3 -c 'from {full_path} import {name}; from wsgiref import simple_server ; simple_server.make_server(\"0.0.0.0\", 7777, {name}.application).serve_forever()'",
-                            "environment": {"INSIDE": "true",
-                                            "LC_ALL": "en_US.UTF-8",
-                                            "LANG": "en_US.UTF - 8",
-                                            "LANGUAGE": "en_US.UTF-8"
-                                            },
+                            "environment": {
+                                "INSIDE": "true",
+                                "LC_ALL": "en_US.UTF-8",
+                                "LANG": "en_US.UTF - 8",
+                                "LANGUAGE": "en_US.UTF-8",
+                            },
                             "volumes": [
                                 "$CWD/python:/home/finn/Programming/self-reading-library/python"
                             ],
@@ -61,8 +64,6 @@ class microservice:
                     ruamel.yaml.dump(compose, f)
             except Exception as e:
                 logging.error("Could not update docker-compose.override!")
-
-
 
         else:
             self.app = {self.service_name: self}
@@ -80,9 +81,11 @@ class microservice:
 
             from falcon_multipart.middleware import MultipartMiddleware
 
-            application = falcon.App(middleware=[cors.middleware, MultipartMiddleware()])
+            application = falcon.App(
+                middleware=[cors.middleware, MultipartMiddleware()]
+            )
             application.add_route("/" + self.service_name, self)
-            print ("Service at /" +  self.service_name)
+            print("Service at /" + self.service_name)
 
             importlib.import_module(self.converter.__module__).application = application
             converter.application = application
@@ -90,11 +93,12 @@ class microservice:
 
             converter.load()
 
-    def remote_call(self,  *args, **kwargs):
+    def remote_call(self, *args, **kwargs):
         send_data = json.dumps((args, kwargs))
         resp = requests.post(
-            f"http://{self.service_name}:7777/{self.service_name}", send_data,
-            headers={"content-Type": "application/json"}
+            f"http://{self.service_name}:7777/{self.service_name}",
+            send_data,
+            headers={"content-Type": "application/json"},
         )
         if not resp.status_code == 200:
             logging.error(f"Error on microservice request {resp.text}")
@@ -112,11 +116,10 @@ class microservice:
             resp.status = falcon.HTTP_200
             print(resp)
         except Exception as e:
-            print (e)
+            print(e)
             logging.error("Could not calculate result", exc_info=True)
             resp.status = falcon.HTTP_500
             resp.text = str(e)
 
     def __call__(self, *args, **kwargs):
         return self.converter(*args, **kwargs)
-

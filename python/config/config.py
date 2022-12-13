@@ -182,3 +182,5 @@ GOLD_DATASET_PATH = hidden_folder + "/gold"
 TRASH_DATASET_PATH = hidden_folder + "/trash"
 
 MIN_CAPTCHA_TRIALS = 3
+
+captcha_queue_size = 15

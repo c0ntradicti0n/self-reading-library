@@ -167,17 +167,22 @@ const AnnotationBox = forwardRef(
       let cols
 
       if (context?.meta[slot]?.bbox) {
-          const bbox = zip([context.meta[slot].x0, context.meta[slot].y0, context.meta[slot].x1, context.meta[slot].y1])
-          cols = zip([
-              bbox,
-              labels ?? context.meta[slot].LABEL ?? context.meta[slot].labels,
-          ])
+         const bbox = zip([
+            context.meta[slot].x0,
+            context.meta[slot].y0,
+            context.meta[slot].x1,
+            context.meta[slot].y1,
+         ])
+         cols = zip([
+            bbox,
+            labels ?? context.meta[slot].LABEL ?? context.meta[slot].labels,
+         ])
       } else return <ThreeCircles />
       console.log(
-          "COLS",
+         'COLS',
          cols,
          labels ?? context.meta[slot].LABEL ?? context.meta[slot].labels,
-         context.meta[slot].bbox
+         context.meta[slot].bbox,
       )
 
       console.debug('imageRenderSize', imgRenderSize)

@@ -25,10 +25,10 @@ const switch_it = {
    span_annotation: 'annotation',
 }
 
-const Captcha = () => {
+const Captcha = ({is_open=true}) => {
    const contextContext = useContext(ContextContext)
    const ref = useRef(null) // ref => { current: null }
-   const [open, __setOpen] = useState(false)
+   const [open, __setOpen] = useState(is_open)
    const [kind, setKind] = useState('annotation')
 
    const setOpen = (o) => {
@@ -39,7 +39,7 @@ const Captcha = () => {
 
    return (
       <div data-backdrop="false">
-         <a onClick={() => setOpen(true)}>Captcha</a>
+         {!is_open && <a onClick={() => setOpen(true)}>Captcha</a> }
          {open ? (
             <Modal
                open={open}
@@ -51,7 +51,7 @@ const Captcha = () => {
                            setKind(switch_it[kind])
                      }}
                   >
-                     Unclear
+                     Don't know the solution
                   </Button>,
                   <Button
                      key="submit"
@@ -61,9 +61,9 @@ const Captcha = () => {
                            setKind(switch_it[kind])
                      }}
                   >
-                     Submit
+                     All is right now
                   </Button>,
-                  <Button onClick={() => setOpen(false)}>Finish game</Button>,
+                  <Button onClick={() => setOpen(false)}>I grew the dataset enough</Button>,
                ]}
             >
                <MacroComponentSwitch

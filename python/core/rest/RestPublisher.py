@@ -15,6 +15,9 @@ bp = Blueprint("blueprint", __name__, template_folder="templates")
 
 class RestPublisher(PathSpec, react):
     def __call__(self, pipeline, arg):
+        import gc
+
+        gc.collect()
         if not isinstance(arg[0], list) and not len(arg[0]) == 2:
             arg = [(a, {}) for a in arg]
         return list(zip(*list(pipeline(list(arg)))))

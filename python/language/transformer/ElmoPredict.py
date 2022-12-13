@@ -141,6 +141,7 @@ class ElmoPredict(PathSpec):
             dataset_reader=self.default_predictor._dataset_reader,
         )
         self.logger.info("Model loaded")
+
     def info(self, annotation):
         table = Texttable()
         table.set_deco(Texttable.HEADER)

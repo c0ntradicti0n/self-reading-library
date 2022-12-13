@@ -16,8 +16,6 @@ from flask import Blueprint
 
 bp = Blueprint("blueprint", __name__, template_folder="templates")
 
-topic_maker = TopicMaker()
-
 
 @converter("reading_order", "topics.graph")
 class TopicsPublisher(RestPublisher, react):
@@ -62,7 +60,7 @@ class TopicsPublisher(RestPublisher, react):
             for meta in metas
         ]
 
-        self.topics, text_ids = topic_maker(texts, meta=metas)
+        self.topics, text_ids = TopicMaker(texts, meta=metas)
 
         with open(config.topics_dump + f"_{len(documents)}", "wb") as f:
             pickle.dump([self.topics, metas], f)

@@ -40,38 +40,36 @@ export function AnnotationModal({ text, onClose, service }) {
    return (
       <ClickBoundary>
          <div data-backdrop="false">
-
-               <Modal
-                  open={true}
-                  footer={[
-                     <Button
-                        key="back"
-                        onClick={() => {
-                           ref?.current?.onCloseDiscard()
-                        }}
-                     >
-                        Unclear
-                     </Button>,
-                     <Button
-                        key="submit"
-                        type="primary"
-                        onClick={() => {
-                           ref?.current?.onCloseSave()
-                        }}
-                     >
-                        Submit
-                     </Button>,
-                     <Button onClick={() => onClose()}>Back</Button>,
-                  ]}
-               >
-                  <AnnotationSpan
-                     ref={ref}
-                     text={text}
-                     service={service}
-                     slot={NORMAL}
-                  />
-               </Modal>
-            ) : null}
+            <Modal
+               open={true}
+               footer={[
+                  <Button
+                     key="back"
+                     onClick={() => {
+                        ref?.current?.onCloseDiscard()
+                     }}
+                  >
+                     Unclear
+                  </Button>,
+                  <Button
+                     key="submit"
+                     type="primary"
+                     onClick={() => {
+                        ref?.current?.onCloseSave()
+                     }}
+                  >
+                     Submit
+                  </Button>,
+                  <Button onClick={() => onClose()}>Back</Button>,
+               ]}
+            >
+               <AnnotationSpan
+                  ref={ref}
+                  text={text}
+                  service={service}
+                  slot={NORMAL}
+               />
+            </Modal>
          </div>
       </ClickBoundary>
    )
@@ -104,10 +102,10 @@ const AnnotationSpan = forwardRef<
    {},
    {
       text: string
-      onClose: () => void
+      onClose?: () => void
       service: Resource
       slot: Slot
-      TAG_SET: string[]
+      TAG_SET?: string[]
    }
 >(
    (
