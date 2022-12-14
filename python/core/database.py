@@ -107,8 +107,6 @@ class Queue:
                         .limit(10)
                         .execute()
                     )
-                if item.empty:
-                    item = self.table.sort_by("date").limit(1).execute()
             else:
                 item = self.table.sort_by("date").limit(1).execute()
         except sqlalchemy.exc.DatabaseError:
