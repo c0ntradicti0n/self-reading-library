@@ -16,8 +16,8 @@
 #nav {
    border-bottom-right-radius: 500px;
    padding-left: 1%;
-   padding-bottom: 5%;
-   padding-top: 3%;
+   padding-bottom: 7%;
+   padding-top: 2%;
    padding-right: 5%;
    font-size: 1rem;
    background-color: #000 !important;
@@ -40,7 +40,7 @@
    padding-left: 3%;
    padding-top: 3%;
    padding-bottom: 3%;
-   padding-right: 3%;
+   padding-right: 2%;
    font-size: 1rem;
    position: fixed !important;
    background-color: #000 !important;

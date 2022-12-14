@@ -26,25 +26,25 @@ const NavigationContent = ({ slot, onClose }: PropType) => {
             <a href="/library">Universe of documents</a>
          </div>
          <div>
-            <a href={'/difference?id=' + id}>Read annotated paper</a>
-         </div>
-         <div>
-            <a href={shortId}>Original PDF</a>
-         </div>
-         <div>
-            <a href={'/upload_annotation?id=' + id}>
-               Improve layout recognition
-            </a>
-         </div>
-         <div>
             <Captcha is_open={false} />
          </div>
+                   <div>
+            <br />
+         </div>
          <div>
+             See a webpage with markup
             <Url2Difference />
+         </div>
+                                       <div>
+            <br />
+         </div>
+                             <div>
+            <br />
          </div>
          <div>
             <UploadDocument />
          </div>
+
          <div>
             <Audiobook />
          </div>
