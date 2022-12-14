@@ -4,9 +4,13 @@ import { zip } from '../helpers/array'
 export const KeySelect = ({
    set,
    onSelect,
+   row,
+   hints,
 }: {
    set: string[]
    onSelect: (string) => void
+   row: boolean
+   hints: { [key: string]: { ariaDescription: string; ariaMultiline: string } }
 }) => {
    const KEYS = set.map((key) => 'Key' + key[0])
 
@@ -46,6 +50,7 @@ export const KeySelect = ({
          {set.map((key, i) => (
             <span key={i}>
                <span
+                  {...hints[key]}
                   key={i + '_1'}
                   style={{
                      border: '1px',
@@ -66,7 +71,7 @@ export const KeySelect = ({
                   {' '}
                   {key.slice(1)}{' '}
                </span>
-               <br />
+               {!row && <br />}
             </span>
          ))}
       </>

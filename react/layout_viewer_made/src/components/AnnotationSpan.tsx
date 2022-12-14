@@ -7,7 +7,7 @@ import React, {
    useRef,
    useState,
 } from 'react'
-import { Button, Card, Modal } from 'antd'
+import { Button, Card, Modal, Row } from 'antd'
 import { Slider } from '@mui/material'
 import { ThreeCircles, ThreeDots } from 'react-loader-spinner'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
@@ -34,6 +34,21 @@ import { ClickBoundary } from './ClickBoundary'
 import { KeySelect } from './KeySelect'
 import Meta from 'antd/lib/card/Meta'
 
+
+const hints = {
+   SUBJECT: {
+      'aria-description': 'Subject',
+      'aria-multiline': `A 'subject' is a concept to be opposed to another.
+      So if it is a difference-set, there should be at least two, but it's also possible
+      to select more than two. And they can be embedded in their explanations`,
+   },
+      CONTRAST: {
+      'aria-description': 'Contrast',
+      'aria-multiline': `This is the explaining phrase to the 'subject'. It needs
+          some explanation, why it is textually opposed to the other word and not just
+          a conjunction. There should be as many such phrases as 'subjects'`,
+   }
+}
 export function AnnotationModal({ text, onClose, service }) {
    const ref = useRef(null) // ref => { current: null }
 
@@ -42,6 +57,7 @@ export function AnnotationModal({ text, onClose, service }) {
          <div data-backdrop="false">
             <Modal
                open={true}
+               onCancel={                        onClose}
                footer={[
                   <Button
                      key="back"
@@ -82,7 +98,11 @@ export function AnnotationTable(props: {
    console.debug('AnnotationTable', props)
    const sortedSpans = sortSpans_precedence(props.spans)
    return (
-      <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+      <div
+
+
+
+          style={{ display: 'flex', flexWrap: 'wrap' }}>
          {props.annotation.map(([word, tag], index) => {
             let span_no =
                sortedSpans.find(
@@ -206,7 +226,11 @@ const AnnotationSpan = forwardRef<
                   <ThreeCircles />
                </>
             ) : (
-               <div>
+               <div style={{fontSize: "0.71rem"}} >
+                  <div      aria-description={'Select spans for annotations'}
+      aria-multiline={ `Here you can mark the difference set, that explain you, 
+      how to tell apart thing A from B. You can use those 'Sliders' or also select 
+      text with the mouse.`}>
                   <SelectText
                      onSelect={(text) => {
                         if (!kind) {
@@ -249,6 +273,7 @@ const AnnotationSpan = forwardRef<
                         setSpanIndices(newSpanIndices)
                      }}
                   >
+
                      <AnnotationTable
                         annotation={annotation}
                         spans={spanIndices}
@@ -266,7 +291,7 @@ const AnnotationSpan = forwardRef<
                            }
                         >
                            <div
-                              style={{ width: '3%', display: 'inline-block' }}
+                              style={{ width: '100%', display: 'inline-block' }}
                            >
                               <Button
                                  icon={<MinusCircleOutlined />}
@@ -279,28 +304,16 @@ const AnnotationSpan = forwardRef<
                                     )
                                  }
                               />
-                           </div>
-                           <div
-                              style={{ width: '3%', display: 'inline-block' }}
-                           >
-                              {' '}
                               <b>
-                                 [{spanIndices[i][1]}:{spanIndices[i][2]}]
+                                 <span style={{display: "inline-block", width: "5vw"}}>{tag}</span>
+
                               </b>
-                           </div>
-                           <b>{tag}</b>
-                           <br />
-                           <div
-                              style={{
-                                 marginRight: '0px',
-                                 marginLeft: '0px',
-                              }}
-                           >
-                              <div
+                              <span
                                  style={{
                                     wordWrap: 'break-word',
                                     whiteSpace: 'normal',
                                     width: '50vw',
+                                    marginLeft: "1%"
                                  }}
                               >
                                  {ws.map((w, iii) => (
@@ -311,7 +324,7 @@ const AnnotationSpan = forwardRef<
                                        {w}
                                     </span>
                                  ))}
-                              </div>
+                              </span>
 
                               <Slider
                                  key={'sl-' + i.toString()}
@@ -346,6 +359,11 @@ const AnnotationSpan = forwardRef<
                         </div>
                      ),
                   )}
+                         <Row gutter={16}>
+                                       <Card
+                     hoverable
+                     style={{ left: '10%', width: '30vw', margin: '10px' }}
+                  >
                   {TAG_SET.map((tag) => (
                      <Button
                         icon={<PlusCircleOutlined />}
@@ -359,23 +377,38 @@ const AnnotationSpan = forwardRef<
                         {tag}
                      </Button>
                   ))}
-                  <Card hoverable style={{ width: '20vw', margin: '10px' }}>
-                     <Meta
-                        title={
-                           <span>
-                              On selecting text
-                              <br />
-                              the text will get a tag
-                           </span>
+                                       </Card>
+                  <Card
+                     hoverable
+                     style={{ left: '10%', width: '40vw', margin: '10px' }}
+                  >
+                     <div
+                        aria-description={
+                           'Here you see, which tag will be set next, use the BIG keys on the keyboard to change it'
                         }
-                        description={
-                           <div style={{ padding: '10px', margin: '10px' }}>
-                              <span className={'tag span_' + kind}>{kind}</span>
-                           </div>
-                        }
-                     />
-                     <KeySelect set={TAG_SET} onSelect={setKind} />
-                  </Card>
+                     >
+                        <Meta
+                           title={
+                              <span>
+                                 On selecting text
+                                 <br />
+                                 the text will get a tag
+                              </span>
+                           }
+                           description={
+                              <div style={{ padding: '10px', margin: '10px' }}>
+                                 <span className={'tag span_' + kind}>
+                                    {kind}
+                                 </span>
+                              </div>
+                           }
+                        />
+                        Use the keyboard to change:{' ' }
+                        <KeySelect row set={TAG_SET} onSelect={setKind} hints={hints} />
+                     </div>
+                  </Card></Row>
+                                          </div>
+
                   {errors?.map((e) => (
                      <div style={{ background: 'red' }}>{e}</div>
                   ))}

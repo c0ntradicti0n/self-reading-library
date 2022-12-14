@@ -39,8 +39,10 @@ const NavigationContent = ({ slot, onClose }: PropType) => {
          <div>
             <Url2Difference />
          </div>
-          <div><UploadDocument /></div>
-                   <div>
+         <div>
+            <UploadDocument />
+         </div>
+         <div>
             <Audiobook />
          </div>
       </GoldenSnake>
@@ -57,7 +59,7 @@ const Navigation = (props: PropType) => {
                <NavigationContent {...props} onClose={() => setOpen(false)} />
             </div>
          }
-         placement="rightBottom"
+         placement="right"
          title={
             <>
                Navigation <a onClick={() => setOpen(false)}>✕</a>
@@ -67,12 +69,10 @@ const Navigation = (props: PropType) => {
          open={open}
       >
          <Button
-             id={"nav"}
+            id={'nav'}
             style={{
                position: 'fixed',
-               top: '0px',
-               right: '0px',
-                fontSize: "1.5rem"
+               fontSize: '1.5rem',
             }}
             type="primary"
             onClick={() => setOpen(true)}

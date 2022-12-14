@@ -25,7 +25,7 @@ const switch_it = {
    span_annotation: 'annotation',
 }
 
-const Captcha = ({is_open=true}) => {
+const Captcha = ({ is_open = true }) => {
    const contextContext = useContext(ContextContext)
    const ref = useRef(null) // ref => { current: null }
    const [open, __setOpen] = useState(is_open)
@@ -39,12 +39,17 @@ const Captcha = ({is_open=true}) => {
 
    return (
       <div data-backdrop="false">
-         {!is_open && <a onClick={() => setOpen(true)}>Captcha</a> }
+         {!is_open && <a onClick={() => setOpen(true)}>Captcha</a>}
          {open ? (
             <Modal
+               style={{ height: '100% !important' }}
                open={open}
+               onCancel={() => setOpen(false)}
                footer={[
                   <Button
+                     aria-description={
+                        "If you don't know, how to label this, you can skip it here"
+                     }
                      key="back"
                      onClick={() => {
                         if (ref?.current?.onCloseDiscard())
@@ -54,6 +59,9 @@ const Captcha = ({is_open=true}) => {
                      Don't know the solution
                   </Button>,
                   <Button
+                     aria-description={
+                        'If you finished with this one, go here. The next one will come'
+                     }
                      key="submit"
                      type="primary"
                      onClick={() => {
@@ -63,15 +71,22 @@ const Captcha = ({is_open=true}) => {
                   >
                      All is right now
                   </Button>,
-                  <Button onClick={() => setOpen(false)}>I grew the dataset enough</Button>,
+                  <Button
+                     aria-description={'If you want to get out of here, click here'}
+                     onClick={() => setOpen(false)}
+                  >
+                     I grew the dataset enough
+                  </Button>,
                ]}
             >
-               <MacroComponentSwitch
-                  ref={ref}
-                  component={kind}
-                  url={Kind[kind].url}
-                  slot={CAPTCHA}
-               />
+               <div style={{ zIndex: 10000 }}>
+                  <MacroComponentSwitch
+                     ref={ref}
+                     component={kind}
+                     url={Kind[kind].url}
+                     slot={CAPTCHA}
+                  />
+               </div>
             </Modal>
          ) : null}
       </div>

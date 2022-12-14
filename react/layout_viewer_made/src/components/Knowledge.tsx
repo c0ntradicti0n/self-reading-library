@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import React, { useContext, useEffect, useState } from 'react'
 import SceletonGraph from './2DSceleton'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
-import { Input } from 'antd'
+import { Input, TourProps } from 'antd'
 
 const STD_SEARCH = 'premise'
 
@@ -26,7 +26,7 @@ export const Knowledge = ({ service, slot }) => {
                left: '0px',
                margin: '1%',
                width: '90%',
-               zIndex: 5768,
+               zIndex: 100,
             }}
             defaultValue={''}
             placeholder='What do you want to "know" about?'

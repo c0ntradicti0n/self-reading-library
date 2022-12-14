@@ -81,6 +81,66 @@ const TAG_COLOR = {
    tb: 'beige',
 }
 
+const hints = {
+   KeyF: {
+      'aria-description': 'Footnote',
+      'aria-multiline': `Footnotes are purely scientific, referring comments or 
+            references to other literature.`,
+   },
+   KeyG: {
+      'aria-description': 'Graphics',
+      'aria-multiline': `Graphics are pictures in general, with colors lines, 
+      but not tables and mathematics`,
+   },
+   KeyT: {
+      'aria-description': 'Table',
+      'aria-multiline': `Tables are things with rows and columns. Also
+      Table of Contents should be seen as a 'table'.`,
+   },
+   Digit1: {
+      'aria-description': 'First column',
+      'aria-multiline': `First column should be used, when there are
+      multiple columns in the view, but not if there is just a single
+      broad column..`,
+   },
+   Digit2: {
+      'aria-description': 'Second column',
+      'aria-multiline': `As before, use if there are more than one column to mark
+      the second one.`,
+   },
+   Digit3: {
+      'aria-description': 'Third column',
+      'aria-multiline': `And that's the third.`,
+   },
+   Digit0: {
+      'aria-description': 'Zero',
+      'aria-multiline': `This is the same as 'w', its the main single column if there
+      is only one.`,
+   },
+   KeyW: {
+      'aria-description': 'Whole single column',
+      'aria-multiline': `This is the column, if there is just one. Here the main thing
+      is to mark sections with the main text. The main text does consist of all the others,
+      also not mathematics and other links on the side. What you mainly regard as 'the text'`,
+   },
+   KeyN: {
+      'aria-description': 'Pagenumber',
+      'aria-multiline': `The pagenumber, if there is one.`,
+   },
+   KeyH: {
+      'aria-description': 'Heading',
+      'aria-multiline': `If there are headings, then mark it with that.
+      Sometimes it's difficult, especially if there is just non-text around. 
+      Should be used, when you find that heading belongs to the main things, you 
+      would read.`,
+   },
+   Space: {
+      'aria-description': 'Nothing to read',
+      'aria-multiline': `Here is things, that an algorithm is unlikely to process.
+      As Mathematics, buttons, links and other functional elements on webpages.`,
+   },
+}
+
 const AnnotationBox = forwardRef(
    ({ service, slot }: { service: Resource; slot: Slot }, inputRef) => {
       service.setSlot(slot)
@@ -406,6 +466,7 @@ const AnnotationBox = forwardRef(
                               </tr>
                               {Object.entries(KEYS).map(([k, v], i) => (
                                  <tr
+                                    {...hints[k]}
                                     key={'k1' + i}
                                     onClick={() => setNextKey(KEYS[k])}
                                  >

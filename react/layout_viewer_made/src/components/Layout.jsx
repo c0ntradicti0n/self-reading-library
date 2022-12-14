@@ -6,7 +6,7 @@ import { Button } from '@mui/material'
 import OrgChartTree from './2DGraph'
 
 const layoutStyle = {
-   marginLeft: "35%",
+   marginLeft: '35%',
    padding: 20,
    display: 'flex',
 }

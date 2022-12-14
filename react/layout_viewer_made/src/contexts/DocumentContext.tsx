@@ -1,5 +1,6 @@
 import React, { createContext, useState } from 'react'
 import { Slot } from './SLOTS'
+import { TourProps } from 'antd'
 
 export interface DocumentContextType {
    value: any
@@ -8,6 +9,8 @@ export interface DocumentContextType {
    setMeta?: (any) => void
    setValueMetas?: (slot, [string, any]) => void
    setValueMeta?: (slot, string, any) => void
+   helpSteps?: TourProps['steps']
+   setHelpSteps?: (steps: TourProps['steps']) => void
 }
 
 export type DocumentContextStateType = {
@@ -17,6 +20,7 @@ export type DocumentContextStateType = {
 const DocumentContext = createContext<DocumentContextType>({
    value: null,
    meta: null,
+   helpSteps: null,
 })
 
 const AppWrapper = ({ children }) => {
@@ -24,6 +28,8 @@ const AppWrapper = ({ children }) => {
       captcha: undefined,
       normal: undefined,
    })
+
+   let [helpSteps, setHelpSteps] = useState<TourProps['steps']>()
 
    const setValueMeta = (slot: Slot, newValue: string, newMeta: any) => {
       state[slot] = { value: newValue, meta: newMeta }
@@ -38,6 +44,10 @@ const AppWrapper = ({ children }) => {
    const value = Object.fromEntries(
       Object.entries(state).map(([slot, entry]) => [slot, entry?.value]),
    )
+
+   const references = (ref) => {
+      ref
+   }
 
    console.debug('context', { children, value, meta })
    return (
@@ -55,6 +65,9 @@ const AppWrapper = ({ children }) => {
 
                setValueMeta(slot, value, meta)
             },
+            setHelpSteps,
+            helpSteps,
+            references,
          }}
       >
          {children}

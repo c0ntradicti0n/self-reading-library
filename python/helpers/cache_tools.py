@@ -18,6 +18,7 @@ from regex import regex
 from config import config
 from helpers.list_tools import metaize
 from helpers.os_tools import filename_only
+from helpers.time_tools import timeit_context
 
 logger = logging.getLogger(__file__)
 import _pickle as cPickle
@@ -346,31 +347,35 @@ def configurable_cache(
                 _filter_path_glob = [_filter_path_glob]
             if not _filter_path_glob:
                 _filter_path_glob = []
-            for i, p in enumerate(_filter_path_glob):
-                if isinstance(p, Callable):
-                    result = p(self)
-                    if isinstance(result, str):
-                        _filter_path_glob[i] = result
-                    elif isinstance(result, Iterable):
-                        result = [filename_only(r) for r in result]
-                        blacklist.extend(result)
-                        _filter_path_glob[i] = None
-                    else:
-                        logging.error(
-                            f"dont know how to handle filter return type, {result}"
-                        )
-            blacklist += [
-                filename_only(os.path.basename(fp))
-                for path in _filter_path_glob
-                if path
-                for fp in glob(path)
-            ]
+            msg = f"Glob"
+            with timeit_context(msg, logger=logger):
+                for i, p in enumerate(_filter_path_glob):
+                    if isinstance(p, Callable):
+                        result = p(self)
+                        if isinstance(result, str):
+                            _filter_path_glob[i] = result
+                        elif isinstance(result, Iterable):
+                            result = [filename_only(r) for r in result]
+                            blacklist.extend(result)
+                            _filter_path_glob[i] = None
+                        else:
+                            logging.error(
+                                f"dont know how to handle filter return type, {result}"
+                            )
+            msg = f"Cache glob blacklist"
+            with timeit_context(msg, logger=logger):
+                blacklist += [
+                    filename_only(os.path.basename(fp))
+                    for path in _filter_path_glob
+                    if path
+                    for fp in glob(path)
+                ]
             if len(cache) == 0:
                 logging.info(
                     f"Found nothing via glob {_from_path_glob} from {os.getcwd()}"
                 )
-            blacklisted = [p for p in cache if filename_only(p) in blacklist]
-            logging.warning(f"{blacklisted=} {self.flags=}")
+            # blacklisted = [p for p in cache if filename_only(p) in blacklist]
+            # logging.warning(f"{blacklisted=} {self.flags=}")
             return blacklist, cache
 
         functools.update_wrapper(new_func, original_func)

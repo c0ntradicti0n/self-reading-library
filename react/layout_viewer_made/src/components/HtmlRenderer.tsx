@@ -52,52 +52,64 @@ const HtmlRenderer = (props: Props) => {
    }, [context.value[props.slot]])
 
    return (
-      <div>
-         <SelectText>
-            {(selected, setSelected) => (
-               <>
-                  {selected ? (
-                     <AnnotationModal
-                        text={selected}
-                        onClose={() => setSelected(null)}
-                        service={difference_AnnotationService}
-                     />
-                  ) : null}
-                  <div
-                     style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        padding: '9em',
-                     }}
-                  >
-                     {context.meta[props.slot] ? (
-                        <style
-                           dangerouslySetInnerHTML={{
-                              __html:
-                                 context.meta[props.slot].css +
-                                 `\n\n
+      <SelectText>
+         {(selected, setSelected) => (
+            <>
+               {selected ? (
+                  <AnnotationModal
+                     text={selected}
+                     onClose={() => setSelected(null)}
+                     service={difference_AnnotationService}
+                  />
+               ) : null}
+               <div
+                  aria-description="Read the text and get the differences"
+                  aria-multiline={`
+               Differences are the building blocks of theories and for 
+               you as the reader who wants that theory out of the text, this may be 
+               the most important stuff. Because the mind will connect those oppositions
+               of A vs B to a network and so you can infere from one difference to another
+               and cook down your decisions to simple semaphores. 
+               
+               The markup should match the phrases where 'differences' are explained. 
+               But the markup is at the moment not always 'perfect', so we have built a way, 
+               how to teach the machine. You can select text, just as you would copy the text
+               and it will open a portal! `}
+                  aria-atomic={'difference-select-text.png'}
+                  aria-modal={'false'}
+                  style={{
+                     display: 'flex',
+                     alignItems: 'center',
+                     justifyContent: 'center',
+                     padding: '9em',
+                     height: '100vh',
+                     margin: '40px',
+                  }}
+               >
+                  {context.meta[props.slot] ? (
+                     <style
+                        dangerouslySetInnerHTML={{
+                           __html:
+                              context.meta[props.slot].css +
+                              `\n\n
                    #page-container { 
                    background-color: transparent !important;
                    background-image: none !important;
                    }`,
-                           }}
-                        />
-                     ) : (
-                        <Captcha />
-                     )}
-                     {htmlContent ? (
-                        <div
-                           dangerouslySetInnerHTML={{ __html: htmlContent }}
-                        />
-                     ) : (
-                        <Triangle ariaLabel="loading-indicator" />
-                     )}
-                  </div>
-               </>
-            )}
-         </SelectText>
-      </div>
+                        }}
+                     />
+                  ) : (
+                     <Captcha />
+                  )}
+                  {htmlContent ? (
+                     <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+                  ) : (
+                     <Triangle ariaLabel="loading-indicator" />
+                  )}
+               </div>
+            </>
+         )}
+      </SelectText>
    )
 }
 

@@ -11,16 +11,44 @@
    transform: translate(-50%, -50%);
 }
 * {
-   font-family:Computer modern !important;
+   font-family: Computer modern !important;
 }
 #nav {
-   border-bottom-left-radius: 500px;
-   padding-left:5%;
+   border-bottom-right-radius: 500px;
+   padding-left: 1%;
    padding-bottom: 5%;
-   padding-top: 1%;
-   padding-right: 2%;
+   padding-top: 3%;
+   padding-right: 5%;
    font-size: 1rem;
    background-color: #000 !important;
+   z-index: 900;
+   width: 10%;
+   height: 10%;
+      top: 0px !important;
+   left: 0px;
+}
+
+.ant-tour-inner {
+   margin-block: 0px;
+   border: black 5px solid !important;
+}
+.ant-tour-mask {
+   z-index: 1050 !important;
+}
+#tour {
+   border-top-left-radius: 500px;
+   padding-left: 3%;
+   padding-top: 3%;
+   padding-bottom: 3%;
+   padding-right: 3%;
+   font-size: 1rem;
+   position: fixed !important;
+   background-color: #000 !important;
+
+   width: 100px;
+   bottom: 0px;
+   right: 0px;
+   z-index: 10000000000;
 }
 .buttonGood {
    background-color: greenyellow;

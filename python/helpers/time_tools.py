@@ -6,8 +6,8 @@ logging.captureWarnings(True)
 
 
 @contextmanager
-def timeit_context(name, logger=print):
-    startTime = time.time()
+def timeit_context(name, logger=logging.getLogger(__name__)):
+    start_time = time.time()
     yield
-    elapsedTime = time.time() - startTime
-    logger(f"... {int(elapsedTime * 1000)} ms for '{name}'")
+    elapsed_time = time.time() - start_time
+    logger.info(f"... {int(elapsed_time * 1000)} ms for '{name}'")

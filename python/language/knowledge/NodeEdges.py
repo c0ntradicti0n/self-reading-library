@@ -10,6 +10,7 @@ from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from helpers.cache_tools import configurable_cache
 from helpers.list_tools import unique
+from language.span.DifferenceSpanSet import SUBJECT
 
 
 @converter(
@@ -54,11 +55,13 @@ class NodeEdges(PathSpec):
             for values in span_sets.kind_sets:
                 for a, b in pairwise(values):
                     id_a, id_b = a.nlp_id, b.nlp_id
+                    label = "opposite" if a.kind == SUBJECT else "contrast"
                     edges.append(
                         {
                             "id": f"arm-{id_a}-{id_b}",
                             "source": id_a,
                             "target": id_b,
+                            "label": label,
                         }
                     )
             identity_links = meta["identity_links"]
@@ -69,6 +72,18 @@ class NodeEdges(PathSpec):
                         "source": a.nlp_id,
                         "target": b.nlp_id,
                         "label": "equal",
+                    }
+                )
+                nodes.append(
+                    {
+                        "id": a.nlp_id,
+                        "label": a.text,
+                    }
+                )
+                nodes.append(
+                    {
+                        "id": b.nlp_id,
+                        "label": b.text,
                     }
                 )
 

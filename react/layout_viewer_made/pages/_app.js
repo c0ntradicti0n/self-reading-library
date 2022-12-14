@@ -8,6 +8,8 @@ import { AppWrapper } from "../src/contexts/DocumentContext.tsx";
 import { ContextWrapper } from "../src/contexts/ContextContext";
 
 import Navigation from "../src/components/Navigation";
+import {TourButton} from "../src/components/Tour";
+
 import { NORMAL } from "../src/contexts/SLOTS";
 import {ConfigProvider, theme} from "antd";
 
@@ -31,6 +33,7 @@ class MyApp extends App {
           <ContextWrapper>
             <AppWrapper>
               <Navigation slot={NORMAL} />
+              <TourButton />
               <Component {...this.props.pageProps} slot={NORMAL} />
             </AppWrapper>
           </ContextWrapper>

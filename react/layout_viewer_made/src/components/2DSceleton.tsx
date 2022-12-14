@@ -40,7 +40,14 @@ export default function SceletonGraph({
    }, [data])
 
    return (
-      <div style={{ width: '94%', height: '94%', overflow: 'hidden' , strokeWidth: "5"}}>
+      <div
+         style={{
+            width: '94%',
+            height: '94%',
+            overflow: 'hidden',
+            strokeWidth: '5',
+         }}
+      >
          {data.links && (
             <ForceGraph2D
                graphData={data}
@@ -71,19 +78,21 @@ export default function SceletonGraph({
 
                   node.__bckgDimensions = bckgDimensions // to re-use in nodePointerAreaPaint
                }}
-               linkLabel = {(n) => n.label}
+               linkLabel={(n) => n.label}
                linkWidth={5}
-               linkColor={(n) =>  {
+               linkColor={(n) => {
                   switch (n.label) {
-                                          case "opposite": return "red"
-                                                               case "...": return "blue"
+                     case 'opposite':
+                        return 'red'
+                     case '...':
+                        return 'blue'
 
-
-                     case "equal": return "greenyellow"
+                     case 'equal':
+                        return 'greenyellow'
                      default:
-return "black"
+                        return 'black'
                   }
-                  }}
+               }}
                nodePointerAreaPaint={(node, color, ctx) => {
                   ctx.fillStyle = color
                   const bckgDimensions = node.__bckgDimensions
