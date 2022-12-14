@@ -20,6 +20,9 @@ const NavigationContent = ({ slot, onClose }: PropType) => {
    return (
       <GoldenSnake onClick={onClose}>
          <div>
+            <a href="/knowledge">Browse differences</a>
+         </div>
+         <div>
             <a href="/library">Universe of documents</a>
          </div>
          <div>

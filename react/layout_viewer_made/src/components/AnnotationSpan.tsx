@@ -34,7 +34,6 @@ import { ClickBoundary } from './ClickBoundary'
 import { KeySelect } from './KeySelect'
 import Meta from 'antd/lib/card/Meta'
 
-
 const hints = {
    SUBJECT: {
       'aria-description': 'Subject',
@@ -42,12 +41,12 @@ const hints = {
       So if it is a difference-set, there should be at least two, but it's also possible
       to select more than two. And they can be embedded in their explanations`,
    },
-      CONTRAST: {
+   CONTRAST: {
       'aria-description': 'Contrast',
       'aria-multiline': `This is the explaining phrase to the 'subject'. It needs
           some explanation, why it is textually opposed to the other word and not just
           a conjunction. There should be as many such phrases as 'subjects'`,
-   }
+   },
 }
 export function AnnotationModal({ text, onClose, service }) {
    const ref = useRef(null) // ref => { current: null }
@@ -57,7 +56,7 @@ export function AnnotationModal({ text, onClose, service }) {
          <div data-backdrop="false">
             <Modal
                open={true}
-               onCancel={                        onClose}
+               onCancel={onClose}
                footer={[
                   <Button
                      key="back"
@@ -98,11 +97,7 @@ export function AnnotationTable(props: {
    console.debug('AnnotationTable', props)
    const sortedSpans = sortSpans_precedence(props.spans)
    return (
-      <div
-
-
-
-          style={{ display: 'flex', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap' }}>
          {props.annotation.map(([word, tag], index) => {
             let span_no =
                sortedSpans.find(
@@ -226,188 +221,225 @@ const AnnotationSpan = forwardRef<
                   <ThreeCircles />
                </>
             ) : (
-               <div style={{fontSize: "0.71rem"}} >
-                  <div      aria-description={'Select spans for annotations'}
-      aria-multiline={ `Here you can mark the difference set, that explain you, 
+               <div style={{ fontSize: '0.71rem' }}>
+                  <div
+                     aria-description={'Select spans for annotations'}
+                     aria-multiline={`Here you can mark the difference set, that explain you, 
       how to tell apart thing A from B. You can use those 'Sliders' or also select 
-      text with the mouse.`}>
-                  <SelectText
-                     onSelect={(text) => {
-                        if (!kind) {
-                           alert(`First set the tag to be set ${kind}`)
-                           return
-                        }
-                        const words = annotation.map(([w, t]) => w)
-                        const selectedWords = text
-                           .split('\n')
-                           .map((s) => s.split(' '))
-                           .flat()
-                           .map((s) => s.trim())
-                           .filter((s) => s)
-                        const subIndexes = indexSubsequence(
-                           words,
-                           selectedWords,
-                        )
-                        if (!subIndexes) {
-                           alert(`Subsequence not found ${kind}`)
-                           return
-                        }
-                        const newSpanIndices = sortSpans_position([
-                           ...spanIndices,
-                           [kind, ...subIndexes, words.slice(...subIndexes)],
-                        ])
-                        if (!newSpanIndices) {
-                           console.debug(
-                              'Selection could not be found in annotation',
-                              selectedWords,
-                              words,
-                           )
-                        }
-                        console.debug(
-                           'new Span:',
-                           newSpanIndices,
-                           subIndexes[0],
-                           words.slice(...subIndexes),
-                        )
-
-                        setSpanIndices(newSpanIndices)
-                     }}
+      text with the mouse.`}
                   >
-
-                     <AnnotationTable
-                        annotation={annotation}
-                        spans={spanIndices}
-                     />
-                  </SelectText>
-                  {sortSpans_position(spanIndices).map(
-                     ([tag, i1, i2, ws], i) => (
-                        <div
-                           key={
-                              i.toString() +
-                              'tag' +
-                              i1.toString() +
-                              '-' +
-                              i2.toString()
+                     <SelectText
+                        onSelect={(text) => {
+                           if (!kind) {
+                              alert(`First set the tag to be set ${kind}`)
+                              return
                            }
-                        >
-                           <div
-                              style={{ width: '100%', display: 'inline-block' }}
-                           >
-                              <Button
-                                 icon={<MinusCircleOutlined />}
-                                 onClick={() =>
-                                    setSpanIndices(
-                                       popSpan(
-                                          sortSpans_position(spanIndices),
-                                          i,
-                                       ),
-                                    )
-                                 }
-                              />
-                              <b>
-                                 <span style={{display: "inline-block", width: "5vw"}}>{tag}</span>
+                           const words = annotation.map(([w, t]) => w)
+                           const selectedWords = text
+                              .split('\n')
+                              .map((s) => s.split(' '))
+                              .flat()
+                              .map((s) => s.trim())
+                              .filter((s) => s)
+                           const subIndexes = indexSubsequence(
+                              words,
+                              selectedWords,
+                           )
+                           if (!subIndexes) {
+                              alert(`Subsequence not found ${kind}`)
+                              return
+                           }
+                           const newSpanIndices = sortSpans_position([
+                              ...spanIndices,
+                              [kind, ...subIndexes, words.slice(...subIndexes)],
+                           ])
+                           if (!newSpanIndices) {
+                              console.debug(
+                                 'Selection could not be found in annotation',
+                                 selectedWords,
+                                 words,
+                              )
+                           }
+                           console.debug(
+                              'new Span:',
+                              newSpanIndices,
+                              subIndexes[0],
+                              words.slice(...subIndexes),
+                           )
 
-                              </b>
-                              <span
+                           setSpanIndices(newSpanIndices)
+                        }}
+                     >
+                        <AnnotationTable
+                           annotation={annotation}
+                           spans={spanIndices}
+                        />
+                     </SelectText>
+                     {sortSpans_position(spanIndices).map(
+                        ([tag, i1, i2, ws], i) => (
+                           <div
+                              key={
+                                 i.toString() +
+                                 'tag' +
+                                 i1.toString() +
+                                 '-' +
+                                 i2.toString()
+                              }
+                           >
+                              <div
                                  style={{
-                                    wordWrap: 'break-word',
-                                    whiteSpace: 'normal',
-                                    width: '50vw',
-                                    marginLeft: "1%"
+                                    width: '100%',
+                                    display: 'inline-block',
                                  }}
                               >
-                                 {ws.map((w, iii) => (
+                                 <Button
+                                    icon={<MinusCircleOutlined />}
+                                    onClick={() =>
+                                       setSpanIndices(
+                                          popSpan(
+                                             sortSpans_position(spanIndices),
+                                             i,
+                                          ),
+                                       )
+                                    }
+                                 />
+                                 <b>
                                     <span
-                                       key={iii}
-                                       className={'tag span_' + tag}
+                                       style={{
+                                          display: 'inline-block',
+                                          width: '5vw',
+                                       }}
                                     >
-                                       {w}
+                                       {tag}
                                     </span>
-                                 ))}
-                              </span>
+                                 </b>
+                                 <span
+                                    style={{
+                                       wordWrap: 'break-word',
+                                       whiteSpace: 'normal',
+                                       width: '50vw',
+                                       marginLeft: '1%',
+                                    }}
+                                 >
+                                    {ws.map((w, iii) => (
+                                       <span
+                                          key={iii}
+                                          className={'tag span_' + tag}
+                                       >
+                                          {w}
+                                       </span>
+                                    ))}
+                                 </span>
 
-                              <Slider
-                                 key={'sl-' + i.toString()}
-                                 value={[i1, i2]}
-                                 valueLabelDisplay="auto"
-                                 style={{ width: '50vw !important' }}
-                                 onChange={(event, newValue, activeThumb) => {
-                                    newValue = [
-                                       Math.round(newValue[0]),
-                                       Math.round(newValue[1]),
-                                    ]
-                                    const result = adjustSpanValue(
-                                       newValue as [number, number],
+                                 <Slider
+                                    key={'sl-' + i.toString()}
+                                    value={[i1, i2]}
+                                    valueLabelDisplay="auto"
+                                    style={{ width: '50vw !important' }}
+                                    onChange={(
+                                       event,
+                                       newValue,
                                        activeThumb,
-                                       sortSpans_position(spanIndices),
-                                       i,
-                                       tag,
-                                       annotation,
+                                    ) => {
+                                       newValue = [
+                                          Math.round(newValue[0]),
+                                          Math.round(newValue[1]),
+                                       ]
+                                       const result = adjustSpanValue(
+                                          newValue as [number, number],
+                                          activeThumb,
+                                          sortSpans_position(spanIndices),
+                                          i,
+                                          tag,
+                                          annotation,
+                                       )
+                                       console.debug(result)
+                                       setSpanIndices(result)
+                                    }}
+                                    onMouseUp={() =>
+                                       setSpanIndices(spanIndices)
+                                    }
+                                    step={1}
+                                    marks
+                                    min={0}
+                                    max={annotation.length}
+                                    disableSwap
+                                    getAriaValueText={valueText}
+                                 />
+                              </div>
+                           </div>
+                        ),
+                     )}
+                     <Row gutter={16}>
+                        <Card
+                           hoverable
+                           style={{
+                              left: '10%',
+                              width: '30vw',
+                              margin: '10px',
+                           }}
+                        >
+                           {TAG_SET.map((tag) => (
+                              <Button
+                                 icon={<PlusCircleOutlined />}
+                                 onClick={() => {
+                                    setSpanIndices(
+                                       addSpan(spanIndices, annotation, tag),
                                     )
-                                    console.debug(result)
-                                    setSpanIndices(result)
                                  }}
-                                 onMouseUp={() => setSpanIndices(spanIndices)}
-                                 step={1}
-                                 marks
-                                 min={0}
-                                 max={annotation.length}
-                                 disableSwap
-                                 getAriaValueText={valueText}
+                                 type="primary"
+                                 value="large"
+                                 style={{ margin: '10px' }}
+                              >
+                                 {tag}
+                              </Button>
+                           ))}
+                        </Card>
+                        <Card
+                           hoverable
+                           style={{
+                              left: '10%',
+                              width: '40vw',
+                              margin: '10px',
+                           }}
+                        >
+                           <div
+                              aria-description={
+                                 'Here you see, which tag will be set next, use the BIG keys on the keyboard to change it'
+                              }
+                           >
+                              <Meta
+                                 title={
+                                    <span>
+                                       On selecting text
+                                       <br />
+                                       the text will get a tag
+                                    </span>
+                                 }
+                                 description={
+                                    <div
+                                       style={{
+                                          padding: '10px',
+                                          margin: '10px',
+                                       }}
+                                    >
+                                       <span className={'tag span_' + kind}>
+                                          {kind}
+                                       </span>
+                                    </div>
+                                 }
+                              />
+                              Use the keyboard to change:{' '}
+                              <KeySelect
+                                 row
+                                 set={TAG_SET}
+                                 onSelect={setKind}
+                                 hints={hints}
                               />
                            </div>
-                        </div>
-                     ),
-                  )}
-                         <Row gutter={16}>
-                                       <Card
-                     hoverable
-                     style={{ left: '10%', width: '30vw', margin: '10px' }}
-                  >
-                  {TAG_SET.map((tag) => (
-                     <Button
-                        icon={<PlusCircleOutlined />}
-                        onClick={() => {
-                           setSpanIndices(addSpan(spanIndices, annotation, tag))
-                        }}
-                        type="primary"
-                        value="large"
-                        style={{ margin: '10px' }}
-                     >
-                        {tag}
-                     </Button>
-                  ))}
-                                       </Card>
-                  <Card
-                     hoverable
-                     style={{ left: '10%', width: '40vw', margin: '10px' }}
-                  >
-                     <div
-                        aria-description={
-                           'Here you see, which tag will be set next, use the BIG keys on the keyboard to change it'
-                        }
-                     >
-                        <Meta
-                           title={
-                              <span>
-                                 On selecting text
-                                 <br />
-                                 the text will get a tag
-                              </span>
-                           }
-                           description={
-                              <div style={{ padding: '10px', margin: '10px' }}>
-                                 <span className={'tag span_' + kind}>
-                                    {kind}
-                                 </span>
-                              </div>
-                           }
-                        />
-                        Use the keyboard to change:{' ' }
-                        <KeySelect row set={TAG_SET} onSelect={setKind} hints={hints} />
-                     </div>
-                  </Card></Row>
-                                          </div>
+                        </Card>
+                     </Row>
+                  </div>
 
                   {errors?.map((e) => (
                      <div style={{ background: 'red' }}>{e}</div>

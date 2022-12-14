@@ -2,17 +2,17 @@ import React, { useEffect, useState } from 'react'
 import Tree from 'react-d3-tree'
 import * as d3 from 'd3'
 const replacerFunc = () => {
-    const visited = new WeakSet();
-    return (key, value) => {
-      if (typeof value === "object" && value !== null) {
-        if (visited.has(value)) {
-          return;
-        }
-        visited.add(value);
+   const visited = new WeakSet()
+   return (key, value) => {
+      if (typeof value === 'object' && value !== null) {
+         if (visited.has(value)) {
+            return
+         }
+         visited.add(value)
       }
-      return value;
-    };
-  };
+      return value
+   }
+}
 const d = {
    name: 'flare',
    children: [
@@ -625,15 +625,24 @@ const rec_hierarchy = (name, data, value = 100) => {
       })
 
    let node = data.nodes.find((n) => n.id === name)
-   node = { ...node, value, children: []}
+   node = { ...node, value, children: [] }
 
-   return !node.title ? edges : [{ name: `<a href='/difference?id=${node.id}'>${node.title}</a>`, id: node.id, value, children: []}]
+   return !node.title
+      ? edges
+      : [
+           {
+              name: `<a href='/difference?id=${node.id}'>${node.title}</a>`,
+              id: node.id,
+              value,
+              children: [],
+           },
+        ]
 }
 const chart = (data, ref, width, height) => {
    let root = pack(data, width, height)
    let focus = root
    let view
-d3.select(ref.current).selectAll("*").remove();
+   d3.select(ref.current).selectAll('*').remove()
    const svg = d3
       .select(ref.current)
 
@@ -658,16 +667,13 @@ d3.select(ref.current).selectAll("*").remove();
          d3.select(this).attr('stroke', null)
       })
 
-           .on("click", function(event, d) {
+      .on('click', function (event, d) {
+         if (!d.children) console.log('asdsadsa', d)
+         else focus !== d && (zoom(event, d), event.stopPropagation())
+         event.stopPropagation()
+      })
 
-        if (! d.children)
-           console.log("asdsadsa", d)
-         else
-            focus !== d && (zoom(event, d), event.stopPropagation())
-              event.stopPropagation()
-    })
-
-     console.log(root.children[0].children)
+   console.log(root.children[0].children)
    const label = svg
       .append('g')
       .style('font', '0.8rem sans-serif')
@@ -675,10 +681,18 @@ d3.select(ref.current).selectAll("*").remove();
       .selectAll('text')
       .data(root.descendants())
       .join('text')
-      .style('fill-opacity', (d) => (d.parent === root || root.children[0].children.includes(d) ? 1 : 1))
-      .style('display', (d) => (d.parent === root|| root.children[0].children.includes(d) || root.children.includes(d)  ? 'inline' : 'none'))
+      .style('fill-opacity', (d) =>
+         d.parent === root || root.children[0].children.includes(d) ? 1 : 1,
+      )
+      .style('display', (d) =>
+         d.parent === root ||
+         root.children[0].children.includes(d) ||
+         root.children.includes(d)
+            ? 'inline'
+            : 'none',
+      )
       .html((d) => d.data.name)
-       .on("click" ,(d)=> console.log("node", d))
+      .on('click', (d) => console.log('node', d))
 
    zoomTo([root.x, root.y, root.r * 2])
 
@@ -712,7 +726,6 @@ d3.select(ref.current).selectAll("*").remove();
             return (t) => zoomTo(i(t))
          })
 
-
       label
          .filter(function (d) {
             return d.parent === focus || this.style.display === 'inline'
@@ -727,27 +740,18 @@ d3.select(ref.current).selectAll("*").remove();
          })
    }
 
-
-
    return svg.node()
 }
 
 export default function CirclePack({ data }) {
    const [trick, setTrick] = useState(false)
-useEffect(() => {
+   useEffect(() => {
+      function handleResize() {
+         setTrick(!trick)
+      }
 
-    function handleResize() {
-
-      setTrick(!trick)
-
-
-
-}
-
-
-    window.addEventListener('resize', handleResize)
-
-  })
+      window.addEventListener('resize', handleResize)
+   })
    const svgRef = React.useRef(null)
 
    useEffect(() => {
@@ -770,18 +774,18 @@ useEffect(() => {
    return (
       // `<Tree />` will fill width/height of its container; in this case `#treeWrapper`.
       <div
-          aria-description="Navigate to documents"
-                  aria-multiline={`
+         aria-description="Navigate to documents"
+         aria-multiline={`
                   Click on the circles to zoom in and discover topics. And if you found one 
                   of the smallest circles, then click on the label to navigate to the document.`}
          id="treeWrapper"
          style={{
-            marginTop: "auto",
+            marginTop: 'auto',
             marginLeft: 'auto',
             marginRight: 'auto',
-                        marginBottom: 'auto',
+            marginBottom: 'auto',
 
-            width: window.innerWidth*0.97,
+            width: window.innerWidth * 0.97,
             overflow: 'hidden',
          }}
       >

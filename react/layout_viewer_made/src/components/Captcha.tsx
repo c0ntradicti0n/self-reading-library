@@ -72,7 +72,9 @@ const Captcha = ({ is_open = true }) => {
                      All is right now
                   </Button>,
                   <Button
-                     aria-description={'If you want to get out of here, click here'}
+                     aria-description={
+                        'If you want to get out of here, click here'
+                     }
                      onClick={() => setOpen(false)}
                   >
                      I grew the dataset enough

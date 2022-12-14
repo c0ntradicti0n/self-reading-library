@@ -11,26 +11,35 @@ const Help = ({
    open: boolean
    setOpen: (boolean) => void
 }) => {
-   let steps = [...document.querySelectorAll('[aria-description]')]
-      .map((el) => {
-         console.log(el.attributes["aria-description"].value, el)
+   let steps = [...document.querySelectorAll('[aria-description]')].map(
+      (el) => {
+         console.log(el.attributes['aria-description'].value, el)
          return {
-            title: el.attributes["aria-description"].value,
-            modal: el.attributes["aria-modal"]?.value,
+            title: el.attributes['aria-description'].value,
+            modal: el.attributes['aria-modal']?.value,
 
-            description: el.attributes["aria-multiline"]?.value ? el.attributes["aria-multiline"].value : undefined,
+            description: el.attributes['aria-multiline']?.value
+               ? el.attributes['aria-multiline'].value
+               : undefined,
             cover: el.ariaAtomic ? <img src={el.ariaAtomic} /> : undefined,
             target: () => el,
          }
-      })
-    const hasModal = steps.some(s => s.modal)
-        console.log(hasModal, steps)
-    const hasNotModal = steps.some(s => !s.modal)
-    console.log(hasModal, steps)
+      },
+   )
+   const hasModal = steps.some((s) => s.modal)
+   console.log(hasModal, steps)
+   const hasNotModal = steps.some((s) => !s.modal)
+   console.log(hasModal, steps)
 
-    if (hasModal && hasNotModal)
-        steps = steps.filter(s => !s.modal)
-   return <Tour placement={"leftTop"} open={open} onClose={() => setOpen(false)} steps={steps} />
+   if (hasModal && hasNotModal) steps = steps.filter((s) => !s.modal)
+   return (
+      <Tour
+         placement={'leftTop'}
+         open={open}
+         onClose={() => setOpen(false)}
+         steps={steps}
+      />
+   )
 }
 
 const TourButton = () => {
