@@ -58,7 +58,7 @@ const MacroComponentSwitch = forwardRef(
       }, [])
 
       console.debug(context, props)
-      if (loading && !slot === CAPTCHA) {
+      if (loading && !(slot === CAPTCHA)) {
          console.log('Display captcha, load is taking some time')
          return <Captcha is_open={true} />
       }

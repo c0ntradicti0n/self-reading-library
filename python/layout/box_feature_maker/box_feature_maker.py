@@ -43,7 +43,7 @@ class BoxFeatureMaker(PathSpec):
                 > config.MAX_PAGES_PER_DOCUMENT
             ):
                 self.logger.warning(
-                    f"Document {labeled_pdf_path=} has to many pages, continuing"
+                    f"Document {labeled_pdf_path=} has too many pages, continuing"
                 )
                 continue
             feature_gen = self.mine_pdf(labeled_pdf_path)

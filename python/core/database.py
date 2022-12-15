@@ -50,6 +50,13 @@ class Queue:
                 except:
                     logging.error(f"Table '{self.service_id}' could not be created.")
 
+    def reset_old(self):
+        item = (
+            self.table.filter(self.table["doc_id"] == id)
+            .sort_by("date")
+            .limit(10)
+            .execute()
+        )
     def id2tablename(self, id):
         return f"queue_{id}".lower()
 
@@ -331,5 +338,6 @@ if __name__ == "__main__":
     assert meta == {"rating_trial": 0, "rating_score": 0.1234}
 
     assert len(r) > 2
+    r.reset_old()
 
     print(q.get_doc_ids())
