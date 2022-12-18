@@ -362,17 +362,13 @@ $if(csl-refs)$
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 $endif$
-$if(lang)$
-\ifLuaTeX
-\usepackage[bidi=basic]{babel}
-\else
+
 \usepackage[bidi=default]{babel}
-\fi
 \babelprovide[main,import]{$babel-lang$}
 % get rid of language-specific shorthands (see #6817):
 \let\LanguageShortHands\languageshorthands
 \def\languageshorthands#1{}
-$endif$
+
 $for(header-includes)$
 $header-includes$
 $endfor$

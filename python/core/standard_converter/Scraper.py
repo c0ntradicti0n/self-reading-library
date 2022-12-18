@@ -146,6 +146,28 @@ class Scraper(PathSpec):
         else:
             os.system(f"pandoc {url} --pdf-engine xelatex --to pdf -o {path}")
 
+        if not os.path.exists(path):
+            os.system(f"chromium  --headless \
+                                  --disable-gpu \
+                                  --disable-translate \
+                                  --disable-extensions \
+                                  --disable-background-networking \
+                                  --safebrowsing-disable-auto-update \
+                                  --disable-sync \
+                                  --metrics-recording-only \
+                                  --disable-default-apps \
+                                  --no-first-run \
+                                  --mute-audio \
+                                  --hide-scrollbars \
+                                  --disable-software-rasterizer "
+                      f"--print-to-pdf={path} {url}")
+
+        if not os.path.exists(path):
+            os.system(f"wkhtmltopdf  {url} {path}")
+
+        if not os.path.exists(path):
+            os.system(f"weasyprint  {url} {path}")
+
 
 import unittest
 
