@@ -119,7 +119,14 @@ class Queue:
                 item = self.table.sort_by("date").limit(1).execute()
         except sqlalchemy.exc.DatabaseError:
             logging.error(f"Database error {row_id=} {id=}", exc_info=True)
-            item = self.table.sort_by("date").limit(1).execute()
+            try:
+                item = self.table.sort_by("date").limit(1).execute()
+            except:
+                if row_id:
+                    self.task_done(row_id)
+                else:
+                    self.delete_task(id)
+                    logging.warning("database broke, deleting " + id)
 
         try:
             self.row_id = item.iloc[0].row_id
@@ -142,6 +149,11 @@ class Queue:
     def task_done(self, id=None):
         self.connection.con.execute(
             f"DELETE from {self.service_id} where row_id = '{self.row_id if not id else id}'"
+        )
+
+    def delete_task(self, id=None):
+        self.connection.con.execute(
+            f"DELETE from {self.service_id} where user_id = '{self.row_id if not id else id}'"
         )
 
     def queue_done(self, id=None):

@@ -147,7 +147,7 @@ class Scraper(PathSpec):
             os.system(f"pandoc {url} --pdf-engine xelatex --to pdf -o {path}")
 
         if not os.path.exists(path):
-            os.system(f"chromium  --headless \
+            os.system(f"google-chrome  --headless \
                                   --disable-gpu \
                                   --disable-translate \
                                   --disable-extensions \

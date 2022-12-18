@@ -67,6 +67,10 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install uvicorn[standard]
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt --use-deprecated=legacy-resolver
 
+RUN pip pip install weasyprint
+RUN apt -y install wkhtmltopdf
+
+
 RUN apt update && apt install  openssh-server  -y
 
 RUN useradd -rm -d /home/ubuntu -s /bin/bash -g root -u 123 test
