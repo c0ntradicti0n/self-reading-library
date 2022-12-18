@@ -48,8 +48,9 @@ dbash:
 d: down dockerbuild up
 ddb:
 	CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain  docker-compose up -d db
-sync:
-	rsync -r --exclude 'node_modules' react/layout_viewer/* react/layout_viewer_made
+gdb:
+	CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain  docker-compose up -d gdb
+
 fe:
 	cd react/layout_viewer_made/ && yarn run dev
 
@@ -61,5 +62,5 @@ docker-fill:
 
 sync_from_host:
 	rsync -av --progress  -r python/.layouteagle/ deploy@self-reading-library.science:/home/deploy/self-reading-library/python/.layouteagle/
-sync_from_romote:
+sync_from_remote:
 	rsync -av --progress  -r deploy@self-reading-library.science:/home/deploy/self-reading-library/python/.layouteagle/ python/.layouteagle/

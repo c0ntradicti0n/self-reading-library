@@ -7,6 +7,7 @@ from nltk.corpus.reader import Lemma
 from core.pathant.PathSpec import PathSpec
 from core.pathant.Converter import converter
 from language.span.DifferenceSpanSet import Span
+from language.knowledge.GraphDB import GraphDB
 
 SUBJECT = "SUBJECT"
 CONTRAST = "CONTRAST"
@@ -25,19 +26,11 @@ class AnnotationAnalyser(PathSpec):
         self.nlp.add_pipe("spacy_wordnet", after="tagger")
 
     def __call__(self, prediction_metas, *args, **kwargs):
-        from core.pathant.PathAnt import PathAnt
-
-        ant = PathAnt()
-        gold_span_annotation = ant(
-            "span_annotation.collection.fix",
-            "span_annotation.collection.span_set",
-            service_id="gold_span_annotation",
-        )
+        gold_span_annotation = GraphDB.all_spansets()
 
         extra_antonyms = defaultdict(lambda: set())
 
-        for i, (path, meta) in enumerate(gold_span_annotation([])):
-            span_set = meta["span_set"]
+        for i, span_set in enumerate(gold_span_annotation):
 
             for subject_a, subject_b in itertools.permutations(
                 span_set.subjects.text, 2

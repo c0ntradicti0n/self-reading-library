@@ -5,6 +5,7 @@ from core.pathant.Converter import converter
 from helpers.list_tools import nest
 from language.span.DifferenceSpanSet import Span, SuperList
 from helpers.list_tools import unique
+from language.knowledge.GraphDB import GraphDB
 
 SUBJECT = "SUBJECT"
 CONTRAST = "CONTRAST"
@@ -19,21 +20,7 @@ class AnnotationAnalyser(PathSpec):
         super().__init__(*args, **kwargs)
 
     def __call__(self, prediction_metas, *args, **kwargs):
-        from core.pathant.PathAnt import PathAnt
-
-        ant = PathAnt()
-        all_subjects = list(
-            itertools.chain(
-                *map(
-                    lambda t: t[1]["span_set"].subjects,
-                    ant(
-                        "span_annotation.collection.fix",
-                        "span_annotation.collection.span_set",
-                        service_id="gold_span_annotation",
-                    )([]),
-                )
-            )
-        )
+        all_subjects = GraphDB.all_subjects()
 
         pre_group = list(
             sorted(

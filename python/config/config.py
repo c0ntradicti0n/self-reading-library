@@ -2,12 +2,13 @@ import os
 import sys
 import logging
 import torch
+from dotenv import load_dotenv
 from traceback_with_variables import activate_by_import
 from traceback_with_variables import Format, ColorSchemes, is_ipython_global
 import numpy
 
+load_dotenv("../.env")
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-
 
 sys.path.append("../core")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -179,6 +180,9 @@ create_frontend = os.environ.get("CREATE_FRONTEND", default=False)
 BEST_MODELS_PATH = hidden_folder + "/best_models.json"
 
 GOLD_DATASET_PATH = hidden_folder + "/gold"
+GOLD_SPAN_ID = "gold_span_annotation"
+GOLD_ANNOTATION_ID = "gold_annotation"
+
 TRASH_DATASET_PATH = hidden_folder + "/trash"
 
 MIN_CAPTCHA_TRIALS = 3

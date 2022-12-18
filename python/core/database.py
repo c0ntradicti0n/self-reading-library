@@ -57,6 +57,7 @@ class Queue:
             .limit(10)
             .execute()
         )
+
     def id2tablename(self, id):
         return f"queue_{id}".lower()
 

@@ -73,7 +73,7 @@ class AnnotatorRate(PathSpec):
                     rating_score = 0.0
                     logging.error(f"Scores not found for {value}, {self.service}")
 
-                if rating_trial > config.MIN_CAPTCHA_TRIALS:
+                if rating_trial >= config.MIN_CAPTCHA_TRIALS:
                     yield _p_m
                 else:
                     q[self.service].put(self.service, _p_m)

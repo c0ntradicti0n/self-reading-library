@@ -1,10 +1,7 @@
 import falcon
-
 from core.rest.Resource import Resource
 from core.rest.RestPublisher import RestPublisher
-
 from helpers.encode import jsonify
-
 from config.ant_imports import *
 
 
@@ -29,10 +26,14 @@ class KnowledgePublisher(RestPublisher):
             ),
         )
         ant = PathAnt()
+
         self.pipeline = ant(
-            "span_annotation.collection.fix",
+            "text",
             "span_annotation.collection.nodes_edges",
         )
+
+    def search(self, search):
+        search, result = list(self.pipeline(metaize([search])))[0]
 
     def on_get(self, req, resp, id=None):
         result = list(

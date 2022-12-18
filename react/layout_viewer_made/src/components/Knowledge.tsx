@@ -16,43 +16,45 @@ export const Knowledge = ({ service, slot }) => {
          service.save(search, search, (val) => context.setValueMetas(slot, val))
    }, [search])
    return (
-      <div aria-description={'Relations of distinctions'}
-                     aria-multiline={`Differences can be networking, because a difference maybe
+      <div
+         aria-description={'Relations of distinctions'}
+         aria-multiline={`Differences can be networking, because a difference maybe
                      alsways builds on another, so a net can built from A-vs-B and a defining A and b defining B.
                      Then there should be in a some other subject A' and in b some subject B'. The nature of
-                     and extent of this relation can be explored with this diagram.`}>
-          <div
-              aria-description={'Search'}
-                     aria-multiline={`Here you can type, what you would like to get the difference-net for`}
-          >
-         <Input.Search
-            onSearch={(search) => setSearch(search)}
-            allowClear
-            style={{
-               position: 'absolute',
-               top: '0px',
-               left: '10vw',
-               margin: '1%',
-               width: '80%',
-               zIndex: 100,
-            }}
-            defaultValue={''}
-            placeholder='What do you want to "know" about?'
-         />
-                  </div>
+                     and extent of this relation can be explored with this diagram.`}
+      >
+         <div
+            aria-description={'Search'}
+            aria-multiline={`Here you can type, what you would like to get the difference-net for`}
+         >
+            <Input.Search
+               onSearch={(search) => setSearch(search)}
+               allowClear
+               style={{
+                  position: 'absolute',
+                  top: '0px',
+                  left: '10vw',
+                  margin: '1%',
+                  width: '80%',
+                  zIndex: 100,
+               }}
+               defaultValue={''}
+               placeholder='What do you want to "know" about?'
+            />
+         </div>
 
-              <div style={{height:"100vh", width: "100vw"}}
-                     aria-description={'Graph'}
-                     aria-multiline={`Here you can see the result. You can drag the nodes to stay where you dragged them.
+         <div
+            style={{ height: '100vh', width: '100vw' }}
+            aria-description={'Graph'}
+            aria-multiline={`Here you can see the result. You can drag the nodes to stay where you dragged them.
                      You can zoom in and out. the red relines mark polar pairs and the green lines mark equality between the concept.
                      As everything, it's not perfect.
                      
                      But as you see in the standard example, where it searches for "premise"
-                     `}>
-
-
-         <SceletonGraph data={context.meta[slot]} />
-    </div>
+                     `}
+         >
+            <SceletonGraph data={context.meta[slot]} />
+         </div>
       </div>
    )
 }

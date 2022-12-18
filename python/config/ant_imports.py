@@ -39,6 +39,7 @@ from layout.annotator.annotation_to_gold import AnnotatedToGoldQueueRest
 from language.span.SpanGold import *
 from language.knowledge.DifferenceAnalyser import *
 from language.knowledge.IdentityAnalyser import *
-
+from language.knowledge.GraphDB import *
+from language.knowledge.GraphDBSearch import *
 from language.knowledge.NodeEdges import *
 from language.knowledge.Filter import *

@@ -1,6 +1,7 @@
 import threading
 
 from config.ant_imports import *
+from helpers.time_tools import wait_for_change
 
 
 def run_extra_threads():
@@ -62,6 +63,19 @@ def run_extra_threads():
             list(itertools.islice(gen, 5))
 
     threading.Thread(target=fill_span_annotation_thread, name="gold annotation").start()
+
+    def update_knowledge_graph_thread():
+        path = config.GOLD_DATASET_PATH + "/" + config.GOLD_SPAN_ID
+        with wait_for_change(path):
+            result = list(
+                ant(
+                    "span_annotation.collection.fix",
+                    "span_annotation.collection.graph_db",
+                )([metaize([None])], service_id=config.GOLD_SPAN_ID)
+            )
+        assert result
+
+    threading.Thread(target=update_knowledge_graph_thread, name="knowledge").start()
 
 
 if __name__ == "__main__":

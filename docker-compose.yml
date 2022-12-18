@@ -6,7 +6,6 @@ services:
     restart: unless-stopped
     depends_on:
       - be
-      - dash
       - fe
     ports:
       - 80:80
@@ -36,26 +35,14 @@ services:
       LC_ALL: en_US.UTF-8
       LANG: en_US.UTF-8
       LANGUAGE: en_US.UTF-8
+      GDB_USER: ich
+      GDB_PASSWORD: ${GDB_PASSWORD}
+      GDB_HOST: gdb
+
 
     volumes:
       - "$CWD/python:/home/finn/Programming/self-reading-library/python"
     entrypoint: uwsgi  --py-autoreload=1 --http 0.0.0.0:$PORT --module wsgi:application --memory-report  --workers 16 --threads 2  --memory-report --enable-threads --skip-atexit-teardown --max-worker-lifetime=1000 --max-worker-lifetime-delta=2000 --harakiri=3000 -b 32768
-  dash:
-    build: python
-    container_name: dash
-
-    tty: true
-    user: $USER_IDS
-    ports:
-      - "54321:12345"
-      - "22222:22"
-    environment:
-      PORT: 12345
-      DB_HOST: db
-      BASE_URL: "/dash/"
-    volumes:
-      - "$CWD/python:/home/finn/Programming/self-reading-library/python"
-    entrypoint: uwsgi  --py-autoreload=1 --http 0.0.0.0:12345 --module dash_wsgi:application --memory-report  --workers 16 --threads 2  --memory-report --enable-threads --skip-atexit-teardown --max-worker-lifetime=1000 --max-worker-lifetime-delta=2000 --harakiri=3000 -b 32768
 
   fill:
     build: python
@@ -63,6 +50,9 @@ services:
     tty: true
     environment:
       DB_HOST: db
+      GDB_PASSWORD: ${GDB_PASSWORD}
+      GDB_HOST: gdb
+
     volumes:
       - "$CWD/python:/home/finn/Programming/self-reading-library/python"
     entrypoint: python3 fill.py
@@ -82,6 +72,17 @@ services:
       POSTGRES_HOST: "localhost"
       CREATE_FRONTEND: "True"
     restart: "unless-stopped"
+
+  gdb:
+    image: franzinc/agraph
+    container_name: gdb
+    restart: unless-stopped
+    shm_size: 1g
+    environment:
+      AGRAPH_SUPER_USER: ich
+      AGRAPH_SUPER_PASSWORD: ${GDB_PASSWORD}
+    ports:
+      - 10000-10035:10000-10035
   fe:
     build:
       context: react

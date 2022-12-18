@@ -82,13 +82,15 @@ export default function SceletonGraph({
                linkWidth={5}
                linkColor={(n) => {
                   switch (n.label) {
-                     case 'opposite':
+                     case 'http://polarity.science/knowledge/SUBJECT':
                         return 'red'
-                     case '...':
+                     case 'http://polarity.science/knowledge/CONTRAST':
                         return 'blue'
 
-                     case 'equal':
+                     case 'http://polarity.science/knowledge/equal':
                         return 'greenyellow'
+                     case 'http://polarity.science/knowledge/forward_difference':
+                        return 'orange'
                      default:
                         return 'black'
                   }

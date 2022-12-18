@@ -1,18 +1,25 @@
 import hashlib
 import itertools
+import json
+import logging
 import unittest
 from functools import cached_property
 
 import nltk
 import spacy
+from franz.openrdf.vocabulary import XMLSchema
+from more_itertools import pairwise
 from nltk import SnowballStemmer
 
+from helpers.list_tools import unique
 from helpers.cache_tools import compressed_pickle, decompress_pickle
 from helpers.hash_tools import hashval
 from spacy_wordnet.wordnet_annotator import WordnetAnnotator
 
 from helpers.span_tools import annotation2span_sets
 
+
+BASE = "http://polarity.science/knowledge/"
 SUBJECT = "SUBJECT"
 CONTRAST = "CONTRAST"
 stemmer = SnowballStemmer("english")
@@ -125,6 +132,48 @@ class Span:
         self.kind = kind
         self.word_tags = word_tags
 
+    SUBJECTS_URI = f"{BASE}{SUBJECT}"
+    CONTRASTS_URI = f"{BASE}{CONTRAST}"
+
+    FTS_TEXT = f"{BASE}text"
+    FTS_LEMMA = f"{BASE}lemma"
+    WORD_TAGS = f"{BASE}word_tags"
+
+    FTS_Uris = [FTS_TEXT, FTS_LEMMA]
+
+    def add_graph_literal(self, conn):
+        Text = conn.createURI(self.FTS_TEXT)
+        Lemma = conn.createURI(self.FTS_LEMMA)
+        WordTags = conn.createURI(self.WORD_TAGS)
+        k = conn.createURI(f"{BASE}{self.nlp_id}")
+        t = conn.createLiteral(self.text, XMLSchema.STRING)
+        l = conn.createLiteral(json.dumps(self.lemmas), XMLSchema.STRING)
+        wt = conn.createLiteral(json.dumps(self.word_tags))
+
+        try:
+            conn.addTriple(k, Text, t)
+        except Exception as e:
+            logging.error("Error writing text in graphdb")
+        try:
+            conn.addTriple(k, Lemma, l)
+        except Exception as e:
+            logging.error("Error writing lemma in graphdb")
+        try:
+            conn.addTriple(k, WordTags, wt)
+        except Exception as e:
+            logging.error("Error writing word_tags in graphdb")
+
+        return k
+
+    def add_link(self, kind, other, conn):
+        Kind = conn.createURI(f"{BASE}{kind}")
+
+        a = self.add_graph_literal(conn)
+        b = other.add_graph_literal(conn)
+
+        conn.addTriple(a, Kind, b)
+        return [a, b]
+
 
 class DifferenceSpanSet:
     def __init__(self, d):
@@ -162,6 +211,10 @@ class DifferenceSpanSet:
         return hashval(self.subjects)
 
     @cached_property
+    def hash(self):
+        return hashval(self.flat())
+
+    @cached_property
     def subject_hash_int(self):
         value = str(self.subjects.text)
         t_value = value.encode("utf8")
@@ -193,6 +246,29 @@ class DifferenceSpanSet:
 
     def __contains__(self, item):
         return any(item in span for span in self.flat().text)
+
+    DIFFERENCE = f"{BASE}difference"
+    SPAN_SETS = f"{BASE}span_sets"
+
+    def add_graph_db(self, conn):
+        d = conn.createURI(self.DIFFERENCE)
+        ss = conn.createURI(self.SPAN_SETS)
+
+        sides = []
+        for spans in self.kind_sets:
+            for a, b in pairwise(spans):
+                sides += a.add_link(a.kind, b, conn)
+
+        for a, b in zip(*self.kind_sets):
+            sides += a.add_link("explains", b, conn)
+
+        sides = unique(sides)
+        id = conn.createLiteral(self.hash, XMLSchema.STRING)
+        span_sets = conn.createLiteral(json.dumps(self.span_sets), XMLSchema.STRING)
+
+        for node in sides:
+            conn.addTriple(id, d, node)
+        conn.addTriple(id, ss, span_sets)
 
 
 class TestSpanMethods(unittest.TestCase):

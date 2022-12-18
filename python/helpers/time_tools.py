@@ -1,3 +1,4 @@
+import os
 from contextlib import contextmanager
 import time
 import logging
@@ -11,3 +12,14 @@ def timeit_context(name, logger=logging.getLogger(__name__)):
     yield
     elapsed_time = time.time() - start_time
     logger.info(f"... {int(elapsed_time * 1000)} ms for '{name}'")
+
+
+@contextmanager
+def wait_for_change(path, logger=logging.getLogger(__name__)):
+    o_time = os.path.getmtime(path)
+    while True:
+        if os.path.getmtime(path) > o_time:
+            logger.info(f"{path} changed, working!")
+            yield
+            o_time = os.path.getmtime(path)
+        time.sleep(1)

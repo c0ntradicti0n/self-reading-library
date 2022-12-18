@@ -7,7 +7,7 @@ import React, {
    useRef,
    useState,
 } from 'react'
-import {Button, Card, Modal, Row, Space} from 'antd'
+import { Button, Card, Modal, Row, Space } from 'antd'
 import { Slider } from '@mui/material'
 import { ThreeCircles, ThreeDots } from 'react-loader-spinner'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
@@ -76,7 +76,7 @@ export function AnnotationModal({ text, onClose, service }) {
                      Submit
                   </Button>,
                   <Button onClick={() => onClose()}>Back</Button>,
-                   <span style={{display: "inline-block", width: "7%"}} />
+                  <span style={{ display: 'inline-block', width: '7%' }} />,
                ]}
             >
                <AnnotationSpan

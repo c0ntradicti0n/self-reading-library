@@ -28,17 +28,17 @@ const NavigationContent = ({ slot, onClose }: PropType) => {
          <div>
             <Captcha is_open={false} />
          </div>
-                   <div>
+         <div>
             <br />
          </div>
          <div>
-             See a webpage with markup
+            See a webpage with markup
             <Url2Difference />
          </div>
-                                       <div>
+         <div>
             <br />
          </div>
-                             <div>
+         <div>
             <br />
          </div>
          <div>

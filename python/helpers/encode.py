@@ -1,5 +1,6 @@
 import json
 import numpy as np
+from franz.openrdf.model import URI, Literal
 
 
 class NpEncoder(json.JSONEncoder):
@@ -10,6 +11,10 @@ class NpEncoder(json.JSONEncoder):
             return float(obj)
         if isinstance(obj, np.ndarray):
             return obj.tolist()
+        if isinstance(obj, URI):
+            return str(obj.uri)
+        if isinstance(obj, Literal):
+            return str(obj.label)
         return super(NpEncoder, self).default(obj)
 
 
