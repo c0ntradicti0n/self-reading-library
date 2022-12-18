@@ -14,27 +14,27 @@ mount-osx:
 	sudo bindfs  ./python/.layouteagle/pdfs/ ./react/layout_viewer_made/public/pdfs
 
 prod:
-	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose build
+	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose build
 dev:
-	ENV=dev USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose build
+	ENV=dev USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose build
 build:
-	USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose build
+	USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose build
 build_fe:
-	USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose build fe
+	USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose build fe
 over:
-	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose -f docker-compose.override.yaml  build
+	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose -f docker-compose.override.yaml  build
 overup:
-	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose -f docker-compose.override.yaml  up
+	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose -f docker-compose.override.yaml  up
 overdown:
-	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker-compose -f docker-compose.override.yaml down
+	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose -f docker-compose.override.yaml down
 
 CWD=$(shell pdw)
 scrape_test:
-	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker run -v "$(shell pwd)/python:/home/finn/Programming/self-reading-library/python" full_python python3 core/standard_converter/Scraper.py
+	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker run -v "$(shell pwd)/python:/home/finn/Programming/self-reading-library/python" full_python python3 core/standard_converter/Scraper.py
 
 
 up:
-	USER=$$USER CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain  docker-compose up -d
+	USER=$$USER CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose up -d
 down:
 	CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose down
 
@@ -47,9 +47,9 @@ dbash:
 
 d: down dockerbuild up
 ddb:
-	CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain  docker-compose up -d db
+	CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose up -d db
 gdb:
-	CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain  docker-compose up -d gdb
+	CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose up -d gdb
 
 fe:
 	cd react/layout_viewer_made/ && yarn run dev

@@ -27,7 +27,7 @@ RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable 
 RUN apt-get -y update
 RUN apt-get install -y google-chrome-stable
 RUN apt -y install language-pack-en
-#RUN apt -y install rsvg-convert
+RUN apt -y install librsvg2-bin
 
 
 # install chromedriver
