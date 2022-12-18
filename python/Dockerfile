@@ -67,7 +67,7 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install uvicorn[standard]
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt --use-deprecated=legacy-resolver
 
-RUN pip pip install weasyprint
+RUN pip install weasyprint
 RUN apt -y install wkhtmltopdf
 
 
