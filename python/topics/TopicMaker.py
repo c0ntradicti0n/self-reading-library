@@ -106,7 +106,7 @@ class TopicMaker(PathSpec):
         return topics, meta
 
     def topicize_recursively(
-        self, embeddings, meta, texts, split_size=6, max_level=7, level=0
+        self, embeddings, meta, texts, split_size=15, max_level=6, level=0
     ):
         logging.info(f"Making Topics {level + 1} of maximally {max_level + 1}")
         labels = self.cluster(embeddings=embeddings)
@@ -208,7 +208,7 @@ class TopicMaker(PathSpec):
         return np.array(out)
 
     def make_titles(self, keywords_to_texts):
-        return {k: " ".join(k[0] for k in v[:4]) for k, v in keywords_to_texts.items()}
+        return {k: " ".join(k[0] for k in v[:2]) for k, v in keywords_to_texts.items()}
 
 
 if __name__ == "__main__":
