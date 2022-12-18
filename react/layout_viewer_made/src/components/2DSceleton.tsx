@@ -83,7 +83,7 @@ export default function SceletonGraph({
                 forceEngine={"ngraph"}
 
                               ref={fgRef}
-                d3AlphaDecay={0.2}
+                d3AlphaDecay={0.02}
                graphData={data}
                onNodeDragEnd={(node) => {
                   node.fx = node.x

@@ -1,7 +1,7 @@
 import os
 
 from config import config
-from core.event_binding import q
+from core.event_binding import q, d
 from core.pathant.PathSpec import PathSpec
 
 
@@ -16,7 +16,9 @@ def existing_in_dataset_or_database(extension):
         + self.flags["service_id"]
         + extension,
         lambda self: [
-            os.path.basename(p) for p in q[self.flags["service_id"]].get_doc_ids()
+            os.path.basename(p) for p in q[self.flags["service_id"]].get_doc_ids()]+[
+        os.path.basename(p)
+    for p in d[self.flags["service_id"]].get_doc_ids()
         ],
     ]
 
