@@ -1,18 +1,37 @@
 import React, { useEffect, useState } from 'react'
 import Tree from 'react-d3-tree'
 import * as d3 from 'd3'
-const replacerFunc = () => {
-   const visited = new WeakSet()
-   return (key, value) => {
-      if (typeof value === 'object' && value !== null) {
-         if (visited.has(value)) {
-            return
-         }
-         visited.add(value)
+import {router} from "next/client";
+
+  function wrap(text, width) {
+   const _dy = -1
+  text.each(function() {
+    var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 2.0, // ems
+        y = text.attr("y"),
+        dy = parseFloat(text.attr("dy")),
+        tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", _dy + "em");
+    while (word = words.pop()) {
+       const str_line = line.join(" ")
+        console.log(word, lineNumber, lineHeight, line.length)
+       lineNumber += 1
+      line.push(word);
+      tspan.text(line.join(" "));
+      if (str_line.length > width) {
+
+        line.pop();
+        tspan.text(line.join(" "));
+        line = [word];
+        tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", _dy + lineHeight  + "em").text(word);
       }
-      return value
-   }
+    }
+  });
 }
+
 const d = {
    name: 'flare',
    children: [
@@ -631,7 +650,7 @@ const rec_hierarchy = (name, data, value = 100) => {
       ? edges
       : [
            {
-              name: `<a href='/difference?id=${node.id}'>${node.title}</a>`,
+              name: node.title,
               id: node.id,
               value,
               children: [],
@@ -668,12 +687,16 @@ const chart = (data, ref, width, height) => {
       })
 
       .on('click', function (event, d) {
-         if (!d.children) console.log('asdsadsa', d)
+         if (!d.children) {
+            console.log('click on node', d)
+            router.push("/difference?id=" + d.data.id)
+         }
          else focus !== d && (zoom(event, d), event.stopPropagation())
          event.stopPropagation()
       })
 
    console.log(root.children[0].children)
+   let textWidth = 10;
    const label = svg
       .append('g')
       .style('font', '0.8rem sans-serif')
@@ -684,6 +707,7 @@ const chart = (data, ref, width, height) => {
       .style('fill-opacity', (d) =>
          d.parent === root || root.children[0].children.includes(d) ? 1 : 1,
       )
+       .style("width", (d) => "30")
       .style('display', (d) =>
          d.parent === root ||
          root.children[0].children.includes(d) ||
@@ -691,8 +715,12 @@ const chart = (data, ref, width, height) => {
             ? 'inline'
             : 'none',
       )
-      .html((d) => d.data.name)
+
+      .text((d) => d.data.name)
+
       .on('click', (d) => console.log('node', d))
+               .call(wrap, textWidth)
+
 
    zoomTo([root.x, root.y, root.r * 2])
 
@@ -738,6 +766,8 @@ const chart = (data, ref, width, height) => {
          .on('end', function (d) {
             if (d.parent !== focus) this.style.display = 'none'
          })
+
+
    }
 
    return svg.node()
@@ -770,6 +800,8 @@ export default function CirclePack({ data }) {
          ],
       }
       chart(hierarchy, svgRef, window.innerWidth, window.innerHeight * 0.97)
+
+
    }, [trick])
    return (
       // `<Tree />` will fill width/height of its container; in this case `#treeWrapper`.
