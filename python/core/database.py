@@ -120,6 +120,8 @@ class Queue:
         except sqlalchemy.exc.DatabaseError:
             logging.error(f"Database error {row_id=} {id=}", exc_info=True)
             item = self.table.sort_by("date").limit(1).execute()
+        except sqlalchemy.exc.ResourceClosedError:
+            item = self.table.sort_by("date").limit(1).execute()
 
         try:
             self.row_id = item.iloc[0].row_id

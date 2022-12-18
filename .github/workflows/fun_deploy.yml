@@ -59,6 +59,7 @@ jobs:
         run: |
           ssh staging '   
               cd self-reading-library
+              docker stop nginx
               make up
           '
       - name: InstallTts
