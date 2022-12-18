@@ -62,7 +62,12 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt -
 
 RUN pip install weasyprint
 RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.bionic_amd64.deb
-RUN sudo apt install ./wkhtmltox_0.12.6-1.bionic_amd64.deb
+RUN wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb
+RUN dpkg -i ./libssl1.1_1.1.0g-2ubuntu4_amd64.deb
+RUN rm -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb
+
+RUN apt -y install ./wkhtmltox_0.12.6-1.bionic_amd64.deb
+
 
 
 RUN apt update && apt install  openssh-server  -y
