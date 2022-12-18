@@ -68,7 +68,8 @@ COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt --use-deprecated=legacy-resolver
 
 RUN pip install weasyprint
-RUN apt -y install wkhtmltopdf
+RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.focal_amd64.deb
+RUN apt -y install ./wkhtmltox_0.12.6-1.focal_amd64.deb
 
 
 RUN apt update && apt install  openssh-server  -y
