@@ -39,19 +39,24 @@ class Span:
 
     @cached_property
     def nlp(self):
+
         if not self._nlp:
+
             Span._nlp = spacy.load("en_core_web_sm")
             Span._nlp.add_pipe("spacy_wordnet", after="tagger")
+            Span._nlp.disable_pipes('tok2vec', 'parser', "ner")
+
             try:
                 Span._nlp("test this text")
             except LookupError:
                 self.post_install()
                 Span._nlp("test this text")
+
         return Span._nlp
 
     def __post_install(self):
-        import nltk
 
+        import nltk
         nltk.download("wordnet")
         nltk.download("omw-1.4")
 
