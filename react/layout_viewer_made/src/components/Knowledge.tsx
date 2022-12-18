@@ -22,10 +22,12 @@ export const Knowledge = ({ service, slot }) => {
                      alsways builds on another, so a net can built from A-vs-B and a defining A and b defining B.
                      Then there should be in a some other subject A' and in b some subject B'. The nature of
                      and extent of this relation can be explored with this diagram.`}
+         aria-modal={false}
       >
          <div
             aria-description={'Search'}
             aria-multiline={`Here you can type, what you would like to get the difference-net for`}
+            aria-modal={false}
          >
             <Input.Search
                onSearch={(search) => setSearch(search)}
@@ -52,6 +54,7 @@ export const Knowledge = ({ service, slot }) => {
                      
                      But as you see in the standard example, where it searches for "premise"
                      `}
+            aria-modal={false}
          >
             <SceletonGraph data={context.meta[slot]} />
          </div>

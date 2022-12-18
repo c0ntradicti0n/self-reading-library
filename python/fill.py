@@ -1,5 +1,6 @@
 import threading
 
+import config.config
 from config.ant_imports import *
 from helpers.time_tools import wait_for_change
 
@@ -75,10 +76,27 @@ def run_extra_threads():
                 )([metaize([None])], service_id=config.GOLD_SPAN_ID)
             )
             assert result
+
         wait_for_change(path, graph_db_update)
-
-
     threading.Thread(target=update_knowledge_graph_thread, name="knowledge").start()
+
+    def update_topics_thread():
+        path = config.tex_data
+
+        def topics_update():
+            result = list(
+                zip(
+                    *list(
+                        ant("arxiv.org", "topics.graph", from_cache_only=True)([])
+                    )
+                )
+            )
+            assert result
+
+        wait_for_change(path, topics_update)
+
+
+    threading.Thread(target=update_topics_thread, name="topics").start()
 
 
 if __name__ == "__main__":

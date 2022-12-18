@@ -50,8 +50,8 @@ class NodeEdges(PathSpec):
             edges.append(
                 {
                     "id": str(binding_set.getValue("s1"))
-                          + "-"
-                          + str(binding_set.getValue("s2")),
+                    + "-"
+                    + str(binding_set.getValue("s2")),
                     "source": binding_set.getValue("s1"),
                     "target": binding_set.getValue("s2"),
                     "label": binding_set.getValue("p"),

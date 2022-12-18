@@ -72,10 +72,16 @@ dss = DifferenceSpanSet(v)
 with catalog.getRepository("difference", Repository.ACCESS) as repository:
     repository.initialize()
     with repository.getConnection() as conn:
-        #conn.clear()
+        # conn.clear()
         dss.add_graph_db(conn)
 
-        conn.createFreeTextIndex("index1", tokenizer="japanese", predicates=Span.FTS_Uris, wordFilters=[], stopWords=[])
+        conn.createFreeTextIndex(
+            "index1",
+            tokenizer="japanese",
+            predicates=Span.FTS_Uris,
+            wordFilters=[],
+            stopWords=[],
+        )
 
         config = conn.getFreeTextIndexConfiguration("index1")
         for key, value in config.items():
@@ -86,4 +92,3 @@ with catalog.getRepository("difference", Repository.ACCESS) as repository:
         pprint(GraphDBSearch.search("premise"))
         pprint(list(NodeEdges(GraphDBSearch(metaize(["premise"])))))
         pprint(list(NodeEdges(GraphDBSearch(metaize(["sex"])))))
-

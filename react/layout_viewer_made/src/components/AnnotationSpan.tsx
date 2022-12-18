@@ -25,7 +25,7 @@ import {
    validateSpans,
    valueText,
 } from '../helpers/span_tools'
-import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons'
+import {CheckOutlined, MinusCircleOutlined, PlusCircleOutlined} from '@ant-design/icons'
 import { CAPTCHA, NORMAL, Slot } from '../contexts/SLOTS'
 import Resource from '../resources/Resource'
 import SelectText from './SelectText'
@@ -50,7 +50,7 @@ const hints = {
 }
 export function AnnotationModal({ text, onClose, service }) {
    const ref = useRef(null) // ref => { current: null }
-
+console.log(ref?.current)
    return (
       <ClickBoundary>
          <div data-backdrop="false">
@@ -136,6 +136,7 @@ const AnnotationSpan = forwardRef<
    ) => {
       const [annotation, setAnnotation] = useState(null)
       const [errors, setErrors] = useState(null)
+      const [success, setSuccess] = useState(false)
       const [kind, setKind] = useState(TAG_SET[0])
 
       const context = useContext<DocumentContext>(DocumentContext)
@@ -184,6 +185,7 @@ const AnnotationSpan = forwardRef<
          inputRef: inputRef,
          onCloseSave: onCloseSave,
          onCloseDiscard: onCloseDiscard,
+         success:success
       }))
 
       const onCloseSave = () => {
@@ -193,17 +195,19 @@ const AnnotationSpan = forwardRef<
          const newAnnotation = spans2annotation(annotation, newSpans)
 
          const _errors = validateSpans(newSpans, newAnnotation, TAG_SET)
+         setErrors(_errors)
          if (_errors.length > 0) {
-            setErrors(_errors)
+                        setSuccess(false)
+
             return false
          }
          ;(async () => {
-            await service.change('[1].annotation', newAnnotation, (r) => {
-               console.debug('updated', r)
-            })
             await service.save(value, newAnnotation, (r) =>
                console.debug('saved', r),
             )
+            setSuccess(true)
+            setErrors([])
+
          })()
          onClose()
          return true
@@ -212,6 +216,8 @@ const AnnotationSpan = forwardRef<
       const onCloseDiscard = () => {
          service.cancel(value, {}, () => console.debug('dicarded'))
          onClose()
+                     setSuccess(true)
+
          return true
       }
 
@@ -440,8 +446,7 @@ const AnnotationSpan = forwardRef<
                            </div>
                         </Card>
                      </Row>
-                  </div>
-
+              {success && <CheckOutlined />}    </div>
                   {errors?.map((e) => (
                      <div style={{ background: 'red' }}>{e}</div>
                   ))}

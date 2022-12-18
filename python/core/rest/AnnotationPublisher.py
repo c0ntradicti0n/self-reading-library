@@ -90,16 +90,15 @@ class DifferenceAnnotationPublisher(RestPublisher):
         print(req.media)
         id, annotation = req.media
         annotation_filename = bas64encode(id) + "--" + hashval(annotation)
+        path = config.ELMO_DIFFERENCE_COLLECTION_PATH +"/" +annotation_filename+ ".conll"
         with open(
-            config.ELMO_DIFFERENCE_COLLECTION_PATH
-            + "/"
-            + annotation_filename
-            + ".conll",
+            path,
             "w",
         ) as f:
             f.write(annotation2conll(annotation))
 
         resp.status = falcon.HTTP_OK
+        resp.text = path, {}
 
 
 if __name__ == "__main__":

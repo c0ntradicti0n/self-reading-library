@@ -35,8 +35,13 @@ class GraphDBSearch(PathSpec):
         with catalog.getRepository("difference", Repository.ACCESS) as repository:
             repository.initialize()
             self.conn = repository.getConnection()
-        self.conn.createFreeTextIndex("index1", tokenizer="japanese", predicates=Span.FTS_Uris, wordFilters=[], stopWords=[])
-
+        self.conn.createFreeTextIndex(
+            "index1",
+            tokenizer="japanese",
+            predicates=Span.FTS_Uris,
+            wordFilters=[],
+            stopWords=[],
+        )
 
     def __call__(self, prediction_metas, *args, **kwargs):
         for i, (search, meta) in enumerate(prediction_metas):
