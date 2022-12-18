@@ -36,7 +36,7 @@ scrape_test:
 up:
 	USER=$$USER CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain  docker-compose up -d
 down:
-	CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose down -v
+	CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose down
 
 dockerlogs:
 	docker logs -f rest

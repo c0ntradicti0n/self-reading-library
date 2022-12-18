@@ -83,6 +83,9 @@ services:
       AGRAPH_SUPER_PASSWORD: ${GDB_PASSWORD}
     ports:
       - 10000-10035:10000-10035
+    volumes:
+      - "$CWD/gdb/data:/agraph/data"
+      - "$CWD/gdb/etc:/agraph/etc"
   fe:
     build:
       context: react

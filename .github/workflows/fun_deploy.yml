@@ -59,7 +59,7 @@ jobs:
         run: |
           ssh staging '   
               cd self-reading-library
-              make down up
+              make up
           '
       - name: InstallTts
         run: |
