@@ -157,6 +157,8 @@ class Pager(PathSpec):
                 self.logger.info("finishing?")
                 return
 
+
+
             ElmoPredict.q2[self.flags["service_id"]].put(
                 (
                     window,
@@ -194,6 +196,7 @@ class Pager(PathSpec):
         # * _i2 -> index of the text, after it was splitted again in more rational
         #      words
         #
+        sent = []
         windowing = True
         start_i2 = 0
         sentence_marks = [0] + [
@@ -224,10 +227,11 @@ class Pager(PathSpec):
             j = min(sentence_marks, key=lambda _m: abs(_m - self.max_window))
             window = rest_text[:j]
 
-            if not window:
-                self.logger.info("Zero text, reset window")
+            if not window or str(window) in sent:
+                self.logger.info("Zero or repeating text, resetting window")
                 window = rest_text[: self.max_window]
 
+            sent.append(str(window))
             consumed_tokens = yield window, {}
 
             if consumed_tokens == 0 and loop_count > 0:
