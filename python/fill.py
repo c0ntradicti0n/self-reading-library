@@ -66,14 +66,17 @@ def run_extra_threads():
 
     def update_knowledge_graph_thread():
         path = config.GOLD_DATASET_PATH + "/" + config.GOLD_SPAN_ID
-        with wait_for_change(path):
+
+        def graph_db_update():
             result = list(
                 ant(
                     "span_annotation.collection.fix",
                     "span_annotation.collection.graph_db",
                 )([metaize([None])], service_id=config.GOLD_SPAN_ID)
             )
-        assert result
+            assert result
+        wait_for_change(path, graph_db_update)
+
 
     threading.Thread(target=update_knowledge_graph_thread, name="knowledge").start()
 
