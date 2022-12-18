@@ -42,13 +42,6 @@ RUN CHROMEDRIVER_VERSION=`curl -sS chromedriver.storage.googleapis.com/LATEST_RE
     chmod +x /opt/chromedriver-$CHROMEDRIVER_VERSION/chromedriver && \
     ln -fs /opt/chromedriver-$CHROMEDRIVER_VERSION/chromedriver /usr/local/bin/chromedriver
 
-# Install Google Chrome
-RUN curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
-    echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list && \
-    apt-get -yqq update && \
-    apt-get -yqq install google-chrome-stable && \
-    rm -rf /var/lib/apt/lists/*
-
 # set display port to avoid crash
 ENV DISPLAY=:99
 
@@ -68,8 +61,8 @@ COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt --use-deprecated=legacy-resolver
 
 RUN pip install weasyprint
-RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.focal_amd64.deb
-RUN apt -y install ./wkhtmltox_0.12.6-1.focal_amd64.deb
+RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.bionic_amd64.deb
+RUN sudo apt install ./wkhtmltox_0.12.6-1.bionic_amd64.deb
 
 
 RUN apt update && apt install  openssh-server  -y
