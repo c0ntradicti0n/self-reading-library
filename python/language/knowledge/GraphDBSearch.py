@@ -1,6 +1,8 @@
 import itertools
 import json
+import logging
 import os
+import time
 from functools import reduce
 from textwrap import wrap
 
@@ -23,8 +25,18 @@ from language.span.DifferenceSpanSet import SUBJECT, Span, DifferenceSpanSet
     "span_annotation.collection.graph_db",
 )
 class GraphDBSearch(PathSpec):
+    conn = None
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        while not self.conn:
+            try:
+                self.login()
+            except:
+                logging.error("Trying to login into graph db again", exc_info=True)
+            time.sleep(1)
+
+    def login(self):
         self.server = AllegroGraphServer(
             host=os.environ.get("GDB_HOST", "localhost"),
             port=10035,
@@ -35,6 +47,7 @@ class GraphDBSearch(PathSpec):
         with catalog.getRepository("difference", Repository.ACCESS) as repository:
             repository.initialize()
             self.conn = repository.getConnection()
+
         self.conn.createFreeTextIndex(
             "index1",
             tokenizer="japanese",
