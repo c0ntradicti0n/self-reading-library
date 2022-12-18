@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Tree from 'react-d3-tree'
 import * as d3 from 'd3'
-import {router} from "next/client";
-
+import {useRouter} from "next/router";
   function wrap(text, width) {
    const _dy = -1
   text.each(function() {
@@ -657,7 +656,7 @@ const rec_hierarchy = (name, data, value = 100) => {
            },
         ]
 }
-const chart = (data, ref, width, height) => {
+const chart = (data, ref, width, height, router) => {
    let root = pack(data, width, height)
    let focus = root
    let view
@@ -783,7 +782,7 @@ export default function CirclePack({ data }) {
       window.addEventListener('resize', handleResize)
    })
    const svgRef = React.useRef(null)
-
+const router = useRouter();
    useEffect(() => {
       const hierarchy = {
          name: 'library',
@@ -799,7 +798,7 @@ export default function CirclePack({ data }) {
             },
          ],
       }
-      chart(hierarchy, svgRef, window.innerWidth, window.innerHeight * 0.97)
+      chart(hierarchy, svgRef, window.innerWidth, window.innerHeight * 0.97, router)
 
 
    }, [trick])

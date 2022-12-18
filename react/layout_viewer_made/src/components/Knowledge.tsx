@@ -56,7 +56,8 @@ export const Knowledge = ({ service, slot }) => {
                      `}
             aria-modal={false}
          >
-            <SceletonGraph data={context.meta[slot]} />
+                         <SceletonGraph data={context.meta[slot]} />
+
          </div>
       </div>
    )
