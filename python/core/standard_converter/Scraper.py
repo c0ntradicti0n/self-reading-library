@@ -1,4 +1,6 @@
 import os
+import urllib
+from urllib.parse import urlparse
 
 if __name__ == "__main__":
     import sys
@@ -108,6 +110,25 @@ class Scraper(PathSpec):
                             """,
                 element,
             )
+        bad_images = driver.find_elements("xpath", "//*/img[starts-with(@src,'/')]")
+        for element in bad_images:
+            if element.size["height"] == 0:
+                driver.execute_script(
+                    f"""
+                                            arguments[0].remove()
+                                            """,
+                    element,
+                )
+            else:
+                driver.execute_script(
+                    f"""
+                                var img = document.createElement('img');
+                                img.width = {element.size['width']}
+                                img.src =\"data:image/png;base64, {element.screenshot_as_base64}\"
+                                arguments[0].outerHTML = img.outerHTML
+                                """,
+                    element,
+                )
         try:
             button = driver.find_element("xpath", "//*[text()='Accept']")
             button.click()

@@ -27,6 +27,8 @@ class NodeEdges(PathSpec):
             nodes_edges = self.generate_nodes_edges(result)
             res = NodeEdges.merge_nested(nodes_edges)
             res["nodes"] = unique(res["nodes"], key=lambda n: str(n["id"]))
+            res["edges"] = unique(res["edges"], key=lambda n: str(n["id"]))
+
             yield path, res
 
     def generate_nodes_edges(self, result):

@@ -369,9 +369,6 @@ $if(lang)$
 \usepackage[bidi=default]{babel}
 \fi
 \babelprovide[main,import]{$babel-lang$}
-$for(babel-otherlangs)$
-\babelprovide[import]{$babel-otherlangs$}
-$endfor$
 % get rid of language-specific shorthands (see #6817):
 \let\LanguageShortHands\languageshorthands
 \def\languageshorthands#1{}
