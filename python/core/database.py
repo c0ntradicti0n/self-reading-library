@@ -119,14 +119,7 @@ class Queue:
                 item = self.table.sort_by("date").limit(1).execute()
         except sqlalchemy.exc.DatabaseError:
             logging.error(f"Database error {row_id=} {id=}", exc_info=True)
-            try:
-                item = self.table.sort_by("date").limit(1).execute()
-            except:
-                if row_id:
-                    self.task_done(row_id)
-                else:
-                    self.delete_task(id)
-                    logging.warning("database broke, deleting " + id)
+            item = self.table.sort_by("date").limit(1).execute()
 
         try:
             self.row_id = item.iloc[0].row_id

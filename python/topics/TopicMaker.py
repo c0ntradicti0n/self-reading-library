@@ -106,7 +106,7 @@ class TopicMaker(PathSpec):
         return topics, meta
 
     def topicize_recursively(
-        self, embeddings, meta, texts, split_size=10, max_level=5, level=0
+        self, embeddings, meta, texts, split_size=6, max_level=7, level=0
     ):
         logging.info(f"Making Topics {level + 1} of maximally {max_level + 1}")
         labels = self.cluster(embeddings=embeddings)

@@ -84,7 +84,7 @@ EXPOSE 22
 
 RUN mkdir /.allennlp  && mkdir /.allennlp/cache  && chmod -R 777 /.allennlp
 RUN mkdir /nltk_data  && chmod -R 777 /nltk_data
-
+RUN mkdir /.local  && chmod -R 777 /.local
 RUN ls
 
 RUN python3 -c 'import nltk; nltk.download("wordnet"); nltk.download("omw-1.4")'

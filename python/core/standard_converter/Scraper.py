@@ -79,7 +79,7 @@ class Scraper(PathSpec):
         driver = webdriver.Chrome(options=chrome_options)
         driver.get(url)
 
-        time.sleep(3)
+        time.sleep(20)
 
         elements = driver.find_elements(By.CSS_SELECTOR, "svg")
         time.sleep(3)

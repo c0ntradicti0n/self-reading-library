@@ -58,6 +58,8 @@ fe:
 docker-fill:
 	docker-compose build fill && docker-compose up fill -d && docker logs -f fill
 
+logs:
+	docker-compose logs -f -t
 
 
 sync_from_host:
