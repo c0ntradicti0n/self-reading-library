@@ -90,7 +90,7 @@ export default function SceletonGraph({
                }}
                nodeCanvasObject={(node, ctx, globalScale) => {
                    const label = node.label
-                  const fontSize = 4*(Math.sqrt((Math.sqrt((Math.sqrt( globalScale))))))
+                  const fontSize = 2*(Math.sqrt((Math.sqrt((Math.sqrt( globalScale))))))
                   ctx.font = `${fontSize}px Computer Modern`
                   const textWidth = ctx.measureText(label).width
                   const bckgDimensions = [textWidth, fontSize].map(

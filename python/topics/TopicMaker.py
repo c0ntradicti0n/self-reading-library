@@ -150,7 +150,7 @@ class TopicMaker(PathSpec):
         g = mixture.GaussianMixture(
             n_components=min(int(X.shape[0] / 3 + 0.5), 10),
             covariance_type="tied",
-            reg_covar=1e-6,
+            reg_covar=1e-4,
             n_init=20,
             max_iter=50,
         )
