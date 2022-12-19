@@ -135,7 +135,7 @@ class RestQueue:
         if not data and get_other:
             logging.info(f"No file prepared for {id}, getting default")
 
-            data = q[self.service_id].get(self.service_id)
+            data = q[self.service_id].get(None)
 
             if data:
                 q[self.service_id].task_done()

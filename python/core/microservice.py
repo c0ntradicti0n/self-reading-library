@@ -107,14 +107,10 @@ class microservice:
 
     def on_post(self, req, resp):
         try:
-            print(req.media)
             args, kwargs = req.media
-
             res = self.p(*args, **kwargs)
-            print(res)
             resp.text = json.dumps(res)
             resp.status = falcon.HTTP_200
-            print(resp)
         except Exception as e:
             print(e)
             logging.error("Could not calculate result", exc_info=True)
