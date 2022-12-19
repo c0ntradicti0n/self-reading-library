@@ -67,7 +67,6 @@ export default function SceletonGraph({
             fgRef.current.d3Force("center", d3.forceManyBody().strength(-20))
         }
     }, [fgRef])
-            console.log(fgRef)
 
    return (
       <div
@@ -90,7 +89,6 @@ export default function SceletonGraph({
                   node.fy = node.y
                }}
                nodeCanvasObject={(node, ctx, globalScale) => {
-                  console.log(node)
                    const label = node.label
                   const fontSize = 4*(Math.sqrt((Math.sqrt((Math.sqrt( globalScale))))))
                   ctx.font = `${fontSize}px Computer Modern`

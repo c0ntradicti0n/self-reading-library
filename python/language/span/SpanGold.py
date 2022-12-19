@@ -12,7 +12,7 @@ from helpers.conll_tools import conll_file2annotation
 from language.span.DifferenceSpanSet import DifferenceSpanSet
 
 AnnotationSpanToGoldQueueRest = RestQueue(
-    service_id="gold_span_annotation", update_data=lambda x: print(x), rated_queue=True
+    service_id="gold_span_annotation", update_data=lambda x: x, rated_queue=True
 )
 
 

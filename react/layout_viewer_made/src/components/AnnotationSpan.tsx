@@ -202,6 +202,9 @@ const AnnotationSpan = forwardRef<
             return false
          }
          ;(async () => {
+                        await service.change('[1].annotation', newAnnotation, (r) => {
+               console.debug('updated', r)
+            })
             await service.save(value, newAnnotation, (r) =>
                console.debug('saved', r),
             )

@@ -65,32 +65,20 @@ class GraphDBSearch(PathSpec):
     def search(self, search_string, limit=100):
         query = self.conn.prepareTupleQuery(
             query=f"""
-            prefix : <http://polarity.science/knowledge/> 
-            
-            select ?super ?sub (count(?mid) as ?distance)  {{ 
+                        prefix : <http://polarity.science/knowledge/>
+
+            select distinct(count(?mid) as ?distance) ?super ?s1 ?s2 ?text1 ?text2 ?p  {{
               ?s fti:match "{search_string}"  .
               ?super :difference* ?mid .
-              ?mid :difference+ ?sub .            
+{{ ?mid :difference ?s1 }} Union {{ ?mid :equal ?s1 }}Union {{ ?mid :SUBJECT ?s1 }} Union {{ ?mid :explains ?s1 }}  Union {{ ?mid :CONTRAST ?s1 }}.
               ?super ?q ?s .
-            }}
-            group by ?super ?sub 
-            order by ?super ?sub
-        """
-        )
-        result = query.evaluate()
-        nl = "\n"
-        ids = list(map(lambda x: x[1], result.string_tuples))
-        result = self.conn.prepareTupleQuery(
-            query=f"""
-                prefix : <http://polarity.science/knowledge/> 
-
-                select  ?s1 ?s2 ?text1 ?text2  ?p  {{ 
-                      VALUES ?p {{ :SUBJECT :CONTRAST :explains :equal :forward_difference }}
-                      VALUES ?s1 {{ {nl.join(ids)} }}
+              VALUES ?p {{ :SUBJECT :CONTRAST :explains :equal :forward_difference }}
                       ?s1 ?p ?s2 .
                       ?s1 :text ?text1 .
                       ?s2 :text ?text2 .
-                }}
+            }}
+            group by ?distance ?super ?s1 ?s2 ?text1 ?text2 ?p
         """
-        ).evaluate()
+        )
+        result = query.evaluate()
         return result
