@@ -40,6 +40,7 @@ server {
     }
 
     location ^~ /api/ {
+        client_max_body_size 100M;
         # reverse proxy for backend server
         proxy_pass http://be:9999/;
         proxy_http_version 1.1;
