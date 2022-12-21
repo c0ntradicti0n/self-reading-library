@@ -32,9 +32,6 @@ class KnowledgePublisher(RestPublisher):
             "span_annotation.collection.nodes_edges",
         )
 
-    def search(self, search):
-        search, result = list(self.pipeline(metaize([search])))[0]
-
     def on_get(self, req, resp, id=None):
         result = list(
             self.pipeline(

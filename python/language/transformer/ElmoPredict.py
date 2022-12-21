@@ -1,10 +1,14 @@
 from allennlp.common import Params
 from allennlp.predictors import Predictor
 from texttable import Texttable
+
+from config import config
 from core.pathant.PathSpec import PathSpec
 from allennlp.models.model import Model
 
+from helpers.conll_tools import annotation2conll_file
 from helpers.model_tools import BEST_MODELS
+from helpers.random_tools import chance
 from language.transformer.difference_predictor.difference_predictor import (
     DifferenceTaggerPredictor,
 )
@@ -72,12 +76,11 @@ class ElmoPredict(PathSpec):
                         break
 
                 try:
-                    annotation = self.predict(words)
+                    annotation = self.predict(words, pdf_path)
                 except Exception as e:
                     self.logger.error(
                         "Faking annotation because of error " + str(e), stack_info=True
                     )
-                    annotation = [("O", w) for w in words]
                     raise
 
                 if "words" in meta:
@@ -117,10 +120,17 @@ class ElmoPredict(PathSpec):
 
             self.init_queues()
 
-    def predict(self, words):
+    def predict(self, words, path):
         annotation = self.predictor.predict_json({"sentence": words})
         subj_annotation = [(t, w) for t, w in annotation if "SUBJ" in t]
         self.info(subj_annotation)
+
+        if chance(0.2):
+            self.logger.info("Randomly saving annotation to dataset " + str(words))
+            new_folder = config.GOLD_DATASET_PATH + "/" + config.GOLD_SPAN_ID + "/"
+            filename = path.replace(config.ELMO_DIFFERENCE_COLLECTION_PATH, "")
+            annotation2conll_file(annotation, filename, new_folder)
+
         return annotation
 
     def load(self):

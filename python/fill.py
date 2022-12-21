@@ -78,6 +78,7 @@ def run_extra_threads():
             assert result
 
         wait_for_change(path, graph_db_update)
+
     threading.Thread(target=update_knowledge_graph_thread, name="knowledge").start()
 
     def update_topics_thread():
@@ -85,16 +86,11 @@ def run_extra_threads():
 
         def topics_update():
             result = list(
-                zip(
-                    *list(
-                        ant("arxiv.org", "topics.graph", from_cache_only=True)([])
-                    )
-                )
+                zip(*list(ant("arxiv.org", "topics.graph", from_cache_only=True)([])))
             )
             assert result
 
         wait_for_change(path, topics_update)
-
 
     threading.Thread(target=update_topics_thread, name="topics").start()
 

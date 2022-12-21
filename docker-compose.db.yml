@@ -1,0 +1,36 @@
+version: "3"
+services:
+
+  db:
+    image: postgres
+    container_name: db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: "db"
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+      POSTGRES_USER: python
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST: "localhost"
+      CREATE_FRONTEND: "True"
+    restart: "unless-stopped"
+
+  gdb:
+    image: franzinc/agraph
+    container_name: gdb
+    restart: unless-stopped
+    shm_size: 1g
+    environment:
+      AGRAPH_SUPER_USER: ich
+      AGRAPH_SUPER_PASSWORD: ${GDB_PASSWORD}
+    ports:
+      - 10000-10035:10000-10035
+    volumes:
+      - "$CWD/gdb/data:/agraph/data"
+      - "$CWD/gdb/etc:/agraph/etc"
+
+
+
+
+
+

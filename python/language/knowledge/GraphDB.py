@@ -1,20 +1,12 @@
 import itertools
 import json
 import logging
-import os
 import time
 from functools import reduce
-from textwrap import wrap
 
-from franz.openrdf.repository import Repository
-from franz.openrdf.sail import AllegroGraphServer
-from more_itertools import pairwise, flatten
-
-from config import config
+from core.database import login
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
-from helpers.cache_tools import configurable_cache
-from helpers.list_tools import unique, nest
 from helpers.time_tools import timeit_context
 from language.span.DifferenceSpanSet import SUBJECT, Span, DifferenceSpanSet
 
@@ -25,26 +17,10 @@ from language.span.DifferenceSpanSet import SUBJECT, Span, DifferenceSpanSet
 )
 class GraphDB(PathSpec):
     conn = None
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        while not self.conn:
-            try:
-                self.login()
-            except:
-                logging.error("Trying to login into graph db again", exc_info=True)
-            time.sleep(1)
-
-    def login(self):
-        self.server = AllegroGraphServer(
-            host=os.environ.get("GDB_HOST", "localhost"),
-            port=10035,
-            user=os.environ.get("GDB_USER", "ich"),
-            password=os.environ.get("GDB_PASSWORD", "qwertz"),
-        )
-        catalog = self.server.openCatalog()
-        with catalog.getRepository("difference", Repository.ACCESS) as repository:
-            repository.initialize()
-            self.conn = repository.getConnection()
+        self.conn = login("difference")
 
     def __call__(self, prediction_metas, *args, **kwargs):
         for i, (path, meta) in enumerate(prediction_metas):

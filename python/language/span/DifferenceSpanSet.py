@@ -19,7 +19,6 @@ from spacy_wordnet.wordnet_annotator import WordnetAnnotator
 from helpers.span_tools import annotation2span_sets
 
 
-BASE = "http://polarity.science/knowledge/"
 SUBJECT = "SUBJECT"
 CONTRAST = "CONTRAST"
 stemmer = SnowballStemmer("english")
@@ -44,7 +43,7 @@ class Span:
 
             Span._nlp = spacy.load("en_core_web_sm")
             Span._nlp.add_pipe("spacy_wordnet", after="tagger")
-            Span._nlp.disable_pipes('tok2vec', 'parser', "ner")
+            Span._nlp.disable_pipes("tok2vec", "parser", "ner")
 
             try:
                 Span._nlp("test this text")
@@ -57,6 +56,7 @@ class Span:
     def __post_install(self):
 
         import nltk
+
         nltk.download("wordnet")
         nltk.download("omw-1.4")
 

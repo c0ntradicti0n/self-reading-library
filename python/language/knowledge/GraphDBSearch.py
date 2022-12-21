@@ -11,6 +11,7 @@ from franz.openrdf.sail import AllegroGraphServer
 from more_itertools import pairwise, flatten
 
 from config import config
+from core.database import login
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from helpers.cache_tools import configurable_cache
@@ -29,25 +30,7 @@ class GraphDBSearch(PathSpec):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        while not self.conn:
-            try:
-                self.login()
-            except:
-                logging.error("Trying to login into graph db again", exc_info=True)
-            time.sleep(1)
-
-    def login(self):
-        self.server = AllegroGraphServer(
-            host=os.environ.get("GDB_HOST", "localhost"),
-            port=10035,
-            user=os.environ.get("GDB_USER", "ich"),
-            password=os.environ.get("GDB_PASSWORD", "qwertz"),
-        )
-        catalog = self.server.openCatalog()
-        with catalog.getRepository("difference", Repository.ACCESS) as repository:
-            repository.initialize()
-            self.conn = repository.getConnection()
-
+        self.conn = login("difference")
         self.conn.createFreeTextIndex(
             "index1",
             tokenizer="japanese",

@@ -20,8 +20,8 @@ def wait_for_change(path, f, logger=logging.getLogger(__name__)):
         if os.path.getmtime(path) > o_time:
             logger.info(f"{path} changed, working!")
             try:
+                o_time = os.path.getmtime(path)
                 f()
             except Exception as e:
                 logger.error(f"Exception on event for {path}", exc_info=True)
-            o_time = os.path.getmtime(path)
         time.sleep(1)

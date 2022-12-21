@@ -256,7 +256,6 @@ class RestQueue:
         resp.media = {"status": "ok"}
         resp.status = falcon.HTTP_OK
 
-
     def on_post(self, req, resp, id=None, *args, **kwargs):
         if isinstance(req.media, str):
             doc_id = req.media

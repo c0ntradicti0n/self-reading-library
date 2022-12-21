@@ -8,7 +8,7 @@ from core.event_binding import queue_iter, RestQueue, q, d
 from helpers.cache_tools import configurable_cache
 import logging
 
-from helpers.conll_tools import conll_file2annotation
+from helpers.conll_tools import conll_file2annotation, annotation2conll_file
 from language.span.DifferenceSpanSet import DifferenceSpanSet
 
 AnnotationSpanToGoldQueueRest = RestQueue(
@@ -107,18 +107,10 @@ class AnnotatorSaveFinal(PathSpec):
             if not os.path.isdir(new_folder):
                 os.makedirs(new_folder)
 
-            words, tags = list(zip(*meta["annotation"]))
             pos = meta["pos"]
-            pos_tags = [
-                p if "-" not in tag else tag[:2] + p
-                for (word, tag), p in zip(meta["annotation"], pos)
-            ]
-            content = "\n".join("\t".join(t) for t in zip(words, pos, pos_tags, tags))
-            if not os.path.isdir(new_folder):
-                os.makedirs(new_folder)
-            new_path = new_folder + "/" + filename
-            with open(new_path, "w") as f:
-                f.write(content)
+            annotation = meta["annotation"]
+
+            new_path = annotation2conll_file(annotation, filename, new_folder, pos)
             yield new_path, meta
 
 

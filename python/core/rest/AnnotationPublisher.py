@@ -90,7 +90,12 @@ class DifferenceAnnotationPublisher(RestPublisher):
         print(req.media)
         id, annotation = req.media
         annotation_filename = bas64encode(id) + "--" + hashval(annotation)
-        path = config.ELMO_DIFFERENCE_COLLECTION_PATH +"/" +annotation_filename+ ".conll"
+        path = (
+            config.ELMO_DIFFERENCE_COLLECTION_PATH
+            + "/"
+            + annotation_filename
+            + ".conll"
+        )
         with open(
             path,
             "w",

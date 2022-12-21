@@ -157,8 +157,6 @@ class Pager(PathSpec):
                 self.logger.info("finishing?")
                 return
 
-
-
             ElmoPredict.q2[self.flags["service_id"]].put(
                 (
                     window,

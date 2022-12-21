@@ -188,3 +188,7 @@ TRASH_DATASET_PATH = hidden_folder + "/trash"
 MIN_CAPTCHA_TRIALS = 3
 
 captcha_queue_size = 15
+
+DB_NAME = "db"
+URL = "http://polarity.science"
+BASE = f"{URL}/knowledge/"

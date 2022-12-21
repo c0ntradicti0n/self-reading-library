@@ -24,7 +24,7 @@ build_fe:
 over:
 	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose -f docker-compose.override.yaml  build
 overup:
-	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose -f docker-compose.override.yaml  up
+	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose -f docker-compose.override.yaml  up --build
 overdown:
 	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose -f docker-compose.override.yaml down
 
