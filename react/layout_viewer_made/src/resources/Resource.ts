@@ -28,7 +28,6 @@ export default class Resource {
    delete_allowed: Boolean
    upload_allowed: Boolean
 
-   id: string = ''
    slot: Slot
 
    constructor(
@@ -38,7 +37,6 @@ export default class Resource {
       upload_allowed = true,
       correct_allowed = true,
       delete_allowed = true,
-      no_id = false,
    ) {
       this.route = route
       this.get_allowed = get_allowed
@@ -47,30 +45,6 @@ export default class Resource {
       this.correct_allowed = correct_allowed
       this.upload_allowed = upload_allowed
       this.delete_allowed = delete_allowed
-
-      let id: string
-
-      if (
-         (typeof window !== 'undefined' && this.slot === NORMAL) ||
-         (!this.slot && !no_id)
-      ) {
-         if (!localStorage.getItem(route)) {
-            id = getRandomArbitrary(100000, 999999).toString()
-            localStorage.setItem(route, id)
-         } else {
-            id = localStorage.getItem(route)
-         }
-         console.debug(
-            localStorage,
-            route,
-            localStorage.getItem(route),
-            new window.URLSearchParams(window.location.search).get('id'),
-         )
-
-         this.id = `/${id}_${cyrb53(
-            new window.URLSearchParams(window.location.search).get('id'),
-         )}`
-      }
    }
 
    setSlot = (slot) => (this.slot = slot)
@@ -94,16 +68,6 @@ export default class Resource {
             console.debug(querystring)
          }
       }
-      console.debug(
-         'Resource request',
-         this,
-         querystring,
-         method,
-         data,
-         callback,
-         is_file,
-         query,
-      )
 
       const fetch_init: RequestInit = {
          method: method.toUpperCase(),
@@ -122,7 +86,6 @@ export default class Resource {
       const request_query =
          BACKEND_HOST +
          this.route +
-         this.id +
          (querystring ? '?' + querystring : '')
 
       try {
@@ -169,21 +132,21 @@ export default class Resource {
       }
    }
 
-   ok = async (id, url = '', data = {}, callback) => {
+   ok = async (id, url = '', data = {}, callback, params) => {
       if (this.read_allowed) {
-         await this.request('post', id, callback)
+         await this.request('post', id, callback, params)
       }
    }
 
-   change = async (json_path, value, callback) => {
+   change = async (json_path, value, callback, params) => {
       if (this.upload_allowed) {
-         await this.request('put', [json_path, value], callback)
+         await this.request('put', [json_path, value], callback, params)
       }
    }
 
-   save = async (id, data = {}, callback) => {
+   save = async (id, data = {}, callback, params) => {
       if (this.upload_allowed) {
-         await this.request('post', [id, data], callback)
+         await this.request('post', [id, data], callback, params)
       }
    }
 

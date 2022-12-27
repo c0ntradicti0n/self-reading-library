@@ -98,6 +98,9 @@ class ElmoPredict(PathSpec):
                             )
                         except StopIteration as e:
                             consumed_tokens = len(words)
+                        except TypeError:
+                            consumed_tokens = len(words)
+                            self.logger("Error annotating document", exc_info=True)
 
                         if consumed_tokens == 0:
                             consumed_tokens = 100

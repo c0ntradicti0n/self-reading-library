@@ -5,6 +5,7 @@ from enum import Enum
 from config import config
 import logging
 from config import config
+from core.graph_logger import GraphHandler
 
 
 class cache_flow(Enum):
@@ -17,12 +18,15 @@ class PathSpec:
     def __init__(self, *args, path_spec=None, cached: cache_flow = None, **kwargs):
         self.path_spec = path_spec
         logger = logging.getLogger(sys.modules[self.__class__.__module__].__file__)
+        logger.addHandler(GraphHandler())
+
         coloredlogs.install(
             fmt="%(asctime)s-" "%(levelname)s-%(name)s:%(message)s",
             level=config.logging_level,
             logger=logger,
         )
         self.logger = logger
+
 
         self.temporary = config.hidden_folder
 

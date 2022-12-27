@@ -31,21 +31,20 @@ def create_app():
 
     publishing = {
         # difference
-        "/difference/{id}": ElmoDifferenceQueueRest,
-        "/difference_annotation/{id}": DifferenceAnnotationPublisher,
+        "/difference": ElmoDifferenceQueueRest,
+        "/difference_annotation": DifferenceAnnotationPublisher,
         # layout
-        "/annotation_captcha/{id}": AnnotationQueueRest,
-        "/upload_annotation/{id}": UploadAnnotationQueueRest,
-        "/layout/{id}": LayoutPublisher,
+        "/annotation_captcha": AnnotationQueueRest,
+        "/upload_annotation": UploadAnnotationQueueRest,
+        "/layout": LayoutPublisher,
         # captcha
-        "/difference_captcha/{id}": AnnotationSpanToGoldQueueRest,
-        "/layout_captcha/{id}": AnnotatedToGoldQueueRest,
+        "/difference_captcha": AnnotationSpanToGoldQueueRest,
         "/layout_captcha": AnnotatedToGoldQueueRest,
         # ----
-        "/library/{id}": TopicsPublisher,
-        "/audiobook/{id}": AudioPublisher,
-        "/knowledge/{id}": KnowledgePublisher,
-        "/ant/{id}": AntPublisher,
+        "/library": TopicsPublisher,
+        "/audiobook": AudioPublisher,
+        "/knowledge": KnowledgePublisher,
+        "/ant": AntPublisher,
     }
 
     from falcon_cors import CORS

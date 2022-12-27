@@ -169,7 +169,7 @@ class RestQueue:
         logging.info(f"Ok {id}")
         item = q[id if id in q else self.service_id].get(id)
         d[self.service_id].put(id, item)
-        q[id if id in q else self.service_id].task_done()
+        q[id if id in q else self.service_id].task_done(item[0])
 
     def discard(self, id):
         try:
@@ -179,18 +179,18 @@ class RestQueue:
         except Exception as e:
             raise e
 
-    def on_get(self, req, resp, id=None):
+    def on_get(self, req, resp):
         # get value from before
         path_url = req.get_param("id", default=None)
-        data = self.get(id, get_other=not path_url)
+        data = self.get(path_url, get_other=not path_url)
 
         if not data and path_url:
             doc_id, url = path_or_url_encoded(path_url)
 
-            logging.info(f"Annotate new document {doc_id=} {id=} {url=}")
-            init_queues(self.service_id, id)
-            data = self.work_on_upload(doc_id, service_id=id, url=url)
-            q[self.service_id].put(id, data)
+            logging.info(f"Annotate new document {doc_id=} {url=}")
+            init_queues(self.service_id, path_url)
+            data = self.work_on_upload(doc_id, service_id=path_url, url=url)
+            q[self.service_id].put(path_url, data)
 
         if not data:
             logging.info("Returning No Content")
@@ -204,6 +204,8 @@ class RestQueue:
     def on_put(self, req, resp, id=None):  # edit, update image
         result = req.media
         path, value = result
+        if "doc_id" in req.params:
+            id = req.params["doc_id"]
         item = self.get(id)
         if path:
             if isinstance(path, str):
@@ -300,9 +302,7 @@ def queue_iter(service_id, gen, single=False):
                 q[service_id].put(service_id, new_val)
 
             except Exception as e:
-                if not single:
-                    raise e
-                else:
+
                     break
         else:
             logging.info("Not adding new samples, enough in queue")
@@ -325,7 +325,7 @@ def queue_iter(service_id, gen, single=False):
             if r:
                 try:
 
-                    d[service_id].task_done()
+                    d[service_id].task_done(r[0])
                     logging.info("Task done")
 
                 except Exception as e:
@@ -335,19 +335,16 @@ def queue_iter(service_id, gen, single=False):
                 if len(q[service_id]) < config.captcha_queue_size:
                     logging.debug("Inserting some new sample in the queue")
                     gc.collect()
+
                     try:
                         new_val = next(gen)
                         q[service_id].put(service_id, new_val)
-
                     except Exception as e:
-                        traceback.print_exc()
-                        # or
-                        print(sys.exc_info()[2])
                         logging.error(e, exc_info=True)
                 else:
                     logging.info("Not adding new samples, enough in queue")
 
-    print("ende")
+    print("The End")
 
 
 if __name__ == "__main__":

@@ -11,6 +11,7 @@ from franz.openrdf.vocabulary import XMLSchema
 from more_itertools import pairwise
 from nltk import SnowballStemmer
 
+from core.database import BASE
 from helpers.list_tools import unique
 from helpers.cache_tools import compressed_pickle, decompress_pickle
 from helpers.hash_tools import hashval

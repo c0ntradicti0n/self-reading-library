@@ -77,15 +77,15 @@ services:
     image: franzinc/agraph
     container_name: gdb
     restart: unless-stopped
-    shm_size: 1g
+    shm_size: 3g
     environment:
       AGRAPH_SUPER_USER: ich
       AGRAPH_SUPER_PASSWORD: ${GDB_PASSWORD}
     ports:
       - 10000-10035:10000-10035
-    volumes:
-      - "$CWD/gdb/data:/agraph/data"
-      - "$CWD/gdb/etc:/agraph/etc"
+    #volumes:
+    #  - "$CWD/gdb/data:/agraph/data"
+    #  - "$CWD/gdb/etc:/agraph/etc"
   fe:
     build:
       context: react

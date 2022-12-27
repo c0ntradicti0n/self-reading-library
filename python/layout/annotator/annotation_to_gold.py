@@ -84,17 +84,15 @@ class AnnotatorRate(PathSpec):
         ):
             id, meta = _p_m
             try:
-                rating_trial, rating_score = d[self.service].scores(id)
+                scores = d[self.service].scores(id)
             except Exception as e:
-                rating_trial = 0
-                rating_score = 0.0
                 logging.error(f"Scores not found for {id}, {self.service}")
 
-            if rating_trial > config.MIN_CAPTCHA_TRIALS:
+            if int(scores.trial) > config.MIN_CAPTCHA_TRIALS:
                 yield _p_m
             else:
                 q[self.service].put(self.service, _p_m)
-                q[self.service].rate(id, rating_score)
+                q[self.service].rate(id, float(scores.score))
 
 
 @converter(

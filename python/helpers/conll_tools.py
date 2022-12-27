@@ -29,8 +29,9 @@ def conll_file2annotation(pickle_path):
 
 
 def annotation2conll_file(annotation, filename, new_folder, pos=None):
+    tags, words = list(zip(*annotation))
+
     if not pos:
-        tags, words = list(zip(*annotation))
         logging.info(words)
         try:
             pos = nltk.pos_tag(words)

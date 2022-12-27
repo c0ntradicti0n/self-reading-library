@@ -151,6 +151,7 @@ const AnnotationBox = forwardRef(
       const [labels, setLabels] = useState(null)
       const [rectangleSelection, setRectangleSelection] = useState(null)
       const context = useContext<DocumentContext>(DocumentContext)
+      const params = {doc_id: context.value[slot]}
 
       useEffect(() => {
          document.addEventListener('keydown', key, true)
@@ -214,6 +215,7 @@ const AnnotationBox = forwardRef(
                         setFinished(true)
                      }
                   },
+                   params
                )
             })()
             return true
@@ -303,21 +305,23 @@ const AnnotationBox = forwardRef(
                   setRectangleSelection([jsonPathsToChange, next_key])
                }}
                onMouseUp={(event) => {
-                  if (rectangleSelection)
-                     service
-                        .change(
-                           rectangleSelection[0],
-                           rectangleSelection[1],
-                           (res) => {
-                              console.debug(
-                                 'changed multiple labels',
-                                 res[1].labels,
-                              )
-                              setLabels(res[1].labels)
-                           },
-                        )
-                        .catch(console.error)
-                  setRectangleSelection(null)
+                  if (rectangleSelection) {
+                      service
+                          .change(
+                              rectangleSelection[0],
+                              rectangleSelection[1],
+                              (res) => {
+                                  console.debug(
+                                      'changed multiple labels',
+                                      res[1].labels,
+                                  )
+                                  setLabels(res[1].labels)
+                              },
+                              params
+                          )
+                          .catch(console.error)
+                      setRectangleSelection(null)
+                  }
                }}
                style={{
                   backgroundColor: 'rgba(0,0,255,0.4)',
@@ -432,6 +436,7 @@ const AnnotationBox = forwardRef(
                                                 )
                                                 setLabels(res[1].labels)
                                              },
+                                              params
                                           )
                                           .catch(console.error)
                                  }}
@@ -510,6 +515,7 @@ const AnnotationBox = forwardRef(
                   </div>
                )}
             </RectangleSelection>
+             {JSON.stringify(params)}
          </div>
       ) : null
    },

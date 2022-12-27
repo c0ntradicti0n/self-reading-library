@@ -67,20 +67,18 @@ class AnnotatorRate(PathSpec):
             ):
                 value, meta = _p_m
                 try:
-                    rating_trial, rating_score = d[self.service].scores(value)
+                    score = d[self.service].scores(value)
                 except IndexError:
-                    rating_trial = 0
-                    rating_score = 0.0
                     logging.error(f"Scores not found for {value}, {self.service}")
 
-                if rating_trial >= config.MIN_CAPTCHA_TRIALS:
+                if int(score.trial) >= config.MIN_CAPTCHA_TRIALS:
                     yield _p_m
                 else:
-                    q[self.service].put(self.service, _p_m)
-                    q[self.service].rate(value, rating_score)
+                    q[self.service].put(value, _p_m)
+                    q[self.service].rate(value, float(score.score))
         except StopIteration:
             self.logger.error(
-                f"End of spans for bathing in gold for {self.flags['service_id']=}"
+                f"No more pre-annotated spans {self.flags['service_id']=}"
             )
 
 
