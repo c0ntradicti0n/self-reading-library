@@ -26,14 +26,17 @@ class GraphHandler(StreamHandler):
         stack_trace = traceback.format_stack(frame)
         logging.debug(stack_trace[:-1])
         hash = hashval(msg)
-        q = f"""
-          insert data {{{{
-             "{{threadName}}" {self.Log} "{hash}".
-             "{hash}" {self.Msg} {json.dumps(msg)}.
-             "{hash}" {self.Level} "{{levelname}}".
-         }}}}
-       """.format(**record.__dict__)
-        self.conn.executeUpdate(q)
+        try:
+            q = f"""
+              insert data {{{{
+                 "{{threadName}}" {self.Log} "{hash}".
+                 "{hash}" {self.Msg} {json.dumps(msg)}.
+                 "{hash}" {self.Level} "{{levelname}}".
+             }}}}
+           """.format(**record.__dict__)
+            self.conn.executeUpdate(q)
+        except Exception as e:
+            logging.error("Error with graph db logging", exc_info=True)
 
 
 

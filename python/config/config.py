@@ -7,7 +7,6 @@ from traceback_with_variables import activate_by_import
 from traceback_with_variables import Format, ColorSchemes, is_ipython_global
 import numpy
 
-from core.graph_logger import GraphHandler
 
 load_dotenv("../.env")
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
@@ -57,9 +56,7 @@ logging.getLogger("pytorch_transformers").setLevel(logging.ERROR)
 logging.getLogger("pdfminer").setLevel(logging.ERROR)
 logging.basicConfig(
     format="""%(asctime)s-%(levelname)s: %(message)s""",
-    datefmt="%H:%M:%S",
-    handlers=[GraphHandler(),         logging.StreamHandler(sys.stdout)
-]
+    datefmt="%H:%M:%S"
 )
 
 
