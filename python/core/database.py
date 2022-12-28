@@ -31,10 +31,13 @@ def login(db_name):
             catalog = server.openCatalog()
             with catalog.getRepository(db_name, Repository.ACCESS) as repository:
                 repository.initialize()
-                return repository.getConnection()
-        except Exception as e:
+                conn = repository.getConnection()
+                conn.setDuplicateSuppressionPolicy("spo")
+                return conn
+            except Exception as e:
             logging.error(f"retrying graph db connection for {db_name}", exc_info=True)
         time.sleep(1)
+
 
 
 class Queue:
