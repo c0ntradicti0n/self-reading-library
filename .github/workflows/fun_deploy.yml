@@ -60,7 +60,7 @@ jobs:
           ssh staging '   
               cd self-reading-library
               docker stop nginx
-              make up
+              make down up
           '
       - name: InstallTts
         run: |

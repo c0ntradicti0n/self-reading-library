@@ -515,7 +515,6 @@ const AnnotationBox = forwardRef(
                   </div>
                )}
             </RectangleSelection>
-             {JSON.stringify(params)}
          </div>
       ) : null
    },
