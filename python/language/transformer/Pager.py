@@ -80,20 +80,24 @@ class Pager(PathSpec):
                 self.logger.error("could not transpile pdf to html", exc_info=True)
                 continue
 
-            # read the text as it is referenced in the html from the reading_order file
-            # containing the class index of the tags and the string, may contain
-            # errors: f"{index}:{string}"
+
             with open(pdf2htmlEX_wordi_path, "rb") as f:
                 content = f.read()
-            content = latex_replace(content)
 
             encoding = chardet.detect(content)["encoding"]
             if not encoding:
                 encoding = "utf-8"
+            content = content.decode(encoding, errors="ignore")
+
+            content = latex_replace(content)
+
+            # read the text as it is referenced in the html from the reading_order file
+            # containing the class index of the tags and the string, may contain
+            # errors: f"{index}:{string}"
             lines = [
                 ww
                 for w in re.split(
-                    "(?![^:])\n", content.decode(encoding, errors="ignore")
+                    "(?![^:])\n", content
                 )
                 for ww in w.split("\n")
                 if ww
