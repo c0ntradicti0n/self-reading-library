@@ -100,7 +100,7 @@ class ElmoPredict(PathSpec):
                             consumed_tokens = len(words)
                         except TypeError:
                             consumed_tokens = len(words)
-                            self.logger("Error annotating document", exc_info=True)
+                            self.logger.error("Error annotating document", exc_info=True)
 
                         if consumed_tokens == 0:
                             consumed_tokens = 100
@@ -117,8 +117,7 @@ class ElmoPredict(PathSpec):
                         q1[self.flags["service_id"]].put(consumed_tokens)
 
                     except Exception as e:
-                        self.logger.error(e.__repr__())
-                        self.logger.error("Could not process " + str(words), e)
+                        self.logger.error("Could not process " + str(words), exc_info=True)
                         raise
 
             self.init_queues()
@@ -130,7 +129,7 @@ class ElmoPredict(PathSpec):
 
         if chance(0.2):
             self.logger.info("Randomly saving annotation to dataset " + str(words))
-            new_folder = config.GOLD_DATASET_PATH + "/" + config.GOLD_SPAN_ID + "/"
+            new_folder = config.ELMO_DIFFERENCE_COLLECTION_PATH + "/"
             filename = path.replace(config.ELMO_DIFFERENCE_COLLECTION_PATH, "")
             annotation2conll_file(annotation, filename, new_folder)
 

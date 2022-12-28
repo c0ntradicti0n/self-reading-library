@@ -8,6 +8,7 @@ import chardet
 from config import config
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
+from helpers.latex_tools import latex_replace
 from helpers.str_tools import str_list_ascii
 from language.nlp_helpers.Regexes import SENTENCE_END_REGEX
 from language.nlp_helpers.split_interpunction import split_punctuation
@@ -84,6 +85,7 @@ class Pager(PathSpec):
             # errors: f"{index}:{string}"
             with open(pdf2htmlEX_wordi_path, "rb") as f:
                 content = f.read()
+            content = latex_replace(content)
 
             encoding = chardet.detect(content)["encoding"]
             if not encoding:
