@@ -303,7 +303,7 @@ def queue_iter(service_id, gen, single=False):
 
             except Exception as e:
 
-                    break
+                break
         else:
             logging.info("Not adding new samples, enough in queue")
 

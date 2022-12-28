@@ -55,8 +55,7 @@ logging.getLogger("pytorch_pretrained_bert").setLevel(logging.ERROR)
 logging.getLogger("pytorch_transformers").setLevel(logging.ERROR)
 logging.getLogger("pdfminer").setLevel(logging.ERROR)
 logging.basicConfig(
-    format="""%(asctime)s-%(levelname)s: %(message)s""",
-    datefmt="%H:%M:%S"
+    format="""%(asctime)s-%(levelname)s: %(message)s""", datefmt="%H:%M:%S"
 )
 
 
@@ -193,4 +192,3 @@ MIN_CAPTCHA_TRIALS = 3
 captcha_queue_size = 15
 
 DB_NAME = "db"
-

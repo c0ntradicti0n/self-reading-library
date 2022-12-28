@@ -13,6 +13,7 @@ from addict import Dict
 from regex import regex
 
 from config import config
+
 URL = "http://polarity.science"
 BASE = f"{URL}/knowledge/"
 # Threadsafe/processsafe replacement for queues, that will not sync in forked processes
@@ -39,11 +40,10 @@ def login(db_name):
         time.sleep(1)
 
 
-
 class Queue:
     def __init__(self, service_id):
         self.conn = login(config.DB_NAME)
-        self.namespace = BASE+ service_id
+        self.namespace = BASE + service_id
         self.service_id = service_id
 
         self.Value = self.conn.createURI(self.namespace + "/is")
@@ -62,7 +62,14 @@ class Queue:
 
     def query2tuples(self, query):
         res = self.conn.executeTupleQuery(query)
-        return list(map(lambda b: Dict((v,str(b.getValue(v)).strip('"')) for v in b.variable_names), res))
+        return list(
+            map(
+                lambda b: Dict(
+                    (v, str(b.getValue(v)).strip('"')) for v in b.variable_names
+                ),
+                res,
+            )
+        )
 
     def get_doc_ids(self):
         q = f"""select ?doc_id where {{
@@ -114,7 +121,7 @@ class Queue:
         "{user_id}".
         }}"""
 
-    def _get_df(self, id, row_id=None, limit=1, extra_q = "", extra_v= ""):
+    def _get_df(self, id, row_id=None, limit=1, extra_q="", extra_v=""):
 
         if not id:
             q = f"""
@@ -148,10 +155,10 @@ class Queue:
 
         self.print_table()
 
-    def print_table(self, limit = 100000):
-        with pandas.option_context('display.max_rows', 100, 'display.max_columns', 10):
+    def print_table(self, limit=100000):
+        with pandas.option_context("display.max_rows", 100, "display.max_columns", 10):
             print(f"TABLE {self.service_id}")
-            q= f"""
+            q = f"""
                  select distinct ?doc_id ?user_id ?date ?row_id ?value{{
                  ?doc_id {self.Value} ?value.     
                  ?doc_id {self.Date} ?date.      
@@ -173,8 +180,7 @@ class Queue:
         }}
         """
         res = self.conn.executeUpdate(q)
-        print (res)
-
+        print(res)
 
     def queue_done(self, id=None):
         q = f"""
@@ -185,9 +191,9 @@ class Queue:
                 }}
                 """
         res = self.conn.executeUpdate(q)
-        print (res)
+        print(res)
 
-    def put(self, user_id, item, extra_q = "", timeout=None):
+    def put(self, user_id, item, extra_q="", timeout=None):
         if isinstance(item, tuple):
             doc_id = item[0]
         else:
@@ -229,7 +235,7 @@ class Queue:
         q = f"""
         select (count(distinct ?o) as ?c)  {{ ?s {self.Value} ?o . }}
         """
-        return int(regex.findall('(\d)\"\^', self.query2tuples(q)[0].c)[0])
+        return int(regex.findall('(\d)"\^', self.query2tuples(q)[0].c)[0])
 
 
 class RatingQueue(Queue):
@@ -251,12 +257,8 @@ class RatingQueue(Queue):
 
         scored = self.scores(doc_id, row_id=self.row_id)
 
-        meta["rating_trial"] = (
-            scored.trial
-        )
-        meta["rating_score"] = (
-            scored.score
-        )
+        meta["rating_trial"] = scored.trial
+        meta["rating_score"] = scored.score
 
         return db_id, meta
 
@@ -270,7 +272,6 @@ class RatingQueue(Queue):
                   "{doc_id}" {self.Score} "{rating_score}" .
         """
         super(RatingQueue, self).put(user_id, item, extra_q)
-
 
     def rate(self, user_id, score, new_trial=True):
         scores = self.scores(user_id)
@@ -304,17 +305,18 @@ class RatingQueue(Queue):
         r = self.query2tuples(q)
 
         try:
-             return r[0]
+            return r[0]
         except:
             raise
 
 
 if __name__ == "__main__":
-    def new_id (pref=""):
-        return pref  + "_" + str(uuid.uuid4())
+
+    def new_id(pref=""):
+        return pref + "_" + str(uuid.uuid4())
+
     user_id = "user_1"
     document_id_1 = "document_1"
-
 
     q = Queue("Q")
     q.conn.clear()
@@ -390,7 +392,6 @@ if __name__ == "__main__":
     assert meta["rating_score"] == "0.1234"
     assert meta["rating_trial"] == "0"
 
-
     doc_id, meta = r.get(doc_id)
     assert meta["rating_score"] == "0.1234"
     assert meta["rating_trial"] == "0"
@@ -407,4 +408,3 @@ if __name__ == "__main__":
 
     x = q.get(None)
     assert x
-

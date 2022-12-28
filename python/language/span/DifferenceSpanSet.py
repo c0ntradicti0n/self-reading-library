@@ -424,8 +424,7 @@ class TestSpanMethods(unittest.TestCase):
         )
 
     def test_valid(self):
-        self.assertEqual( True, self.dss.valid)
-
+        self.assertEqual(True, self.dss.valid)
 
 
 if __name__ == "__main__":

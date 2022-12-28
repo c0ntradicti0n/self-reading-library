@@ -14,11 +14,11 @@ class GraphHandler(StreamHandler):
 
         # Kafka Broker Configuration
         self.conn = login("ant_log")
-        self.Log = self.conn.createURI( f"{BASE}log")
-        self.Level = self.conn.createURI( f"{BASE}level")
-        self.Msg = self.conn.createURI( f"{BASE}msg")
-        self.Date = self.conn.createURI( f"{BASE}date")
-        self.Msg = self.conn.createURI( f"{BASE}type")
+        self.Log = self.conn.createURI(f"{BASE}log")
+        self.Level = self.conn.createURI(f"{BASE}level")
+        self.Msg = self.conn.createURI(f"{BASE}msg")
+        self.Date = self.conn.createURI(f"{BASE}date")
+        self.Msg = self.conn.createURI(f"{BASE}type")
 
     def emit(self, record):
         msg = self.format(record)
@@ -33,10 +33,9 @@ class GraphHandler(StreamHandler):
                  "{hash}" {self.Msg} {json.dumps(msg)}.
                  "{hash}" {self.Level} "{{levelname}}".
              }}}}
-           """.format(**record.__dict__)
+           """.format(
+                **record.__dict__
+            )
             self.conn.executeUpdate(q)
         except Exception as e:
             logging.error("Error with graph db logging", exc_info=True)
-
-
-

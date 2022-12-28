@@ -84,9 +84,7 @@ class ElmoPredict(PathSpec):
                             self.logger.error("retrying to annotate document")
                 except Exception as e:
 
-
-
-                   raise
+                    raise
 
                 if "words" in meta:
                     meta["annotation"] = annotation
@@ -106,7 +104,9 @@ class ElmoPredict(PathSpec):
                             consumed_tokens = len(words)
                         except TypeError as e:
                             consumed_tokens = len(words)
-                            self.logger.error("Error annotating document", exc_info=True)
+                            self.logger.error(
+                                "Error annotating document", exc_info=True
+                            )
 
                         if consumed_tokens == 0:
                             consumed_tokens = 100
@@ -123,7 +123,9 @@ class ElmoPredict(PathSpec):
                         q1[self.flags["service_id"]].put(consumed_tokens)
 
                     except Exception as e:
-                        self.logger.error("Could not process " + str(words), exc_info=True)
+                        self.logger.error(
+                            "Could not process " + str(words), exc_info=True
+                        )
                         raise
 
             self.init_queues()

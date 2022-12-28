@@ -51,7 +51,7 @@ class microservice:
                                 "LANG": "en_US.UTF - 8",
                                 "LANGUAGE": "en_US.UTF-8",
                                 "GDB_PASSWORD": "${GDB_PASSWORD}",
-            "GDB_HOST": "gdb"
+                                "GDB_HOST": "gdb",
                             },
                             "volumes": [
                                 "$CWD/python:/home/finn/Programming/self-reading-library/python"

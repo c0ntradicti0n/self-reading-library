@@ -47,7 +47,7 @@ def annotation2conll_file(annotation, filename, new_folder, pos=None):
     pos_tags = [
         p if "-" not in tag else tag[:2] + p for (word, tag), p in zip(annotation, pos)
     ]
-    print (f"\n{words=} \n{pos=} {pos_tags=} \n{tags=}\n")
+    print(f"\n{words=} \n{pos=} {pos_tags=} \n{tags=}\n")
 
     content = "\n".join("\t".join(t) for t in zip(words, pos_tags, tags))
     if not os.path.isdir(new_folder):

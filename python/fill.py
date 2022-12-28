@@ -63,7 +63,9 @@ def run_extra_threads():
             # suck 5 items from it and then restart to reload cache
             list(itertools.islice(gen, 5))
 
-    threading.Thread(target=fill_span_annotation_thread, name="gold_span_annotation").start()
+    threading.Thread(
+        target=fill_span_annotation_thread, name="gold_span_annotation"
+    ).start()
 
     def update_knowledge_graph_thread():
         path = config.GOLD_DATASET_PATH + "/" + config.GOLD_SPAN_ID

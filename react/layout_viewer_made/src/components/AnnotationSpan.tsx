@@ -146,8 +146,7 @@ const AnnotationSpan = forwardRef<
       const context = useContext<DocumentContext>(DocumentContext)
       let value = context.value[slot]
       let meta = context.meta[slot]
-      const params = {doc_id: value}
-
+      const params = { doc_id: value }
 
       console.debug('AnnotationSpan', slot, value, meta, context)
 
@@ -208,12 +207,19 @@ const AnnotationSpan = forwardRef<
             return false
          }
          ;(async () => {
-            await service.change('[1].annotation', newAnnotation, (r) => {
-               console.debug('updated', r)
-            }, params)
-            await service.save(value, newAnnotation, (r) =>
-               console.debug('saved', r),
-                params
+            await service.change(
+               '[1].annotation',
+               newAnnotation,
+               (r) => {
+                  console.debug('updated', r)
+               },
+               params,
+            )
+            await service.save(
+               value,
+               newAnnotation,
+               (r) => console.debug('saved', r),
+               params,
             )
             setSuccess(true)
             setErrors([])

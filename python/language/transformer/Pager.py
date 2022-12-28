@@ -80,7 +80,6 @@ class Pager(PathSpec):
                 self.logger.error("could not transpile pdf to html", exc_info=True)
                 continue
 
-
             with open(pdf2htmlEX_wordi_path, "rb") as f:
                 content = f.read()
 
@@ -96,9 +95,7 @@ class Pager(PathSpec):
             # errors: f"{index}:{string}"
             lines = [
                 ww
-                for w in re.split(
-                    "(?![^:])\n", content
-                )
+                for w in re.split("(?![^:])\n", content)
                 for ww in w.split("\n")
                 if ww
             ]

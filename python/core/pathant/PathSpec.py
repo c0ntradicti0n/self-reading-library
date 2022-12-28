@@ -27,7 +27,6 @@ class PathSpec:
         )
         self.logger = logger
 
-
         self.temporary = config.hidden_folder
 
         self.meta_storage = []

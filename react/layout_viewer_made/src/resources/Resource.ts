@@ -84,9 +84,7 @@ export default class Resource {
       }
 
       const request_query =
-         BACKEND_HOST +
-         this.route +
-         (querystring ? '?' + querystring : '')
+         BACKEND_HOST + this.route + (querystring ? '?' + querystring : '')
 
       try {
          const response = await fetch(request_query, fetch_init)
