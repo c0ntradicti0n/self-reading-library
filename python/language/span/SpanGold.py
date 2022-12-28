@@ -77,8 +77,11 @@ class AnnotatorRate(PathSpec):
                     logging.error(f"Scores not found for {value}, {self.service}")
 
                 if int(score.trial) >= config.MIN_CAPTCHA_TRIALS:
+                    self.logger.info(f"{score=} were good enough to make gold")
                     yield _p_m
                 else:
+                    self.logger.info(f"{score=} too low")
+                    self.logger.info(f"Adding {meta=} again to queue")
                     q[self.service].put(value, _p_m)
                     q[self.service].rate(value, float(score.score))
         except StopIteration:
