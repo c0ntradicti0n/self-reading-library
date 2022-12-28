@@ -20,6 +20,7 @@ import threading
 def preprocess_text(texts):
     text = " ".join([word for t in texts for i, word in t])
     text = text.replace("-\n", "")
+    text = latex_replace(text)
     text = unicodedata.normalize("NFKD", text)
     real_tokens = split_punctuation(text, ".,:!?;")
     return real_tokens

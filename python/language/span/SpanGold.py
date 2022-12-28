@@ -44,8 +44,13 @@ class AnnotatorUnpacker(PathSpec):
 
     def __call__(self, prediction_metas, *args, **kwargs):
         for conll_path, meta in prediction_metas:
-            result = conll_file2annotation(conll_path)
-            yield conll_path, result
+            try:
+                result = conll_file2annotation(conll_path)
+                yield conll_path, result
+            except:
+                self.logger.error(
+                    f"Error reading conll file: {conll_path}", exc_info=True
+                )
 
 
 @converter(

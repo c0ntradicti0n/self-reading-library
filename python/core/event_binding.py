@@ -302,8 +302,11 @@ def queue_iter(service_id, gen, single=False):
                 q[service_id].put(service_id, new_val)
 
             except Exception as e:
-
-                break
+                logging.error(
+                    f"Error on putting new sample into queue {service_id=}",
+                    exc_info=True,
+                )
+                raise
         else:
             logging.info("Not adding new samples, enough in queue")
 

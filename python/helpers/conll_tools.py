@@ -7,7 +7,7 @@ from language.span.DifferenceSpanSet import Span
 from language.transformer.core.bio_annotation import conll_line
 
 
-def conll2annotation(content):
+def conll2annotation(content, swap=False):
     cols = list(
         zip(
             *[
@@ -17,14 +17,23 @@ def conll2annotation(content):
             ]
         )
     )
-    result = {"annotation": list(zip(cols[0], cols[-1])), "pos": cols[1]}
+    try:
+        result = {
+            "annotation": list(
+                list(t)
+                for t in zip(*[cols[0], cols[-1]] if not swap else [cols[-1], cols[0]])
+            ),
+            "pos": cols[1],
+        }
+    except:
+        raise
     return result
 
 
-def conll_file2annotation(pickle_path):
+def conll_file2annotation(pickle_path, swap=False):
     with open(pickle_path, errors="ignore") as f:
         content = f.read()
-    result = conll2annotation(content)
+    result = conll2annotation(content, swap=swap)
     return result
 
 
@@ -49,7 +58,7 @@ def annotation2conll_file(annotation, filename, new_folder, pos=None):
     ]
     print(f"\n{words=} \n{pos=} {pos_tags=} \n{tags=}\n")
 
-    content = "\n".join("\t".join(t) for t in zip(words, pos_tags, tags))
+    content = "\n".join("\t".join(t) for t in zip(words, pos, pos_tags, tags))
     if not os.path.isdir(new_folder):
         os.makedirs(new_folder)
     new_path = new_folder + "/" + filename

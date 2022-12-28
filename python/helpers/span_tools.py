@@ -328,6 +328,14 @@ class TestStringMethods(unittest.TestCase):
             span_sets2kind_sets(start),
         )
 
+    def test_connll(self):
+        from helpers.conll_tools import conll_file2annotation, annotation2conll_file
+
+        path = "test.conll"
+        annotation2conll_file(self.testNestAnnotation, path, "./")
+        saved_annotation = conll_file2annotation(path, swap=True)
+        self.assertEqual(saved_annotation["annotation"], self.testNestAnnotation)
+
 
 if __name__ == "__main__":
     unittest.main()

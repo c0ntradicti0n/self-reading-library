@@ -7,6 +7,7 @@ from core.pathant.PathSpec import PathSpec
 from allennlp.models.model import Model
 
 from helpers.conll_tools import annotation2conll_file
+from helpers.hash_tools import hashval
 from helpers.model_tools import BEST_MODELS
 from helpers.random_tools import chance
 from language.span.DifferenceSpanSet import DifferenceSpanSet
@@ -140,7 +141,12 @@ class ElmoPredict(PathSpec):
             self.logger.info("Randomly saving annotation to dataset " + str(words))
             new_folder = config.ELMO_DIFFERENCE_COLLECTION_PATH + "/"
             print(f"{path=} {config.tex_data=}")
-            filename = path.replace(config.tex_data.replace("//", "/"), "") + ".conll"
+            filename = (
+                path.replace(config.tex_data.replace("//", "/"), "")
+                + "."
+                + hashval(words)
+                + ".conll"
+            )
             annotation2conll_file(annotation, filename, new_folder)
 
         return annotation
