@@ -40,7 +40,7 @@ class ElmoPredict(PathSpec):
 
     def __call__(self, feature_meta, *args, **kwargs):
         self.init_queues()
-        global model
+
         for pdf_path, meta in feature_meta:
 
             q1[self.flags["service_id"]].put(0)
@@ -77,12 +77,16 @@ class ElmoPredict(PathSpec):
                         break
 
                 try:
-                    annotation = self.predict(words, pdf_path)
+                    annotation = None
+                    while annotation is None:
+                        annotation = self.predict(words, pdf_path)
+                        if annotation is None:
+                            self.logger.error("retrying to annotate document")
                 except Exception as e:
-                    self.logger.error(
-                        "Faking annotation because of error " + str(e), stack_info=True
-                    )
-                    raise
+
+
+
+                   raise
 
                 if "words" in meta:
                     meta["annotation"] = annotation
@@ -91,6 +95,7 @@ class ElmoPredict(PathSpec):
                 else:
                     try:
                         try:
+
                             # rfind of not "O"
                             consumed_tokens = next(
                                 i
@@ -99,7 +104,7 @@ class ElmoPredict(PathSpec):
                             )
                         except StopIteration as e:
                             consumed_tokens = len(words)
-                        except TypeError:
+                        except TypeError as e:
                             consumed_tokens = len(words)
                             self.logger.error("Error annotating document", exc_info=True)
 
@@ -132,7 +137,8 @@ class ElmoPredict(PathSpec):
         if chance(0.5) and DifferenceSpanSet(annotation):
             self.logger.info("Randomly saving annotation to dataset " + str(words))
             new_folder = config.ELMO_DIFFERENCE_COLLECTION_PATH + "/"
-            filename = path.replace(config.ELMO_DIFFERENCE_COLLECTION_PATH, "")
+            print(f"{path=} {config.tex_data=}")
+            filename = path.replace(config.tex_data.replace("//", "/"), "") + ".conll"
             annotation2conll_file(annotation, filename, new_folder)
 
         return annotation

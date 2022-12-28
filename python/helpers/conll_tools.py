@@ -35,16 +35,21 @@ def annotation2conll_file(annotation, filename, new_folder, pos=None):
         logging.info(words)
         try:
             pos = nltk.pos_tag(words)
+
         except LookupError:
             nltk.download("averaged_perceptron_tagger")
             pos = nltk.pos_tag(words)
-            pos = [p for w, p in pos]
+        pos = [p for w, p in pos]
     logging.info(pos)
+
+    print(f"\n{annotation=} \n{pos=}\n")
 
     pos_tags = [
         p if "-" not in tag else tag[:2] + p for (word, tag), p in zip(annotation, pos)
     ]
-    content = "\n".join("\t".join(t) for t in zip(words, pos, pos_tags, tags))
+    print (f"\n{words=} \n{pos=} {pos_tags=} \n{tags=}\n")
+
+    content = "\n".join("\t".join(t) for t in zip(words, pos_tags, tags))
     if not os.path.isdir(new_folder):
         os.makedirs(new_folder)
     new_path = new_folder + "/" + filename
