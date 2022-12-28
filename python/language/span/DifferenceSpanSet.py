@@ -247,6 +247,17 @@ class DifferenceSpanSet:
     def kind_sets(self):
         return SuperList([self.subjects, self.contrasts])
 
+    @cached_property
+    def n_arity(self):
+        ks = list(set(map(len, self.kind_sets)))
+        if len(ks) != 1:
+            return None
+        return ks[0]
+
+    @cached_property
+    def valid(self):
+        return self.n_arity not in [1, None]
+
     def flat(self):
         return self._filter_kind(kind=None)
 
@@ -411,6 +422,10 @@ class TestSpanMethods(unittest.TestCase):
                 ],
             ],
         )
+
+    def test_valid(self):
+        self.assertEqual( True, self.dss.valid)
+
 
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@ from allennlp.models.model import Model
 from helpers.conll_tools import annotation2conll_file
 from helpers.model_tools import BEST_MODELS
 from helpers.random_tools import chance
+from language.span.DifferenceSpanSet import DifferenceSpanSet
 from language.transformer.difference_predictor.difference_predictor import (
     DifferenceTaggerPredictor,
 )
@@ -124,10 +125,11 @@ class ElmoPredict(PathSpec):
 
     def predict(self, words, path):
         annotation = self.predictor.predict_json({"sentence": words})
+
         subj_annotation = [(t, w) for t, w in annotation if "SUBJ" in t]
         self.info(subj_annotation)
 
-        if chance(0.2):
+        if chance(0.5) and DifferenceSpanSet(annotation):
             self.logger.info("Randomly saving annotation to dataset " + str(words))
             new_folder = config.ELMO_DIFFERENCE_COLLECTION_PATH + "/"
             filename = path.replace(config.ELMO_DIFFERENCE_COLLECTION_PATH, "")
