@@ -213,14 +213,14 @@ export const validateSpans = (spans, annotation, TAG_SET) => {
    let errors = []
    check(
       errors,
-      spans.length / TAG_SET.length > 1,
-      'Must have multiple sets of TAG_SET',
+      spans.length / TAG_SET.length != 1,
+      `Must have multiple sets of ${JSON.stringify(TAG_SET)} or must be without any annotation`,
    )
 
    check(
       errors,
       spans.length % TAG_SET.length === 0,
-      'Must have length proportional to TAG_SET',
+      `Must have length proportional to ${JSON.stringify(TAG_SET)}`,
    )
    let new_annotation = spans2annotation(annotation, spans)
    new_annotation = new_annotation.map((l) => [...l, tagStrip(l[1])])
@@ -269,7 +269,7 @@ export const validateSpans = (spans, annotation, TAG_SET) => {
          )
          return tag_set.value.length === TAG_SET
       }),
-      'Must have annotations splitted with None-Tags',
+      'Must have annotations split with None-Tags',
    )
 
    return errors

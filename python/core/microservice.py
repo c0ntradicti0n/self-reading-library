@@ -100,7 +100,7 @@ class microservice:
         resp = requests.post(
             f"http://{self.service_name}:7777/{self.service_name}",
             send_data,
-            headers={"origin":"localhost", "content-Type": "application/json"},
+            headers={"origin": "localhost", "content-Type": "application/json"},
         )
         if not resp.status_code == 200:
             logging.error(f"Error on microservice request {resp.text}")

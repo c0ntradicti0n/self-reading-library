@@ -19,7 +19,7 @@ class Pipeline:
         try:
             for x in gen:
                 msg = f"Pipeline step {name} running on result: '''{str(x)[:100]}...'''"
-                with timeit_context(msg, logger=logger):
+                with timeit_context(msg, logger=logger.info):
                     yield x
         except TypeError as e:
             logger(f"{name} finished")

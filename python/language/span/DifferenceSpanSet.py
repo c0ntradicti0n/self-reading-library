@@ -11,14 +11,14 @@ from franz.openrdf.vocabulary import XMLSchema
 from more_itertools import pairwise
 from nltk import SnowballStemmer
 
-from core.database import BASE
+from core.database import BASE, login
 from helpers.list_tools import unique
 from helpers.cache_tools import compressed_pickle, decompress_pickle
 from helpers.hash_tools import hashval
 from spacy_wordnet.wordnet_annotator import WordnetAnnotator
 
 from helpers.span_tools import annotation2span_sets
-
+from helpers.time_tools import timeit_context
 
 SUBJECT = "SUBJECT"
 CONTRAST = "CONTRAST"
@@ -147,37 +147,37 @@ class Span:
 
     FTS_Uris = [FTS_TEXT, FTS_LEMMA]
 
-    def add_graph_literal(self, conn):
+    def add_graph_literal(self, conn, triples=None):
         Text = conn.createURI(self.FTS_TEXT)
         Lemma = conn.createURI(self.FTS_LEMMA)
         WordTags = conn.createURI(self.WORD_TAGS)
-        k = conn.createURI(f"{BASE}{self.nlp_id}")
-        t = conn.createLiteral(self.text, XMLSchema.STRING)
-        l = conn.createLiteral(json.dumps(self.lemmas), XMLSchema.STRING)
+        k = conn.createLiteral(f"{self.nlp_id}")
+        t = conn.createLiteral(self.text)
+        l = conn.createLiteral(json.dumps(self.lemmas))
         wt = conn.createLiteral(json.dumps(self.word_tags))
 
-        try:
-            conn.addTriple(k, Text, t)
-        except Exception as e:
-            logging.error("Error writing text in graphdb")
-        try:
-            conn.addTriple(k, Lemma, l)
-        except Exception as e:
-            logging.error("Error writing lemma in graphdb")
-        try:
-            conn.addTriple(k, WordTags, wt)
-        except Exception as e:
-            logging.error("Error writing word_tags in graphdb")
+        triples_ = [(k, Text, t), (k, Lemma, l), (k, WordTags, wt)]
+        if triples is None:
+            try:
+                conn.addTriples(triples_)
+            except Exception as e:
+                logging.error("Error writing text in graphdb")
+
+        else:
+            triples.extend(triples_)
 
         return k
 
-    def add_link(self, kind, other, conn):
+    def add_link(self, kind, other, conn, triples=None):
         Kind = conn.createURI(f"{BASE}{kind}")
 
-        a = self.add_graph_literal(conn)
-        b = other.add_graph_literal(conn)
+        a = self.add_graph_literal(conn, triples=triples)
+        b = other.add_graph_literal(conn, triples=triples)
 
-        conn.addTriple(a, Kind, b)
+        if triples is None:
+            conn.addTriple(a, Kind, b)
+        else:
+            triples.append((a, Kind, b))
         return [a, b]
 
 
@@ -189,6 +189,12 @@ class DifferenceSpanSet:
             self.span_sets = d.span_sets
         else:
             self.span_sets = annotation2span_sets(annotation=d)
+
+    def init_uris(self, conn):
+        if not hasattr(DifferenceSpanSet, "__uris__"):
+            DifferenceSpanSet.__uris__ = True
+            DifferenceSpanSet.d = conn.createURI(self.DIFFERENCE)
+            DifferenceSpanSet.ss = conn.createURI(self.SPAN_SETS)
 
     def __getstate__(self):
         return self.span_sets
@@ -268,24 +274,25 @@ class DifferenceSpanSet:
     SPAN_SETS = f"{BASE}span_sets"
 
     def add_graph_db(self, conn):
-        d = conn.createURI(self.DIFFERENCE)
-        ss = conn.createURI(self.SPAN_SETS)
+        self.init_uris(conn)
+        triples = []
 
         sides = []
         for spans in self.kind_sets:
             for a, b in pairwise(spans):
-                sides += a.add_link(a.kind, b, conn)
+                sides += a.add_link(a.kind, b, conn, triples=triples)
 
         for a, b in zip(*self.kind_sets):
-            sides += a.add_link("explains", b, conn)
+            sides += a.add_link("explains", b, conn, triples=triples)
 
         sides = unique(sides)
         id = conn.createLiteral(self.hash, XMLSchema.STRING)
         span_sets = conn.createLiteral(json.dumps(self.span_sets), XMLSchema.STRING)
-
         for node in sides:
-            conn.addTriple(id, d, node)
-        conn.addTriple(id, ss, span_sets)
+            triples.append((id, DifferenceSpanSet.d, node))
+        triples.append((id, DifferenceSpanSet.ss, span_sets))
+
+        conn.addTriples(triples)
 
 
 class TestSpanMethods(unittest.TestCase):
@@ -377,7 +384,6 @@ class TestSpanMethods(unittest.TestCase):
             b = Span(SUBJECT, _b)
             print(a.stems(), b.stems())
             if not a.same_root(b):
-
                 errors.append((a, b))
         self.assertEqual(errors, [], "not equal")
 
@@ -425,6 +431,67 @@ class TestSpanMethods(unittest.TestCase):
 
     def test_valid(self):
         self.assertEqual(True, self.dss.valid)
+
+    def test_add_db(self):
+        conn = login("test")
+        conn.clear()
+        for i in range(10):
+            conn.clearNamespaces()
+            x = {
+                0: [
+                    (
+                        "CONTRAST",
+                        [
+                            [str(i), "B", "CONTRAST", 14],
+                            ["in", "I", "CONTRAST", 15],
+                            ["an", "I", "CONTRAST", 16],
+                            ["omnipresent", "I", "CONTRAST", 17],
+                            [",", "I", "CONTRAST", 18],
+                            ["omnipotent", "I", "CONTRAST", 19],
+                            ["God", "I", "CONTRAST", 20],
+                            [",", "I", "CONTRAST", 21],
+                            ["the", "I", "CONTRAST", 22],
+                            ["Almighty", "I", "CONTRAST", 23],
+                            ["Father", "L", "CONTRAST", 24],
+                        ],
+                    ),
+                    ("SUBJECT", [[str(2 * i), "U", "SUBJECT", 13]]),
+                ],
+                1: [
+                    (
+                        "CONTRAST",
+                        [
+                            ["does", "B", "CONTRAST", 28],
+                            ["not", "I", "CONTRAST", 29],
+                            [".", "I", "CONTRAST", 30],
+                            [str(i + 1), "I", "CONTRAST", 31],
+                            ["closest", "I", "CONTRAST", 32],
+                            ["thing", "I", "CONTRAST", 33],
+                            ["to", "I", "CONTRAST", 34],
+                            ["God", "I", "CONTRAST", 35],
+                            ["would", "I", "CONTRAST", 36],
+                            ["be", "I", "CONTRAST", 37],
+                            ["Siddhartha", "I", "CONTRAST", 38],
+                            ["Gautama", "I", "CONTRAST", 39],
+                            [",", "I", "CONTRAST", 40],
+                            ["the", "I", "CONTRAST", 41],
+                            ["first", "I", "CONTRAST", 42],
+                            ["Buddha", "I", "CONTRAST", 43],
+                            ["to", "I", "CONTRAST", 44],
+                            ["achieve", "I", "CONTRAST", 45],
+                            ["spiritual", "I", "CONTRAST", 46],
+                            ["enlightenment", "L", "CONTRAST", 47],
+                        ],
+                    ),
+                    ("SUBJECT", [["Buddhism", "U", "SUBJECT", 27]]),
+                ],
+            }
+
+            with timeit_context(f"Constructing set ", logger=print):
+                dss = DifferenceSpanSet(x)
+
+            with timeit_context(f"Inserting set {dss.hash=} into db", logger=print):
+                dss.add_graph_db(conn)
 
 
 if __name__ == "__main__":

@@ -79,7 +79,7 @@ def run_extra_threads():
             )
             assert result
 
-        wait_for_change(path, graph_db_update)
+        wait_for_change(path, graph_db_update, on_first=True)
 
     threading.Thread(target=update_knowledge_graph_thread, name="knowledge").start()
 

@@ -54,11 +54,11 @@ def model_in_the_loop(
     loops = []
 
     while True:
-        print(
-            "model_in_the_loopmodel_in_the_loopmodel_in_the_loopmodel_in_the_loopmodel_in_the_loopmodel_in_the_loopmodel_in_the_loopmodel_in_the_loop"
-        )
+
+
+
         TRAINING_RATE["service_id"] = service_id
-        samples_files = os.listdir(collection_path)
+        samples_files = os.listdir(config.GOLD_DATASET_PATH + "/" + service_id + "/")
 
         if training_rate_mode == "ls":
             n_samples = len(samples_files)
@@ -70,9 +70,9 @@ def model_in_the_loop(
         full_model_path = best_model_path
 
         if scores:
-            training_rate = int(scores.groups()[0]) / n_samples
+            training_rate = n_samples /int(scores.groups()[0])
         else:
-            training_rate = 0
+            training_rate = 1
 
         loops.append(training_rate)
 
@@ -89,7 +89,7 @@ def model_in_the_loop(
         BEST_MODELS = json_file_update(config.BEST_MODELS_PATH, update=BEST_MODELS)
 
         logging.info(f"Having {training_rate = }")
-        if training_rate < 0.8 or not full_model_path:
+        if training_rate > 0.8 or not full_model_path:
             # let's train
 
             model_meta = on_train(

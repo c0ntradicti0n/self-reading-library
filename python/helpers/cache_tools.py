@@ -348,7 +348,7 @@ def configurable_cache(
             if not _filter_path_glob:
                 _filter_path_glob = []
             msg = f"Glob"
-            with timeit_context(msg, logger=logger):
+            with timeit_context(msg, logger=logger.info):
                 for i, p in enumerate(_filter_path_glob):
                     if isinstance(p, Callable):
                         result = p(self)
@@ -363,7 +363,7 @@ def configurable_cache(
                                 f"dont know how to handle filter return type, {result}"
                             )
             msg = f"Cache glob blacklist"
-            with timeit_context(msg, logger=logger):
+            with timeit_context(msg, logger=logger.info):
                 blacklist += [
                     filename_only(os.path.basename(fp))
                     for path in _filter_path_glob

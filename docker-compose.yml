@@ -97,5 +97,6 @@ services:
 
 networks:
   db:
+    external: True
   world:
 
