@@ -46,10 +46,9 @@ dbash:
 	docker exec -it rest bash
 
 d: down dockerbuild up
-ddb:
-	CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose up -d db
-gdb:
-	CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose up -d gdb
+
+db:
+	CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose  -f docker-compose.db.yml up -d gdb
 
 fe:
 	cd react/layout_viewer_made/ && yarn run dev

@@ -16,7 +16,8 @@ services:
       - ./react/layout_viewer_made/.next/:/next/.next/
       - "$CWD/python/.layouteagle/pdfs/:/pdfs"
       - "$CWD/python/.layouteagle/audio/:/audio"
-
+    networks:
+      - world
 
   be:
     image: full_python
@@ -38,7 +39,9 @@ services:
       GDB_USER: ich
       GDB_PASSWORD: ${GDB_PASSWORD}
       GDB_HOST: gdb
-
+    networks:
+      - db
+      - world
 
     volumes:
       - "$CWD/python:/home/finn/Programming/self-reading-library/python"
@@ -48,6 +51,8 @@ services:
     build: python
     container_name: fill
     tty: true
+    networks:
+      - db
     environment:
       DB_HOST: db
       GDB_PASSWORD: ${GDB_PASSWORD}
@@ -59,33 +64,7 @@ services:
 
 
 
-  db:
-    image: postgres
-    container_name: db
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_DB: "db"
-      POSTGRES_HOST_AUTH_METHOD: "trust"
-      POSTGRES_USER: python
-      POSTGRES_PASSWORD: password
-      POSTGRES_HOST: "localhost"
-      CREATE_FRONTEND: "True"
-    restart: "unless-stopped"
 
-  gdb:
-    image: franzinc/agraph
-    container_name: gdb
-    restart: unless-stopped
-    shm_size: 3g
-    environment:
-      AGRAPH_SUPER_USER: ich
-      AGRAPH_SUPER_PASSWORD: ${GDB_PASSWORD}
-    ports:
-      - 10000-10035:10000-10035
-    #volumes:
-    #  - "$CWD/gdb/data:/agraph/data"
-    #  - "$CWD/gdb/etc:/agraph/etc"
   fe:
     build:
       context: react
@@ -111,8 +90,12 @@ services:
       NEXT_PUBLIC_FRONTEND_HOST: ${FRONTEND_HOST}
       NEXT_PUBLIC_BACKEND_HOST: "/api"
       NEXT_PUBLIC_DASH_HOST: "/dash"
+    networks:
+      - world
 
 
 
-
+networks:
+  db:
+  world:
 
