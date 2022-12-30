@@ -53,6 +53,7 @@ class microservice:
                                 "GDB_PASSWORD": "${GDB_PASSWORD}",
                                 "GDB_HOST": "gdb",
                             },
+                            "networks": ["db"],
                             "volumes": [
                                 "$CWD/python:/home/finn/Programming/self-reading-library/python"
                             ],
