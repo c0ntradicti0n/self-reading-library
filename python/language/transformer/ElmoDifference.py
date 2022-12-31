@@ -121,7 +121,8 @@ def annotate_difference_elmo():
                 metaize(args["samples_files"]), collection_step=args["training_rate"]
             )
         ),
-        service_id="gold_span_annotation",
+        service_id="difference",
+        trigger_service="gold_span_annotation",
         on_predict=on_predict,
         training_rate_mode="ls",
         training_rate_file=config.ELMO_DIFFERENCE_COLLECTION_PATH

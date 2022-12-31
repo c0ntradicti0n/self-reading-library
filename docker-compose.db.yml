@@ -5,7 +5,7 @@ services:
     image: franzinc/agraph
     container_name: gdb
     restart: unless-stopped
-    shm_size: 3g
+    shm_size: 10g
     environment:
       AGRAPH_SUPER_USER: ich
       AGRAPH_SUPER_PASSWORD: ${GDB_PASSWORD}

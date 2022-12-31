@@ -49,6 +49,8 @@ d: down dockerbuild up
 
 db:
 	CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose  -f docker-compose.db.yml up -d gdb
+dbdown:
+	CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose  -f docker-compose.db.yml down -v
 
 fe:
 	cd react/layout_viewer_made/ && yarn run dev
@@ -65,3 +67,5 @@ sync_from_host:
 	rsync -av --progress  -r python/.layouteagle/ deploy@self-reading-library.science:/home/deploy/self-reading-library/python/.layouteagle/
 sync_from_remote:
 	rsync -av --progress  -r deploy@self-reading-library.science:/home/deploy/self-reading-library/python/.layouteagle/ python/.layouteagle/
+
+fresh: down dbdown db build up

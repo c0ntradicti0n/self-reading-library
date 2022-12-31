@@ -42,7 +42,7 @@ def login(db_name):
 
 class Queue:
     def __init__(self, service_id):
-        self.conn = login(config.DB_NAME)
+        self.conn = login(service_id)
         self.namespace = BASE + service_id
         self.service_id = service_id
 
@@ -85,27 +85,25 @@ class Queue:
             n += 1
             if n > timeout:
                 break
-            try:
-                result = f()
-            except Exception as e:
-                time.sleep(1)
+            result = f()
+            if result:
+                break
+            time.sleep(1)
 
-                continue
         return result
 
-    def get(self, id, timeout=None):
+    def get(self, id, timeout=None, extra_q="",  extra_v="", default=None):
         if timeout:
-            return self.timeout(lambda: self.get(id), timeout=timeout)
-        result = self._get_df(id)
+            return self.timeout(lambda: Queue.get(self, id, extra_q=extra_q, extra_v=extra_v, default=default), timeout=timeout)
+        result = self._get_df(id, extra_q=extra_q,  extra_v=extra_v)
         if not result:
-            return None
+            return default
         item = result[0]
 
         try:
             return decompress_pickle(bytes.fromhex(item["value"]))
         except Exception as e:
             raise
-            raise ValueError(f"Strange value in {self.service_id}, {item}") from e
 
     def determine_doc(self, user_id, doc_id):
         return f"""
@@ -244,14 +242,14 @@ class RatingQueue(Queue):
         self.Trial = self.conn.createURI(self.namespace + "/trial")
         self.Score = self.conn.createURI(self.namespace + "/score")
 
-    def get(self, doc_id, timeout=None):
+    def get(self, doc_id, timeout=None, extra_q="", default=None):
         try:
-            result = Queue.get(self, doc_id, timeout=timeout)
+            result = Queue.get(self, doc_id, timeout=timeout, extra_q=extra_q, extra_v="?score ?trial", default=default)
         except Exception as e:
             raise
 
         if not result:
-            return None
+            return default
         else:
             db_id, meta = result
 
@@ -261,6 +259,14 @@ class RatingQueue(Queue):
         meta["rating_score"] = scored.score
 
         return db_id, meta
+
+    def get_ready(self, doc_id, timeout=None):
+        return self.get(doc_id, extra_q= f"""
+        ?doc_id {self.Trial} ?trial.
+        filter(?trial >= "{config.MIN_CAPTCHA_TRIALS}")
+        """
+, timeout=timeout, default=[]
+                                )
 
     def put(self, user_id, item, timeout=None):
         doc_id, meta = item

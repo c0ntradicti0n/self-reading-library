@@ -82,7 +82,10 @@ class AnnotatorRate(PathSpec):
             gen=(p_m for p_m in prediction_metas),
             single=False,
         ):
-            id, meta = _p_m
+            try:
+                id, meta = _p_m
+            except Exception as e:
+                continue
             try:
                 scores = d[self.service].scores(id)
             except Exception as e:

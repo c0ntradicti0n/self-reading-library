@@ -34,7 +34,6 @@ def create_app():
         "/difference": ElmoDifferenceQueueRest,
         "/difference_annotation": DifferenceAnnotationPublisher,
         # layout
-        "/annotation_captcha": AnnotationQueueRest,
         "/upload_annotation": UploadAnnotationQueueRest,
         "/layout": LayoutPublisher,
         # captcha

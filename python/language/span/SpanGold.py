@@ -72,13 +72,15 @@ class AnnotatorRate(PathSpec):
             ):
                 value, meta = _p_m
                 try:
-                    score = d[self.service].scores(value)
+                    score = q[self.service].scores(value)
                 except IndexError:
                     logging.error(f"Scores not found for {value}, {self.service}")
 
                 if int(score.trial) >= config.MIN_CAPTCHA_TRIALS:
                     self.logger.info(f"{score=} were good enough to make gold")
                     yield _p_m
+                    q[self.service].task_done(value)
+
                 else:
                     self.logger.info(f"{score=} too low")
                     self.logger.info(f"Adding {meta=} again to queue")

@@ -32,17 +32,15 @@ q = {}
 d = {}
 
 
-def init_queues(service_id, id=None, rated_queue=False):
+def init_queues(service_id, id=None):
     global q
     global d
     # samples to take from
-    if rated_queue:
-        Q = RatingQueue
-    else:
-        Q = Queue
-    q[service_id] = Q(service_id + "_q")
+    Q = RatingQueue
+
+    q[service_id] = Q(service_id)
     # samples edited by user
-    d[service_id] = Q(service_id + "_d")
+    d[service_id] = Q(service_id)
     # session dependent queue
     if id:
         q[id] = Q(id + "_id")
@@ -122,7 +120,7 @@ class RestQueue:
         global all_rest_queues
         all_rest_queues.append(self)
         self.service_id = service_id
-        init_queues(service_id, rated_queue=rated_queue)
+        init_queues(service_id)
         self.update_data = update_data
         self.work_on_upload = work_on_upload
 
@@ -136,10 +134,6 @@ class RestQueue:
             logging.info(f"No file prepared for {id}, getting default")
 
             data = q[self.service_id].get(None)
-
-            if data:
-                q[self.service_id].task_done()
-                q[self.service_id].put(id, data)
 
         try:
             data = data[0], dict(
@@ -169,7 +163,7 @@ class RestQueue:
         logging.info(f"Ok {id}")
         item = q[id if id in q else self.service_id].get(id)
         d[self.service_id].put(id, item)
-        q[id if id in q else self.service_id].task_done(item[0])
+
 
     def discard(self, id):
         try:
@@ -315,37 +309,33 @@ def queue_iter(service_id, gen, single=False):
     while True:
         # polling the q... TODO: make q blocking again
         try:
-            r = d[service_id].get(None, timeout=30)
+            result = d[service_id].get_ready(None, timeout=30)
         except Exception as e:
-            r = None
-            logging.info("Pulse", exc_info=True)
+            raise
 
-        if r:
-            logging.debug("Yielding")
-            yield r
-            logging.debug("Yielded")
+        logging.debug("Yielding")
+        yield result
+        logging.debug("Yielded")
 
-            if r:
+        if result:
+            try:
+                logging.info("Task done")
+
+            except Exception as e:
+                logging.debug("Was the task already done?", exc_info=True)
+
+        for i in range(1):
+            if len(q[service_id]) < config.captcha_queue_size:
+                logging.debug("Inserting some new sample in the queue")
+                gc.collect()
+
                 try:
-
-                    d[service_id].task_done(r[0])
-                    logging.info("Task done")
-
+                    new_val = next(gen)
+                    q[service_id].put(service_id, new_val)
                 except Exception as e:
-                    logging.debug("Was the task already done?", exc_info=True)
-
-            for i in range(3):
-                if len(q[service_id]) < config.captcha_queue_size:
-                    logging.debug("Inserting some new sample in the queue")
-                    gc.collect()
-
-                    try:
-                        new_val = next(gen)
-                        q[service_id].put(service_id, new_val)
-                    except Exception as e:
-                        logging.error(e, exc_info=True)
-                else:
-                    logging.info("Not adding new samples, enough in queue")
+                    logging.error(e, exc_info=True)
+            else:
+                logging.info("Not adding new samples, enough in queue")
 
     print("The End")
 

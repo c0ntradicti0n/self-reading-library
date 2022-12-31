@@ -44,6 +44,7 @@ def model_in_the_loop(
     on_predict,
     training_rate_mode="ls",
     training_rate_file=None,
+trigger_service=None
 ):
     global BEST_MODELS
     if not os.path.isdir(model_dir):
@@ -58,7 +59,7 @@ def model_in_the_loop(
 
 
         TRAINING_RATE["service_id"] = service_id
-        samples_files = os.listdir(config.GOLD_DATASET_PATH + "/" + service_id + "/")
+        samples_files = os.listdir(config.GOLD_DATASET_PATH + "/" +( trigger_service if trigger_service else service_id) + "/")
 
         if training_rate_mode == "ls":
             n_samples = len(samples_files)
