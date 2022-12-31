@@ -52,6 +52,7 @@ class Queue:
         self.Date = self.conn.createURI(self.namespace + "/date")
         self.RowId = self.conn.createURI(self.namespace + "/row")
 
+        self.links = [self.Value, self.RowId, self.RowId, self.UserId]
         self.row_id = None
 
     def reset_old(self):
@@ -92,10 +93,15 @@ class Queue:
 
         return result
 
-    def get(self, id, timeout=None, extra_q="",  extra_v="", default=None):
+    def get(self, id, timeout=None, extra_q="", extra_v="", default=None):
         if timeout:
-            return self.timeout(lambda: Queue.get(self, id, extra_q=extra_q, extra_v=extra_v, default=default), timeout=timeout)
-        result = self._get_df(id, extra_q=extra_q,  extra_v=extra_v)
+            return self.timeout(
+                lambda: Queue.get(
+                    self, id, extra_q=extra_q, extra_v=extra_v, default=default
+                ),
+                timeout=timeout,
+            )
+        result = self._get_df(id, extra_q=extra_q, extra_v=extra_v)
         if not result:
             return default
         item = result[0]
@@ -173,7 +179,7 @@ class Queue:
         delete {{
              "{id}" ?p ?o
         }} where {{
-             values ?p {{ {self.Value} {self.Date}  {self.UserId}   {self.RowId} }}
+             values ?p {{ {' '.join([str(uri) for uri in self.links])} }}
              "{id}" ?p ?o
         }}
         """
@@ -241,10 +247,18 @@ class RatingQueue(Queue):
         super(RatingQueue, self).__init__(*args, **kwargs)
         self.Trial = self.conn.createURI(self.namespace + "/trial")
         self.Score = self.conn.createURI(self.namespace + "/score")
+        self.links += [self.Trial, self.Score]
 
     def get(self, doc_id, timeout=None, extra_q="", default=None):
         try:
-            result = Queue.get(self, doc_id, timeout=timeout, extra_q=extra_q, extra_v="?score ?trial", default=default)
+            result = Queue.get(
+                self,
+                doc_id,
+                timeout=timeout,
+                extra_q=extra_q,
+                extra_v="?score ?trial",
+                default=default,
+            )
         except Exception as e:
             raise
 
@@ -261,12 +275,15 @@ class RatingQueue(Queue):
         return db_id, meta
 
     def get_ready(self, doc_id, timeout=None):
-        return self.get(doc_id, extra_q= f"""
+        return self.get(
+            doc_id,
+            extra_q=f"""
         ?doc_id {self.Trial} ?trial.
         filter(?trial >= "{config.MIN_CAPTCHA_TRIALS}")
-        """
-, timeout=timeout, default=[]
-                                )
+        """,
+            timeout=timeout,
+            default=[],
+        )
 
     def put(self, user_id, item, timeout=None):
         doc_id, meta = item

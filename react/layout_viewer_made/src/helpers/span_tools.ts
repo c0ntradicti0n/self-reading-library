@@ -214,7 +214,9 @@ export const validateSpans = (spans, annotation, TAG_SET) => {
    check(
       errors,
       spans.length / TAG_SET.length != 1,
-      `Must have multiple sets of ${JSON.stringify(TAG_SET)} or must be without any annotation`,
+      `Must have multiple sets of ${JSON.stringify(
+         TAG_SET,
+      )} or must be without any annotation`,
    )
 
    check(

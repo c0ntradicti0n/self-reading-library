@@ -47,6 +47,10 @@ class AnnotatorUnpacker(PathSpec):
             try:
                 result = conll_file2annotation(conll_path)
                 yield conll_path, result
+            except GeneratorExit:
+                self.logger.error(f"generator exit?: {conll_path}", exc_info=True)
+                continue
+
             except:
                 self.logger.error(
                     f"Error reading conll file: {conll_path}", exc_info=True
@@ -70,7 +74,10 @@ class AnnotatorRate(PathSpec):
                 gen=(p_m for p_m in prediction_metas),
                 single=False,
             ):
-                value, meta = _p_m
+                try:
+                    value, meta = _p_m
+                except Exception as e:
+                    continue
                 try:
                     score = q[self.service].scores(value)
                 except IndexError:
@@ -81,11 +88,6 @@ class AnnotatorRate(PathSpec):
                     yield _p_m
                     q[self.service].task_done(value)
 
-                else:
-                    self.logger.info(f"{score=} too low")
-                    self.logger.info(f"Adding {meta=} again to queue")
-                    q[self.service].put(value, _p_m)
-                    q[self.service].rate(value, float(score.score))
         except StopIteration:
             self.logger.error(
                 f"No more pre-annotated spans {self.flags['service_id']=}"

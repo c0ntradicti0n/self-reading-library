@@ -54,4 +54,4 @@ class Annotator(RestPublisher, react):
                     ):
                         yield _p_m
                 except RuntimeError as e:
-                    logging.error("Annotating next document", exc_info=True)
+                    logging.error("Error on annotating next document", exc_info=True)

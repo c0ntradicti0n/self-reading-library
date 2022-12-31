@@ -164,7 +164,6 @@ class RestQueue:
         item = q[id if id in q else self.service_id].get(id)
         d[self.service_id].put(id, item)
 
-
     def discard(self, id):
         try:
             print("Discarding")
@@ -262,6 +261,7 @@ class RestQueue:
             self.work_on_upload(doc_id, service_id=id, url=url)
         else:
             logging.info(f"Add annotation to collection {id=}")
+            q[self.service_id].rate(id, score=10)
 
             self.ok(id)
 
@@ -289,7 +289,10 @@ def queue_iter(service_id, gen, single=False):
 
     for i in range(5):
         if len(q[service_id]) < 8:
-            gc.collect()
+            try:
+                gc.collect()
+            except:
+                logging.error("gc failed", exc_info=True)
 
             try:
                 new_val = next(gen)
@@ -309,9 +312,12 @@ def queue_iter(service_id, gen, single=False):
     while True:
         # polling the q... TODO: make q blocking again
         try:
-            result = d[service_id].get_ready(None, timeout=30)
+            result = d[service_id].get_ready(None, timeout=10)
         except Exception as e:
             raise
+
+        if not result:
+            continue
 
         logging.debug("Yielding")
         yield result
