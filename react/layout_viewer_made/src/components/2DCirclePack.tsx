@@ -21,7 +21,6 @@ function wrap(text, width) {
             .attr('dy', _dy + 'em')
       while ((word = words.pop())) {
          const str_line = line.join(' ')
-         console.log(word, lineNumber, lineHeight, line.length)
          lineNumber += 1
          line.push(word)
          tspan.text(line.join(' '))
@@ -696,13 +695,11 @@ const chart = (data, ref, width, height, router) => {
 
       .on('click', function (event, d) {
          if (!d.children) {
-            console.log('click on node', d)
             router.push('/difference?id=' + d.data.id)
          } else focus !== d && (zoom(event, d), event.stopPropagation())
          event.stopPropagation()
       })
 
-   console.log(root.children[0].children)
    let textWidth = 10
    const label = svg
       .append('g')
@@ -748,9 +745,7 @@ const chart = (data, ref, width, height, router) => {
 
    function zoom(event, d) {
       focus = d
-      console.log(d)
-      if (d.children.length == 1 && d.children.depth < d.children)
-         console.log(d.children)
+
 
       const transition = svg
          .transition()

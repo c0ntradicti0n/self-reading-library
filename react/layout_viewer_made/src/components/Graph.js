@@ -23,8 +23,6 @@ class Graph extends React.Component {
 
    constructor(props) {
       super(props)
-
-      console.debug(props)
       this.state = {
          graph: {
             nodes: [
@@ -123,7 +121,6 @@ class Graph extends React.Component {
       // Aim at node from outside it
       const distance = 40
       const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z)
-      console.debug('REF', this.myRef, this.state)
 
       this.myRef.then((r) =>
          r.cameraPosition(
@@ -188,7 +185,6 @@ class Graph extends React.Component {
                      return obj
                   }}
                   onNodeClick={(node) => {
-                     console.debug(node)
                      Router.push({
                         pathname: '/difference/',
                         query: { id: node.name },

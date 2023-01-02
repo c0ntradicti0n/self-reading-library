@@ -101,3 +101,8 @@ def rm_r(path):
         os.unlink(path)
     else:
         shutil.rmtree(path)
+
+
+def touch(path):
+    with open(path, "a"):
+        os.utime(path, None)

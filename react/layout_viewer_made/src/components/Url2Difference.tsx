@@ -10,7 +10,6 @@ export default class Url2Difference extends React.Component {
          <ClickBoundary>
             <Search
                onSearch={(search) => {
-                  console.log('Search', search)
                   Router.push('/difference?id=' + search).then(() =>
                      Router.reload(),
                   )

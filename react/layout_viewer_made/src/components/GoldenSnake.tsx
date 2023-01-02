@@ -58,8 +58,6 @@ const GoldenSnake = ({ a = 40, children, ...props }) => {
    path = path.map((p) => p.map(Math.round))
    text_heights = text_heights.map((p) => p.map((p) => p * 0.37))
 
-   console.log(ref)
-
    const pathD = 'M 0 50 c ' + path.map((t, i) => t.join(' ')).join('\n c ')
    return (
       <div

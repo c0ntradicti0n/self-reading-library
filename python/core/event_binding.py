@@ -1,4 +1,5 @@
 import gc
+import multiprocessing
 import traceback
 from collections import defaultdict
 import json
@@ -11,7 +12,10 @@ from PIL import Image
 from core.database import Queue, RatingQueue
 from helpers import hash_tools
 from helpers.encode import jsonify
+from helpers.hash_tools import hashval
 from helpers.json_tools import np_encoder
+from helpers.os_tools import touch
+from helpers.time_tools import timeout
 
 logging.getLogger().setLevel(logging.INFO)
 import os
@@ -109,6 +113,34 @@ def path_or_url_encoded(path_url):
     return doc_id, url
 
 
+def long_request(f):
+    def _(self, req, resp, *args, **kwargs):
+        hash = hashval(req.uri) + (hashval(req.media) if req.method != "GET" else "")
+        path = config.REST_WORKING + "-" + hash + ".wip"
+        if not os.path.exists(path):
+            touch(path)
+
+            @timeout(3)
+            def finish():
+                try:
+                    res = f(self, req, resp, *args, **kwargs)
+                finally:
+                    os.remove(path)
+                return res
+
+            try:
+                res = finish()
+                return res
+            except multiprocessing.context.TimeoutError:
+                resp.status = falcon.HTTP_503
+                resp.retry_after = "7"
+        else:
+            resp.status = falcon.HTTP_503
+            resp.retry_after = "7"
+
+    return _
+
+
 class RestQueue:
     def __init__(
         self,
@@ -166,12 +198,13 @@ class RestQueue:
 
     def discard(self, id):
         try:
-            print("Discarding")
+            logging.info(f"Discarding {id}")
             q[self.service_id].rate(id, score=-1)
             self.ok(id)
         except Exception as e:
             raise e
 
+    @long_request
     def on_get(self, req, resp):
         # get value from before
         path_url = req.get_param("id", default=None)
@@ -274,7 +307,8 @@ class RestQueue:
             resp.text = json.dumps({})
 
     def on_delete(self, req, resp, id=None):
-        self.discard(id)
+        doc_id = req.media[0]
+        self.discard(doc_id)
 
 
 def queue_put(service_id, gen):

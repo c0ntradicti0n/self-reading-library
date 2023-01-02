@@ -168,17 +168,9 @@ const AnnotationBox = forwardRef(
             })
             return
          }
-         console.debug(meta, meta?.bbox)
       }, [meta?.bbox])
 
       const key = useCallback((event) => {
-         console.debug(
-            event.keyCode,
-            event.key,
-            event.which,
-            event.code,
-            'a'.charCodeAt(0),
-         )
 
          const next_key = KEYS[event.code]
 
@@ -187,16 +179,7 @@ const AnnotationBox = forwardRef(
          }
          if (next_key) {
             setNextKey(next_key)
-            console.debug({
-               dep: context.meta[slot]?.image,
-               next_key,
-               finished,
-               imgOriginalSize,
-               imgRenderSize,
-               labels,
-               rectangleSelection,
-               context,
-            })
+
             event.preventDefault()
          }
       }, [])
@@ -210,7 +193,7 @@ const AnnotationBox = forwardRef(
                   '',
                   {},
                   async (val) => {
-                     console.debug(await val)
+                     await val
                      if (!Object.keys(val).length) {
                         setFinished(true)
                      }
@@ -221,8 +204,13 @@ const AnnotationBox = forwardRef(
             return true
          },
          onCloseDiscard: () => {
-            service.cancel()
-            return false
+            service.cancel(context.value[slot], {},                   async (val) => {
+                     await val
+                        setFinished(true)
+
+                  },
+                  params,)
+            return true
          },
       }))
 
@@ -240,14 +228,8 @@ const AnnotationBox = forwardRef(
             labels ?? context.meta[slot].LABEL ?? context.meta[slot].labels,
          ])
       } else return <ThreeCircles />
-      console.log(
-         'COLS',
-         cols,
-         labels ?? context.meta[slot].LABEL ?? context.meta[slot].labels,
-         context.meta[slot].bbox,
-      )
 
-      console.debug('imageRenderSize', imgRenderSize)
+
       const renderRectTagsCoords = imgRenderSize
          ? cols?.map((row, i) => [
               row[1],
@@ -311,10 +293,6 @@ const AnnotationBox = forwardRef(
                            rectangleSelection[0],
                            rectangleSelection[1],
                            (res) => {
-                              console.debug(
-                                 'changed multiple labels',
-                                 res[1].labels,
-                              )
                               setLabels(res[1].labels)
                            },
                            params,
@@ -334,7 +312,6 @@ const AnnotationBox = forwardRef(
                         We have annotated the whole document!{' '}
                         <Button
                            onClick={(e) => {
-                              console.debug(e)
                               Router.push({
                                  pathname: '/difference/',
                                  query: { id: context.value[slot] },
@@ -383,7 +360,6 @@ const AnnotationBox = forwardRef(
                                     (im.naturalWidth / im.naturalHeight)
                               else scaleW = scaleH
 
-                              console.debug('loading image')
                               setLabels(context.meta[slot]?.labels)
                               setImgOriginalSize({
                                  width: im.naturalHeight,
@@ -430,10 +406,6 @@ const AnnotationBox = forwardRef(
                                              '[1].labels.[' + i + ']',
                                              label,
                                              (res) => {
-                                                console.debug(
-                                                   'changed single label',
-                                                   res,
-                                                )
                                                 setLabels(res[1].labels)
                                              },
                                              params,

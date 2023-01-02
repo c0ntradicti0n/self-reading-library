@@ -33,7 +33,6 @@ const AppWrapper = ({ children }) => {
 
    const setValueMeta = (slot: Slot, newValue: string, newMeta: any) => {
       state[slot] = { value: newValue, meta: newMeta }
-      console.debug('setState', state)
 
       setState({ ...state })
    }
@@ -48,8 +47,6 @@ const AppWrapper = ({ children }) => {
    const references = (ref) => {
       ref
    }
-
-   console.debug('context', { children, value, meta })
    return (
       <DocumentContext.Provider
          value={{
@@ -57,12 +54,9 @@ const AppWrapper = ({ children }) => {
             meta,
             setValueMetas: (slot, value_meta) => {
                const [value, meta] = value_meta ?? [null, null]
-               console.debug('setPlural', slot, value, meta)
                setValueMeta(slot, value, meta)
             },
             setValueMeta: (slot, value, meta) => {
-               console.debug('setSingular', slot, value, meta)
-
                setValueMeta(slot, value, meta)
             },
             setHelpSteps,

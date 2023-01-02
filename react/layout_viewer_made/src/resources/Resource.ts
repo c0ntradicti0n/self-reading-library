@@ -1,4 +1,4 @@
-import { getRandomArbitrary } from '../helpers/array'
+import _ from 'lodash'
 import { NORMAL, Slot } from '../contexts/SLOTS'
 import { BACKEND_HOST } from '../../config/connection'
 
@@ -65,7 +65,6 @@ export default class Resource {
             const add_query = window?.location.search.substring(1)
             if (querystring) querystring = add_query + '&' + querystring
             else querystring = window?.location.search.substring(1)
-            console.debug(querystring)
          }
       }
 
@@ -88,6 +87,15 @@ export default class Resource {
 
       try {
          const response = await fetch(request_query, fetch_init)
+
+         if (response.status === 503) {
+            _.debounce(
+               () =>
+                  this.request(method, data, callback, params, is_file, query),
+               7000,
+            )()
+            return
+         }
 
          if (!response.ok) {
             throw response.statusText
@@ -148,9 +156,9 @@ export default class Resource {
       }
    }
 
-   cancel = async (id, data = {}, callback) => {
+   cancel = async (id, data = {}, callback, params) => {
       if (this.upload_allowed) {
-         await this.request('delete', [id, data], callback)
+         await this.request('delete', [id, data], callback, params)
       }
    }
 

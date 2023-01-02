@@ -26,13 +26,10 @@ const AppWrapper = ({ presetValue = null, children }) => {
             meta,
             setMeta,
             setValueMetas: ([value, meta]) => {
-               console.debug('setPlural', value, meta)
                setValue(value)
                setMeta(meta)
             },
             setValueMeta: (value, meta) => {
-               console.debug('setSingular', value, meta)
-
                setValue(value)
                setMeta(meta)
             },

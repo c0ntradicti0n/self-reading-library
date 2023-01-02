@@ -38,7 +38,7 @@ const Captcha = ({ is_open = true }) => {
    }
 
    return (
-      <div data-backdrop="false">
+      <div>
          {!is_open && <a onClick={() => setOpen(true)}>Captcha</a>}
          {open ? (
             <Modal

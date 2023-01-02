@@ -192,3 +192,5 @@ MIN_CAPTCHA_TRIALS = 3
 captcha_queue_size = 5
 
 DB_NAME = "db"
+
+REST_WORKING = hidden_folder + "req_running/"

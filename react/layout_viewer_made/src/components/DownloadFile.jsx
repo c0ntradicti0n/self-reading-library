@@ -4,7 +4,6 @@ import { BACKEND_HOST } from '../../config/connection'
 
 export default class DownloadFile extends React.Component {
    render() {
-      console.debug(this.props)
       return (
          <form
             method="POST"

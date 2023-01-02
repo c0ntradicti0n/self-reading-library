@@ -54,7 +54,6 @@ const hints = {
 }
 export function AnnotationModal({ text, onClose, service }) {
    const ref = useRef(null) // ref => { current: null }
-   console.log(ref?.current)
    return (
       <ClickBoundary>
          <div data-backdrop="false">
@@ -99,7 +98,6 @@ export function AnnotationTable(props: {
    annotation: string[][]
    spans: [string, number, number, string[]][]
 }) {
-   console.debug('AnnotationTable', props)
    const sortedSpans = sortSpans_precedence(props.spans)
    return (
       <div style={{ display: 'flex', flexWrap: 'wrap' }}>
@@ -131,7 +129,7 @@ const AnnotationSpan = forwardRef<
    (
       {
          text = null,
-         onClose = () => console.debug('close span_annotation'),
+         onClose = () => null,
          service,
          slot,
          TAG_SET = ['SUBJECT', 'CONTRAST'],
@@ -147,8 +145,6 @@ const AnnotationSpan = forwardRef<
       let value = context.value[slot]
       let meta = context.meta[slot]
       const params = { doc_id: value }
-
-      console.debug('AnnotationSpan', slot, value, meta, context)
 
       const initializeFromAnnotation = (annotation) => {
          const sanitized = correctPrefix(annotation)
@@ -181,7 +177,6 @@ const AnnotationSpan = forwardRef<
             return
          }
          if (meta?.annotation) {
-            console.debug(meta, meta?.annotation)
             initializeFromAnnotation(meta?.annotation)
          }
       }, [meta?.annotation])
@@ -194,7 +189,6 @@ const AnnotationSpan = forwardRef<
       }))
 
       const onCloseSave = () => {
-         console.debug('save', annotation, spanIndices)
          const updatedAnnotation = spans2annotation(annotation, spanIndices)
          const newSpans = mergeSpans(spanIndices, updatedAnnotation)
          const newAnnotation = spans2annotation(annotation, newSpans)
@@ -211,14 +205,16 @@ const AnnotationSpan = forwardRef<
                '[1].annotation',
                newAnnotation,
                (r) => {
-                  console.debug('updated', r)
+                  return
                },
                params,
             )
             await service.save(
                value,
                newAnnotation,
-               (r) => console.debug('saved', r),
+               (r) => {
+                  return
+               },
                params,
             )
             setSuccess(true)
@@ -229,7 +225,9 @@ const AnnotationSpan = forwardRef<
       }
 
       const onCloseDiscard = () => {
-         service.cancel(value, {}, () => console.debug('dicarded'))
+         service.cancel(value, {}, () => {
+         return
+         })
          onClose()
          setSuccess(true)
 
@@ -275,19 +273,6 @@ const AnnotationSpan = forwardRef<
                               ...spanIndices,
                               [kind, ...subIndexes, words.slice(...subIndexes)],
                            ])
-                           if (!newSpanIndices) {
-                              console.debug(
-                                 'Selection could not be found in annotation',
-                                 selectedWords,
-                                 words,
-                              )
-                           }
-                           console.debug(
-                              'new Span:',
-                              newSpanIndices,
-                              subIndexes[0],
-                              words.slice(...subIndexes),
-                           )
 
                            setSpanIndices(newSpanIndices)
                         }}
@@ -375,7 +360,6 @@ const AnnotationSpan = forwardRef<
                                           tag,
                                           annotation,
                                        )
-                                       console.debug(result)
                                        setSpanIndices(result)
                                     }}
                                     onMouseUp={() =>

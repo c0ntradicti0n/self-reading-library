@@ -39,7 +39,6 @@ export default function SceletonGraph({
    )
    const fgRef = React.useRef(null)
    const [trick, setTrick] = useState(false)
-   console.log(data)
 
    useEffect(() => {
       data.links = data.edges
@@ -52,7 +51,6 @@ export default function SceletonGraph({
          .map((e) => [{ id: e.target, label: e.label }])
          .flat()
 
-      console.log('unknown nodes', unknow_nodes_t, unknow_nodes_s)
       data.nodes = [...data.nodes, ...unknow_nodes_s, ...unknow_nodes_t]
       data.nodes = data.nodes
          .map((n) => ({ ...n, x: 0, y: 0, value: 100 }))

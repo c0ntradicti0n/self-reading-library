@@ -84,15 +84,6 @@ export function adjustSpanValue(
    tag: string,
    annotation: [string, string][],
 ) {
-   console.debug(
-      'adjustSpanValue',
-      newValue,
-      activeThumb,
-      _spanIndices,
-      i,
-      tag,
-      annotation,
-   )
    let spanIndices = [..._spanIndices]
    if (!Array.isArray(newValue)) {
       return
@@ -124,8 +115,6 @@ export function adjustSpanValue(
       end,
       annotation.slice(start, end).map(([w]) => w),
    ])
-
-   console.debug('result', spanIndices)
 
    return spanIndices //.sort((a, b) => a[1] - b[1])
 }
@@ -184,7 +173,6 @@ export function popSpan(
    i: number,
 ) {
    spanIndices.splice(i, 1)
-   console.debug('popping', { after: spanIndices, i })
    return [...spanIndices]
 }
 

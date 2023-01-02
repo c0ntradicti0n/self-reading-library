@@ -3,6 +3,7 @@ import logging
 import falcon
 from wsgiref import simple_server
 from config.ant_imports import *
+from helpers.os_tools import make_fresh_dir
 from language.knowledge.KnowledgePublisher import KnowledgePublisher
 from layout.annotator.annotation_to_gold import AnnotatedToGoldQueueRest
 
@@ -28,6 +29,8 @@ def create_app():
     from language.transformer.ElmoDifference import ElmoDifferenceQueueRest
 
     from core.rest.LayoutPublisher import LayoutPublisher
+
+    make_fresh_dir(config.REST_WORKING)
 
     publishing = {
         # difference

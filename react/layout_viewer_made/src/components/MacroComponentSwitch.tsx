@@ -37,7 +37,6 @@ const MacroComponentSwitch = forwardRef(
       const component = props.component
       const service = new Resource(props.url, true, true, true, true, true)
       service.setSlot(slot)
-      console.debug('MacroComponentSwitch', props, slot)
       useEffect(() => {
          const valueToFetch =
             props.value ?? (slot === NORMAL ? router.query.id : null)
@@ -57,9 +56,7 @@ const MacroComponentSwitch = forwardRef(
          } else context?.setValueMetas(slot, props.input)
       }, [])
 
-      console.debug(context, props)
       if (loading && !(slot === CAPTCHA)) {
-         console.log('Display captcha, load is taking some time')
          return <Captcha is_open={true} />
       }
       if (!context.value[slot]) return null

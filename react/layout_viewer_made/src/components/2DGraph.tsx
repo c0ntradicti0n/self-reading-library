@@ -407,7 +407,6 @@ function Pack(
       strokeOpacity = 0.4, // stroke opacity for internal circles
    } = {},
 ) {
-   console.log(d, path)
 
    // If id and parentId options are specified, or the path option, use d3.stratify
    // to convert tabular data to a hierarchy; otherwise we assume that the data is

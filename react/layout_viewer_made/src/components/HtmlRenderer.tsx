@@ -30,14 +30,6 @@ const HtmlRenderer = (props: Props) => {
          context.value[props.slot] &&
          !context.value[props.slot].includes('http')
       ) {
-         console.debug(
-            'fetching static html',
-            FRONTEND_HOST,
-            '/' +
-               context.value[props.slot].replace('.layouteagle/', '') +
-               '.html',
-            context.value[props.slot],
-         )
          httpGet(
             FRONTEND_HOST +
                '/' +
@@ -73,7 +65,7 @@ const HtmlRenderer = (props: Props) => {
                
                The markup should match the phrases where 'differences' are explained. 
                But the markup is at the moment not always 'perfect', so we have built a way, 
-               how to teach the machine. You can select text, just as you would copy the text
+               how to teach the machine. You can <b>select text</b>, just as you would copy the text
                and it will open a portal! `}
                   aria-atomic={'difference-select-text.png'}
                   aria-modal={'false'}

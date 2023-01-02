@@ -13,7 +13,6 @@ const Help = ({
 }) => {
    let steps = [...document.querySelectorAll('[aria-description]')].map(
       (el) => {
-         console.log(el.attributes['aria-description'].value, el)
          return {
             title: el.attributes['aria-description'].value,
             modal: el.attributes['aria-modal']?.value,
@@ -27,9 +26,7 @@ const Help = ({
       },
    )
    const hasModal = steps.some((s) => s.modal)
-   console.log(hasModal, steps)
    const hasNotModal = steps.some((s) => !s.modal)
-   console.log(hasModal, steps)
 
    if (hasModal && hasNotModal) steps = steps.filter((s) => !s.modal)
    return (

@@ -134,7 +134,6 @@ class Rector extends React.Component {
    }
 
    render() {
-      console.debug('render')
       return (
          <canvas
             width={this.props.width}

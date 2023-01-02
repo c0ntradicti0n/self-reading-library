@@ -27,14 +27,6 @@ export const KeySelect = ({
    }, [])
 
    const key = useCallback((event) => {
-      console.debug(
-         event.keyCode,
-         event.key,
-         event.which,
-         event.code,
-         'a'.charCodeAt(0),
-      )
-
       const next_key = KEY_TRANSLATE[event.code]
 
       if (!next_key) {
