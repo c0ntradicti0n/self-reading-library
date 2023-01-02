@@ -9,6 +9,9 @@ def latex_replace(s):
         "\\N{LATIN}": "",
         "\\N{DEGREE SIGN}": "°",
         "\\N{LATIN SMALL LIGATURE FF}": "ff",
+        "\\N{LATIN SMALL LIGATURE FI}": "fi",
+        "\\N{LATIN SMALL LETTER E WITH ACUTE}": "é",
+
     }.items():
         s = s.replace(k, v)
     return s

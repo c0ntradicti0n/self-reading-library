@@ -45,7 +45,7 @@ services:
 
     volumes:
       - "$CWD/python:/home/finn/Programming/self-reading-library/python"
-    entrypoint: uwsgi  --py-autoreload=1 --http 0.0.0.0:$PORT --module wsgi:application --memory-report  --workers 1 --threads 16  --memory-report --enable-threads --skip-atexit-teardown --max-worker-lifetime=1000 --max-worker-lifetime-delta=2000 --harakiri=3000 -b 32768
+    entrypoint: uwsgi  --py-autoreload=1 --http 0.0.0.0:$PORT --module wsgi:application --memory-report  --workers 1 --threads 16  --memory-report --enable-threads --skip-atexit-teardown --max-worker-lifetime=200000--max-worker-lifetime-delta=200000 --harakiri=200000 -b 32768
 
   fill:
     build: python
