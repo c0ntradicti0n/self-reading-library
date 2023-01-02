@@ -638,11 +638,22 @@ const color = d3
    .range(['hsl(152,80%,80%)', 'hsl(228,30%,40%)'])
    .interpolate(d3.interpolateHcl)
 
-const rec_hierarchy = (name, data, value = 100) => {
+const rec_hierarchy = (name, data, value = 100, visited = []) => {
+   if (visited.includes(name))
+      return [
+           {
+              name: "--->>",
+              id: "recursive",
+              value,
+              children: [],
+           },
+        ]
+   visited.push(name)
+
    const edges = data.links
       .filter((l) => l.source === name)
       .map((n) => {
-         let res = rec_hierarchy(n.target, data, value * 4)
+         let res = rec_hierarchy(n.target, data, value * 4, visited)
          if (res.length === 1) {
             res = res?.[0]
             return res
