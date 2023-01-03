@@ -149,6 +149,10 @@ class AnnotationSpanSet(PathSpec):
         for path, meta in prediction_metas:
             self.logger.debug(f"Reading annotation from '{path}'")
             result = conll_file2annotation(path)
+
+            if not result:
+                continue
+
             self.logger.debug(f"Read '{result}'")
             result["span_set"] = DifferenceSpanSet(result["annotation"])
             yield path, result

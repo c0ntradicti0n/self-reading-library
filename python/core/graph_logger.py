@@ -14,6 +14,7 @@ class GraphHandler(StreamHandler):
 
         # Kafka Broker Configuration
         self.conn = login("ant_log")
+        self.conn.clear()
         self.Log = self.conn.createURI(f"{BASE}log")
         self.Level = self.conn.createURI(f"{BASE}level")
         self.Msg = self.conn.createURI(f"{BASE}msg")

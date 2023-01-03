@@ -26,7 +26,7 @@ def conll2annotation(content, swap=False):
             "pos": cols[1],
         }
     except:
-        raise
+        logging.error(f"Error reading annotation {cols=}", exc_info=True)
     return result
 
 
