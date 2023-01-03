@@ -71,20 +71,7 @@ class Dict2Graph(Ant):
                 "id": k,
                 "name": dig.nodes[k]["attr"] if "attr" in dig.nodes[k] else k,
                 "val": 2 ** (levels - 1) if v else 2 ** (levels - 2),
-                "title": (
-                    dig.nodes[k]["title"].strip().replace("\n", " ").title()
-                    if "title" in dig.nodes[k]
-                    and config.hidden_folder not in dig.nodes[k]["title"]
-                    else (
-                        " ".join(
-                            dig.nodes[k]["used_text_boxes"][0][0][0].split(" ")[:20]
-                        )
-                        .replace("\n", "")
-                        .title()
-                        if "used_text_boxes" in dig.nodes[k]
-                        else None
-                    )
-                ),
+                "title": self.make_title(dig, k),
                 "group": cross_nodes_2_i[rev_ddic[k]] if k in rev_ddic else None,
                 "path": dig.nodes[k]["html_path"].replace(config.tex_data, "")
                 if "html_path" in dig.nodes[k]
@@ -100,6 +87,26 @@ class Dict2Graph(Ant):
                 "group": 0,
                 "path": "error",
             }
+
+    def make_title(self, dig, k):
+        try:
+            return (
+                dig.nodes[k]["title"].strip().replace("\n", " ").title()
+                if "title" in dig.nodes[k]
+                   and config.hidden_folder not in dig.nodes[k]["title"]
+                else (
+                    " ".join(
+                        dig.nodes[k]["used_text_boxes"][0][0][0].split(" ")[:20]
+                    )
+                    .replace("\n", "")
+                    .title()
+                    if "used_text_boxes" in dig.nodes[k]
+                    else None
+                )
+            )
+        except:
+            logging.error(f"Error making titles {dig.nodes[k]['used_text_boxes']=}")
+            return "error"
 
 
 if __name__ == "__main__":
