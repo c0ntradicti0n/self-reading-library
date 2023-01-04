@@ -46,7 +46,6 @@ class AnnotatorUnpacker(PathSpec):
         for conll_path, meta in prediction_metas:
             try:
                 result = conll_file2annotation(conll_path)
-                yield conll_path, result
             except GeneratorExit:
                 self.logger.error(f"generator exit?: {conll_path}", exc_info=True)
                 continue
@@ -55,6 +54,9 @@ class AnnotatorUnpacker(PathSpec):
                 self.logger.error(
                     f"Error reading conll file: {conll_path}", exc_info=True
                 )
+                continue
+
+            yield conll_path, result
 
 
 @converter(

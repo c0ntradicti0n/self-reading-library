@@ -1,3 +1,6 @@
+import regex
+
+
 def latex_replace(s):
     for k, v in {
         "\\N{RIGHT SINGLE QUOTATION MARK}": "'",
@@ -14,6 +17,11 @@ def latex_replace(s):
         "\\N{BLACK SMALL SQUARE}": "*",
         "\\N{EN DASH}": "-",
         "\\N{NO-BREAK SPACE}": " ",
+        "\\N{COPYRIGHT SIGN}": "©"
     }.items():
         s = s.replace(k, v)
+    for m in regex.findall(r"\\N\{[\w\s\d]+\}", s):
+        print (m)
+
+    s = regex.sub( r"\\N\{[\w\s\d]+\}",s, "")
     return s
