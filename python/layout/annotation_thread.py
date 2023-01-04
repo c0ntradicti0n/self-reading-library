@@ -95,12 +95,13 @@ UploadAnnotationQueueRest = RestQueue(
 )
 
 
-def on_predict(args):
+def on_predict(args, service_id=None):
     gen = forget_except(
         sample_pipe(
             metaize(itertools.cycle(["http://export.arxiv.org/"])),
             model_path=args["best_model_path"],
             layout_model_path=["full_model_path"],
+            service_id=service_id,
         ),
         keys=["html_path"],
     )

@@ -171,7 +171,6 @@ const AnnotationBox = forwardRef(
       }, [meta?.bbox])
 
       const key = useCallback((event) => {
-
          const next_key = KEYS[event.code]
 
          if (!next_key) {
@@ -204,12 +203,15 @@ const AnnotationBox = forwardRef(
             return true
          },
          onCloseDiscard: () => {
-            service.cancel(context.value[slot], {},                   async (val) => {
-                     await val
-                        setFinished(true)
-
-                  },
-                  params,)
+            service.cancel(
+               context.value[slot],
+               {},
+               async (val) => {
+                  await val
+                  setFinished(true)
+               },
+               params,
+            )
             return true
          },
       }))
@@ -217,18 +219,26 @@ const AnnotationBox = forwardRef(
       let cols
 
       if (context?.meta[slot]?.bbox) {
-         const bbox = zip([
-            context.meta[slot].x0,
-            context.meta[slot].y0,
-            context.meta[slot].x1,
-            context.meta[slot].y1,
-         ])
-         cols = zip([
-            bbox,
-            labels ?? context.meta[slot].LABEL ?? context.meta[slot].labels,
-         ])
+         try {
+            const bbox = zip([
+               context.meta[slot].x0,
+               context.meta[slot].y0,
+               context.meta[slot].x1,
+               context.meta[slot].y1,
+            ])
+            cols = zip([
+               bbox,
+               labels ?? context.meta[slot].LABEL ?? context.meta[slot].labels,
+            ])
+         } catch (e) {
+            return (
+               <pre>
+                  {JSON.stringify(context.meta[slot], null, 2)}
+                  {e.toString()}
+               </pre>
+            )
+         }
       } else return <ThreeCircles />
-
 
       const renderRectTagsCoords = imgRenderSize
          ? cols?.map((row, i) => [

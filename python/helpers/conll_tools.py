@@ -27,12 +27,15 @@ def conll2annotation(content, swap=False):
         }
     except:
         logging.error(f"Error reading annotation {cols=}", exc_info=True)
+        return None
     return result
 
 
 def conll_file2annotation(pickle_path, swap=False):
     with open(pickle_path, errors="ignore") as f:
         content = f.read()
+    if not content:
+        return None
     result = conll2annotation(content, swap=swap)
     return result
 

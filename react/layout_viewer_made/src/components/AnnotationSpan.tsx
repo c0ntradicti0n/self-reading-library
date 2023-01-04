@@ -226,7 +226,7 @@ const AnnotationSpan = forwardRef<
 
       const onCloseDiscard = () => {
          service.cancel(value, {}, () => {
-         return
+            return
          })
          onClose()
          setSuccess(true)

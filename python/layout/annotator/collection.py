@@ -37,5 +37,5 @@ class Annotator(PathSpec):
                 yield id, meta
             except Exception as e:
                 logging.error(
-                    "Error when preparing pagewise layout annotation", exc_info=True
+                    "Error when preparing page wise layout annotation", exc_info=True
                 )

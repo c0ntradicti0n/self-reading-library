@@ -641,13 +641,13 @@ const color = d3
 const rec_hierarchy = (name, data, value = 100, visited = []) => {
    if (visited.includes(name))
       return [
-           {
-              name: "--->>",
-              id: "recursive",
-              value,
-              children: [],
-           },
-        ]
+         {
+            name: '--->>',
+            id: 'recursive',
+            value,
+            children: [],
+         },
+      ]
    visited.push(name)
 
    const edges = data.links
@@ -756,7 +756,6 @@ const chart = (data, ref, width, height, router) => {
 
    function zoom(event, d) {
       focus = d
-
 
       const transition = svg
          .transition()

@@ -183,8 +183,7 @@ class Queue:
              "{id}" ?p ?o
         }}
         """
-        res = self.conn.executeUpdate(q)
-        print(res)
+        self.conn.executeUpdate(q)
 
     def queue_done(self, id=None):
         q = f"""
@@ -296,8 +295,8 @@ class RatingQueue(Queue):
         """
         super(RatingQueue, self).put(user_id, item, extra_q)
 
-    def rate(self, user_id, score, new_trial=True):
-        scores = self.scores(user_id)
+    def rate(self, doc_id, score, new_trial=True):
+        scores = self.scores(doc_id)
 
         q = f"""
                 delete data {{

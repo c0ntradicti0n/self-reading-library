@@ -407,7 +407,6 @@ function Pack(
       strokeOpacity = 0.4, // stroke opacity for internal circles
    } = {},
 ) {
-
    // If id and parentId options are specified, or the path option, use d3.stratify
    // to convert tabular data to a hierarchy; otherwise we assume that the data is
    // specified as an object {children} with nested objects (a.k.a. the “flare.json”

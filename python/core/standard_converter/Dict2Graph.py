@@ -93,11 +93,9 @@ class Dict2Graph(Ant):
             return (
                 dig.nodes[k]["title"].strip().replace("\n", " ").title()
                 if "title" in dig.nodes[k]
-                   and config.hidden_folder not in dig.nodes[k]["title"]
+                and config.hidden_folder not in dig.nodes[k]["title"]
                 else (
-                    " ".join(
-                        dig.nodes[k]["used_text_boxes"][0][0][0].split(" ")[:20]
-                    )
+                    " ".join(dig.nodes[k]["used_text_boxes"][0][0][0].split(" ")[:20])
                     .replace("\n", "")
                     .title()
                     if "used_text_boxes" in dig.nodes[k]

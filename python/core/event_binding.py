@@ -285,6 +285,9 @@ class RestQueue:
         resp.status = falcon.HTTP_OK
 
     def on_post(self, req, resp, id=None, *args, **kwargs):
+
+
+
         if isinstance(req.media, str):
             doc_id = req.media
             doc_id, url = path_or_url_encoded(doc_id)
@@ -293,7 +296,9 @@ class RestQueue:
             init_queues(self.service_id, id)
             self.work_on_upload(doc_id, service_id=id, url=url)
         else:
-            logging.info(f"Add annotation to collection {id=}")
+            logging.info(f"Ok for annotation {id=}")
+            if "doc_id" in req.params:
+                id = req.params["doc_id"]
             q[self.service_id].rate(id, score=10)
 
             self.ok(id)
@@ -338,15 +343,13 @@ def queue_iter(service_id, gen, single=False):
                     exc_info=True,
                 )
                 raise
-        else:
-            logging.info("Not adding new samples, enough in queue")
 
     logging.info(f"Inserted samples in the queue {service_id}")
 
     while True:
         # polling the q... TODO: make q blocking again
         try:
-            result = d[service_id].get_ready(None, timeout=10)
+            result = d[service_id].get_ready(None, timeout=5)
         except Exception as e:
             raise
 
@@ -356,13 +359,6 @@ def queue_iter(service_id, gen, single=False):
         logging.debug("Yielding")
         yield result
         logging.debug("Yielded")
-
-        if result:
-            try:
-                logging.info("Task done")
-
-            except Exception as e:
-                logging.debug("Was the task already done?", exc_info=True)
 
         for i in range(1):
             if len(q[service_id]) < config.captcha_queue_size:
@@ -374,8 +370,8 @@ def queue_iter(service_id, gen, single=False):
                     q[service_id].put(service_id, new_val)
                 except Exception as e:
                     logging.error(e, exc_info=True)
-            else:
-                logging.info("Not adding new samples, enough in queue")
+
+
 
     print("The End")
 

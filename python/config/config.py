@@ -189,7 +189,7 @@ TRASH_DATASET_PATH = hidden_folder + "/trash"
 
 MIN_CAPTCHA_TRIALS = 3
 
-captcha_queue_size = 5
+captcha_queue_size = os.environ.get("CAPTCHA_QUEUE_SIZE", default=5)
 
 DB_NAME = "db"
 

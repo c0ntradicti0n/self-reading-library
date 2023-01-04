@@ -20,7 +20,6 @@ services:
       LANG: en_US.UTF - 8, LANGUAGE: en_US.UTF-8, LC_ALL: en_US.UTF-8}
     image: full_python
     networks: [db]
-    ports: [7777:7777]
     volumes: [$CWD/python:/home/finn/Programming/self-reading-library/python]
   micro_topicmaker:
     build: python

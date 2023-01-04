@@ -46,12 +46,13 @@ class Annotator(RestPublisher, react):
 
                 try:
                     for _p_m in queue_iter(
-                        service_id="annotation",
+                        service_id=self.flags["service_id"],
                         gen=(p_m for p_m in meta["layout_predictions"]),
                         single=self.flags["from_function_only"]
                         if "from_function_only" in self.flags
                         else False,
                     ):
                         yield _p_m
-                except RuntimeError as e:
+                except Exception:
                     logging.error("Error on annotating next document", exc_info=True)
+                    continue
