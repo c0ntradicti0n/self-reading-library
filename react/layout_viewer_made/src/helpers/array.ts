@@ -90,7 +90,9 @@ export const indexSubsequence = (seq, subseq) => {
       .map((w, i) => [w, i])
       .filter(([w, i]) => subseq[0] === w)
       .map(([w, i]) => i)
-   const result = max(
+   let result
+   try {
+    result = max(
       starts
          .map((i) =>
             seq
@@ -100,7 +102,9 @@ export const indexSubsequence = (seq, subseq) => {
          )
          .reverse(),
       (s1, s2) => s1.length > s2.length,
-   )
+   ) } catch (e) {
+      result = undefined
+   }
    if (!result) return undefined
    return [Math.min(...result), Math.max(...result) + 1]
 }

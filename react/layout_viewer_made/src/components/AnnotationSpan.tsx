@@ -266,7 +266,7 @@ const AnnotationSpan = forwardRef<
                               selectedWords,
                            )
                            if (!subIndexes) {
-                              alert(`Subsequence not found ${kind}`)
+                              alert(`Text not found ${text}`)
                               return
                            }
                            const newSpanIndices = sortSpans_position([

@@ -52,7 +52,10 @@ export const Knowledge = ({ service, slot }) => {
                      You can zoom in and out. the red relines mark polar pairs and the green lines mark equality between the concept.
                      As everything, it's not perfect.
                      
-                     But as you see in the standard example, where it searches for "premise"
+                     But as you see in the standard example, where it searches for "premise", it reveils the relation 
+                     between "premise" and "truth" as well as "conclusion" and "validity", that in logic premises
+                     must be true as correct statemants about the world and the conclusion must be drawn by logically 
+                     valid steps. That you learn in the first logic couse in philosophy.
                      `}
             aria-modal={false}
          >
