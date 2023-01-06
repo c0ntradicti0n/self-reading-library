@@ -137,7 +137,7 @@ class Queue:
                              ?doc_id  {self.UserId} ?user_id.  
 
                              {extra_q}
-                            }} limit {limit}
+                            }} ORDER BY RAND() limit {limit}
                         """
         else:
 
