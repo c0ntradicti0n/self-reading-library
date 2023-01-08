@@ -335,7 +335,10 @@ def queue_iter(service_id, gen, single=False):
 
             try:
                 new_val = next(gen)
-                q[service_id].put(service_id, new_val)
+                if new_val:
+                    q[service_id].put(service_id, new_val)
+                else:
+                    logging.error(f"Pipeline gave {new_val=}")
 
             except Exception as e:
                 logging.error(
@@ -367,7 +370,10 @@ def queue_iter(service_id, gen, single=False):
 
                 try:
                     new_val = next(gen)
-                    q[service_id].put(service_id, new_val)
+                    if new_val:
+                        q[service_id].put(service_id, new_val)
+                    else:
+                        logging.error(f"Pipeline gave {new_val=}")
                 except Exception as e:
                     logging.error(e, exc_info=True)
 

@@ -287,6 +287,10 @@ class RatingQueue(Queue):
     def put(self, user_id, item, timeout=None):
         doc_id, meta = item
 
+        if isinstance(meta, dict):
+            logging.error(f"Meta is null in db update?\n{doc_id=}\n{meta=}")
+            return
+
         rating_trial = meta.get("rating_trial", 0)
         rating_score = meta.get("rating_score", 0)
         extra_q = f"""

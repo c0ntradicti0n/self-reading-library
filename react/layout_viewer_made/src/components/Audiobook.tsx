@@ -5,9 +5,9 @@ import { Button } from '@mui/material'
 import { Audio } from 'react-loader-spinner'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
 import AudiobookService from '../resources/AudiobookService'
+import {NORMAL} from "../contexts/SLOTS";
 
 const Audiobook = () => {
-   return null
    const context = useContext<DocumentContext>(DocumentContext)
    const [service] = useState(new AudiobookService())
 
@@ -19,7 +19,18 @@ const Audiobook = () => {
    const addIntervallId = (n) => setIntervalIds([...intervalIds, n])
 
    const existsCall = async () => {
-      await service.exists(context.value[props.slot], (res) => {
+      fetch(audioPath,
+          { method: "HEAD" }
+    ).then((res) => {
+      if (res.ok) {
+          setExists(true)
+       } else {
+          setExists(false)
+      }
+    });
+
+
+      await service.exists(context.value[NORMAL], (res) => {
          setExists(true)
          setId(id)
          setaudioPath(res.audio_path)
@@ -29,23 +40,21 @@ const Audiobook = () => {
    }
 
    useEffect(() => {
-      if (context.value[props.slot] && context.value[props.slot] !== id) {
+      if (context.value[NORMAL] && context.value[NORMAL] !== id) {
          existsCall()
          const intervalId = window.setInterval(existsCall, 20000)
          addIntervallId(intervalId)
          return () => intervalIds.map((id) => clearInterval(intervalId))
       }
-   }, [context.value[props.slot]])
+   }, [context.value[NORMAL]])
 
-   const load = async () => {
-      if (context.value[props.slot] && id != context.value[props.slot]) {
-         console.debug('Request audiobook for', context.value[props.slot])
-         await service.getOne(context.value[props.slot], (res) => {
-            console.debug(res)
+   const createAudio = async () => {
+      if (context.value[NORMAL] ) {
+         console.debug('Request audiobook for', context.value[NORMAL])
+         await service.getOne(context.value[NORMAL], (res) => {
+            console.log(res)
             setExists(true)
             setId(id)
-            setaudioPath(res.audio_path)
-            intervalIds.map((id) => clearInterval(id))
          })
       }
    }
@@ -57,7 +66,8 @@ const Audiobook = () => {
          ) : exists ? (
             <AudiobookPlayer id={audioPath}></AudiobookPlayer>
          ) : (
-            <Button onClick={load}>Create (more recent) Audiobook</Button>
+             <Button onClick={createAudio}> </Button>
+
          )}
       </div>
    )

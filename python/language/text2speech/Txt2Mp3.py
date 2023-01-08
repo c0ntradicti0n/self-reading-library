@@ -3,6 +3,7 @@ import os
 
 from ant import Ant
 from config import config
+from core.microservice import microservice
 
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import cache_flow
@@ -35,12 +36,19 @@ def get_audio_path(id):
     return out_path
 
 
+@microservice
 @converter("reading_order", "audio")
 class Txt2Mp3(Ant):
     def __init__(self, debug=True, *args, n=15, **kwargs):
         super().__init__(*args, cached=cache_flow.iterate, **kwargs)
         self.n = n
         self.debug = debug
+
+    def load(self):
+        pass
+
+    def predict(self, id, text):
+        return generate_audio(id, text)
 
     @configurable_cache(
         filename=config.cache + os.path.basename(__file__),
@@ -51,9 +59,7 @@ class Txt2Mp3(Ant):
                 " ".join(preprocess_text(meta["enumerated_texts"])).replace("/n", " ")
                 + "\n"
             )
-
-            audio_path = generate_audio(id, text)
-
+            audio_path = self.predict(id, text)
             meta["audio_path"] = audio_path
             yield id, meta
 

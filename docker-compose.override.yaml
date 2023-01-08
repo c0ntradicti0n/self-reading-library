@@ -31,3 +31,13 @@ services:
     image: full_python
     networks: [db]
     volumes: [$CWD/python:/home/finn/Programming/self-reading-library/python]
+  micro_txt2mp3:
+    build: python
+    container_name: micro_txt2mp3
+    entrypoint: python3 -c 'from language.text2speech.Txt2Mp3 import Txt2Mp3; from
+      wsgiref import simple_server ; simple_server.make_server("0.0.0.0", 7777, Txt2Mp3.application).serve_forever()'
+    environment: {GDB_HOST: gdb, GDB_PASSWORD: '${GDB_PASSWORD}', INSIDE: 'true',
+      LANG: en_US.UTF - 8, LANGUAGE: en_US.UTF-8, LC_ALL: en_US.UTF-8}
+    image: full_python
+    networks: [db]
+    volumes: [$CWD/python:/home/finn/Programming/self-reading-library/python]
