@@ -17,8 +17,8 @@ def run_extra_threads():
     def fill_annotation_thread():
         while True:
             gen = gold_annotation(metaize(["x"] * 100), service_id="gold_annotation")
-            # suck 5 items from it and then restart to reload cache
-            list(itertools.islice(gen, 5))
+            # suck 1 item from it and then restart to reload cache
+            list(itertools.islice(gen, 1))
 
     threading.Thread(target=fill_annotation_thread, name="gold_annotation").start()
 
@@ -27,8 +27,8 @@ def run_extra_threads():
             gen = gold_span_annotation(
                 metaize(["x"] * 100), service_id="gold_span_annotation"
             )
-            # suck 5 items from it and then restart to reload cache
-            list(itertools.islice(gen, 5))
+            # suck 1 item from it and then restart to reload cache
+            list(itertools.islice(gen, 1))
 
     threading.Thread(
         target=fill_span_annotation_thread, name="gold_span_annotation"

@@ -6,14 +6,17 @@ import Audiobook from './Audiobook'
 import Url2Difference from './Url2Difference'
 import UploadDocument from './Upload'
 import {
-   GlobalOutlined, QuestionCircleOutlined,
-   RadarChartOutlined, RocketOutlined,
-   SearchOutlined, SmileOutlined,
+   GlobalOutlined,
+   QuestionCircleOutlined,
+   RadarChartOutlined,
+   RocketOutlined,
+   SearchOutlined,
+   SmileOutlined,
    SoundOutlined,
    UploadOutlined,
 } from '@ant-design/icons'
-import {Help} from "./Tour";
-function getItem(label, key, icon, children=undefined) {
+import { Help } from './Tour'
+function getItem(label, key, icon, children = undefined) {
    return {
       key,
       icon,
@@ -27,7 +30,7 @@ interface PropType {
 }
 
 const NavigationContent = ({ slot, onClose }: PropType) => {
-      const [open, setOpen] = useState(false)
+   const [open, setOpen] = useState(false)
 
    const items = [
       getItem(
@@ -43,13 +46,18 @@ const NavigationContent = ({ slot, onClose }: PropType) => {
       getItem(<Captcha is_open={false} />, 'link3', <SmileOutlined />),
       getItem(<Url2Difference />, 'link4', <SearchOutlined />),
       getItem(<UploadDocument />, 'link5', <RocketOutlined />),
-      getItem(<Audiobook />, 'a', <SoundOutlined />),
-       getItem(        <>
-         {' '}
-         {open ? <Help open={open} setOpen={setOpen} /> : null}
-         <Button type="link" onClick={() => setOpen(!open)}>Help me!</Button>
-      </>, "help", <QuestionCircleOutlined />
-)
+      getItem(<Audiobook />, 'link6', <SoundOutlined />),
+      getItem(
+         <>
+            {' '}
+            {open ? <Help open={open} setOpen={setOpen} /> : null}
+            <Button type="link" onClick={() => setOpen(!open)}>
+               Help me!
+            </Button>
+         </>,
+         'link8',
+         <QuestionCircleOutlined />,
+      ),
    ]
    return (
       <Menu

@@ -5,7 +5,7 @@ import { Audio } from 'react-loader-spinner'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
 import AudiobookService from '../resources/AudiobookService'
 import { NORMAL } from '../contexts/SLOTS'
-import {Button} from "antd";
+import { Button } from 'antd'
 
 const Audiobook = () => {
    const context = useContext<DocumentContext>(DocumentContext)
@@ -61,12 +61,13 @@ const Audiobook = () => {
          {checked === null ? (
             <Audio height="80" />
          ) : exists ? (
-            <>b<AudiobookPlayer
-               id={audioPath}
-               style={{width:"100px"}}
-            ></AudiobookPlayer></>
+            <div style={{ height: '100px !important' }}>
+               <AudiobookPlayer id={audioPath}></AudiobookPlayer>
+            </div>
          ) : (
-            <Button type="link" onClick={createAudio}>Make audiobook </Button>
+            <Button type="link" onClick={createAudio}>
+               Make audiobook{' '}
+            </Button>
          )}
       </>
    )
