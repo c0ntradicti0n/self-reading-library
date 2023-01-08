@@ -56,6 +56,8 @@ class AnnotatorUnpacker(PathSpec):
                 )
                 continue
 
+            self.logger.info(f"Read {conll_path=} and {result=} to add to queue")
+
             yield conll_path, result
 
 
