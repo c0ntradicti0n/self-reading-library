@@ -8,7 +8,7 @@ import { Slot } from '../contexts/SLOTS'
 import { AnnotationModal } from './AnnotationSpan'
 import { FRONTEND_HOST } from '../../config/connection'
 import Captcha from './Captcha'
-import {Spin} from "antd";
+import { Spin } from 'antd'
 
 interface Props {
    service: Resource

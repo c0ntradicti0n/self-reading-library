@@ -31,7 +31,6 @@ const Help = ({
    if (hasModal && hasNotModal) steps = steps.filter((s) => !s.modal)
    return (
       <Tour
-         placement={'leftTop'}
          open={open}
          onClose={() => setOpen(false)}
          steps={steps}
@@ -46,9 +45,7 @@ const TourButton = () => {
       <>
          {' '}
          {open ? <Help open={open} setOpen={setOpen} /> : null}
-         <Button id={'tour'} type="primary" onClick={() => setOpen(!open)}>
-            ?
-         </Button>
+         <Button onClick={() => setOpen(!open)}>?</Button>
       </>
    )
 }

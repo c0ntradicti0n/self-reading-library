@@ -1,77 +1,58 @@
 import React from "react";
-import Layout from "../src/components/Layout";
 import styled from "styled-components";
 
-import { Button } from "@mui/material";
-import { DASH_HOST } from "../config/connection";
+import Url2Difference from "../src/components/Url2Difference";
+import {Card, Col, Row} from "antd";
 
-const PageTitle = styled.div`
-  align: right;
-  margin: 2em;
-  padding: 2em;
-`;
+const Item = ({children})  =>                   <Col  flex="1 0 25%"  >
+    <Card style={{margin: 10, height: "200px"}}> {children} </Card></Col>
 
-const H = styled.div`
-  text-transform: capitalize;
-  font-size: 1em;
-  animation: color-change 10s infinite, background-color-change 10s infinite;
-  border-radius: 30px;
-  width: 55rem;
-  height: 15rem;
-`;
-
-const CenterHorizontallyVertically = styled.div`
-  padding: 70px 0;
-  text-align: center;
-`;
-
-const Quote = styled.div`
-  font-family: serif;
-`;
-
-export default class Index extends React.Component {
-  render() {
+const Index = () =>  {
     return (
-      <Layout title="Home" pages={this.props.pages}>
-        <iframe
-          style={{ width: "60vw", border: "none" }}
-          src={DASH_HOST}
-          width="60vw"
-          height="100%"
-        >
-          {" "}
-        </iframe>
-        <PageTitle>
-          <p>
-            People cannot think without oppositions, no decision, no approach,
-            not any concept would there be, without knowing something about your
-            consept A and what it makes something else from other things.
-          </p>
-          <p>
-            <ul>
-              <li>
-                Legend markup for{" "}
-                <span className="span_SUBJECT">opposites (a "subject")</span>
-                and{" "}
-                <span className="span_CONTRAST">
-                  {" "}
-                  explanation of opposition (a "contrast")
-                </span>
-              </li>
-              <li>Audiobooks</li>
-              <li>Layout</li>
-            </ul>
-          </p>
-          <p>
-            <Quote>
-              "It is impossible that the same thing belong and not belong to the
-              same thing at the same time and in the same respect." (Aristotle,
-              1005b19-20)
-            </Quote>
-          </p>
-          Content follows form
-        </PageTitle>
-      </Layout>
+        <Row className="row">
+<Item>
+                     <a href="/knowledge">Browse differences</a>
+</Item>
+<Item>
+                     <a href="/Cardrary">Universe of documents</a>
+                  </Item>
+
+<Item>
+                     Browse a page with annotation
+        <br />
+
+                     <Url2Difference />
+</Item>
+<Item>
+                     Some source of papers
+    <br />
+                     <a href={'http://arxiv.org'}>http://arxiv.org</a>
+</Item>
+<Item>
+                     {' '}
+                     <a href="https://plato.stanford.edu/entries/categories/">
+                        https://plato.stanford.edu/entries/categories/
+                     </a>
+                  </Item>
+<Item>
+                     Some other websites featuring <i> differences </i>
+                     <ul>
+                        <li>
+                           <a href={'http://www.differencebetween.net/'} target="_blank" rel="noopener noreferrer">
+                              http://www.differencebetween.net/
+                           </a>
+                        </li>
+                        <li>
+                           <a href={'http://www.differencebetween.com/'} target="_blank" rel="noopener noreferrer">
+                              http://www.differencebetween.com/
+                           </a>
+                        </li>
+                     </ul>
+                  </Item>
+
+            </Row>
     );
-  }
+
 }
+
+export default Index

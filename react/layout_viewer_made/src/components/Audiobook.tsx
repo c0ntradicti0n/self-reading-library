@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { useContext, useEffect, useState } from 'react'
 import AudiobookPlayer from './AudiobookPlayer'
-import { Button } from '@mui/material'
 import { Audio } from 'react-loader-spinner'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
 import AudiobookService from '../resources/AudiobookService'
-import {NORMAL} from "../contexts/SLOTS";
+import { NORMAL } from '../contexts/SLOTS'
+import {Button} from "antd";
 
 const Audiobook = () => {
    const context = useContext<DocumentContext>(DocumentContext)
@@ -19,16 +19,13 @@ const Audiobook = () => {
    const addIntervallId = (n) => setIntervalIds([...intervalIds, n])
 
    const existsCall = async () => {
-      fetch(audioPath,
-          { method: "HEAD" }
-    ).then((res) => {
-      if (res.ok) {
-          setExists(true)
-       } else {
-          setExists(false)
-      }
-    });
-
+      fetch(audioPath, { method: 'HEAD' }).then((res) => {
+         if (res.ok) {
+            setExists(true)
+         } else {
+            setExists(false)
+         }
+      })
 
       await service.exists(context.value[NORMAL], (res) => {
          setExists(true)
@@ -49,7 +46,7 @@ const Audiobook = () => {
    }, [context.value[NORMAL]])
 
    const createAudio = async () => {
-      if (context.value[NORMAL] ) {
+      if (context.value[NORMAL]) {
          console.debug('Request audiobook for', context.value[NORMAL])
          await service.getOne(context.value[NORMAL], (res) => {
             console.log(res)
@@ -60,16 +57,18 @@ const Audiobook = () => {
    }
 
    return (
-      <div>
+      <>
          {checked === null ? (
             <Audio height="80" />
          ) : exists ? (
-            <AudiobookPlayer id={audioPath}></AudiobookPlayer>
+            <>b<AudiobookPlayer
+               id={audioPath}
+               style={{width:"100px"}}
+            ></AudiobookPlayer></>
          ) : (
-             <Button onClick={createAudio}> </Button>
-
+            <Button type="link" onClick={createAudio}>Make audiobook </Button>
          )}
-      </div>
+      </>
    )
 }
 

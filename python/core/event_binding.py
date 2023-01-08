@@ -286,8 +286,6 @@ class RestQueue:
 
     def on_post(self, req, resp, id=None, *args, **kwargs):
 
-
-
         if isinstance(req.media, str):
             doc_id = req.media
             doc_id, url = path_or_url_encoded(doc_id)
@@ -376,8 +374,6 @@ def queue_iter(service_id, gen, single=False):
                         logging.error(f"Pipeline gave {new_val=}")
                 except Exception as e:
                     logging.error(e, exc_info=True)
-
-
 
     print("The End")
 

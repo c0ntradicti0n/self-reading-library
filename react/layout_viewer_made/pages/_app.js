@@ -1,6 +1,4 @@
-import React, { version } from "react";
-import App from "next/app";
-import * as glob from "glob";
+import React, {useState} from "react";
 import "../src/App.css";
 
 import NoSSR from "../src/components/NoSSR";
@@ -11,19 +9,19 @@ import Navigation from "../src/components/Navigation";
 import {TourButton} from "../src/components/Tour";
 
 import { NORMAL } from "../src/contexts/SLOTS";
-import {ConfigProvider, theme} from "antd";
+import {ConfigProvider, Layout, theme} from "antd";
 
 
-class MyApp extends App {
-  static async getInitialProps(appContext) {
-    const appProps = await App.getInitialProps(appContext);
-    return { pageProps: {  } , appProps};
-  }
 
-  render() {
-    const { Component, appProps } = this.props;
+const MyApp = ({Component}) => {
+      const [collapsed, setCollapsed] = useState(false);
+      const { Sider, Content } = Layout;
+
     return (
-      <div id="comp-wrapp">
+      <Layout
+            style={{
+        minHeight: '100vh',
+      }}>
         <NoSSR>
           <ConfigProvider
     theme={{
@@ -32,16 +30,28 @@ class MyApp extends App {
   >
           <ContextWrapper>
             <AppWrapper>
-              <Navigation slot={NORMAL} />
-              <TourButton />
-              <Component {...this.props.pageProps} slot={NORMAL} />
+              <Sider
+               width={250}
+               collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
+                          <div
+          style={{
+            height: 32,
+            margin: 16,
+            background: 'rgba(255, 255, 255, 0.2)',
+          }}
+        />
+                <Navigation slot={NORMAL} />
+                </Sider>
+                <Content>
+              <Component slot={NORMAL} />
+                    </Content>
             </AppWrapper>
           </ContextWrapper>
           </ConfigProvider>
         </NoSSR>
-      </div>
+      </Layout>
     );
-  }
+
 }
 
 export default MyApp;

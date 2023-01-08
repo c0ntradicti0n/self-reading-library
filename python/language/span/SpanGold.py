@@ -150,9 +150,16 @@ class AnnotationSpanSet(PathSpec):
     def __call__(self, prediction_metas, *args, **kwargs):
         for path, meta in prediction_metas:
             self.logger.debug(f"Reading annotation from '{path}'")
-            result = conll_file2annotation(path)
+            try:
+                result = conll_file2annotation(path)
+            except GeneratorExit:
+                self.logger.error(f"generator exit?: {path}", exc_info=True)
+                continue
 
-            if not result:
+            except:
+                self.logger.error(
+                    f"Error reading conll file: {path}", exc_info=True
+                )
                 continue
 
             self.logger.debug(f"Read '{result}'")

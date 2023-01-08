@@ -256,3 +256,10 @@ line {
    background-color: rgba(0, 0, 0, 0.5);
    user-select: none;
 }
+
+
+@media screen and (max-width: 992px) {
+  .column {
+    flex: 100% !important; /* !important so that it overrides the inline style because by default it has higher priority */
+  }
+}

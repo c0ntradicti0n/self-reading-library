@@ -1,54 +1,63 @@
-import React, { useContext, useState } from 'react'
-import { DocumentContext } from '../contexts/DocumentContext.tsx'
+import React, { useState } from 'react'
 import Captcha from './Captcha'
 import { Slot } from '../contexts/SLOTS'
-import { Button, Popover } from 'antd'
+import { Button, Menu, Popover } from 'antd'
 import Audiobook from './Audiobook'
 import Url2Difference from './Url2Difference'
 import UploadDocument from './Upload'
-import GoldenSnake from './GoldenSnake'
-
+import {
+   GlobalOutlined, QuestionCircleOutlined,
+   RadarChartOutlined, RocketOutlined,
+   SearchOutlined, SmileOutlined,
+   SoundOutlined,
+   UploadOutlined,
+} from '@ant-design/icons'
+import {Help} from "./Tour";
+function getItem(label, key, icon, children=undefined) {
+   return {
+      key,
+      icon,
+      children,
+      label,
+   }
+}
 interface PropType {
    slot: Slot
    onClose: () => void
 }
 
 const NavigationContent = ({ slot, onClose }: PropType) => {
-   const context = useContext<DocumentContext>(DocumentContext)
-   const id = context.value[slot]
-   const shortId = (id ?? '').replace('.layouteagle/', '')
-   return (
-      <GoldenSnake onClick={onClose}>
-         <div>
-            <a href="/knowledge">Browse differences</a>
-         </div>
-         <div>
-            <a href="/library">Universe of documents</a>
-         </div>
-         <div>
-            <Captcha is_open={false} />
-         </div>
-         <div>
-            <br />
-         </div>
-         <div>
-            See a webpage with markup
-            <Url2Difference />
-         </div>
-         <div>
-            <br />
-         </div>
-         <div>
-            <br />
-         </div>
-         <div>
-            <UploadDocument />
-         </div>
+      const [open, setOpen] = useState(false)
 
-         <div>
-            <Audiobook />
-         </div>
-      </GoldenSnake>
+   const items = [
+      getItem(
+         <a href="/knowledge">Browse differences</a>,
+         'link1',
+         <RadarChartOutlined />,
+      ),
+      getItem(
+         <a href="/library">Universe of documents</a>,
+         'link2',
+         <GlobalOutlined />,
+      ),
+      getItem(<Captcha is_open={false} />, 'link3', <SmileOutlined />),
+      getItem(<Url2Difference />, 'link4', <SearchOutlined />),
+      getItem(<UploadDocument />, 'link5', <RocketOutlined />),
+      getItem(<Audiobook />, 'a', <SoundOutlined />),
+       getItem(        <>
+         {' '}
+         {open ? <Help open={open} setOpen={setOpen} /> : null}
+         <Button onClick={() => setOpen(!open)}>?</Button>
+      </>, "help", <QuestionCircleOutlined />
+)
+   ]
+   return (
+      <Menu
+         theme="dark"
+         defaultSelectedKeys={['1']}
+         mode="inline"
+         items={items}
+      />
    )
 }
 
@@ -85,4 +94,4 @@ const Navigation = (props: PropType) => {
       </Popover>
    )
 }
-export default Navigation
+export default NavigationContent
