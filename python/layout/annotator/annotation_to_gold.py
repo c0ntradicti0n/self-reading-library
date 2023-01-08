@@ -92,8 +92,8 @@ class AnnotatorRate(PathSpec):
                 logging.error(f"Scores not found for {id}, {self.service}")
 
             if int(scores.trial) >= config.MIN_CAPTCHA_TRIALS:
-                yield _p_m
                 q[self.service].task_done(id)
+                yield _p_m
 
 
 @converter(

@@ -87,8 +87,8 @@ class AnnotatorRate(PathSpec):
 
                 if int(score.trial) >= config.MIN_CAPTCHA_TRIALS:
                     self.logger.info(f"{score=} were good enough to make gold")
-                    yield _p_m
                     q[self.service].task_done(value)
+                    yield _p_m
 
         except StopIteration:
             self.logger.error(
