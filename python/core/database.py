@@ -287,7 +287,7 @@ class RatingQueue(Queue):
     def put(self, user_id, item, timeout=None):
         doc_id, meta = item
 
-        if isinstance(meta, dict):
+        if not isinstance(meta, dict):
             logging.error(f"Meta is null in db update?\n{doc_id=}\n{meta=}")
             return
 
