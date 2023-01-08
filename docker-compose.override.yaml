@@ -1,3 +1,5 @@
+networks:
+  db: {external: true}
 services:
   micro_elmodifferencepredict:
     build: python
@@ -40,4 +42,4 @@ services:
       LANG: en_US.UTF - 8, LANGUAGE: en_US.UTF-8, LC_ALL: en_US.UTF-8}
     image: full_python
     networks: [db]
-    volumes: [$CWD/python:/home/finn/Programming/self-reading-library/python]
+    volumes: [$CWD/python:/home/finn/Programming/self-reading-library/python, $CWD/.layouteagle/audio/:/home/finn/Programming/self-reading-library/python/.layouteagle/audio/language/text2speech/]

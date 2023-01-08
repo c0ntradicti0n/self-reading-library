@@ -1,3 +1,5 @@
+import logging
+
 import regex
 
 
@@ -23,5 +25,8 @@ def latex_replace(s):
     for m in regex.findall(r"\\N\{[\w\s\d]+\}", s):
         print(m)
 
-    s = regex.sub(r"\\N\{[\w\s\d]+\}", s, "")
-    return s
+    s2 = regex.sub(r"\\N\{[\w\s\d]+\}", s, "")
+    if not s2:
+        logging.info("regex replaced whole string")
+        return s
+    return s2

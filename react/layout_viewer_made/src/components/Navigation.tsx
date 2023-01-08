@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import Captcha from './Captcha'
-import { Slot } from '../contexts/SLOTS'
+import { NORMAL, Slot } from '../contexts/SLOTS'
 import { Button, Menu, Popover } from 'antd'
 import Audiobook from './Audiobook'
 import Url2Difference from './Url2Difference'
@@ -16,6 +16,8 @@ import {
    UploadOutlined,
 } from '@ant-design/icons'
 import { Help } from './Tour'
+import { DocumentContext } from '../contexts/DocumentContext.tsx'
+import { useRouter } from 'next/router'
 function getItem(label, key, icon, children = undefined) {
    return {
       key,
@@ -31,25 +33,33 @@ interface PropType {
 
 const NavigationContent = ({ slot, onClose }: PropType) => {
    const [open, setOpen] = useState(false)
-
+   const context = useContext<DocumentContext>(DocumentContext)
+   const router = useRouter()
+   console.log(context)
    const items = [
       getItem(
-         <a href="/knowledge">Browse differences</a>,
+         <Button type="link" href="/knowledge">
+            Browse differences
+         </Button>,
          'link1',
          <RadarChartOutlined />,
       ),
       getItem(
-         <a href="/library">Universe of documents</a>,
+         <Button type="link" href="/library">
+            Universe of documents
+         </Button>,
          'link2',
          <GlobalOutlined />,
       ),
       getItem(<Captcha is_open={false} />, 'link3', <SmileOutlined />),
       getItem(<Url2Difference />, 'link4', <SearchOutlined />),
       getItem(<UploadDocument />, 'link5', <RocketOutlined />),
-      getItem(<Audiobook />, 'link6', <SoundOutlined />),
+      context.value[NORMAL]?.endsWith('pdf')
+         ? getItem(<Audiobook />, 'link6', <SoundOutlined />)
+         : null,
       getItem(
          <>
-            {' '}
+            {context.value[NORMAL]?.end}{' '}
             {open ? <Help open={open} setOpen={setOpen} /> : null}
             <Button type="link" onClick={() => setOpen(!open)}>
                Help me!
@@ -58,7 +68,7 @@ const NavigationContent = ({ slot, onClose }: PropType) => {
          'link8',
          <QuestionCircleOutlined />,
       ),
-   ]
+   ].filter((x) => x)
    return (
       <Menu
          theme="dark"

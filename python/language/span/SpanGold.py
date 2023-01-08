@@ -157,9 +157,7 @@ class AnnotationSpanSet(PathSpec):
                 continue
 
             except:
-                self.logger.error(
-                    f"Error reading conll file: {path}", exc_info=True
-                )
+                self.logger.error(f"Error reading conll file: {path}", exc_info=True)
                 continue
 
             self.logger.debug(f"Read '{result}'")

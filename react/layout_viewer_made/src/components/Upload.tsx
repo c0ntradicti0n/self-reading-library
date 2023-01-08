@@ -21,7 +21,9 @@ const props: UploadProps = {
 
 const UploadDocument: React.FC = () => (
    <Upload {...props}>
-      <Button icon={<UploadOutlined />}>Click to Upload</Button>
+      <Button style={{ width: '135%' }} icon={<UploadOutlined />}>
+         Click to Upload
+      </Button>
    </Upload>
 )
 

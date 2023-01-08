@@ -13,31 +13,23 @@ const Audiobook = () => {
 
    const [exists, setExists] = useState(false)
    const [checked, setChecked] = useState(false)
-   const [audioPath, setaudioPath] = useState('')
+   const [audioPath, setAudioPath] = useState('')
    const [id, setId] = useState('')
    const [intervalIds, setIntervalIds] = useState<number[]>([])
    const addIntervallId = (n) => setIntervalIds([...intervalIds, n])
 
    const existsCall = async () => {
-      fetch(audioPath, { method: 'HEAD' }).then((res) => {
-         if (res.ok) {
-            setExists(true)
-         } else {
-            setExists(false)
-         }
-      })
-
       await service.exists(context.value[NORMAL], (res) => {
-         setExists(true)
+         setExists(res.exists)
          setId(id)
-         setaudioPath(res.audio_path)
+         setAudioPath(res.audio_path)
          intervalIds.map((id) => clearInterval(id))
       })
       setChecked(true)
    }
 
    useEffect(() => {
-      if (context.value[NORMAL] && context.value[NORMAL] !== id) {
+      if (!exists && context.value[NORMAL] && context.value[NORMAL] !== id) {
          existsCall()
          const intervalId = window.setInterval(existsCall, 20000)
          addIntervallId(intervalId)
@@ -48,11 +40,15 @@ const Audiobook = () => {
    const createAudio = async () => {
       if (context.value[NORMAL]) {
          console.debug('Request audiobook for', context.value[NORMAL])
-         await service.getOne(context.value[NORMAL], (res) => {
-            console.log(res)
-            setExists(true)
-            setId(id)
-         })
+         await service.ok(
+            context.value[NORMAL],
+            (res) => {
+               console.log(res)
+               setExists(true)
+               setId(id)
+            },
+            { doc_id: context.value[NORMAL] },
+         )
       }
    }
 
@@ -61,8 +57,31 @@ const Audiobook = () => {
          {checked === null ? (
             <Audio height="80" />
          ) : exists ? (
-            <div style={{ height: '100px !important' }}>
-               <AudiobookPlayer id={audioPath}></AudiobookPlayer>
+            <div
+               style={{
+                  right: '10px',
+                  position: 'relative',
+                  width: '240px',
+                  height: '100px !important',
+                  margin: '5px',
+                  background: 'white',
+                  overflow: 'hidden',
+               }}
+            >
+               <div
+                  style={{
+                     width: '200px',
+                     height: '100px !important',
+                     margin: '5px',
+                     background: 'white',
+                     overflow: 'hidden',
+                  }}
+               >
+                  <AudiobookPlayer
+                     width={'100px'}
+                     id={audioPath}
+                  ></AudiobookPlayer>
+               </div>
             </div>
          ) : (
             <Button type="link" onClick={createAudio}>

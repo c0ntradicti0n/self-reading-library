@@ -1,3 +1,4 @@
+import logging
 import re
 import os
 import unicodedata
@@ -110,7 +111,10 @@ class Pager(PathSpec):
 
             # start iterating on windows of this text
             generator = self.make_tokenized_windows(real_tokens)
-            next(generator)
+            try:
+                next(generator)
+            except StopIteration:
+                logging.error("Windows raised StopIteration")
             threading.Thread(
                 target=self.window_thread,
                 args=(

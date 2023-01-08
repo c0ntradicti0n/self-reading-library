@@ -45,7 +45,6 @@ class Layout2ReadingOrder(PathSpec):
         filename=config.cache + os.path.basename(__file__),
     )
     def __call__(self, x_meta, *args, **kwargs):
-        # self.load()
 
         for pdf_path, meta in x_meta:
 

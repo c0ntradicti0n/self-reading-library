@@ -39,7 +39,11 @@ const Captcha = ({ is_open = true }) => {
 
    return (
       <div>
-         {!is_open && <a onClick={() => setOpen(true)}>Captcha</a>}
+         {!is_open && (
+            <Button type="link" onClick={() => setOpen(true)}>
+               Captcha
+            </Button>
+         )}
          {open ? (
             <Modal
                style={{ height: '100% !important' }}

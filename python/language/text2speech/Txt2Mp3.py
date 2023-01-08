@@ -21,10 +21,9 @@ def generate_audio(id, text):
 
     with open(f"{id}.txt", "w") as f:
         f.write(text)
+    real_path = os.path.dirname(os.path.realpath(__file__))
 
-    os.system(
-        f". ../tts/venv/bin/activate &&  python ../tts/tts.py -i {id}.txt {out_path}.ogg "
-    )
+    os.system(f"python3 {real_path}/tts.py -i {id}.txt {out_path}.ogg ")
 
     return out_path
 
@@ -39,13 +38,28 @@ def get_audio_path(id):
 @microservice
 @converter("reading_order", "audio")
 class Txt2Mp3(Ant):
+    docker_kwargs = {
+        "volumes": [
+            "$CWD/python:/home/finn/Programming/self-reading-library/python",
+            f"$CWD/{config.audio_path}:/home/finn/Programming/self-reading-library/python/.layouteagle/audio/language/text2speech/",
+        ]
+    }
+
     def __init__(self, debug=True, *args, n=15, **kwargs):
         super().__init__(*args, cached=cache_flow.iterate, **kwargs)
+
         self.n = n
         self.debug = debug
 
     def load(self):
-        pass
+        logging.info("loading tts!")
+        real_path = os.path.dirname(os.path.realpath(__file__))
+        logging.info(real_path)
+
+        generate_audio(
+            "language/text2speech/test_text",
+            "Hallo du dumme Sau. Sprich mir einen schönen Text.",
+        )
 
     def predict(self, id, text):
         return generate_audio(id, text)

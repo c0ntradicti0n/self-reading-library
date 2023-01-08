@@ -17,6 +17,10 @@ class microservice:
         self.service_name = "micro_" + name.lower()
         self.converter = converter
 
+        docker_kwargs = (
+            {} if not hasattr(converter, "docker_kwargs") else converter.docker_kwargs
+        )
+
         f = converter.predict
 
         def p(*args, **kwargs):
@@ -37,30 +41,26 @@ class microservice:
             compose = addict.addict.Dict(ruamel.yaml.load(compose))
             full_path = converter.__class__.__module__
             full_path = full_path.replace("python.", "")
-            compose.update(
-                {
-                    "services": {
-                        self.service_name: {
-                            "container_name": self.service_name,
-                            "image": "full_python",
-                            "build": "python",
-                            "entrypoint": f"python3 -c 'from {full_path} import {name}; from wsgiref import simple_server ; simple_server.make_server(\"0.0.0.0\", 7777, {name}.application).serve_forever()'",
-                            "environment": {
-                                "INSIDE": "true",
-                                "LC_ALL": "en_US.UTF-8",
-                                "LANG": "en_US.UTF - 8",
-                                "LANGUAGE": "en_US.UTF-8",
-                                "GDB_PASSWORD": "${GDB_PASSWORD}",
-                                "GDB_HOST": "gdb",
-                            },
-                            "networks": ["db"],
-                            "volumes": [
-                                "$CWD/python:/home/finn/Programming/self-reading-library/python"
-                            ],
-                        }
-                    }
-                }
-            )
+            service_def = {
+                "container_name": self.service_name,
+                "image": "full_python",
+                "build": "python",
+                "entrypoint": f"python3 -c 'from {full_path} import {name}; from wsgiref import simple_server ; simple_server.make_server(\"0.0.0.0\", 7777, {name}.application).serve_forever()'",
+                "environment": {
+                    "INSIDE": "true",
+                    "LC_ALL": "en_US.UTF-8",
+                    "LANG": "en_US.UTF - 8",
+                    "LANGUAGE": "en_US.UTF-8",
+                    "GDB_PASSWORD": "${GDB_PASSWORD}",
+                    "GDB_HOST": "gdb",
+                },
+                "networks": ["db"],
+                "volumes": [
+                    "$CWD/python:/home/finn/Programming/self-reading-library/python"
+                ],
+                **docker_kwargs,
+            }
+            compose.update({"services": {self.service_name: service_def}})
             compose = compose.to_dict()
             try:
                 with open("../docker-compose.override.yaml", "w") as f:
@@ -104,7 +104,9 @@ class microservice:
             headers={"origin": "localhost", "content-Type": "application/json"},
         )
         if not resp.status_code == 200:
-            logging.error(f"Error on microservice request {resp.text}")
+            logging.error(
+                f"Error on microservice request {self.service_name} {resp.text}"
+            )
         else:
             return json.loads(resp.text)
 

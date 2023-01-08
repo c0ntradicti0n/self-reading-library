@@ -28,6 +28,13 @@ class TopicMaker(PathSpec):
         self.stop_words = [
             "abstract",
             "paper",
+            "difference",
+            "conference",
+            "similar",
+            "same",
+            "terms",
+            "introduction",
+            "contents",
             *self.alphabet,
             *[str(i) for i in range(1000)],
         ]
@@ -177,10 +184,10 @@ class TopicMaker(PathSpec):
             constructed_doc = (
                 " ".join(
                     [
-                        w
+                        w.strip()
                         for t in [texts[id] for id in text_ids]
                         for w in t.split()
-                        if w.lower() not in self.stop_words
+                        if w.lower().strip() not in self.stop_words
                     ]
                 )
                 .replace(".", "")

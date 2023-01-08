@@ -60,6 +60,16 @@
 #page-container {
    width: 75%;
    overflow: visible !important;
+   left: 50px !important;
+   z-index: 0;
+}
+.ant-btn-link {
+   color: #1677ff !important;
+}
+.ant-layout-sider {
+   position: fixed !important;
+   z-index: 1000;
+   height: 100vh;
 }
 
 #annotation_canvas {

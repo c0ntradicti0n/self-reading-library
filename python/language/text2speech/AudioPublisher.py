@@ -4,6 +4,7 @@ import os
 import falcon
 
 from config import config
+from core.event_binding import long_request
 from core.rest.Resource import Resource
 from core.rest.RestPublisher import RestPublisher
 from core.rest.react import react
@@ -43,19 +44,20 @@ class AudioPublisher(RestPublisher, react):
     def on_get(self, req, resp, id=None):
         id = id if id else req.params["id"]
         audio_path = get_audio_path(id)
-        json.dumps(
-            {"audio_path": audio_path.replace(config.hidden_folder, "")},
-            ensure_ascii=False,
+        exists = os.path.exists(
+            config.hidden_folder + audio_path.replace(config.hidden_folder, "")
         )
-        resp.text = json.dumps(
-            {"audio_path": audio_path.replace(config.hidden_folder, "")},
-            ensure_ascii=False,
-        )
-        if os.path.exists(audio_path):
-            resp.status = falcon.HTTP_OK
-        else:
-            resp.status = falcon.HTTP_404
+        content = json.dumps(
+            {"audio_path": audio_path.replace(config.hidden_folder, ""),
+             "exists": exists},
 
+            ensure_ascii=False,
+        )
+        resp.text = content
+        resp.status = falcon.HTTP_OK
+
+
+    @long_request
     def on_post(self, req, resp, id=None):
         id = req.media
         pipeline = self.ant(
@@ -65,16 +67,8 @@ class AudioPublisher(RestPublisher, react):
             layout_model_path=config.layout_model_path,
         )
         id, meta = list(pipeline(metaize([id])))[0]
-        compute_path = f"{id}.audiobook"
-        os.system(f"touch  {compute_path}")
-        if os.path.exists(meta["audio_path"]) and not os.path.exists(compute_path):
-            resp.status = falcon.HTTP_OK
-            resp.text = json.dumps(
-                meta["audio_path"].replace(config.hidden_folder, ""), ensure_ascii=False
-            )
-        else:
-            if os.path.exists(compute_path):
-                resp.status = falcon.HTTP_404
-                resp.headers["Retry-After"] = 20
-            else:
-                resp.status = falcon.HTTP_404
+
+        resp.status = falcon.HTTP_OK
+        resp.text = json.dumps(
+            meta["audio_path"].replace(config.hidden_folder, ""), ensure_ascii=False
+        )

@@ -29,13 +29,7 @@ const Help = ({
    const hasNotModal = steps.some((s) => !s.modal)
 
    if (hasModal && hasNotModal) steps = steps.filter((s) => !s.modal)
-   return (
-      <Tour
-         open={open}
-         onClose={() => setOpen(false)}
-         steps={steps}
-      />
-   )
+   return <Tour open={open} onClose={() => setOpen(false)} steps={steps} />
 }
 
 const TourButton = () => {
