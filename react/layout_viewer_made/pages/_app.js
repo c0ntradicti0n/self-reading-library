@@ -9,7 +9,7 @@ import Navigation from "../src/components/Navigation";
 import {TourButton} from "../src/components/Tour";
 
 import { NORMAL } from "../src/contexts/SLOTS";
-import {ConfigProvider, Layout, theme} from "antd";
+import {ConfigProvider, Divider, Layout, Space, theme} from "antd";
 
 
 
@@ -39,8 +39,8 @@ const MyApp = ({Component}) => {
             margin: 16,
             background: 'rgba(255, 255, 255, 0.2)',
           }}
-        />
-                <Navigation slot={NORMAL} />
+        ><img src='logo.jpg' style={{width:"100%"}}/>
+                          </div>   <Divider/>           <Divider/>     <Divider/>     <Divider/>     <Divider/>      <Navigation slot={NORMAL} />
                 </Sider>
                 <Content>
               <Component slot={NORMAL} />

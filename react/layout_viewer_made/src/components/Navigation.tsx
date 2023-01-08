@@ -47,7 +47,7 @@ const NavigationContent = ({ slot, onClose }: PropType) => {
        getItem(        <>
          {' '}
          {open ? <Help open={open} setOpen={setOpen} /> : null}
-         <Button onClick={() => setOpen(!open)}>?</Button>
+         <Button type="link" onClick={() => setOpen(!open)}>Help me!</Button>
       </>, "help", <QuestionCircleOutlined />
 )
    ]

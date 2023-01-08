@@ -35,9 +35,9 @@ export const Knowledge = ({ service, slot }) => {
                style={{
                   position: 'absolute',
                   top: '0px',
-                  left: '10vw',
+                  left: '20vw',
                   margin: '1%',
-                  width: '80%',
+                  width: '70%',
                   zIndex: 100,
                }}
                defaultValue={''}
