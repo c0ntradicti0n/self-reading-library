@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useState } from "react";
-import MacroComponentSwitch from "./../src/components/MacroComponentSwitch";
+import React, { useContext, useEffect, useState } from 'react'
+import MacroComponentSwitch from './../src/components/MacroComponentSwitch'
 
 const Difference = () => {
-  return <MacroComponentSwitch component={"html"} url={"/difference"} />;
-};
+   return <MacroComponentSwitch component={'html'} url={'/difference'} />
+}
 
-export default Difference;
+export default Difference

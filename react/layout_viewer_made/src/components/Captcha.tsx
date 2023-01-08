@@ -2,8 +2,8 @@ import React, { useContext, useRef, useState } from 'react'
 import { Button, Modal } from 'antd'
 import MacroComponentSwitch from './MacroComponentSwitch'
 import { ContextContext } from '../contexts/ContextContext'
-import {CAPTCHA, NORMAL} from '../contexts/SLOTS'
-import {Help} from "./Tour";
+import { CAPTCHA, NORMAL } from '../contexts/SLOTS'
+import { Help } from './Tour'
 
 const Kind: {
    [kind: string]: {
@@ -30,7 +30,7 @@ const Captcha = ({ is_open = true }) => {
    const contextContext = useContext(ContextContext)
    const ref = useRef(null) // ref => { current: null }
    const [open, __setOpen] = useState(is_open)
-      const [hopen, sethOpen] = useState(false)
+   const [hopen, sethOpen] = useState(false)
 
    const [kind, setKind] = useState('annotation')
 
@@ -86,12 +86,12 @@ const Captcha = ({ is_open = true }) => {
                   >
                      I grew the dataset enough
                   </Button>,
-                   <>
-            {open ? <Help open={hopen} setOpen={sethOpen} /> : null}
-            <Button type="link" onClick={() => sethOpen(!hopen)}>
-               Help me!
-            </Button>
-         </>
+                  <>
+                     {open ? <Help open={hopen} setOpen={sethOpen} /> : null}
+                     <Button type="link" onClick={() => sethOpen(!hopen)}>
+                        Help me!
+                     </Button>
+                  </>,
                ]}
             >
                <div style={{ zIndex: 10000 }}>

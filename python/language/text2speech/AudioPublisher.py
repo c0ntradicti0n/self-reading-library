@@ -48,14 +48,14 @@ class AudioPublisher(RestPublisher, react):
             config.hidden_folder + audio_path.replace(config.hidden_folder, "")
         )
         content = json.dumps(
-            {"audio_path": audio_path.replace(config.hidden_folder, ""),
-             "exists": exists},
-
+            {
+                "audio_path": audio_path.replace(config.hidden_folder, ""),
+                "exists": exists,
+            },
             ensure_ascii=False,
         )
         resp.text = content
         resp.status = falcon.HTTP_OK
-
 
     @long_request
     def on_post(self, req, resp, id=None):

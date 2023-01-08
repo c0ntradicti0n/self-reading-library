@@ -26,15 +26,10 @@ function getItem(label, key, icon, children = undefined) {
       label,
    }
 }
-interface PropType {
-   slot: Slot
-   onClose: () => void
-}
 
-const NavigationContent = ({ slot, onClose }: PropType) => {
+const NavigationContent = () => {
    const [open, setOpen] = useState(false)
    const context = useContext<DocumentContext>(DocumentContext)
-   const router = useRouter()
    console.log(context)
    const items = [
       getItem(

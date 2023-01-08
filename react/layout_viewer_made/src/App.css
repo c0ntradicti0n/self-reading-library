@@ -11,7 +11,7 @@
    transform: translate(-50%, -50%);
 }
 * {
-   font-family: Computer modern !important;
+   font-family: sans-serif;
 }
 #nav {
    border-bottom-right-radius: 500px;

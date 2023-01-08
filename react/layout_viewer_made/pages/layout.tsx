@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useState } from "react";
-import MacroComponentSwitch from "./../src/components/MacroComponentSwitch";
+import React, { useContext, useEffect, useState } from 'react'
+import MacroComponentSwitch from './../src/components/MacroComponentSwitch'
 
 const Layout = () => {
-  return <MacroComponentSwitch component={"html"} url={"/layout"} />;
-};
+   return <MacroComponentSwitch component={'html'} url={'/layout'} />
+}
 
-export default Layout;
+export default Layout
