@@ -49,23 +49,23 @@ const MyApp = ({ Component }) => {
                            collapsed={collapsed}
                            onCollapse={(value) => setCollapsed(value)}
                         >
+                                                      <div
+                              style={{
+                                 margin: collapsed ? "15px" : "40px",
+                                 height: collapsed ? "50px": "220px",
+                                 width: collapsed ?"50px":  "220px",}}>
                            <div
                               style={{
-                                 height: 32,
-                                 margin: 16,
-                                 background: 'rgba(255, 255, 255, 0.2)',
+                                 height: "100%",
+                                 width: "100%",
+                                 background: `url("logo.svg") no-repeat`,
+                                     backgroundSize:"cover"
                               }}
                            >
-                              <img src="logo.jpg" style={{ width: '50px' }} />
+                              </div>
                            </div>
 
-                           {!mobile ? (
-                              <>
-                                 {' '}
-                                 <Divider /> <Divider /> <Divider /> <Divider />{' '}
-                                 <Divider /> <Divider />{' '}
-                              </>
-                           ) : null}
+
 
                            <Navigation />
                         </Sider>
