@@ -1,24 +1,25 @@
 import React, { useEffect, useState } from 'react'
-import Tree from 'react-d3-tree'
 import * as d3 from 'd3'
 import { useRouter } from 'next/router'
 function wrap(text, width) {
    const _dy = -1
    text.each(function () {
-      var text = d3.select(this),
+      let text = d3.select(this),
          words = text.text().split(/\s+/).reverse(),
          word,
          line = [],
          lineNumber = 0,
          lineHeight = 2.0, // ems
          y = text.attr('y'),
-         dy = parseFloat(text.attr('dy')),
-         tspan = text
-            .text(null)
-            .append('tspan')
-            .attr('x', 0)
-            .attr('y', y)
-            .attr('dy', _dy + 'em')
+         r = text._groups[0][0].__data__.r
+      let tspan = text
+         .text(null)
+         .append('tspan')
+         .attr('x', 0)
+         .attr('y', -Math.log10(r / 20) * 130)
+         .attr('dy', _dy + 'em')
+      console.log('text', y, r, text.r, r, text._groups[0][0].__data__)
+
       while ((word = words.pop())) {
          const str_line = line.join(' ')
          lineNumber += 1
@@ -31,9 +32,9 @@ function wrap(text, width) {
             tspan = text
                .append('tspan')
                .attr('x', 0)
-               .attr('y', y)
+               .attr('y', r * 140)
                .attr('dy', _dy + lineHeight + 'em')
-               .text(word)
+               .text(r.toString() + word + 'hal')
          }
       }
    })
@@ -139,6 +140,7 @@ const chart = (data, ref, width, height, router) => {
          d.parent === root || root.children[0].children.includes(d) ? 1 : 1,
       )
       .style('width', (d) => '30')
+
       .style('display', (d) =>
          d.parent === root ||
          root.children[0].children.includes(d) ||

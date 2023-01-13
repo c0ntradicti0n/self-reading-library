@@ -49,23 +49,22 @@ const MyApp = ({ Component }) => {
                            collapsed={collapsed}
                            onCollapse={(value) => setCollapsed(value)}
                         >
-                                                      <div
-                              style={{
-                                 margin: collapsed ? "15px" : "40px",
-                                 height: collapsed ? "50px": "220px",
-                                 width: collapsed ?"50px":  "220px",}}>
                            <div
                               style={{
-                                 height: "100%",
-                                 width: "100%",
-                                 background: `url("logo.svg") no-repeat`,
-                                     backgroundSize:"cover"
+                                 margin: collapsed ? '15px' : '40px',
+                                 height: collapsed ? '50px' : '220px',
+                                 width: collapsed ? '50px' : '220px',
                               }}
                            >
-                              </div>
+                              <div
+                                 style={{
+                                    height: '100%',
+                                    width: '100%',
+                                    background: `url("logo.svg") no-repeat`,
+                                    backgroundSize: 'cover',
+                                 }}
+                              ></div>
                            </div>
-
-
 
                            <Navigation />
                         </Sider>

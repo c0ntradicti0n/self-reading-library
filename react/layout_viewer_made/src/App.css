@@ -67,9 +67,8 @@
    color: #1677ff;
 }
 
-.ant-menu-item-selected .ant-btn-link{
-      color: #ffffff !important;
-
+.ant-menu-item-selected .ant-btn-link {
+   color: #ffffff !important;
 }
 .ant-layout-sider {
    position: fixed !important;

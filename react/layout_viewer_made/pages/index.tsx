@@ -17,7 +17,7 @@ const Index = () => {
             <a href="/knowledge">Browse differences</a>
          </Item>
          <Item>
-            <a href="/Cardrary">Universe of documents</a>
+            <a href="/library">Universe of documents</a>
          </Item>
 
          <Item>
