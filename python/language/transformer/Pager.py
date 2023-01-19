@@ -168,7 +168,9 @@ class Pager(PathSpec):
 
             if "url" in meta:
                 try:
-                    meta["html_path"] = self.insert_z_tags(meta["url"], meta["html_path"], i_word, meta, pdf2htmlEX_wordi_path)
+                    z_path = self.insert_z_tags(meta["url"], meta["html_path"], i_word, meta, pdf2htmlEX_wordi_path)
+                    os.system(f"mv -f {z_path} " + meta["html_path"])
+
                 except Exception as e:
                     logging.error("Error while Z-etting", exc_info=True)
 
