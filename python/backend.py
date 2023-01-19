@@ -1,5 +1,3 @@
-import logging
-
 import falcon
 from wsgiref import simple_server
 from config.ant_imports import *

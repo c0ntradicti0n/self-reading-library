@@ -1,10 +1,10 @@
 import copy
 
 from listalign.helpers import alignment_table
+from listalign.word_pyalign import align
 
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
-from listalign.word_pyalign import align
 import multiprocessing as mp
 
 from helpers.str_tools import str_list_ascii, str_ascii

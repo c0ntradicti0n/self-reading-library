@@ -1,19 +1,35 @@
 import logging
+import sys
+
 import re
 import os
 import unicodedata
+from functools import reduce
 from queue import Empty
 from pathlib import Path
-
+from typing import Callable
+from xml.sax.saxutils import escape, unescape
 import chardet
+from bs4 import BeautifulSoup, NavigableString, Tag, Comment
+from listalign.word_pyalign import align
+
 from config import config
+
+sys.path.insert(0,"/home/stefan/Programming/Programming/self-reading-library/python")
+
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from helpers.latex_tools import latex_replace
-from helpers.str_tools import str_list_ascii
+from helpers.str_tools import str_list_ascii, str_ascii
 from language.nlp_helpers.Regexes import SENTENCE_END_REGEX
 from language.nlp_helpers.split_interpunction import split_punctuation
-from language.transformer import ElmoPredict
+try:
+    from language.transformer import ElmoPredict
+except Exception as e:
+    logging.warning(e, exc_info=True)
+
+
+
 
 import threading
 
@@ -42,14 +58,14 @@ class Pager(PathSpec):
             return -1, line
         return int(m.group(1)), m.group(2)
 
-    def run_pdf2htmlEX(self, pdf_path, meta):
+    def run_pdf2htmlEX(self, pdf_path, meta, _html_path=None):
         outputs = {
             "html": "html",  # same looking html
             "reading_order": "wordi",  # numbered word list
             "feat": "feat",  # json with indexed single words as they can be reapplied via css to the html-document
         }
 
-        html_path = pdf_path + "." + outputs["html"]
+        html_path =  pdf_path + "." + outputs["html"] if not _html_path else _html_path
         pdf2htmlEX_wordi_path = pdf_path + "." + outputs["reading_order"]
         feat_path = pdf_path + "." + outputs["feat"]
 
@@ -70,6 +86,72 @@ class Pager(PathSpec):
         meta["feat_path"] = feat_path
 
         return (html_path, pdf2htmlEX_wordi_path, feat_path)
+    def flat_visit(self, soup, pos_acc,  collector = lambda: list(), exluded=["head", "style", "script", "svg", "title"]):
+        if isinstance(collector, Callable):
+            collector = collector()
+
+        pos =  pos_acc[soup.sourceline-1 if soup.sourceline else 0 ] + soup.sourcepos if soup.sourcepos else 0
+        added = ""
+
+        for content in soup.contents:
+
+            if isinstance(content, NavigableString):
+                if not isinstance(content, Comment):
+                    added_temp = added
+                    for word in split_punctuation(content, ".!?;,-:", matches=True):
+
+                        if word.strip():
+                            collector.append(((pos+1 + len(added_temp),(pos +1+ len(added_temp)+len(word))) , word.strip().replace(str(chr(160)), "][{<<>")))
+                        added_temp += str(word)
+
+                added += str(content)#.encode('ascii', 'xmlcharrefreplace').decode()
+
+            elif isinstance(content, Tag):
+
+                if content.name not in exluded:
+
+                    self.flat_visit(content, pos_acc, collector=collector)
+                added += str(content)
+
+        return collector
+
+
+    def insert_z_tags(self, url, html_path, i_word, meta, pdf2htmlEX_wordi_path):
+        # repair html
+        t = Path(html_path).read_text()
+        souper = BeautifulSoup(t,  'html5lib')
+        with open(html_path + ".rep", "w") as f:
+            f.write(str(souper))
+
+        with open(html_path  + ".rep" ) as f:
+            def _(acc, i_line):
+                i, line = i_line
+                i += 0
+                acc[i+1] = (acc[i] if i in acc else 0)  + len(line)
+                return acc
+            html_lines = f.readlines()
+            line_lenghts = (reduce(_, enumerate(html_lines), {0:0}))
+
+        with open(html_path  + ".rep") as f:
+            html = f.read()
+        soup = BeautifulSoup(html,  'html5lib')
+
+        html_index, l_a = list(zip(*[(pos, word) for pos, word in self.flat_visit(soup, line_lenghts)]))
+        word_index, l_b = list(zip(*[ (i, word) for i, word in i_word]))
+
+        alignment, cigar = align(l_a, l_b)
+
+        z_html_path = html_path + ".z.html"
+        for (i_a, i_b) in reversed(alignment):
+            html_i_a = html_index[i_a]
+
+            start, end = html_i_a
+            html = html[:end] + "</z>" + html[end:]
+            html= html[:start] + f"<z word='{l_a[i_a]}' class='{hex(i_b)}'>" + html[start:]
+
+        with open(z_html_path, "w", encoding="utf-8") as f:
+            f.write(html.replace("–", "&#150;").replace("“", "&quot;").replace("”","&quot;" ))
+        return z_html_path
 
     def __call__(self, paths, *args, **kwargs):
         for _pdf_path, meta in paths:
@@ -78,33 +160,17 @@ class Pager(PathSpec):
                 pdf_path, pdf2htmlEX_wordi_path, _ = self.run_pdf2htmlEX(
                     meta["html_path"], meta
                 )
-            except Exception as e:
+            except Exception:
                 self.logger.error("could not transpile pdf to html", exc_info=True)
                 continue
 
-            with open(pdf2htmlEX_wordi_path, "rb") as f:
-                content = f.read()
+            i_word = self.read_i_word(pdf2htmlEX_wordi_path)
 
-            encoding = chardet.detect(content)["encoding"]
-            if not encoding:
-                encoding = "utf-8"
-            content = content.decode(encoding, errors="ignore")
-
-            content = latex_replace(content)
-
-            # read the text as it is referenced in the html from the reading_order file
-            # containing the class index of the tags and the string, may contain
-            # errors: f"{index}:{string}"
-            lines = [
-                ww
-                for w in re.split("(?![^:])\n", content)
-                for ww in w.split("\n")
-                if ww
-            ]
-
-            i_word = [
-                self.match_reading_order_line(line) for line in lines if len(line) > 2
-            ]
+            if "url" in meta:
+                try:
+                    meta["html_path"] = self.insert_z_tags(meta["url"], meta["html_path"], i_word, meta, pdf2htmlEX_wordi_path)
+                except Exception as e:
+                    logging.error("Error while Z-etting", exc_info=True)
 
             # use layout filtered text
             real_tokens = preprocess_text(texts)
@@ -126,6 +192,28 @@ class Pager(PathSpec):
             ).start()
             meta["texts"] = texts
             yield _pdf_path, meta
+
+    def read_i_word(self, pdf2htmlEX_wordi_path):
+        with open(pdf2htmlEX_wordi_path, "rb") as f:
+            content = f.read()
+        encoding = chardet.detect(content)["encoding"]
+        if not encoding:
+            encoding = "utf-8"
+        content = content.decode(encoding, errors="ignore")
+        content = latex_replace(content)
+        # read the text as it is referenced in the html from the reading_order file
+        # containing the class index of the tags and the string, may contain
+        # errors: f"{index}:{string}"
+        lines = [
+            ww
+            for w in re.split("(?![^:])\n", content)
+            for ww in w.split("\n")
+            if ww
+        ]
+        i_word = [
+            self.match_reading_order_line(line) for line in lines if len(line) > 2
+        ]
+        return i_word
 
     def window_thread(self, generator, meta, i_word):
         i = 0
@@ -269,3 +357,21 @@ class Pager(PathSpec):
                 )
             else:
                 raise FileNotFoundError(f"{pdf_filename} was not found")
+
+if __name__ == "__main__":
+    from core.standard_converter.Scraper import Scraper
+    url = "https://www.differencebetween.com/what-is-the-difference-between-hendravirus-and-nipahvirus/"
+    path = "test" + ".pdf"
+    html_path = "test.html"
+    html_path_ex = "test.pdf.html"
+
+    i_path = path + ".wordi"
+    meta = {}
+    if not os.path.exists(path):
+        Scraper.scrape(url, path)
+        os.system(f"mv {path}.htm {html_path}")
+    Pager.run_pdf2htmlEX(
+        path , meta, _html_path=html_path_ex
+    )
+    i_word = Pager.read_i_word(i_path)
+    Pager.insert_z_tags(url, html_path,i_word, meta,i_path )
