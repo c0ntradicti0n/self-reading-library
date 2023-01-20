@@ -51,14 +51,14 @@ class Scraper(PathSpec):
                 meta["url"] = self.flags["url"]
 
                 if not os.path.exists(path):
-                    self.scrape(url, path)
+                    self.scrape(url, path, meta)
                 yield id, meta
             elif os.path.exists(id) and regex.match(self.file_regex, id) is not None:
                 yield id, meta
             else:
                 logging.error(f"{id} is not a valid url/path")
 
-    def scrape(self, url, path):
+    def scrape(self, url, path, meta):
 
         import os
         import time
@@ -136,12 +136,16 @@ class Scraper(PathSpec):
             self.logger.warning("Found no cookie banner, but cool")
 
         source = driver.page_source.encode("utf-8").decode()
+        original_html_path = f"./{path}.htm"
+        with open(original_html_path, "w") as f:
+            f.write(source)
+            meta["original_html_path"] = original_html_path
+
         if (
             not "Occasionally, you may see this page while the site ensures that the connection is secure."
             in source
         ):
-            with open(f"./{path}.htm", "w") as f:
-                f.write(source)
+
             os.system(f"pandoc {path}.htm  --pdf-engine xelatex --to pdf -o {path}")
         else:
             os.system(f"pandoc {url} --pdf-engine xelatex --to pdf -o {path}")

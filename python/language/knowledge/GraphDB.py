@@ -24,7 +24,7 @@ class GraphDB(PathSpec):
 
     def __call__(self, prediction_metas, *args, **kwargs):
         for i, (path, meta) in enumerate(prediction_metas):
-            with timeit_context(f"Inserting set no {i} into db"):
+                #with timeit_context(f"Inserting set no {i} into db"):
                 span_set: DifferenceSpanSet = meta["span_set"]
                 span_set.add_graph_db(self.conn)
 
