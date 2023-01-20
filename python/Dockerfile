@@ -1,7 +1,7 @@
 FROM docker.io/c0ntradiction/pdf2htmlex
 RUN echo cool
 RUN apt update
-RUN apt upgrade
+RUN apt upgrade -y
 RUN apt install software-properties-common -y
 RUN add-apt-repository ppa:deadsnakes/ppa
 RUN apt update
