@@ -152,7 +152,7 @@ class Pager(PathSpec):
 
             start, end = html_i_a
             html = html[:end] + "</z>" + html[end:]
-            html= html[:start] + f"<z class='z{str(hex(i))[2:]}'>" + html[start:]
+            html= html[:start] + f"<z class='z z{str(hex(i))[2:]}'>" + html[start:]
 
         with open(z_html_path, "w", encoding="utf-8") as f:
             f.write(html.replace("–", "&#150;").replace("“", "&quot;").replace("”","&quot;" ))

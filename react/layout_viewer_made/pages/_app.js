@@ -70,7 +70,7 @@ const MyApp = ({ Component }) => {
                         </Sider>
 
                         <Content
-                           style={{ marginLeft: collapsed ? '50px' : '300px' }}
+                           style={{ marginLeft: collapsed ? '50px' : '310px' }}
                         >
                            <Component slot={NORMAL} />
                         </Content>

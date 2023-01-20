@@ -183,7 +183,11 @@ BEST_MODELS_PATH = hidden_folder + "/best_models.json"
 
 GOLD_DATASET_PATH = hidden_folder + "/gold"
 GOLD_SPAN_ID = "gold_span_annotation"
+GOLD_SPAN_SET = GOLD_DATASET_PATH + "/" + GOLD_SPAN_ID + "/"
+
 GOLD_ANNOTATION_ID = "gold_annotation"
+GOLD_ANNOTATION_SET = GOLD_DATASET_PATH + "/" + GOLD_ANNOTATION_ID + "/"
+
 
 TRASH_DATASET_PATH = hidden_folder + "/trash"
 

@@ -28,6 +28,7 @@ RUN apt-get -y update
 RUN apt-get install -y google-chrome-stable
 RUN apt -y install language-pack-en
 RUN apt -y install librsvg2-bin
+RUN apt -y install moreutils
 
 
 # install chromedriver

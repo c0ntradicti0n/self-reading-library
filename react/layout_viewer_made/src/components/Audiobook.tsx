@@ -12,6 +12,8 @@ const Audiobook = () => {
    const [service] = useState(new AudiobookService())
 
    const [exists, setExists] = useState(false)
+      const [making, setMaking] = useState(false)
+
    const [checked, setChecked] = useState(false)
    const [audioPath, setAudioPath] = useState('')
    const [id, setId] = useState('')
@@ -40,12 +42,15 @@ const Audiobook = () => {
    const createAudio = async () => {
       if (context.value[NORMAL]) {
          console.debug('Request audiobook for', context.value[NORMAL])
+         setMaking(true)
          await service.ok(
             context.value[NORMAL],
             (res) => {
                console.log(res)
                setExists(true)
                setId(id)
+                        setMaking(false)
+
             },
             { doc_id: context.value[NORMAL] },
          )
@@ -85,7 +90,7 @@ const Audiobook = () => {
             </div>
          ) : (
             <Button type="link" onClick={createAudio}>
-               Make audiobook{' '}
+               {making ? "Make audiobook" : "... producing audiobook..."}
             </Button>
          )}
       </>

@@ -87,10 +87,10 @@
     "histogram_interval": 10,
     "shuffle": true,
     "validation_metric": "+f1-measure-overall",
-    "num_serialized_models_to_keep": 70,
+    "num_serialized_models_to_keep": 5,
     "num_epochs": 100,
     "grad_norm": 1.0,
-    "patience": 100,
+    "patience": 20,
     "cuda_device": -1
   }
 }
