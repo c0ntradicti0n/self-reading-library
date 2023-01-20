@@ -5,7 +5,7 @@ services:
     build: python
     container_name: micro_elmodifferencepredict
     entrypoint: python3 -c 'from language.transformer.ElmoDifferencePredict import
-      ElmoDifferencePredict; from wsgiref import simple_server ; simple_server.make_server("0.0.0.0",
+      ElmoDifferencePredict; from wsgiref import simple_server; simple_server.make_server("0.0.0.0",
       7777, ElmoDifferencePredict.application).serve_forever()'
     environment: {GDB_HOST: gdb, GDB_PASSWORD: '${GDB_PASSWORD}', INSIDE: 'true',
       LANG: en_US.UTF - 8, LANGUAGE: en_US.UTF-8, LC_ALL: en_US.UTF-8}
@@ -17,7 +17,7 @@ services:
     build: python
     container_name: micro_layout2readingorder
     entrypoint: python3 -c 'from layout.Layout2ReadingOrder import Layout2ReadingOrder;
-      from wsgiref import simple_server ; simple_server.make_server("0.0.0.0", 7777,
+      from wsgiref import simple_server; simple_server.make_server("0.0.0.0", 7777,
       Layout2ReadingOrder.application).serve_forever()'
     environment: {GDB_HOST: gdb, GDB_PASSWORD: '${GDB_PASSWORD}', INSIDE: 'true',
       LANG: en_US.UTF - 8, LANGUAGE: en_US.UTF-8, LC_ALL: en_US.UTF-8}
@@ -29,7 +29,7 @@ services:
     build: python
     container_name: micro_topicmaker
     entrypoint: python3 -c 'from topics.TopicMaker import TopicMaker; from wsgiref
-      import simple_server ; simple_server.make_server("0.0.0.0", 7777, TopicMaker.application).serve_forever()'
+      import simple_server; simple_server.make_server("0.0.0.0", 7777, TopicMaker.application).serve_forever()'
     environment: {GDB_HOST: gdb, GDB_PASSWORD: '${GDB_PASSWORD}', INSIDE: 'true',
       LANG: en_US.UTF - 8, LANGUAGE: en_US.UTF-8, LC_ALL: en_US.UTF-8}
     image: full_python
@@ -40,7 +40,7 @@ services:
     build: python
     container_name: micro_txt2mp3
     entrypoint: python3 -c 'from language.text2speech.Txt2Mp3 import Txt2Mp3; from
-      wsgiref import simple_server ; simple_server.make_server("0.0.0.0", 7777, Txt2Mp3.application).serve_forever()'
+      wsgiref import simple_server; simple_server.make_server("0.0.0.0", 7777, Txt2Mp3.application).serve_forever()'
     environment: {GDB_HOST: gdb, GDB_PASSWORD: '${GDB_PASSWORD}', INSIDE: 'true',
       LANG: en_US.UTF - 8, LANGUAGE: en_US.UTF-8, LC_ALL: en_US.UTF-8}
     image: full_python

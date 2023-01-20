@@ -1,4 +1,5 @@
-from layout.imports import *
+import os
+
 from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from config import config
@@ -14,6 +15,30 @@ class Training(PathSpec):
         super().__init__(*args, num_labels=config.NUM_LABELS, **kwargs)
 
     def __call__(self, x_meta, *args, **kwargs):
+        self.logger.info("!IMPORTING DANGEROUS STUFF")
+        from datasets import Dataset
+        from torch.utils.data import DataLoader
+        import os
+        import shutil
+        from pprint import pprint, pformat
+        import pandas
+        import torch
+        from matplotlib import colors
+        from torch.utils.data import DataLoader
+        from datasets import load_metric
+        from GPUtil import showUtilization as gpu_usage
+        from sklearn.preprocessing import MinMaxScaler
+        from datasets import Dataset
+        from PIL import Image, ImageFilter
+        from transformers import LayoutLMv2Processor
+        from datasets import Features, Sequence, ClassLabel, Value, Array2D, Array3D
+        from transformers import LayoutLMv2ForTokenClassification, AdamW
+        import torch
+        from tqdm import tqdm
+        from PIL import Image, ImageDraw, ImageFont
+
+        font = ImageFont.load_default()
+
         if "collection_step" not in self.flags:
             raise Exception(
                 "Declare collection step, that expresses for which set of features we trained this model"

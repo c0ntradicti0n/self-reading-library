@@ -10,6 +10,10 @@ import falcon
 import requests
 import ruamel.yaml
 
+loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+
+for logger in loggers:
+    logger.setLevel(logging.DEBUG)
 
 class microservice:
     def __init__(self, converter, *args, **kwargs):
@@ -47,7 +51,7 @@ class microservice:
                 "image": "full_python",
                 "build": "python",
                 "restart": "unless-stopped",
-                "entrypoint": f"python3 -c 'from {full_path} import {name}; from wsgiref import simple_server ; simple_server.make_server(\"0.0.0.0\", 7777, {name}.application).serve_forever()'",
+                "entrypoint": f"python3 -c 'from {full_path} import {name}; from wsgiref import simple_server; simple_server.make_server(\"0.0.0.0\", 7777, {name}.application).serve_forever()'",
                 "environment": {
                     "INSIDE": "true",
                     "LC_ALL": "en_US.UTF-8",
@@ -71,6 +75,8 @@ class microservice:
                 logging.error("Could not update docker-compose.override!")
 
         else:
+            logging.warning(f"Building app {name}")
+
             self.app = {self.service_name: self}
             import falcon
             from falcon_cors import CORS
@@ -95,8 +101,17 @@ class microservice:
             importlib.import_module(self.converter.__module__).application = application
             converter.application = application
             self.application = application
+            loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+
+            for logger in loggers:
+                logger.setLevel(logging.DEBUG)
+            logging.warning(f"Load {name}")
 
             converter.load()
+            loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+            for logger in loggers:
+                logger.setLevel(logging.DEBUG)
+
 
     def remote_call(self, *args, **kwargs):
         send_data = json.dumps((args, kwargs))

@@ -12,3 +12,4 @@
 **/*.log
 **/.DS_Store
 **/Thumbs.db
+**/python/.layouteagle/*.pickle

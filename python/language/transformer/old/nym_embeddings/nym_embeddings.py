@@ -1,12 +1,4 @@
-from allennlp.common.checks import ConfigurationError
-from overrides import overrides
-from ampligraph.utils import restore_model
 
-from allennlp.modules.token_embedders.token_embedder import TokenEmbedder
-from allennlp.data import Vocabulary
-from xnym_embeddings.time_tools import timeit_context
-import torch
-import numpy as np
 
 
 @TokenEmbedder.register("nym_embedder")

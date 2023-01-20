@@ -1,7 +1,6 @@
 import os
 import sys
 import logging
-import torch
 from dotenv import load_dotenv
 from traceback_with_variables import activate_by_import
 from traceback_with_variables import Format, ColorSchemes, is_ipython_global
@@ -120,8 +119,6 @@ cols_to_use = [
 ]
 array_cols_to_use = []
 N = 7
-DEVICE = torch.device("cpu")
-#        torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 TEXT_BOX_MODEL_PATH = hidden_folder + "text_box_models/"
 PREDICTION_PATH = hidden_folder + "prediction/"
 NOT_COLLECTED_PATH = hidden_folder + "non_collection/"

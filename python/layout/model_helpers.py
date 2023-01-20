@@ -1,8 +1,10 @@
+import logging
 import types
 
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from PIL.Image import Resampling
 
-from layout.imports import *
+font = ImageFont.load_default()
 from config import config
 import pickle
 
@@ -82,6 +84,13 @@ class LayoutModelParts(types.ModuleType):
     @property
     def PROCESSOR(self):
         if not hasattr(self, "_PROCESSOR"):
+            logging.info("ACCESSING LAYOUT PROCESSOR")
+            import os
+            from matplotlib import colors
+            from PIL import Image, ImageFilter
+            from transformers import LayoutLMv2Processor
+            from PIL import Image, ImageDraw, ImageFont
+
             if os.path.isfile(config.PROCESSOR_PICKLE):
                 with open(config.PROCESSOR_PICKLE, "rb") as f:
                     self._PROCESSOR = pickle.load(f)
@@ -96,10 +105,27 @@ class LayoutModelParts(types.ModuleType):
     @property
     def MODEL(self):
         if not hasattr(self, "_MODEL"):
+            logging.info("ACCESSING LAYOUT MODEL")
+            import os
+            logging.info("ACCESSING transformers")
+
+            from transformers import LayoutLMv2Processor
+            logging.info("ACCESSING classificattion")
+
+            from transformers import LayoutLMv2ForTokenClassification
+            logging.info("ACCESSING transformers")
+
+            from PIL import Image, ImageDraw, ImageFont
+            logging.info("imported")
+
             if os.path.isfile(config.MODEL_PICKLE):
+                logging.info("unpickle")
+
                 with open(config.MODEL_PICKLE, "rb") as f:
                     self._MODEL = pickle.load(f)
             else:
+                logging.info("in memory")
+
                 self._MODEL = LayoutLMv2ForTokenClassification.from_pretrained(
                     "microsoft/layoutlmv2-base-uncased", num_labels=config.NUM_LABELS
                 )
@@ -165,6 +191,8 @@ def resize(image, basesize):
 
 
 def repaint_image_from_labels(data_meta):
+    from matplotlib import colors
+
     id, data = data_meta
     labels = data["labels"]
     bbox = data["bbox"]

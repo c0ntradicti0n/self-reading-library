@@ -11,7 +11,6 @@ from helpers.list_tools import metaize, forget_except
 from layout.annotation_thread import full_model_path
 from language.transformer.ElmoDifferenceTrain import ElmoDifferenceTrain
 from language.transformer.ElmoDifferencePredict import ElmoDifferencePredict
-from allennlp_models.tagging.models import crf_tagger
 
 
 @converter("css.difference", "elmo.css_html.difference")

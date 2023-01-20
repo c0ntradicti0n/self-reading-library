@@ -10,9 +10,9 @@ from helpers.hash_tools import hashval
 
 class GraphHandler(StreamHandler):
     def __init__(self):
+        return
         StreamHandler.__init__(self)
 
-        # Kafka Broker Configuration
         self.conn = login("ant_log")
         self.conn.clear()
         self.Log = self.conn.createURI(f"{BASE}log")
@@ -22,6 +22,7 @@ class GraphHandler(StreamHandler):
         self.Msg = self.conn.createURI(f"{BASE}type")
 
     def emit(self, record):
+        return
         msg = self.format(record)
         frame = inspect.currentframe()
         stack_trace = traceback.format_stack(frame)

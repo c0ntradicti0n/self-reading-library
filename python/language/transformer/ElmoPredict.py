@@ -1,19 +1,14 @@
-from allennlp.common import Params
-from allennlp.predictors import Predictor
 from texttable import Texttable
 
 from config import config
 from core.pathant.PathSpec import PathSpec
-from allennlp.models.model import Model
 
 from helpers.conll_tools import annotation2conll_file
 from helpers.hash_tools import hashval
 from helpers.model_tools import BEST_MODELS
 from helpers.random_tools import chance
 from language.span.DifferenceSpanSet import DifferenceSpanSet
-from language.transformer.difference_predictor.difference_predictor import (
-    DifferenceTaggerPredictor,
-)
+
 from queue import Queue, Empty
 
 q2 = {}
@@ -24,7 +19,8 @@ class ElmoPredict(PathSpec):
     def __init__(self, *args, elmo_config=None, train_output_dir, **kwargs):
         super().__init__(*args, **kwargs)
         self.elmo_config = elmo_config
-        self.config = Params.from_file(params_file=elmo_config)
+
+
 
         self.CSS = {
             (span_letter + "-" + tag) if tag != "O" else tag: css
@@ -152,6 +148,9 @@ class ElmoPredict(PathSpec):
         return annotation
 
     def load(self):
+        from allennlp.common import Params
+        from allennlp.predictors import Predictor
+        from allennlp.models.model import Model
         from allennlp_models.tagging.models import crf_tagger
 
         self.logger.info("Loading difference model")
@@ -164,6 +163,9 @@ class ElmoPredict(PathSpec):
             BEST_MODELS["difference"]["best_model_path"]
         )
         self.logger.info("Loading tagger_model")
+        from language.transformer.difference_predictor.difference_predictor import (
+            DifferenceTaggerPredictor,
+        )
         self.predictor = DifferenceTaggerPredictor(
             self.default_predictor._model,
             dataset_reader=self.default_predictor._dataset_reader,

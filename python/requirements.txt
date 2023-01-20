@@ -92,7 +92,7 @@ cytoolz
 gputil
 flask
 scikit-learn
-transformers==4.10.1
+transformers==4.25.1
 diff_match_patch
 python-Levenshtein
 pycallgraph
