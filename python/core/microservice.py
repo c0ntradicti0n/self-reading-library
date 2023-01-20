@@ -14,6 +14,7 @@ import ruamel.yaml
 class microservice:
     def __init__(self, converter, *args, **kwargs):
         name = converter.__class__.__name__
+        logging.warning(f"STARTING {name}")
         self.service_name = "micro_" + name.lower()
         self.converter = converter
 

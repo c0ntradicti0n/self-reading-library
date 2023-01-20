@@ -20,6 +20,7 @@ from helpers.time_tools import wait_for_change
 class train_on:
     def __init__(self, converter, *args, **kwargs):
         name = converter.__class__.__name__
+        logging.warning(f"STARTING {name}")
         self.service_name = "train_" + name.lower()
         self.converter = converter
 

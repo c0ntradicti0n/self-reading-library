@@ -3,7 +3,6 @@
 
 # Allow files and directories
 !/python/[^.]*
-!/tts/[^.]*
 
 !/src
 
