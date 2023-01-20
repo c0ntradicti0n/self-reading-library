@@ -14,6 +14,7 @@ from bs4 import BeautifulSoup, NavigableString, Tag, Comment
 from listalign.word_pyalign import align
 
 from config import config
+from helpers.list_tools import unique
 
 sys.path.insert(0,"/home/stefan/Programming/Programming/self-reading-library/python")
 
@@ -141,13 +142,16 @@ class Pager(PathSpec):
 
         alignment, cigar = align(l_a, l_b)
 
+        alignment = unique(alignment, key=lambda l: l[1])
+        alignment = unique(alignment, key=lambda l: l[0])
+
         z_html_path = html_path + ".z.html"
         for (i_a, i_b) in reversed(alignment):
             html_i_a = html_index[i_a]
 
             start, end = html_i_a
             html = html[:end] + "</z>" + html[end:]
-            html= html[:start] + f"<z word='{l_a[i_a]}' class='{hex(i_b)}'>" + html[start:]
+            html= html[:start] + f"<z class='z{str(hex(i_b))[2:]}'>" + html[start:]
 
         with open(z_html_path, "w", encoding="utf-8") as f:
             f.write(html.replace("–", "&#150;").replace("“", "&quot;").replace("”","&quot;" ))

@@ -78,6 +78,7 @@ const HtmlRenderer = (props: Props) => {
                      margin: '40px',
                   }}
                >
+
                   {context.meta[props.slot] ? (
                      <style
                         dangerouslySetInnerHTML={{
