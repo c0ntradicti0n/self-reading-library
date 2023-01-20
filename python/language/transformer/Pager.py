@@ -148,10 +148,11 @@ class Pager(PathSpec):
         z_html_path = html_path + ".z.html"
         for (i_a, i_b) in reversed(alignment):
             html_i_a = html_index[i_a]
+            i=word_index[i_b]
 
             start, end = html_i_a
             html = html[:end] + "</z>" + html[end:]
-            html= html[:start] + f"<z class='z{str(hex(i_b))[2:]}'>" + html[start:]
+            html= html[:start] + f"<z class='z{str(hex(i))[2:]}'>" + html[start:]
 
         with open(z_html_path, "w", encoding="utf-8") as f:
             f.write(html.replace("–", "&#150;").replace("“", "&quot;").replace("”","&quot;" ))
