@@ -50,7 +50,7 @@ services:
   train_elmodifferencetrain:
     build: python
     container_name: train_elmodifferencetrain
-    entrypoint: python3 -c 'from __main__ import ElmoDifferenceTrain;  ElmoDifferenceTrain.wait_for_change()'
+    entrypoint: python3 -c 'from language.transformer.ElmoDifferenceTrain import ElmoDifferenceTrain;  ElmoDifferenceTrain.wait_for_change()'
     environment: {GDB_HOST: gdb, GDB_PASSWORD: '${GDB_PASSWORD}', INSIDE: 'true',
       LANG: en_US.UTF - 8, LANGUAGE: en_US.UTF-8, LC_ALL: en_US.UTF-8}
     image: full_python

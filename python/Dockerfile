@@ -30,9 +30,10 @@ RUN apt -y install language-pack-en
 RUN apt -y install librsvg2-bin
 RUN apt -y install moreutils
 
+RUN apt update
 
 # install chromedriver
-RUN apt-get install -yqq unzip curl
+RUN apt-get install -y unzip curl
 
 # Install Chrome WebDriver
 RUN CHROMEDRIVER_VERSION=`curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE` && \
