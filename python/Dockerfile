@@ -51,18 +51,21 @@ ENV DISPLAY=:99
 RUN   >&2 echo "$(python3 --version)"
 WORKDIR /home/finn/Programming/self-reading-library
 
-
+RUN pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
+RUN pip install transformers==4.25.1
 RUN --mount=type=cache,target=/root/.cache/pip pip install setuptools==57.5.0
-RUN --mount=type=cache,target=/root/.cache/pip pip install torch==1.10.2 spacy spacy-transformers
+RUN --mount=type=cache,target=/root/.cache/pip pip install spacy spacy-transformers
 RUN --mount=type=cache,target=/root/.cache/pip python3 -m spacy download en_core_web_trf
 RUN --mount=type=cache,target=/root/.cache/pip python3 -m spacy download en_core_web_md
 RUN --mount=type=cache,target=/root/.cache/pip python3 -m spacy download en_core_web_sm
 RUN --mount=type=cache,target=/root/.cache/pip pip install git+https://github.com/facebookresearch/detectron2.git
 RUN --mount=type=cache,target=/root/.cache/pip pip install uvicorn[standard]
-
+RUN pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
+RUN pip install transformers==4.25.1
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt --use-deprecated=legacy-resolver
-
+RUN pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
+RUN pip install transformers==4.25.1
 RUN pip install weasyprint
 RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.bionic_amd64.deb
 RUN wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb

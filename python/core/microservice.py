@@ -101,17 +101,8 @@ class microservice:
             importlib.import_module(self.converter.__module__).application = application
             converter.application = application
             self.application = application
-            loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
-
-            for logger in loggers:
-                logger.setLevel(logging.DEBUG)
-            logging.warning(f"Load {name}")
 
             converter.load()
-            loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
-            for logger in loggers:
-                logger.setLevel(logging.DEBUG)
-
 
     def remote_call(self, *args, **kwargs):
         send_data = json.dumps((args, kwargs))

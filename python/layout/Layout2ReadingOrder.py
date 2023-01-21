@@ -1,51 +1,23 @@
-print ("a")
 import gc
-print ("a")
-
 import logging
-print ("a")
-
-import os
-print ("b")
-
 import tracemalloc
-print ("b")
 
 import numpy
-print ("b")
-
-from PIL.Image import Image
-print ("b")
 
 from core.microservice import microservice
-print ("c")
 
 from helpers.cache_tools import configurable_cache
-print ("c")
-
 from helpers.hash_tools import hashval
-print ("c")
-
 from helpers.str_tools import str_ascii
-print ("c")
-
+from layout.imports import *
 from config import config
-print ("c")
-
 from core.pathant.Converter import converter
-print ("d")
-
 from core.pathant.PathSpec import PathSpec
-print ("d")
-
 from layout import model_helpers
-print ("d")
-
 
 tracemalloc.start()
 import pyarrow as pa
 import pyarrow.parquet as pq
-print ("f")
 
 
 def cast_array_list(sample):
@@ -251,69 +223,49 @@ class Layout2ReadingOrder(PathSpec):
         return box_predictions, prediction
 
     def load(self):
-        logging.info("LOADING MODEL")
         import torch
         logging.info(torch.__version__)
         import os
-        logging.info("LOADING MODEL")
 
         import shutil
-        logging.info("LOADING MODEL")
 
         from pprint import pprint, pformat
-        logging.info("LOADING MODEL")
 
         import pandas
-        logging.info("LOADING MODEL")
 
         import torch
-        logging.info("LOADING MODEL")
 
         from matplotlib import colors
-        logging.info("LOADING MODELx ")
 
         from torch.utils.data import DataLoader
-        logging.info("LOADING MODELy")
 
         from datasets import load_metric
-        logging.info("LOADING MODELz")
 
         from GPUtil import showUtilization as gpu_usage
-        logging.info("LOADING MODELa")
 
         from sklearn.preprocessing import MinMaxScaler
-        logging.info("LOADING MODELg")
 
         from datasets import Dataset
-        logging.info("LOADING MdODELz ImageFilter")
 
         from PIL import Image, ImageFilter
-        logging.info("LOADIdNG MODELz LayoutLMv2Processor")
 
         from transformers import LayoutLMv2Processor
-        logging.info("aLOADING MODELz Features")
 
         from datasets import Features, Sequence, ClassLabel, Value, Array2D, Array3D
-        logging.info("dLOADING MODELz")
 
 
 
         import torch
-        logging.info("fLOADING MODELz")
 
         from tqdm import tqdm
-        logging.info("gLOADING MODELz")
 
         from PIL import Image, ImageDraw, ImageFont
-        logging.info("fgLOADING MODELz")
 
 
         font = ImageFont.load_default()
-        logging.info("dLOADING MODELz")
 
 
         self.DEVICE = torch.device("cpu")
-        logging.info("sdLdOADING MODELz")
 
         self.model_path = config.layout_model_path
         print(f" - {config.layout_model_path}")
