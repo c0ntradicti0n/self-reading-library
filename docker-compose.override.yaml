@@ -57,3 +57,13 @@ services:
     networks: [db]
     restart: unless-stopped
     volumes: [$CWD/python:/home/finn/Programming/self-reading-library/python]
+  train_training:
+    build: python
+    container_name: train_training
+    entrypoint: python3 -c 'from __main__ import Training;  Training.wait_for_change()'
+    environment: {GDB_HOST: gdb, GDB_PASSWORD: '${GDB_PASSWORD}', INSIDE: 'true',
+      LANG: en_US.UTF - 8, LANGUAGE: en_US.UTF-8, LC_ALL: en_US.UTF-8}
+    image: full_python
+    networks: [db]
+    restart: unless-stopped
+    volumes: [$CWD/python:/home/finn/Programming/self-reading-library/python]

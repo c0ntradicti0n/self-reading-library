@@ -95,7 +95,7 @@ RUN ls
 
 RUN python3 -c 'import nltk; nltk.download("wordnet"); nltk.download("omw-1.4")'
 RUN pip install dash==2.3.0 dash-extensions visdcc werkzeug==2.0.3
-#RUN cp python/tokenization_layoutvm2_fast.py ../venv/lib/python3.9/site-packages/transformers/models/layoutlmv2/tokenization_layoutlmv2_fast.py
+RUN cp python/tokenization_layoutvm2_fast.py ../venv/lib/python3.9/site-packages/transformers/models/layoutlmv2/tokenization_layoutlmv2_fast.py
 RUN pip install gevent
 RUN apt install -y jq
 COPY config/default.latex  /usr/share/pandoc/data/templates/default.latex

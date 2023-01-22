@@ -4,34 +4,47 @@ from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from config import config
 import pandas
+
+from core.pathant.train_on import train_on
 from helpers import pandas_tools
+from helpers.json_tools import load_json_gzip
 from layout import model_helpers
 from helpers import os_tools
 
-
+@train_on
 @converter("annotation.corrected", "model")
 class Training(PathSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, num_labels=config.NUM_LABELS, **kwargs)
 
+    on = config.GOLD_ANNOTATION_SET
+    training_rate_mode = "ls"
+    model_dir = config.TEXT_BOX_MODEL_PATH
+
+    service_id = "layout"
+
+    def on_train(self, samples_files, training_rate):
+        from core.pathant.PathAnt import PathAnt
+        from helpers.list_tools import metaize
+        ant = PathAnt()
+        model_pipe = ant(
+            "annotation.corrected",
+            "model",
+            num_labels=config.NUM_LABELS,
+            collection_step=training_rate,
+        )
+        list(model_pipe(
+            metaize(samples_files),    collection_step= training_rate
+        ))
+
     def __call__(self, x_meta, *args, **kwargs):
         self.logger.info("!IMPORTING DANGEROUS STUFF")
-        from datasets import Dataset
-        from torch.utils.data import DataLoader
         import os
-        import shutil
         from pprint import pprint, pformat
         import pandas
-        import torch
-        from matplotlib import colors
         from torch.utils.data import DataLoader
         from datasets import load_metric
-        from GPUtil import showUtilization as gpu_usage
-        from sklearn.preprocessing import MinMaxScaler
         from datasets import Dataset
-        from PIL import Image, ImageFilter
-        from transformers import LayoutLMv2Processor
-        from datasets import Features, Sequence, ClassLabel, Value, Array2D, Array3D
         from transformers import LayoutLMv2ForTokenClassification, AdamW
         import torch
         from tqdm import tqdm
@@ -55,20 +68,30 @@ class Training(PathSpec):
 
         os.makedirs(model_path)
 
-        feature_df = pandas.concat(
-            [
-                df
+        dicts =             [
+                d
                 for p in feature_dfs
-                if (df := pandas_tools.load_pandas_file(config.COLLECTION_PATH + p))
+                if (d := load_json_gzip(config.GOLD_ANNOTATION_SET + p)) and d["label"]
                 is not None
             ]
-        )
 
-        print("LABEL", feature_df["LABEL"].tolist())
+        no_data =              [
+                d
+                for p in feature_dfs
+                if (d := load_json_gzip(config.GOLD_ANNOTATION_SET + p)) and not d["label"]
+                is not None
+            ]
+        self.logger.warning(f"Soma layout samples have no label? {no_data}")
+
+        feature_df = pandas.DataFrame.from_records(dicts)
 
         feature_df = feature_df[
             feature_df.image_path.map(lambda path: os.path.exists(path[0]))
         ]
+
+        feature_df.drop(["rating_trial", "rating_score"], axis=1, inplace=True)
+
+        feature_df["LABEL"] = feature_df["label"]
 
         dataset = Dataset.from_pandas(feature_df)
 
@@ -93,19 +116,20 @@ class Training(PathSpec):
                 features=config.FEATURES,
             )
 
-            model_helpers.LayoutModelParts.PROCESSOR.tokenizer.decode(
+            model_helpers.LayoutModelParts().PROCESSOR.tokenizer.decode(
                 train_dataset["input_ids"][0]
             )
 
-            train_dataset.set_format(type="torch", device=config.DEVICE)
-            test_dataset.set_format(type="torch", device=config.DEVICE)
+            self.DEVICE = torch.device("cpu")
+            train_dataset.set_format(type="torch", device=self.DEVICE)
+            test_dataset.set_format(type="torch", device=self.DEVICE)
 
             train_dataloader = DataLoader(train_dataset, batch_size=2, shuffle=True)
             test_dataloader = DataLoader(test_dataset, batch_size=1)
 
             for x in range(0, 10):
                 example = dataset["train"][x : x + 1]
-                image = Image.open(example["image_path"][0][0])
+                image = Image.open(example["image_path"][0])
                 image = image.convert("RGB")
                 width, height = image.size
                 draw = ImageDraw.Draw(image)
@@ -128,9 +152,9 @@ class Training(PathSpec):
 
             batch = next(iter(train_dataloader))
 
-            model = model_helpers.LayoutModelParts.MODEL
+            model = model_helpers.LayoutModelParts().MODEL
 
-            model.to(config.DEVICE)
+            model.to(self.DEVICE)
             optimizer = AdamW(model.parameters(), lr=1e-5, weight_decay=0.17)
 
             global_step = 0
@@ -146,9 +170,9 @@ class Training(PathSpec):
                     for batch in tdqm_train_dataloader:
                         tdqm_train_dataloader.set_description(f"Epoch {epoch}")
                         # zero the parameter gradients
-                        # optimizer.zero_grad()
+                        optimizer.zero_grad()
 
-                        # forward + backward + optimize
+                        #forward + backward + optimize
                         outputs = model(**batch)
                         loss = outputs.loss
 
@@ -164,12 +188,12 @@ class Training(PathSpec):
                 model.eval()
                 for batch in tqdm(test_dataloader, desc="Evaluating"):
                     with torch.no_grad():
-                        input_ids = batch["input_ids"].to(config.DEVICE)
-                        bbox = batch["bbox"].to(config.DEVICE)
-                        image = batch["image"].to(config.DEVICE)
-                        attention_mask = batch["attention_mask"].to(config.DEVICE)
-                        token_type_ids = batch["token_type_ids"].to(config.DEVICE)
-                        labels = batch["labels"].to(config.DEVICE)
+                        input_ids = batch["input_ids"].to(self.DEVICE)
+                        bbox = batch["bbox"].to(self.DEVICE)
+                        image = batch["image"].to(self.DEVICE)
+                        attention_mask = batch["attention_mask"].to(self.DEVICE)
+                        token_type_ids = batch["token_type_ids"].to(self.DEVICE)
+                        labels = batch["labels"].to(self.DEVICE)
 
                         # forward pass
                         outputs = model(
@@ -224,3 +248,7 @@ class Training(PathSpec):
 
         best_model_path = max(f1_to_new_model_paths.items(), key=lambda x: x[0])[1]
         yield best_model_path, df_paths_meta
+
+
+if __name__ ==  "__main__":
+    Training.prepare_and_train()

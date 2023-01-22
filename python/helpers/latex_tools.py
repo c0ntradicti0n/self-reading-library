@@ -18,6 +18,7 @@ def latex_replace(s):
         "\\N{LATIN SMALL LETTER E WITH ACUTE}": "é",
         "\\N{BLACK SMALL SQUARE}": "*",
         "\\N{EN DASH}": "-",
+        "\\N{EM DASH}": "-",
         "\\N{NO-BREAK SPACE}": " ",
         "\\N{COPYRIGHT SIGN}": "©",
     }.items():

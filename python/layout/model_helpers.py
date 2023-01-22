@@ -130,7 +130,9 @@ class LayoutModelParts(types.ModuleType):
                 logging.info("in memory")
 
                 self._MODEL = LayoutLMv2ForTokenClassification.from_pretrained(
-                    "microsoft/layoutlmv2-base-uncased", num_labels=config.NUM_LABELS
+                    "microsoft/layoutlmv2-base-uncased", num_labels=config.NUM_LABELS,
+                zero_division=True
+
                 )
                 with open(config.MODEL_PICKLE, "wb") as f:
                     pickle.dump(self._MODEL, f)
@@ -147,16 +149,16 @@ def preprocess_data(training=False):
 
         boxes = compute_bbox(examples)
 
-        word_labels = (
+        box_labels = (
             ([[0] * (len(examples["label"][0]))])
             if not training
             else [[config.label2id[l] for l in L] for L in examples["LABEL"]]
         )
 
         if training:
-            print(f"{word_labels = }")
+            print(f"\n{box_labels = }")
 
-        images = [Image.open(path[0]).convert("RGB") for path in examples["image_path"]]
+        images = [Image.open(path if  isinstance(path, str) else path[0]).convert("RGB") for path in examples["image_path"]]
 
         images = [resize(image, 255) for image in images]
 
@@ -164,7 +166,7 @@ def preprocess_data(training=False):
             images,
             words,
             boxes=boxes,
-            word_labels=word_labels,
+            word_labels=box_labels,
             padding="max_length",
             truncation=True,
             return_overflowing_tokens=False,

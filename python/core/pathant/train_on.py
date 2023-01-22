@@ -20,7 +20,7 @@ from helpers.time_tools import wait_for_change
 class train_on:
     def __init__(self, converter, *args, **kwargs):
         name = converter.__class__.__name__
-        logging.warning(f"STARTING {name}")
+        logging.warning(f"REGISTERING TRIGGER {name}")
         self.service_name = "train_" + name.lower()
         self.converter = converter
 
@@ -77,8 +77,8 @@ class train_on:
         global BEST_MODELS
         if not os.path.isdir(self.converter.model_dir):
             os.makedirs(self.converter.model_dir)
-        if not os.path.isdir(self.converter.collection_path):
-            os.makedirs(self.converter.collection_path)
+        if not os.path.isdir(self.converter.on):
+            os.makedirs(self.converter.on)
 
         loops = []
 
@@ -116,7 +116,7 @@ class train_on:
         BEST_MODELS = json_file_update(config.BEST_MODELS_PATH, update=BEST_MODELS)
 
         logging.info(f"Having {training_rate = }")
-        if training_rate > 1.2 or not full_model_path:
+        if training_rate > 1.1 or not full_model_path:
             model_meta = self.converter.on_train(
                 samples_files, len(samples_files)
             )
