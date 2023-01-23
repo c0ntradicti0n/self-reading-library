@@ -46,7 +46,9 @@ jobs:
           ssh staging "
 
               cd self-reading-library
-              git pull
+              git fetch --all
+              git reset --hard origin/main
+
           "
 
       - name: Build
