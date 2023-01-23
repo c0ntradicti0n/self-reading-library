@@ -5,13 +5,13 @@ from core.pathant.PathSpec import PathSpec
 from config import config
 import pandas
 
-from core.pathant.train_on import train_on
+from core.pathant.trigger_on import trigger_on
 from helpers import pandas_tools
 from helpers.json_tools import load_json_gzip
 from layout import model_helpers
 from helpers import os_tools
 
-@train_on
+@trigger_on
 @converter("annotation.corrected", "model")
 class Training(PathSpec):
     def __init__(self, *args, **kwargs):
@@ -186,6 +186,7 @@ class Training(PathSpec):
 
                 # put model in evaluation mode
                 model.eval()
+                keeping_models = {}
                 for batch in tqdm(test_dataloader, desc="Evaluating"):
                     with torch.no_grad():
                         input_ids = batch["input_ids"].to(self.DEVICE)
@@ -243,8 +244,12 @@ class Training(PathSpec):
                 print(f"{dataset.shape = }")
                 path = f"{config.TEXT_BOX_MODEL_PATH}_{str(n_samples)}_{str(f1).replace('.', ',')}_{epoch}"
                 f1_to_new_model_paths[f1] = path
-
                 torch.save(model.state_dict(), path)
+
+                keeping_models[f1] = path
+                if len(keeping_models)> 3:
+                    worst = min(keeping_models)
+                    os.system(f"rm {keeping_models[worst]}")
 
         best_model_path = max(f1_to_new_model_paths.items(), key=lambda x: x[0])[1]
         yield best_model_path, df_paths_meta

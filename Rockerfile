@@ -1,0 +1,4 @@
+FROM python:3.10
+RUN python --version
+RUN pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
+RUN pip install transformers==4.25.1

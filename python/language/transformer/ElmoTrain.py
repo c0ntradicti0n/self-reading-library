@@ -33,6 +33,7 @@ class ElmoTrain(PathSpec):
         )
 
     def __call__(self, feature_meta, *args, **kwargs):
+        path = None
         try:
             conll_concat_train_valid(self.on)
             path = f"{config.ELMO_DIFFERENCE_MODEL_PATH}/" +str (self.flags["collection_step"]) + "_0_0"
@@ -54,3 +55,4 @@ class ElmoTrain(PathSpec):
 
         except subprocess.CalledProcessError as e:
             logging.error("Training of Elmo model failed", exc_info=True)
+            os.system(f"rm -rf {path}")

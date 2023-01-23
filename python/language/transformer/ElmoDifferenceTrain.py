@@ -1,9 +1,9 @@
 from core.pathant.Converter import converter
-from core.pathant.train_on import train_on
+from core.pathant.trigger_on import trigger_on
 from language.transformer.ElmoTrain import ElmoTrain
 from config import config
 
-@train_on
+@trigger_on
 @converter(None, "elmo_model.difference")
 class ElmoDifferenceTrain(ElmoTrain):
     def __init__(self, *args, **kwargs):

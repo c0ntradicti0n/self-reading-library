@@ -17,11 +17,11 @@ from helpers.model_tools import BEST_MODELS, TRAINING_RATE, find_best_model
 from helpers.time_tools import wait_for_change
 
 
-class train_on:
+class trigger_on:
     def __init__(self, converter, *args, **kwargs):
         name = converter.__class__.__name__
         logging.warning(f"REGISTERING TRIGGER {name}")
-        self.service_name = "train_" + name.lower()
+        self.service_name = "trigger_" + name.lower()
         self.converter = converter
 
         docker_kwargs = (
@@ -73,6 +73,7 @@ class train_on:
     def wait_for_change(self):
         wait_for_change(self.converter.on, self.prepare_and_train)
 
+    mutext_affix = ""
     def prepare_and_train(self):
         global BEST_MODELS
         if not os.path.isdir(self.converter.model_dir):
@@ -116,11 +117,18 @@ class train_on:
         BEST_MODELS = json_file_update(config.BEST_MODELS_PATH, update=BEST_MODELS)
 
         logging.info(f"Having {training_rate = }")
-        if training_rate > 1.1 or not full_model_path:
-            model_meta = self.converter.on_train(
-                samples_files, len(samples_files)
-            )
-            pprint(model_meta)
+        
+        mutext_path = config.hidden_folder+self.mutex
+        if training_rate > 1.1 or not full_model_path and not os.path.exists(mutext_path):
+            os.system(f"touch {mutext_path}")
+            try:
+                model_meta = self.converter.on_train(
+                    samples_files, len(samples_files)
+                )
+                pprint(model_meta)
+            finally:
+                os.system(f"rm {mutext_path}")
+
 
     def __call__(self, *args, **kwargs):
         return self.converter(*args, **kwargs)
