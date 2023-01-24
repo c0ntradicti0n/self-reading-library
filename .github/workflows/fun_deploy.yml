@@ -63,7 +63,7 @@ jobs:
               cd self-reading-library
               docker stop nginx
               make down up
-              make overdown over overup
+              make overdown over overupd
           '
       - name: RestTest
         run: |
