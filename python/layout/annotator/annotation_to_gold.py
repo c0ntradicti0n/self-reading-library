@@ -13,7 +13,7 @@ from core.pathant.Filter import existing_in_dataset_or_database
 from core.pathant.PathSpec import PathSpec
 from core.event_binding import queue_iter, RestQueue, queue_put, q, d
 from helpers.cache_tools import configurable_cache
-from helpers.json_tools import np_encoder
+from helpers.json_tools import np_encoder, dump_json_gzip
 from layout.model_helpers import changed_labels
 import pyarrow.parquet as pq
 
