@@ -17,7 +17,7 @@ import {
 } from '@ant-design/icons'
 import { Help } from './Tour'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
-import { useRouter } from 'next/router'
+
 function getItem(label, key, icon, children = undefined) {
    return {
       key,
@@ -48,7 +48,7 @@ const NavigationContent = () => {
       ),
       getItem(<Captcha is_open={false} />, 'link3', <SmileOutlined />),
       getItem(<Url2Difference />, 'link4', <SearchOutlined />),
-      getItem(<UploadDocument />, 'link5', <RocketOutlined />),
+      //getItem(<UploadDocument />, 'link5', <RocketOutlined />),
       context.value[NORMAL]?.endsWith('pdf')
          ? getItem(<Audiobook />, 'link6', <SoundOutlined />)
          : null,

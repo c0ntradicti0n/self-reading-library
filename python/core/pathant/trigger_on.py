@@ -118,7 +118,7 @@ class trigger_on:
 
         logging.info(f"Having {training_rate = }")
         
-        mutext_path = config.hidden_folder+self.mutex
+        mutext_path = config.hidden_folder+self.mutext_affix
         if training_rate > 1.1 or not full_model_path and not os.path.exists(mutext_path):
             os.system(f"touch {mutext_path}")
             try:
