@@ -33,7 +33,7 @@ def find_best_model(model_dir):
 
 TRAINING_RATE = {}
 
-BEST_MODELS = json_file_update(config.BEST_MODELS_PATH)
+BEST_MODELS = config.BEST_MODELS
 
 
 def model_in_the_loop(

@@ -6,10 +6,7 @@ from traceback_with_variables import activate_by_import
 from traceback_with_variables import Format, ColorSchemes, is_ipython_global
 import numpy
 
-from helpers.model_tools import BEST_MODELS
-
-load_dotenv("../.env")
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+from helpers.json_tools import json_file_update
 
 sys.path.append("../core")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -102,7 +99,6 @@ difference_model_train_output = hidden_folder + f"/over_{model_config}/"
 difference_model_config = f"language/transformer/experiment_configs/{model_config}"
 
 wordninjalanguagemodel = "language/english.txt.gz"
-layout_model_path = BEST_MODELS["layout"]["best_model_path"] #hidden_folder + "/text_box_models//_782_0,8268912618438863_14"
 saved_layout_model_dir = hidden_folder + "/layout_model_saved/"
 collected_features_path = ".core/labeled_features.pickle"
 use_pdf2htmlex_features = False
@@ -178,7 +174,11 @@ audio_format = ".ogg"
 audio_path = hidden_folder + "audio/"
 create_frontend = os.environ.get("CREATE_FRONTEND", default=False)
 BEST_MODELS_PATH = hidden_folder + "/best_models.json"
+BEST_MODELS = json_file_update(BEST_MODELS_PATH)
+layout_model_path = BEST_MODELS["layout"]["best_model_path"] #hidden_folder + "/text_box_models//_782_0,8268912618438863_14"
 
+load_dotenv("../.env")
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 GOLD_DATASET_PATH = hidden_folder + "/gold"
 GOLD_SPAN_ID = "gold_span_annotation"
 GOLD_SPAN_SET = GOLD_DATASET_PATH + "/" + GOLD_SPAN_ID + "/"
