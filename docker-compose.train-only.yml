@@ -24,5 +24,22 @@ services:
     volumes:
       - "$CWD/python:/home/finn/Programming/self-reading-library/python"
     entrypoint: python3 layout/training/training.py
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+  test:
+    image: nvidia/cuda:10.2-base
+    command: nvidia-smi
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
 
 
