@@ -24,20 +24,20 @@ class GraphDB(PathSpec):
 
     def __call__(self, prediction_metas, *args, **kwargs):
         for i, (path, meta) in enumerate(prediction_metas):
-                #with timeit_context(f"Inserting set no {i} into db"):
-                span_set: DifferenceSpanSet = meta["span_set"]
-                span_set.add_graph_db(self.conn)
+            # with timeit_context(f"Inserting set no {i} into db"):
+            span_set: DifferenceSpanSet = meta["span_set"]
+            span_set.add_graph_db(self.conn)
 
-                identity_links = meta["identity_links"]
-                for a, b in itertools.permutations(identity_links, 2):
-                    a.add_link("equal", b, self.conn)
+            identity_links = meta["identity_links"]
+            for a, b in itertools.permutations(identity_links, 2):
+                a.add_link("equal", b, self.conn)
 
-                analysed_links = meta["analysed_links"]
-                for a1, a2, as1, as2, c1, c2, l1, l2 in analysed_links:
-                    as1.add_link("forward_difference", c1, self.conn)
-                    as2.add_link("forward_difference", c2, self.conn)
+            analysed_links = meta["analysed_links"]
+            for a1, a2, as1, as2, c1, c2, l1, l2 in analysed_links:
+                as1.add_link("forward_difference", c1, self.conn)
+                as2.add_link("forward_difference", c2, self.conn)
 
-                yield path, meta
+            yield path, meta
 
     def all_subjects(self):
         with timeit_context("looking up subjects"):

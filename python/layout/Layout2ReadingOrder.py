@@ -224,6 +224,7 @@ class Layout2ReadingOrder(PathSpec):
 
     def load(self):
         import torch
+
         logging.info(torch.__version__)
         import os
 
@@ -253,17 +254,13 @@ class Layout2ReadingOrder(PathSpec):
 
         from datasets import Features, Sequence, ClassLabel, Value, Array2D, Array3D
 
-
-
         import torch
 
         from tqdm import tqdm
 
         from PIL import Image, ImageDraw, ImageFont
 
-
         font = ImageFont.load_default()
-
 
         self.DEVICE = torch.device("cpu")
 

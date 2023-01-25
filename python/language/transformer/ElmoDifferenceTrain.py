@@ -3,6 +3,7 @@ from core.pathant.trigger_on import trigger_on
 from language.transformer.ElmoTrain import ElmoTrain
 from config import config
 
+
 @trigger_on
 @converter(None, "elmo_model.difference")
 class ElmoDifferenceTrain(ElmoTrain):
@@ -20,10 +21,9 @@ class ElmoDifferenceTrain(ElmoTrain):
     model_dir = config.ELMO_DIFFERENCE_MODEL_PATH
     service_id = "difference"
 
-
     def __call__(self, *args, **kwargs):
         super().__call__(*args, **kwargs)
 
 
-if __name__ ==  "__main__":
+if __name__ == "__main__":
     ElmoDifferenceTrain.wait_for_change()

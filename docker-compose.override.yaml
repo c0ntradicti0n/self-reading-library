@@ -1,12 +1,6 @@
-
-
 networks:
-  db:
-    external: True
-  world:
-
-
-
+  db: {external: true}
+  world: null
 services:
   micro_elmodifferencepredict:
     build: python

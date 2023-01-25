@@ -96,14 +96,14 @@ class LayoutModelParts(types.ModuleType):
                     self._PROCESSOR = pickle.load(f)
             else:
                 self._PROCESSOR = LayoutLMv2Processor.from_pretrained(
-                    "microsoft/layoutlmv2-base-uncased", revision="no_ocr",
-
+                    "microsoft/layoutlmv2-base-uncased",
+                    revision="no_ocr",
                 )
                 with open(config.PROCESSOR_PICKLE, "wb") as f:
                     pickle.dump(self._PROCESSOR, f)
         self._PROCESSOR.feature_extractor.ocr_lang = "en"
 
-        self._PROCESSOR.feature_extractor.tesseract_config = '-psm 6'
+        self._PROCESSOR.feature_extractor.tesseract_config = "-psm 6"
         return self._PROCESSOR
 
     @property
@@ -111,14 +111,18 @@ class LayoutModelParts(types.ModuleType):
         if not hasattr(self, "_MODEL"):
             logging.info("ACCESSING LAYOUT MODEL")
             import os
+
             logging.info("ACCESSING transformers")
             from transformers import LayoutLMv2Processor
+
             logging.info("ACCESSING classificattion")
 
             from transformers import LayoutLMv2ForTokenClassification
+
             logging.info("ACCESSING transformers")
 
             from PIL import Image, ImageDraw, ImageFont
+
             logging.info("imported")
 
             if os.path.isfile(config.MODEL_PICKLE):
@@ -130,9 +134,9 @@ class LayoutModelParts(types.ModuleType):
                 logging.info("in memory")
 
                 self._MODEL = LayoutLMv2ForTokenClassification.from_pretrained(
-                    "microsoft/layoutlmv2-base-uncased", num_labels=config.NUM_LABELS,
-                zero_division=True
-
+                    "microsoft/layoutlmv2-base-uncased",
+                    num_labels=config.NUM_LABELS,
+                    zero_division=True,
                 )
                 with open(config.MODEL_PICKLE, "wb") as f:
                     pickle.dump(self._MODEL, f)
@@ -158,7 +162,10 @@ def preprocess_data(training=False):
         if training:
             print(f"\n{box_labels = }")
 
-        images = [Image.open(path if  isinstance(path, str) else path[0]).convert("RGB") for path in examples["image_path"]]
+        images = [
+            Image.open(path if isinstance(path, str) else path[0]).convert("RGB")
+            for path in examples["image_path"]
+        ]
 
         images = [resize(image, 255) for image in images]
 
@@ -231,6 +238,7 @@ def repaint_image_from_labels(data_meta):
 def changed_labels(data_meta):
     id, data = data_meta
     return (id, {**data, "labels": data["labels"]})
+
 
 if __name__ == "__main__":
     processor = LayoutModelParts().PROCESSOR

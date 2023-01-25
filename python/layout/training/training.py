@@ -1,3 +1,4 @@
+import logging
 import os
 
 from core.pathant.Converter import converter
@@ -10,6 +11,7 @@ from helpers import pandas_tools
 from helpers.json_tools import load_json_gzip
 from layout import model_helpers
 from helpers import os_tools
+
 
 @trigger_on
 @converter("annotation.corrected", "model")
@@ -26,6 +28,7 @@ class Training(PathSpec):
     def on_train(self, samples_files, training_rate):
         from core.pathant.PathAnt import PathAnt
         from helpers.list_tools import metaize
+
         ant = PathAnt()
         model_pipe = ant(
             "annotation.corrected",
@@ -33,9 +36,7 @@ class Training(PathSpec):
             num_labels=config.NUM_LABELS,
             collection_step=training_rate,
         )
-        list(model_pipe(
-            metaize(samples_files),    collection_step= training_rate
-        ))
+        list(model_pipe(metaize(samples_files), collection_step=training_rate))
 
     def __call__(self, x_meta, *args, **kwargs):
         self.logger.info("!IMPORTING DANGEROUS STUFF")
@@ -68,19 +69,19 @@ class Training(PathSpec):
 
         os.makedirs(model_path)
 
-        dicts =             [
-                d
-                for p in feature_dfs
-                if (d := load_json_gzip(config.GOLD_ANNOTATION_SET + p)) and d["label"]
-                is not None
-            ]
+        dicts = [
+            d
+            for p in feature_dfs
+            if (d := load_json_gzip(config.GOLD_ANNOTATION_SET + p))
+            and d["label"] is not None
+        ]
 
-        no_data =              [
-                d
-                for p in feature_dfs
-                if (d := load_json_gzip(config.GOLD_ANNOTATION_SET + p)) and not d["label"]
-                is not None
-            ]
+        no_data = [
+            d
+            for p in feature_dfs
+            if (d := load_json_gzip(config.GOLD_ANNOTATION_SET + p))
+            and not d["label"] is not None
+        ]
         self.logger.warning(f"Soma layout samples have no label? {no_data}")
 
         feature_df = pandas.DataFrame.from_records(dicts)
@@ -172,7 +173,7 @@ class Training(PathSpec):
                         # zero the parameter gradients
                         optimizer.zero_grad()
 
-                        #forward + backward + optimize
+                        # forward + backward + optimize
                         outputs = model(**batch)
                         loss = outputs.loss
 
@@ -247,13 +248,15 @@ class Training(PathSpec):
                 torch.save(model.state_dict(), path)
 
                 keeping_models[f1] = path
-                if len(keeping_models)> 3:
+                logging.info(f"models in computation: {keeping_models=} with {len(keeping_models)=}")
+                if len(keeping_models) > 3:
                     worst = min(keeping_models)
                     os.system(f"rm {keeping_models[worst]}")
+                    logging.info(f"eliminated: {worst=}")
 
         best_model_path = max(f1_to_new_model_paths.items(), key=lambda x: x[0])[1]
         yield best_model_path, df_paths_meta
 
 
-if __name__ ==  "__main__":
+if __name__ == "__main__":
     Training.prepare_and_train()

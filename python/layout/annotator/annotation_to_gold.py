@@ -96,8 +96,6 @@ class AnnotatorRate(PathSpec):
                 yield _p_m
 
 
-
-
 @converter(
     "annotation.collection.platinum",
     "annotation.collection.fix",
@@ -135,5 +133,5 @@ class AnnotatorSaveFinal(PathSpec):
 
             if not os.path.isdir(new_folder):
                 os.makedirs(new_folder)
-            path_gzip_json =new_folder + fname + "." + str(page_number) + ".json.gz"
+            path_gzip_json = new_folder + fname + "." + str(page_number) + ".json.gz"
             dump_json_gzip(meta, path_gzip_json)

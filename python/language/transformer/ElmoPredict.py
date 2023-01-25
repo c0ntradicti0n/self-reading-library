@@ -20,8 +20,6 @@ class ElmoPredict(PathSpec):
         super().__init__(*args, **kwargs)
         self.elmo_config = elmo_config
 
-
-
         self.CSS = {
             (span_letter + "-" + tag) if tag != "O" else tag: css
             for span_letter in ["L", "I", "B", "U"]
@@ -166,6 +164,7 @@ class ElmoPredict(PathSpec):
         from language.transformer.difference_predictor.difference_predictor import (
             DifferenceTaggerPredictor,
         )
+
         self.predictor = DifferenceTaggerPredictor(
             self.default_predictor._model,
             dataset_reader=self.default_predictor._dataset_reader,

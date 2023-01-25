@@ -78,7 +78,6 @@ const HtmlRenderer = (props: Props) => {
                      margin: '40px',
                   }}
                >
-
                   {context.meta[props.slot] ? (
                      <style
                         dangerouslySetInnerHTML={{
@@ -95,7 +94,15 @@ const HtmlRenderer = (props: Props) => {
                      <Captcha />
                   )}
                   {htmlContent ? (
-                     <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+                     <div
+                        id={'html_content'}
+                        style={{ marginTop: '0px !important' }}
+                     >
+                        {' '}
+                        <div
+                           dangerouslySetInnerHTML={{ __html: htmlContent }}
+                        />{' '}
+                     </div>
                   ) : (
                      <Spin />
                   )}

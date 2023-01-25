@@ -14,13 +14,15 @@ def split_punctuation(s, punctuations, matches=False):
     """
     if len(punctuations) == 0:
         if matches:
-            return list([ word  for word in re.split( r'(\s+)', s)])
+            return list([word for word in re.split(r"(\s+)", s)])
         return s.split()
     else:
         separator, *rest = punctuations
 
         things = []
-        for word in re.split(rf"(?<=[a-zA-Z][a-zA-Z])(?=\{separator})(?:/d)*", s, matches):
+        for word in re.split(
+            rf"(?<=[a-zA-Z][a-zA-Z])(?=\{separator})(?:/d)*", s, matches
+        ):
             things.append(split_punctuation(word, rest, matches=matches))
         return flatten(things)
 

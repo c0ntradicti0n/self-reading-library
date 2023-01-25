@@ -28,8 +28,6 @@ class trigger_on:
             {} if not hasattr(converter, "docker_kwargs") else converter.docker_kwargs
         )
 
-
-
         if not os.environ.get("INSIDE", False):
             self.converter = converter
             self.imports = inspect.getmembers(sys.modules[__name__], inspect.isclass)
@@ -74,6 +72,7 @@ class trigger_on:
         wait_for_change(self.converter.on, self.prepare_and_train)
 
     mutext_affix = ""
+
     def prepare_and_train(self):
         global BEST_MODELS
         if not os.path.isdir(self.converter.model_dir):
@@ -83,11 +82,9 @@ class trigger_on:
 
         loops = []
 
-        samples_files = os.listdir(
-            self.converter.on
-        )
+        samples_files = os.listdir(self.converter.on)
 
-        if self.converter.training_rate_mode== "ls":
+        if self.converter.training_rate_mode == "ls":
             n_samples = len(samples_files)
         elif self.converter.training_rate_mode == "size":
             n_samples = os.path.getsize(self.converter.training_rate_file)
@@ -117,18 +114,19 @@ class trigger_on:
         BEST_MODELS = json_file_update(config.BEST_MODELS_PATH, update=BEST_MODELS)
 
         logging.info(f"Having {training_rate = }")
-        
-        mutext_path = config.hidden_folder+self.mutext_affix
-        if training_rate > 1.1 or not full_model_path and not os.path.exists(mutext_path):
+
+        mutext_path = config.hidden_folder + self.mutext_affix
+        if (
+            training_rate > 1.1
+            or not full_model_path
+            and not os.path.exists(mutext_path)
+        ):
             os.system(f"touch {mutext_path}")
             try:
-                model_meta = self.converter.on_train(
-                    samples_files, len(samples_files)
-                )
+                model_meta = self.converter.on_train(samples_files, len(samples_files))
                 pprint(model_meta)
             finally:
                 os.system(f"rm {mutext_path}")
-
 
     def __call__(self, *args, **kwargs):
         return self.converter(*args, **kwargs)

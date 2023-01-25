@@ -1,6 +1,24 @@
-body{ margin: 0 }
-.ant-layout-content {
+body {
+   margin: 0;
+}
+/*.ant-layout-content {
    margin-top: 5000px !important;
+}*/
+
+.z {box-shadow: 0px 0px 10px 2px }
+
+z {
+   --z-contrast: #ffa839;
+   --z-subject: #33c9e5;
+   --z-o: grey;
+
+}
+
+#html_content {
+   margin-top: 20px;
+   margin-bottom: 20px;
+   top: 0px;
+   position: absolute;
 }
 .modal-size {
    position: absolute;
@@ -17,7 +35,6 @@ body{ margin: 0 }
 * {
    font-family: sans-serif;
 }
-
 
 .ant-tour-inner {
    margin-block: 0px;

@@ -21,18 +21,18 @@ def np_encoder(object):
 
 
 def dump_json_gzip(meta, path_gzip_json):
-    with gzip .open(
-            path_gzip_json,
-            "wt",
-            encoding="ascii",
+    with gzip.open(
+        path_gzip_json,
+        "wt",
+        encoding="ascii",
     ) as zipfile:
         json.dump(meta, zipfile, default=np_encoder)
 
 
 def load_json_gzip(path_gzip_json):
     with gzip.open(
-            path_gzip_json,
-            "rt",
-            encoding="ascii",
+        path_gzip_json,
+        "rt",
+        encoding="ascii",
     ) as zipfile:
         return json.load(zipfile)

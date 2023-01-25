@@ -68,6 +68,9 @@ docker-fill:
 logs:
 	docker-compose logs -f -t
 
+hosts:
+	sudo bash update_hosts.sh &
+
 
 sync_from_host:
 	rsync -av --progress  -r python/.layouteagle/ deploy@self-reading-library.science:/home/deploy/self-reading-library/python/.layouteagle/
@@ -75,3 +78,5 @@ sync_from_remote:
 	rsync -av --progress  -r deploy@self-reading-library.science:/home/deploy/self-reading-library/python/.layouteagle/ python/.layouteagle/
 
 fresh: down dbdown db build up
+
+prepare: mount hosts logs

@@ -1,6 +1,3 @@
-
-
-
 @TokenEmbedder.register("nym_embedder")
 class NymEmbedder(TokenEmbedder):
     """

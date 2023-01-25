@@ -4,9 +4,10 @@ from language.transformer.ElmoPredict import ElmoPredict
 from config import config
 
 
-#if __name__ == "__main__":
+# if __name__ == "__main__":
 #    import os
 #    os.environ["INSIDE"] = "True"
+
 
 @microservice
 @converter(
@@ -24,13 +25,16 @@ class ElmoDifferencePredict(ElmoPredict):
         pass
 
     CSS_SIMPLE = {
-        "O": "color: #123",
-        "SUBJECT": "background-color: #FFDC00 ",
-        "CONTRAST": "background-color: #F012BE ",
+        "O": "color: var(--z-o)",
+        "SUBJECT": "background-color: var(--z-subject) ",
+        "CONTRAST": "background-color: var(--z-contrast)",
     }
+
 
 if __name__ == "__main__":
 
     from wsgiref import simple_server
 
-    simple_server.make_server("0.0.0.0", 7777, ElmoDifferencePredict.converter.application).serve_forever()
+    simple_server.make_server(
+        "0.0.0.0", 7777, ElmoDifferencePredict.converter.application
+    ).serve_forever()
