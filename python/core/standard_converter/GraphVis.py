@@ -3,6 +3,7 @@ import math
 from functools import reduce
 from queue import Queue
 
+
 import matplotlib as matplotlib
 import dashvis
 from dash import html, dcc

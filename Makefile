@@ -80,3 +80,6 @@ sync_from_remote:
 fresh: down dbdown db build up
 
 prepare: mount hosts logs
+
+train-only:
+	USER=$$USER CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose -f docker-compose.train-only.yml up -d  --build

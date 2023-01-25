@@ -1,0 +1,28 @@
+version: "3"
+services:
+  train_only:
+    build:
+        context: python
+        dockerfile: train.Dockerfile
+    container_name: train_only
+
+    tty: true
+    user: $USER_IDS
+    ports:
+      - "${PORT}:${PORT}"
+      - "2222:22"
+    environment:
+      PORT: $PORT
+      DB_HOST: db
+      LC_ALL: en_US.UTF-8
+      LANG: en_US.UTF-8
+      LANGUAGE: en_US.UTF-8
+      GDB_USER: ich
+      GDB_PASSWORD: ${GDB_PASSWORD}
+      GDB_HOST: gdb
+
+    volumes:
+      - "$CWD/python:/home/finn/Programming/self-reading-library/python"
+    entrypoint: python3 layout/training/training.py
+
+

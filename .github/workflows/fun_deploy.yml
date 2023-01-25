@@ -19,7 +19,12 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     environment: production
-
+    if:
+      contains('
+        refs/heads/main
+        refs/heads/staging
+        refs/heads/production
+      ', github.ref)
     steps:
       - name: Configure SSH
         run: |

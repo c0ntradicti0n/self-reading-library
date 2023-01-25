@@ -4,8 +4,12 @@ import os
 from typing import List, Tuple
 
 import networkx as nx
-import pylab
-import matplotlib
+try:
+    import pylab
+    import matplotlib
+
+except Exception:
+    logging.error("pylab iport", exc_info=True)
 from more_itertools import pairwise
 
 from config import config
@@ -122,8 +126,10 @@ class PathAnt:
         return Pipeline(pipeline, source, target, extra_paths, via=via, **kwargs)
 
     def info(self, path="pathant.png", pipelines_to_highlight=None):
-        import pylab as plt
-
+        try:
+            import pylab as plt
+        except Exception:
+            logging.error("pylab iport", exc_info=True)
         pylab.rcParams["figure.figsize"] = 35, 23
 
         dG = self.G.copy()

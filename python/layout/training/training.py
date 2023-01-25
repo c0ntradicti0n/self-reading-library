@@ -1,3 +1,6 @@
+import sys,os
+sys.path.append(os.getcwd())
+
 import logging
 import os
 
@@ -259,4 +262,7 @@ class Training(PathSpec):
 
 
 if __name__ == "__main__":
+    import sys, os
+
+    sys.path.append(os.getcwd())
     Training.prepare_and_train()

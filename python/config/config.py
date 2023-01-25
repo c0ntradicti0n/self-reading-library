@@ -174,10 +174,14 @@ audio_format = ".ogg"
 audio_path = hidden_folder + "audio/"
 create_frontend = os.environ.get("CREATE_FRONTEND", default=False)
 BEST_MODELS_PATH = hidden_folder + "/best_models.json"
-BEST_MODELS = json_file_update(BEST_MODELS_PATH)
-layout_model_path = BEST_MODELS["layout"][
-    "best_model_path"
-]  # hidden_folder + "/text_box_models//_782_0,8268912618438863_14"
+
+try:
+    BEST_MODELS = json_file_update(BEST_MODELS_PATH)
+    layout_model_path = BEST_MODELS["layout"][
+        "best_model_path"
+    ]  # hidden_folder + "/text_box_models//_782_0,8268912618438863_14"
+except Exception:
+    logging.info("Best models not available")
 
 load_dotenv("../.env")
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
