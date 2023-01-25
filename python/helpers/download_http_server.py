@@ -1,3 +1,6 @@
+import sys,os
+sys.path.append(os.getcwd())
+
 import os
 from pathlib import Path
 from urllib.parse import urlparse, urljoin
