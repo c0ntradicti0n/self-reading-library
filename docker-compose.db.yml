@@ -1,0 +1,22 @@
+version: "3"
+services:
+
+  db:
+    image: nawer/blazegraph
+    restart: unless-stopped
+    environment:
+      JAVA_XMS: 512m
+      JAVA_XMX: 1g
+    networks:
+      - db
+    volumes:
+      - .layouteagle/blazegraph:/var/lib/blazegraph
+    ports:
+      - "12345:9999"
+
+networks:
+  db:
+    external: True
+
+
+

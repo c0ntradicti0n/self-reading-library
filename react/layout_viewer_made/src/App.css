@@ -1,0 +1,288 @@
+body {
+   margin: 0;
+}
+/*.ant-layout-content {
+   margin-top: 5000px !important;
+}*/
+
+/*.z {box-shadow: 0px 0px 10px 2px } */
+
+z {
+   --z-contrast: #ffa839;
+   --z-subject: #33c9e5;
+   --z-o: grey;
+}
+
+#html_content {
+   margin-top: 20px;
+   margin-bottom: 20px;
+   top: 0px;
+   position: absolute;
+}
+.modal-size {
+   position: absolute;
+   width: 80%;
+   height: 80%;
+
+   top: 50%;
+   left: 50%;
+   right: auto;
+   bottom: auto;
+
+   transform: translate(-50%, -50%);
+}
+* {
+   font-family: sans-serif;
+}
+
+.ant-tour-inner {
+   margin-block: 0px;
+   border: black 5px solid !important;
+}
+.ant-tour-mask {
+   z-index: 1050 !important;
+}
+#tour {
+   border-top-left-radius: 500px;
+   padding-left: 3%;
+   padding-top: 3%;
+   padding-bottom: 3%;
+   padding-right: 2%;
+   font-size: 1rem;
+   position: fixed !important;
+   background-color: #000 !important;
+
+   width: 100px;
+   bottom: 0px;
+   right: 0px;
+   z-index: 10000000000;
+}
+.buttonGood {
+   background-color: greenyellow;
+}
+.buttonBad {
+   background-color: tomato;
+}
+
+#page-container {
+   width: 75%;
+   overflow: visible !important;
+   left: 50px !important;
+   z-index: 0;
+}
+.ant-btn-link {
+   color: #1677ff;
+}
+
+.ant-menu-item-selected .ant-btn-link {
+   color: #ffffff !important;
+}
+.ant-layout-sider {
+   position: fixed !important;
+   z-index: 1000;
+   height: 100vh;
+}
+
+#annotation_canvas {
+   width: 50vw !important;
+   height: 100vh !important;
+}
+
+@font-face {
+   font-family: 'keys';
+   src: local('keys'), url(../public/fonts/212_Keyboard.otf) format('opentype');
+}
+
+div.c.x1 {
+}
+
+div.t {
+   z-index: 300 !important;
+}
+
+@keyframes color-change {
+   0% {
+      color: red;
+   }
+   33% {
+      color: blue;
+   }
+   66% {
+      color: yellow;
+   }
+   100% {
+      color: red;
+   }
+}
+
+@keyframes background-color-change {
+   0% {
+      background-color: white;
+   }
+   50% {
+      background-color: black;
+   }
+   100% {
+      background-color: white;
+   }
+}
+
+span.tag {
+   padding-left: 10px;
+   padding-right: 10px;
+   border-radius: 0px;
+   padding: 5px;
+}
+
+span.span_CONTRAST {
+   background-color: rgba(210, 57, 233, 0.75);
+   box-shadow: 0 0 0 0px rgba(210, 57, 233, 0.75);
+}
+
+span.span_SUBJECT {
+   background-color: #fbe54e;
+   box-shadow: 0 0 0 0px rgba(251, 237, 78, 0.92);
+}
+
+.App {
+   text-align: center;
+}
+
+.App-logo {
+   height: 40vmin;
+   pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+   .App-logo {
+      animation: App-logo-spin infinite 20s linear;
+   }
+}
+
+.App-header {
+   background-color: #282c34;
+   min-height: 100vh;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   font-size: calc(10px + 2vmin);
+   color: white;
+}
+
+.App-link {
+   color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+   from {
+      transform: rotate(0deg);
+   }
+   to {
+      transform: rotate(360deg);
+   }
+}
+
+.container {
+   display: flex;
+}
+
+.view {
+   width: 30%;
+}
+
+.use {
+   flex-grow: 1;
+   width: 50%;
+}
+
+.node-label {
+   font-size: 12px;
+   padding: 1px 4px;
+   border-radius: 4px;
+   background-color: rgba(0, 0, 0, 0.5);
+   user-select: none;
+}
+
+.MuiDialog-container {
+   height: 90vh !important;
+}
+
+canvas {
+   width: 640px;
+   height: 480px;
+}
+
+react-reactangle-selection {
+   z-index: 100000000;
+}
+
+.my-modal-dialog {
+   width: 100%;
+   height: 100%;
+   margin: 0;
+   padding: 0;
+}
+
+.button {
+   display: none;
+}
+
+.img:hover + .button,
+.button:hover {
+   display: inline-block;
+}
+
+.ant-modal,
+.ant-modal-content {
+   height: 100vh;
+   width: 100vw;
+   margin: 0;
+   top: 0;
+}
+
+.ant-modal-body {
+   height: calc(100vh - 110px);
+}
+
+line {
+   stroke: black;
+   fill: blue;
+   stroke-width: 5.46px;
+   stroke-linecap: round;
+}
+
+#sidebar {
+   display: none;
+}
+
+.pf {
+   box-shadow: none !important;
+}
+
+.w0 {
+   width: 900px;
+}
+
+::selection {
+   background: rgba(0, 0, 0, 1) !important;
+   color: #fff;
+}
+
+.node-label {
+   font-size: 12px;
+   padding: 1px 4px;
+   border-radius: 4px;
+   color: #0f0f5f;
+   background-color: rgba(0, 0, 0, 0.5);
+   user-select: none;
+}
+.ant-menu-item {
+   height: unset !important;
+}
+
+@media screen and (max-width: 992px) {
+   .column {
+      flex: 100% !important; /* !important so that it overrides the inline style because by default it has higher priority */
+   }
+}

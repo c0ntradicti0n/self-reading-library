@@ -1,0 +1,8 @@
+# Ignore everything:
+/*
+
+# Except:
+!src
+!test
+!helpers
+!pages

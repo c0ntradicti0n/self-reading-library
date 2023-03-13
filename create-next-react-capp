@@ -1,0 +1,19 @@
+
+npm cache clean --force
+
+rm -r node_modules
+mkdir $1
+cd $1
+npm init -y
+npm install next react react-dom
+npm install --save typescript @types/node @types/react @types/react-dom @types/jest
+npm install @zeit/next-typescript @types/next @types/react @zeit/next-typescript @types/next @types/react
+echo "{
+  \"presets\": [\"next/babel\", \"@zeit/next-typescript/babel\"]
+}" > .babelrc
+echo "// next.config.js
+const withTypescript = require('@zeit/next-typescript')
+module.exports = withTypescript()" > next.config.js
+perl -0777 -ipackage.json -pe 's+"test": "echo \\"Error: no test specified\\" && exit 1"+"dev": "next","build": "next build","start": "next start"+g' package.json
+mkdir pages
+npm run dev

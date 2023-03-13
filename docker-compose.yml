@@ -1,0 +1,121 @@
+version: "3"
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    depends_on:
+      - be
+      - fe
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/sites-enabled/:/etc/nginx/sites-enabled/
+      - ./react/layout_viewer_made/.next/:/next/.next/
+      - "$CWD/python/.layouteagle/pdfs/:/pdfs"
+      - "$CWD/python/.layouteagle/audio/:/audio"
+    networks:
+      - world
+
+  be:
+    image: full_python
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+
+    build: python
+    container_name: be
+
+    tty: true
+    user: $USER_IDS
+    ports:
+      - "${PORT}:${PORT}"
+      - "2222:22"
+    environment:
+      PORT: $PORT
+      DB: ${DB}
+      LC_ALL: en_US.UTF-8
+      LANG: en_US.UTF-8
+      LANGUAGE: en_US.UTF-8
+    networks:
+      - db
+      - world
+
+    volumes:
+      - "$CWD/python:/home/finn/Programming/self-reading-library/python"
+    entrypoint: uwsgi  --py-autoreload=1 --http 0.0.0.0:$PORT --module wsgi:application   --workers 1 --threads 16   --enable-threads --skip-atexit-teardown --max-worker-lifetime=200000--max-worker-lifetime-delta=200000 --harakiri=200000 -b 32768
+
+  fill:
+    build: python
+    container_name: fill
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    tty: true
+    networks:
+      - db
+    environment:
+      DB: ${DB}
+      DB_HOST: db
+      GDB_PASSWORD: ${GDB_PASSWORD}
+      GDB_HOST: gdb
+
+    volumes:
+      - "$CWD/python:/home/finn/Programming/self-reading-library/python"
+    entrypoint: python3 fill.py
+
+
+
+
+  fe:
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    build:
+      context: react
+      dockerfile: Dockerfile.${ENV}
+
+      args:
+        NEXT_PUBLIC_FRONTEND_HOST: ${FRONTEND_HOST}
+        NEXT_PUBLIC_BACKEND_HOST: "/api"
+        NEXT_PUBLIC_DASH_HOST: "/dash"
+    container_name: fe
+    ports:
+      - "3210:3000"
+    tty: true
+    volumes:
+
+      - "$CWD/react/layout_viewer_made/config:/app/config"
+      - "$CWD/react/layout_viewer_made/public:/app/public"
+      - "$CWD/react/layout_viewer_made/pages:/app/pages"
+      - "$CWD/react/layout_viewer_made/spec:/app/spec"
+      - "$CWD/react/layout_viewer_made/src:/app/src"
+
+    environment:
+      PORT: 3000
+      NEXT_PUBLIC_FRONTEND_HOST: ${FRONTEND_HOST}
+      NEXT_PUBLIC_BACKEND_HOST: "/api"
+      NEXT_PUBLIC_DASH_HOST: "/dash"
+    networks:
+      - world
+
+
+
+networks:
+  db:
+    external: True
+  world:
+

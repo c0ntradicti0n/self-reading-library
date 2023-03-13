@@ -1,0 +1,71 @@
+
+name: Deploy to VM staging
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/staging.key
+          chmod 600 ~/.ssh/staging.key
+          cat >>~/.ssh/config <<END
+          Host staging
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/staging.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+
+
+      - name: Deploy
+        env:
+          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+        run: |
+          ssh staging "
+
+              cd self-reading-library
+              git fetch --all
+              git reset --hard origin/main
+
+          "
+
+      - name: Build
+        run: |
+          ssh staging '   
+              cd self-reading-library
+              make build
+          '
+      - name: Start
+        run: |
+          ssh staging '   
+              cd self-reading-library
+              docker stop nginx
+              make down up
+              make overdown over overupd
+          '
+      - name: RestTest
+        run: |
+          echo $(curl http://$SSH_HOST:80) 
+          echo $(curl -k https://$SSH_HOST:9999)

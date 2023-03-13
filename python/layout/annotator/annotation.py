@@ -1,0 +1,58 @@
+from core.pathant.Converter import converter
+from core.rest.RestPublisher import RestPublisher
+from core.rest.RestPublisher import Resource
+from core.rest.react import react
+from core.event_binding import queue_iter, RestQueue, queue_put
+from layout.model_helpers import changed_labels
+import logging
+
+
+AnnotationQueueRest = RestQueue(service_id="annotation", update_data=changed_labels)
+
+
+@converter("reading_order", ["annotation", "upload_annotation"])
+class Annotator(RestPublisher, react):
+    def __init__(self, *args, **kwargs):
+        super().__init__(
+            *args,
+            **kwargs,
+            resource=Resource(
+                title="Annotation",
+                type="annotation",
+                path="annotation",
+                route="annotation",
+                access={
+                    "add_id": True,
+                    "fetch": True,
+                    "read": True,
+                    "upload": True,
+                    "correct": True,
+                    "delete": True,
+                },
+            )
+        )
+
+    def __call__(self, prediction_metas, *args, **kwargs):
+        for prediction_meta, meta in prediction_metas:
+
+            if "from_function_only" in self.flags and self.flags["from_function_only"]:
+                queue_put(
+                    service_id=self.flags["service_id"],
+                    gen=(p_m for p_m in meta["layout_predictions"]),
+                )
+
+                yield from meta["layout_predictions"]
+            else:
+
+                try:
+                    for _p_m in queue_iter(
+                        service_id=self.flags["service_id"],
+                        gen=(p_m for p_m in meta["layout_predictions"]),
+                        single=self.flags["from_function_only"]
+                        if "from_function_only" in self.flags
+                        else False,
+                    ):
+                        yield _p_m
+                except Exception:
+                    logging.error("Error on annotating next document", exc_info=True)
+                    continue
