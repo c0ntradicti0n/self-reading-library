@@ -336,10 +336,10 @@ class Queue:
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             g_str = self.g.serialize()
-            with open(f"{self.conn.service_id}.ttl", "w") as f:
+            with open(f"{config.hidden_folder}/{self.conn.service_id}.ttl", "w") as f:
                 f.write(g_str)
             os.system(
-                f"""curl -D- -H 'Content-Type: text/turtle' --upload-file {self.conn.service_id}.ttl -X POST '{self.conn.db}/namespace/{self.conn.service_id}/sparql?context-uri={self.conn.Graph}'"""
+                f"""curl -D- -H 'Content-Type: text/turtle' --upload-file {config.hidden_folder}/{self.conn.service_id}.ttl -X POST '{self.conn.db}/namespace/{self.conn.service_id}/sparql?context-uri={self.conn.Graph}'"""
             )
 
     @property

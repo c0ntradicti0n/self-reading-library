@@ -64,6 +64,20 @@ def run_extra_threads():
     threading.Thread(target=update_topics_thread, name="topics").start()
 
 
+
+    def update_all_documents():
+        path = config.tex_data
+
+        def update():
+            result = list(
+                zip(*list(ant("arxiv.org", "recompute", from_cache_only=True)([])))
+            )
+            assert result
+
+        wait_for_change(path, update)
+
+    threading.Thread(target=update_all_documents, name="topics").start()
+
 if __name__ == "__main__":
     run_extra_threads()
 
