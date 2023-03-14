@@ -87,7 +87,11 @@ class Span:
         return " ".join(self.words)
 
     def stems(self):
-        return [lemma.lemmatize(w).lower() for w in self.words]
+        try:
+            return [lemma.lemmatize(w).lower() for w in self.words]
+        except LookupError:
+            self.post_install()
+            return [lemma.lemmatize(w).lower() for w in self.words]
 
     def same_root(self, other):
         return any(l in self.derived for l in other.lemmas)
