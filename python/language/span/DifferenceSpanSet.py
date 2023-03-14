@@ -90,7 +90,7 @@ class Span:
         try:
             return [lemma.lemmatize(w).lower() for w in self.words]
         except LookupError:
-            self.post_install()
+            self.__post_install()
             return [lemma.lemmatize(w).lower() for w in self.words]
 
     def same_root(self, other):
