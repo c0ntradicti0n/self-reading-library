@@ -39,21 +39,27 @@ services:
     user: $USER_IDS
     ports:
       - "${PORT}:${PORT}"
+      - "9876:9999"
       - "2222:22"
+    expose:
+      - "2345"
     environment:
       PORT: $PORT
-      DB: ${DB}
+      DB: ${DOCKER_DB}
       LC_ALL: en_US.UTF-8
       LANG: en_US.UTF-8
       LANGUAGE: en_US.UTF-8
+
+      DEBUG: "true"
     networks:
       - db
       - world
+    extra_hosts:
+        - "host.docker.internal:host-gateway"
 
     volumes:
       - "$CWD/python:/home/finn/Programming/self-reading-library/python"
-    entrypoint: uwsgi  --py-autoreload=1 --http 0.0.0.0:$PORT --module wsgi:application   --workers 1 --threads 16   --enable-threads --skip-atexit-teardown --max-worker-lifetime=200000--max-worker-lifetime-delta=200000 --harakiri=200000 -b 32768
-
+    entrypoint:  bash entrypoint.sh
   fill:
     build: python
     container_name: fill

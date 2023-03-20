@@ -37,7 +37,7 @@ scrape_test:
 	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker run -v "$(shell pwd)/python:/home/finn/Programming/self-reading-library/python" full_python python3 core/standard_converter/Scraper.py
 
 be:
-	USER=$$USER CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose up --build be
+	USER=$$USER CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose up   --build be
 
 up:
 	USER=$$USER CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose up -d  --build

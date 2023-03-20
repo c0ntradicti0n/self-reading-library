@@ -12,7 +12,8 @@ import Resource from '../resources/Resource'
 import { CAPTCHA, NORMAL, Slot } from '../contexts/SLOTS'
 import AnnotationSpan from './AnnotationSpan'
 import { Knowledge } from './Knowledge'
-import boolean from 'async-validator/dist-types/validator/boolean'
+import { Knowledge2 } from './Knowledge2'
+
 import Captcha from './Captcha'
 import CirclePack from './2DCirclePack'
 
@@ -75,6 +76,9 @@ const MacroComponentSwitch = forwardRef(
 
       if (component === 'knowledge') {
          return <Knowledge service={service} slot={slot} />
+      }
+            if (component === 'knowledge2') {
+         return <Knowledge2 service={service} slot={slot} />
       }
 
       if (component === 'text') {

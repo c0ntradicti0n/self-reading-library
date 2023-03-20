@@ -84,6 +84,7 @@ RUN  echo 'test:test' | chpasswd
 
 RUN service ssh start
 
+EXPOSE 22
 
 # COPY . python
 
@@ -101,11 +102,7 @@ RUN apt install -y jq
 COPY config/default.latex  /usr/share/pandoc/data/templates/default.latex
 WORKDIR /home/finn/Programming/self-reading-library/python
 
-EXPOSE 22
 
-ARG USER=go
-ARG PASS=go
 
-RUN adduser $USER && echo "$USER:$PASS" | chpasswd
 
-RUN chmod -R 777  /etc/ssh/
+CMD ["/usr/sbin/sshd","-D"]
