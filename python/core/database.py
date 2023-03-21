@@ -44,7 +44,10 @@ def login(db_name):
 
                     return server.queryAndConvert()
                 except URLError:
-                    logging.error(f"Error accessing db {db_name} ({server.conn_str})", exc_info=True)
+                    logging.error(
+                        f"Error accessing db {db_name} ({server.conn_str})",
+                        exc_info=True,
+                    )
 
             server.executeUpdate = do
 

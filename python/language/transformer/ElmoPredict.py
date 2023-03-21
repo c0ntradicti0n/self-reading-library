@@ -1,3 +1,5 @@
+import os
+
 from texttable import Texttable
 
 from config import config
@@ -155,7 +157,10 @@ class ElmoPredict(PathSpec):
         self.logger.info("Loading difference model")
         self.model = Model.load(
             config=Params.from_file(params_file=self.elmo_config),
-            serialization_dir=find_best_model(config.ELMO_DIFFERENCE_MODEL_PATH)[0]
+            serialization_dir=find_best_model(
+                config.ELMO_DIFFERENCE_MODEL_PATH,
+                lambda path: os.path.exists(path + "/vocabulary"),
+            )[0],
         )
         self.logger.info("Loading predictor")
         self.default_predictor = Predictor.from_path(

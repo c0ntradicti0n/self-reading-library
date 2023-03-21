@@ -7,8 +7,10 @@ model_regex = r"(?P<shape>\d+)_(?P<f1>0,?\d*)_(?P<epoch>\d+)"
 import logging
 
 
-def find_best_model(model_dir):
+def find_best_model(model_dir, condition=None):
     models = os.listdir(model_dir)
+    if condition:
+        models = [m for m in models if condition(model_dir + "/" + m)]
     try:
         best_model_path, scores = max(
             [
@@ -29,6 +31,11 @@ def find_best_model(model_dir):
 if __name__ == "__main__":
     from config import config
 
-    print(find_best_model(config.ELMO_DIFFERENCE_MODEL_PATH))
+    print(
+        find_best_model(
+            config.ELMO_DIFFERENCE_MODEL_PATH,
+            lambda path: os.path.exists(path + "/vocabulary"),
+        )
+    )
 
     print(find_best_model(config.TEXT_BOX_MODEL_PATH))
