@@ -4,6 +4,8 @@ import SceletonGraph from './2DSceleton'
 import { DocumentContext } from '../contexts/DocumentContext.tsx'
 import { Input } from 'antd'
 import { ThreeDots } from 'react-loader-spinner'
+import CytoscapeComponent from 'react-cytoscapejs'
+import CytoscapeGraph from './CytoScrapeGraph'
 
 const STD_SEARCH = 'premise'
 
@@ -81,7 +83,7 @@ export const Knowledge2 = ({ service, slot }) => {
                      `}
             aria-modal={false}
          >
-            <SceletonGraph
+            <CytoscapeGraph
                graphData={context.meta[slot]}
                onExpand={async (node) => {
                   return (await service.change(node.label))[1]

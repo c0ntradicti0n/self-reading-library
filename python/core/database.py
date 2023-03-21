@@ -23,10 +23,10 @@ def login(db_name):
     while True:
         try:
             conn_str = f"http://{os.environ.get('DB', 'localhost:12345')}/blazegraph/namespace/difference/sparql"
-            logging.info(conn_str   )
-            server = SPARQLWrapper(conn_str )
+            logging.info(conn_str)
+            server = SPARQLWrapper(conn_str)
             server.setMethod(POST)
-            server.conn_str= conn_str
+            server.conn_str = conn_str
 
             server.setReturnFormat(JSON)
 

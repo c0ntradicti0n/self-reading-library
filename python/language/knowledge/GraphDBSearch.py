@@ -35,18 +35,22 @@ class GraphDBSearch(PathSpec, Queue):
             prefix : <http://polarity.science/>
   
 
-            select distinct(count(?mid) as ?distance) ?super ?s1 ?s2 ?text1 ?text2 ?p
+            select distinct(count(?mid) as ?distance) ?d ?super ?s1 ?s2 ?text1 ?text2 ?p
              where  {{ {self.graph}  {{
                 ?s bds:search "{search_string}"  .
               ?super :difference* ?mid .
               {{ ?mid :difference ?s1 }} Union {{ ?mid :equal ?s1 }} Union {{ ?mid :SUBJECT ?s1 }} Union {{ ?mid :explains ?s1 }}  Union {{ ?mid :CONTRAST ?s1 }}.
               ?super ?q ?s .
-              values ?p {{ :SUBJECT :CONTRAST :explains :equal :forward_difference }}
-                      ?s1 ?p ?s2 .
-                      ?s1 :text ?text1 .
-                      ?s2 :text ?text2 .
+              values ?p {{ :SUBJECT :CONTRAST :explains :equal :forward_difference }}.
+              values ?x {{ :difference }}.
+
+               ?s1 ?p ?s2 .
+               ?d ?x  ?s1.
+               ?d ?x  ?s2.
+               ?s1 :text ?text1 .
+               ?s2 :text ?text2 .
             }} }}
-            group by ?distance ?super ?s1 ?s2 ?text1 ?text2 ?p
+            group by ?d ?distance ?super ?s1 ?s2 ?text1 ?text2 ?p
         """
         )
         result = [{k: v["value"] for k, v in val.items()} for val in query]

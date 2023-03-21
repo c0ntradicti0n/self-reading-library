@@ -77,7 +77,7 @@ const MacroComponentSwitch = forwardRef(
       if (component === 'knowledge') {
          return <Knowledge service={service} slot={slot} />
       }
-            if (component === 'knowledge2') {
+      if (component === 'knowledge2') {
          return <Knowledge2 service={service} slot={slot} />
       }
 

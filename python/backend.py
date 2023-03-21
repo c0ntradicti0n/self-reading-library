@@ -6,8 +6,6 @@ from language.knowledge.KnowledgePublisher import KnowledgePublisher
 from layout.annotator.annotation_to_gold import AnnotatedToGoldQueueRest
 
 
-
-
 class ExampleMiddleware:
     def process_request(self, req, resp):
         """Process the request before routing it.
@@ -23,11 +21,15 @@ class ExampleMiddleware:
             resp: Response object that will be routed to
                 the on_* responder.
         """
-        logging.warning("OPENING DEBUGGING PORT 2345")
-        import pydevd_pycharm
+        try:
+            logging.warning("OPENING DEBUGGING PORT 2345")
+            import pydevd_pycharm
 
-        pydevd_pycharm.settrace('host.docker.internal', port=2345, stdoutToServer=True,
-                                stderrToServer=True)
+            pydevd_pycharm.settrace(
+                "host.docker.internal", port=2345, stdoutToServer=True, stderrToServer=True
+            )
+        except:
+            logging.warning("could not connect to debugger")
 
     def process_resource(self, req, resp, resource, params):
         """Process the request after routing.
@@ -120,7 +122,12 @@ def create_app():
     from falcon_compression.middleware import CompressionMiddleware
 
     api = falcon.App(
-        middleware=[cors.middleware, MultipartMiddleware(), CompressionMiddleware(), ExampleMiddleware()]
+        middleware=[
+            cors.middleware,
+            MultipartMiddleware(),
+            CompressionMiddleware(),
+            ExampleMiddleware(),
+        ]
     )
 
     for route, module in publishing.items():

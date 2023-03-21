@@ -52,22 +52,22 @@ export default function SceletonGraph({
    function preprocessData(data) {
       data.links = data.edges
       const unknow_nodes_s = data.edges
-          .filter((e) => !data.nodes.find((n) => n.id == e.source))
-          .map((e) => [{id: e.source, label: e.label}])
-          .flat()
+         .filter((e) => !data.nodes.find((n) => n.id == e.source))
+         .map((e) => [{ id: e.source, label: e.label }])
+         .flat()
       const unknow_nodes_t = data.edges
-          .filter((e) => !data.nodes.find((n) => n.id == e.target))
-          .map((e) => [{id: e.target, label: e.label}])
-          .flat()
+         .filter((e) => !data.nodes.find((n) => n.id == e.target))
+         .map((e) => [{ id: e.target, label: e.label }])
+         .flat()
 
       data.nodes = [...data.nodes, ...unknow_nodes_s, ...unknow_nodes_t]
       data.nodes = data.nodes
-          .map((n) => ({...n, x: 0, y: 0, value: 100}))
-          .reverse()
+         .map((n) => ({ ...n, x: 0, y: 0, value: 100 }))
+         .reverse()
    }
 
    useEffect(() => {
-      preprocessData(data);
+      preprocessData(data)
       setTrick(!trick)
    }, [data])
 
@@ -104,7 +104,7 @@ export default function SceletonGraph({
                      console.log(node)
                      console.log(data)
                      const more = await onExpand(node)
-                           preprocessData(more);
+                     preprocessData(more)
 
                      console.log('more', more)
                      /*if (

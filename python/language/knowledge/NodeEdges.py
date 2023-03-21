@@ -39,12 +39,14 @@ class NodeEdges(PathSpec):
                 {
                     "id": binding_set.get("s1"),
                     "label": binding_set.get("text1"),
+                    "parent": binding_set.get("s1"),
                 }
             )
             nodes.append(
                 {
                     "id": binding_set.get("s2"),
                     "label": binding_set.get("text2"),
+                    "parent": binding_set.get("s1"),
                 }
             )
             edges.append(
