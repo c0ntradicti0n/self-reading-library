@@ -39,7 +39,7 @@ def preprocess_text(texts):
     text = text.replace("-\n", "")
     text = latex_replace(text)
     text = unicodedata.normalize("NFKD", text)
-    real_tokens = split_punctuation(text, ".,:!?;")
+    real_tokens = split_punctuation(text)
     return real_tokens
 
 
@@ -109,7 +109,7 @@ class Pager(PathSpec):
             if isinstance(content, NavigableString):
                 if not isinstance(content, Comment):
                     added_temp = added
-                    for word in split_punctuation(content, ".!?;,-:", matches=True):
+                    for word in split_punctuation(content, matches=True):
 
                         if word.strip():
                             collector.append(
