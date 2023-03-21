@@ -15,11 +15,11 @@ services:
       - "12345:9999"
 
   inotify:
-    image: kali
+    image: debian
     restart: unless-stopped
-    entrypoint:  bash inotify.sh
+    entrypoint:  bash inotify.sh  /home/finn/Programming/self-reading-library/python
     volumes:
-      - ./inotify.sh:inotify.sh
+      - "$CWD/inotify.sh:/inotify.sh"
       - "$CWD/python:/home/finn/Programming/self-reading-library/python"
 
 networks:
