@@ -154,18 +154,18 @@ class ElmoPredict(PathSpec):
         from allennlp.models.model import Model
         from allennlp_models.tagging.models import crf_tagger
 
+        best_model = find_best_model(
+            config.ELMO_DIFFERENCE_MODEL_PATH,
+            lambda path: os.path.exists(path + "/vocabulary"),
+        )[0]
+
         self.logger.info("Loading difference model")
         self.model = Model.load(
             config=Params.from_file(params_file=self.elmo_config),
-            serialization_dir=find_best_model(
-                config.ELMO_DIFFERENCE_MODEL_PATH,
-                lambda path: os.path.exists(path + "/vocabulary"),
-            )[0],
+            serialization_dir=best_model,
         )
         self.logger.info("Loading predictor")
-        self.default_predictor = Predictor.from_path(
-            BEST_MODELS["difference"]["best_model_path"]
-        )
+        self.default_predictor = Predictor.from_path(best_model)
         self.logger.info("Loading tagger_model")
         from language.transformer.difference_predictor.difference_predictor import (
             DifferenceTaggerPredictor,
