@@ -118,6 +118,13 @@ services:
     networks:
       - world
 
+  inotify:
+    image: debian
+    restart: unless-stopped
+    entrypoint:  bash inotify.sh  /home/finn/Programming/self-reading-library/python
+    volumes:
+      - "$CWD/inotify.sh:/inotify.sh"
+      - "$CWD/python:/home/finn/Programming/self-reading-library/python"
 
 
 networks:
