@@ -2,6 +2,7 @@ from texttable import Texttable
 
 from config import config
 from core.pathant.PathSpec import PathSpec
+from helpers.best_model_tools import find_best_model
 
 from helpers.conll_tools import annotation2conll_file
 from helpers.hash_tools import hashval
@@ -154,7 +155,7 @@ class ElmoPredict(PathSpec):
         self.logger.info("Loading difference model")
         self.model = Model.load(
             config=Params.from_file(params_file=self.elmo_config),
-            serialization_dir=BEST_MODELS["difference"]["best_model_path"],
+            serialization_dir=find_best_model(config.ELMO_DIFFERENCE_MODEL_PATH)
         )
         self.logger.info("Loading predictor")
         self.default_predictor = Predictor.from_path(
