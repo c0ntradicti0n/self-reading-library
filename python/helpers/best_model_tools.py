@@ -24,3 +24,11 @@ def find_best_model(model_dir):
 
     logging.info(f"{scores=} {best_model_path =}")
     return best_model_path, scores
+
+
+if __name__ == "__main__":
+    from config import config
+
+    print(find_best_model(config.ELMO_DIFFERENCE_MODEL_PATH))
+
+    print(find_best_model(config.TEXT_BOX_MODEL_PATH))
