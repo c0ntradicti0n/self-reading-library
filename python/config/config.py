@@ -7,7 +7,7 @@ from traceback_with_variables import Format, ColorSchemes, is_ipython_global
 import numpy
 
 from helpers.json_tools import json_file_update
-from helpers.model_tools import find_best_model
+from helpers.best_model_tools import find_best_model
 
 sys.path.append("../core")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))

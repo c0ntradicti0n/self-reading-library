@@ -19,7 +19,7 @@ services:
     restart: unless-stopped
     entrypoint:  bash inotify.sh
     volumes:
-      - inotify.sh:inotify.sh /home/finn/Programming/self-reading-library/python
+      - ./inotify.sh:inotify.sh
       - "$CWD/python:/home/finn/Programming/self-reading-library/python"
 
 networks:

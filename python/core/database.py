@@ -4,6 +4,8 @@ import os
 import uuid
 import time
 from threading import Thread
+from urllib.error import URLError
+
 import pandas
 import rdflib
 from addict import Dict
@@ -23,7 +25,6 @@ def login(db_name):
     while True:
         try:
             conn_str = f"http://{os.environ.get('DB', 'localhost:12345')}/blazegraph/namespace/difference/sparql"
-            logging.info(conn_str)
             server = SPARQLWrapper(conn_str)
             server.setMethod(POST)
             server.conn_str = conn_str
@@ -40,8 +41,11 @@ def login(db_name):
                 server.setQuery(q)
 
                 logging.warning(server.conn_str)
+                try:
 
-                return server.queryAndConvert()
+                    return server.queryAndConvert()
+                except URLError:
+                    logging.error(f"Error accessing db {db_name} ({server.conn_str})", exc_info=True)
 
             server.executeUpdate = do
 

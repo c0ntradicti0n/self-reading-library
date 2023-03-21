@@ -66,7 +66,7 @@ docker-fill:
 	docker-compose build fill && docker-compose up fill -d && docker logs -f fill
 
 logs:
-	docker-compose logs -f -t
+	docker-compose logs -f -t --tail 10
 
 hosts:
 	sudo bash update_hosts.sh &
