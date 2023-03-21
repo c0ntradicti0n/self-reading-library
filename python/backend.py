@@ -1,6 +1,7 @@
 import falcon
 from wsgiref import simple_server
 from config.ant_imports import *
+from debugger_tools import connect_debugger
 from helpers.os_tools import make_fresh_dir
 from language.knowledge.KnowledgePublisher import KnowledgePublisher
 from layout.annotator.annotation_to_gold import AnnotatedToGoldQueueRest
@@ -21,15 +22,7 @@ class ExampleMiddleware:
             resp: Response object that will be routed to
                 the on_* responder.
         """
-        try:
-            logging.warning("OPENING DEBUGGING PORT 2345")
-            import pydevd_pycharm
-
-            pydevd_pycharm.settrace(
-                "host.docker.internal", port=2345, stdoutToServer=True, stderrToServer=True
-            )
-        except:
-            logging.warning("could not connect to debugger")
+        connect_debugger(2345)
 
     def process_resource(self, req, resp, resource, params):
         """Process the request after routing.

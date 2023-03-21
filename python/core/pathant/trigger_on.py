@@ -7,13 +7,11 @@ import sys
 from pprint import pprint
 
 import addict as addict
-import falcon
-import requests
 import ruamel.yaml
 
 from config import config
 from helpers.json_tools import json_file_update
-from helpers.model_tools import BEST_MODELS, TRAINING_RATE, find_best_model
+from helpers.best_model_tools import find_best_model
 from helpers.time_tools import wait_for_change
 
 

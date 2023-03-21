@@ -59,7 +59,7 @@ services:
 
     volumes:
       - "$CWD/python:/home/finn/Programming/self-reading-library/python"
-    entrypoint:  bash entrypoint.sh
+    entrypoint:  bash entrypoint.be.sh
   fill:
     build: python
     container_name: fill
@@ -79,7 +79,7 @@ services:
 
     volumes:
       - "$CWD/python:/home/finn/Programming/self-reading-library/python"
-    entrypoint: python3 fill.py
+    entrypoint:  bash entrypoint.fill.sh
 
 
 

@@ -24,7 +24,7 @@ from helpers.os_tools import file_exists_regex
 from helpers.list_tools import metaize, forget_except
 from config import config
 import subprocess
-from helpers.model_tools import find_best_model
+from helpers.best_model_tools import find_best_model
 from helpers.model_tools import model_in_the_loop
 
 if not os.path.isdir(config.COLLECTION_PATH):

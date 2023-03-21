@@ -2,6 +2,7 @@ import threading
 
 import config.config
 from config.ant_imports import *
+from debugger_tools import connect_debugger
 from helpers.time_tools import wait_for_change
 
 
@@ -35,6 +36,7 @@ def run_extra_threads():
     ).start()
 
     def update_knowledge_graph_thread():
+        connect_debugger(3456)
         path = config.GOLD_DATASET_PATH + "/" + config.GOLD_SPAN_ID
 
         def graph_db_update():

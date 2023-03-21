@@ -338,9 +338,9 @@ class Queue:
             g_str = self.g.serialize()
             with open(f"{config.hidden_folder}/{self.conn.service_id}.ttl", "w") as f:
                 f.write(g_str)
-            os.system(
-                f"""curl -D- -H 'Content-Type: text/turtle' --upload-file {config.hidden_folder}/{self.conn.service_id}.ttl -X POST '{self.conn.db}/namespace/{self.conn.service_id}/sparql?context-uri={self.conn.Graph}'"""
-            )
+            cmd = f"""curl -D- -H 'Content-Type: text/turtle' --upload-file {config.hidden_folder}/{self.conn.service_id}.ttl -X POST '{self.conn.db}/namespace/{self.conn.service_id}/sparql?context-uri={self.conn.Graph}'"""
+            logging.info("executing " + cmd)
+            os.system(cmd)
 
     @property
     def commit(self):

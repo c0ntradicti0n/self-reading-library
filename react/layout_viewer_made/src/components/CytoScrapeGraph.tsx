@@ -23,7 +23,7 @@ const CytoscapeGraph = ({ graphData, onExpand }) => {
 
       console.log(data.nodes)
       const cydata = [
-         ...data.nodes.map((n) => ({ group: 'nodes', data: { ...n }})),
+         ...data.nodes.map((n) => ({ group: 'nodes', data: { ...n } })),
          ...data.edges.map((e) => ({
             group: 'edges',
             data: { id: e.id + 'xxx', source: e.source, target: e.target },

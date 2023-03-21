@@ -7,6 +7,7 @@ from traceback_with_variables import Format, ColorSchemes, is_ipython_global
 import numpy
 
 from helpers.json_tools import json_file_update
+from helpers.model_tools import find_best_model
 
 sys.path.append("../core")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -175,9 +176,7 @@ audio_path = hidden_folder + "audio/"
 create_frontend = os.environ.get("CREATE_FRONTEND", default=False)
 BEST_MODELS_PATH = hidden_folder + "/best_models.json"
 BEST_MODELS = json_file_update(BEST_MODELS_PATH)
-layout_model_path = BEST_MODELS["layout"][
-    "best_model_path"
-]  # hidden_folder + "/text_box_models//_782_0,8268912618438863_14"
+layout_model_path = find_best_model(TEXT_BOX_MODEL_PATH)[0]
 
 load_dotenv("../.env")
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
