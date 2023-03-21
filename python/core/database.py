@@ -40,7 +40,6 @@ def login(db_name):
 
                 server.setQuery(q)
 
-                logging.warning(server.conn_str)
                 try:
 
                     return server.queryAndConvert()
