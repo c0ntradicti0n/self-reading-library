@@ -23,7 +23,7 @@ class ExampleMiddleware:
             resp: Response object that will be routed to
                 the on_* responder.
         """
-        timeout(connect_debugger(2345), 1)
+        timeout(lambda : connect_debugger(2345), 1)
 
     def process_resource(self, req, resp, resource, params):
         """Process the request after routing.
