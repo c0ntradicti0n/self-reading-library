@@ -4,11 +4,8 @@ import regex as re
 def flatten(t):
     return [item for sublist in t for item in sublist]
 
-
 PUNCTUATIONS = ".,:!?;()[]{}"
-
-
-def split_punctuation(s, matches=False, REST=PUNCTUATIONS):
+def split_punctuation(s,  matches=False, REST=PUNCTUATIONS):
     """simplest tokenizer...
 
     >>> split_punctuation("sentence, bla... end. go further. and here! also at the end?")
@@ -26,7 +23,7 @@ def split_punctuation(s, matches=False, REST=PUNCTUATIONS):
         for word in re.split(
             rf"(?<=[a-zA-Z][a-zA-Z])(?=\{separator})(?:/d)*", s, matches
         ):
-            things.append(split_punctuation(word, REST=REST, matches=matches))
+            things.append(split_punctuation(word, REST=rest, matches=matches))
         return flatten(things)
 
 
