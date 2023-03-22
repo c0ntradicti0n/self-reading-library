@@ -98,8 +98,8 @@ COPY tokenization_layoutvm2_fast.py /usr/local/lib/python3.9/dist-packages/trans
 
 RUN pip install gevent
 RUN apt install -y jq
-RUN apt apt install graphviz  -y
-RUN apt apt install graphviz-dev  -y
+RUN apt install graphviz  -y
+RUN apt install graphviz-dev  -y
 COPY config/default.latex  /usr/share/pandoc/data/templates/default.latex
 WORKDIR /home/finn/Programming/self-reading-library/python
 
