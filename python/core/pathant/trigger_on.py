@@ -76,7 +76,6 @@ class trigger_on:
     mutext_affix = ""
 
     def prepare_and_train(self):
-        global BEST_MODELS
         if not os.path.isdir(self.converter.model_dir):
             os.makedirs(self.converter.model_dir)
         if not os.path.isdir(self.converter.on):
@@ -105,15 +104,6 @@ class trigger_on:
 
         if loops.count(training_rate) > 2:
             logging.info("Training did not change, staying prediction loop")
-
-        args = {
-            "best_model_path": best_model_path,
-            "training_rate": training_rate,
-            "layout_model_path": config.layout_model_path,
-        }
-
-        BEST_MODELS[self.converter.service_id] = args
-        BEST_MODELS = json_file_update(config.BEST_MODELS_PATH, update=BEST_MODELS)
 
         logging.info(f"Having {training_rate = }")
 
