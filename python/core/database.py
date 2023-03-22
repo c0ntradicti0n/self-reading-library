@@ -13,6 +13,8 @@ from SPARQLWrapper import SPARQLWrapper, JSON, POST
 from rdflib import Graph, Literal
 from rdflib.term import Node
 
+from helpers.time_tools import timeout as timeout_fun
+
 from config import config
 
 URL = "http://polarity.science"
@@ -118,26 +120,11 @@ class Queue:
         }}"""
         return [r["doc_id"] for r in self.query2tuples(q)]
 
-    def timeout(self, f, timeout=None):
-        # Database polling until value appeared or not
-        result = None
-        n = 0
-        while not result:
-            n += 1
-            if n > timeout:
-                break
-            result = f()
-            if result:
-                break
-            time.sleep(1)
-
-        return result
-
     def get(
         self, id, timeout=None, extra_q="", extra_v="", default=None, special_info=None
     ):
         if timeout:
-            return self.timeout(
+            return timeout_fun(
                 lambda: Queue.get(
                     self,
                     id,

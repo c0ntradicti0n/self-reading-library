@@ -3,7 +3,7 @@ import logging
 
 def connect_debugger(port):
     try:
-        logging.warning("OPENING DEBUGGING PORT 2345")
+        logging.warning("ACCESSING DEBUGGING PORT 2345")
         import pydevd_pycharm
 
         pydevd_pycharm.settrace(

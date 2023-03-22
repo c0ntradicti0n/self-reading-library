@@ -15,7 +15,7 @@ from helpers.encode import jsonify
 from helpers.hash_tools import hashval
 from helpers.json_tools import np_encoder
 from helpers.os_tools import touch
-from helpers.time_tools import timeout
+from helpers.time_tools import timeout_deco
 
 logging.getLogger().setLevel(logging.INFO)
 import os
@@ -120,7 +120,7 @@ def long_request(f):
         if not os.path.exists(path):
             touch(path)
 
-            @timeout(3)
+            @timeout_deco(3)
             def finish():
                 try:
                     res = f(self, req, resp, *args, **kwargs)

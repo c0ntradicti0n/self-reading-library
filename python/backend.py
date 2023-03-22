@@ -3,6 +3,7 @@ from wsgiref import simple_server
 from config.ant_imports import *
 from debugger_tools import connect_debugger
 from helpers.os_tools import make_fresh_dir
+from helpers.time_tools import timeout
 from language.knowledge.KnowledgePublisher import KnowledgePublisher
 from layout.annotator.annotation_to_gold import AnnotatedToGoldQueueRest
 
@@ -22,7 +23,7 @@ class ExampleMiddleware:
             resp: Response object that will be routed to
                 the on_* responder.
         """
-        connect_debugger(2345)
+        timeout(connect_debugger(2345), 1)
 
     def process_resource(self, req, resp, resource, params):
         """Process the request after routing.

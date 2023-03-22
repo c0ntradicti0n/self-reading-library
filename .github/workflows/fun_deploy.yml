@@ -55,7 +55,7 @@ jobs:
         run: |
           ssh staging '   
               cd self-reading-library
-              make build
+              make build over
           '
       - name: Start
         run: |
@@ -63,7 +63,7 @@ jobs:
               cd self-reading-library
               docker stop nginx
               make down up
-              make overdown over overupd
+              make overdown overupd
           '
       - name: RestTest
         run: |

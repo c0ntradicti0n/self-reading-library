@@ -33,7 +33,7 @@ import functools
 
 # https://stackoverflow.com/a/35139284
 # https://stackoverflow.com/users/42897/rich
-def timeout(max_timeout):
+def timeout_deco(max_timeout):
     """Timeout decorator, parameter in seconds."""
 
     def timeout_decorator(item):
@@ -50,3 +50,19 @@ def timeout(max_timeout):
         return func_wrapper
 
     return timeout_decorator
+
+
+def timeout(f, timeout=None):
+    # Database polling until value appeared or not
+    result = None
+    n = 0
+    while not result:
+        n += 1
+        if n > timeout:
+            break
+        result = f()
+        if result:
+            break
+        time.sleep(1)
+
+    return result
