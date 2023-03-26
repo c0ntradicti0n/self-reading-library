@@ -23,7 +23,6 @@ jobs:
     steps:
       - name: Configure SSH
         run: |
-          
           mkdir -p ~/.ssh/
           echo "$SSH_KEY" > ~/.ssh/staging.key
           chmod 600 ~/.ssh/staging.key
@@ -45,7 +44,8 @@ jobs:
           SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
         run: |
           ssh staging "
-              ls
+
+              cd self-reading-library
               git fetch --all
               git reset --hard origin/main
 
@@ -54,11 +54,13 @@ jobs:
       - name: Build
         run: |
           ssh staging '   
+              cd self-reading-library
               make build over
           '
       - name: Start
         run: |
           ssh staging '   
+              cd self-reading-library
               docker stop nginx
               make down up
               make overdown overupd
