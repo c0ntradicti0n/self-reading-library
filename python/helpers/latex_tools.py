@@ -29,7 +29,7 @@ def latex_replace(s):
         "\\N{LATIN SMALL LETTER I WITH DIAERESIS}": "i",
         "\\N{LATIN SMALL LETTER O WITH MACRON}": 'o',
         "\\N{THIN SPACE}": " "
-"
+
     }.items():
         s = s.replace(k, v)
     for m in regex.findall(r"\\N\{[\w\s\d]+\}", s):
