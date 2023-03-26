@@ -28,6 +28,7 @@ class ElmoDifferencePredict(ElmoPredict):
         "O": "color: var(--z-o)",
         "SUBJECT": "background-color: var(--z-subject) ",
         "CONTRAST": "background-color: var(--z-contrast)",
+        "U-U": "background-color: var(--z-subject) ",
     }
 
 
