@@ -130,7 +130,9 @@ class BoxFeatureMaker(PathSpec):
                 document = PDFDocument(parser)
                 return resolve1(document.catalog["Pages"])["Count"]
         except:
-            logging.error("File not found on determining filesize", exc_info=True)
+            logging.error(
+                "File not found on determining number of pages", exc_info=True
+            )
             return 999999
 
     def mine_pdf(self, pdf_path):

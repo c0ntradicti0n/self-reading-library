@@ -45,7 +45,6 @@ jobs:
         run: |
           ssh staging "
 
-              cd self-reading-library
               git fetch --all
               git reset --hard origin/main
 
@@ -54,13 +53,11 @@ jobs:
       - name: Build
         run: |
           ssh staging '   
-              cd self-reading-library
               make build over
           '
       - name: Start
         run: |
           ssh staging '   
-              cd self-reading-library
               docker stop nginx
               make down up
               make overdown overupd

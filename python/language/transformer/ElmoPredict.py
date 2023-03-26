@@ -8,7 +8,6 @@ from helpers.best_model_tools import find_best_model
 
 from helpers.conll_tools import annotation2conll_file
 from helpers.hash_tools import hashval
-from helpers.model_tools import BEST_MODELS
 from helpers.random_tools import chance
 from language.span.DifferenceSpanSet import DifferenceSpanSet
 
@@ -16,6 +15,14 @@ from queue import Queue, Empty
 
 q2 = {}
 q1 = {}
+
+
+def find_best_tagger_model():
+    return find_best_model(
+        config.ELMO_DIFFERENCE_MODEL_PATH,
+        lambda path: os.path.exists(path + "/vocabulary")
+                     and os.path.exists(path + "/best.th"),
+    )[0]
 
 
 class ElmoPredict(PathSpec):
@@ -154,10 +161,7 @@ class ElmoPredict(PathSpec):
         from allennlp.models.model import Model
         from allennlp_models.tagging.models import crf_tagger
 
-        best_model = find_best_model(
-            config.ELMO_DIFFERENCE_MODEL_PATH,
-            lambda path: os.path.exists(path + "/vocabulary"),
-        )[0]
+        best_model = find_best_tagger_model()
 
         self.logger.info("Loading difference model")
         self.model = Model.load(

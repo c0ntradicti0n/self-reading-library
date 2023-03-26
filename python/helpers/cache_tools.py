@@ -246,7 +246,7 @@ def configurable_cache(
     from_function_only=False,
     dont_append_to_cache=False,
 ):
-    filename = filename.replace(".py", "")
+    filename = refactor_filename(filename)
 
     def decorator(original_func):
         def new_func(
@@ -383,6 +383,10 @@ def configurable_cache(
         return new_func
 
     return decorator
+
+
+def refactor_filename(filename):
+    return filename.replace(".py", "")
 
 
 configurable_cache.flags = {}

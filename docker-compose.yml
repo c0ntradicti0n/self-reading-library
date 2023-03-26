@@ -81,6 +81,27 @@ services:
       - "$CWD/python:/home/finn/Programming/self-reading-library/python"
     entrypoint:  bash entrypoint.fill.sh
 
+  recompute:
+    build: python
+    container_name: recompute
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    tty: true
+    networks:
+      - db
+    environment:
+      DB: ${DB}
+      DB_HOST: db
+      GDB_PASSWORD: ${GDB_PASSWORD}
+      GDB_HOST: gdb
+
+    volumes:
+      - "$CWD/python:/home/finn/Programming/self-reading-library/python"
+    entrypoint:  bash entrypoint.recompute.sh
+
 
 
 

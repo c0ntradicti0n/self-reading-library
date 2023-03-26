@@ -1,6 +1,7 @@
 import os
 from core.pathant.PathSpec import PathSpec
 from config import config
+from helpers.best_model_tools import find_best_model
 from helpers.cache_tools import configurable_cache
 from core.pathant.Converter import converter
 from core.pathant.PathAnt import PathAnt
@@ -8,6 +9,7 @@ from core.event_binding import RestQueue, queue_put
 from helpers.json_tools import json_file_update
 from helpers.model_tools import model_in_the_loop, BEST_MODELS
 from helpers.list_tools import metaize, forget_except
+from language.transformer.ElmoPredict import find_best_tagger_model
 from layout.annotation_thread import full_model_path
 from language.transformer.ElmoDifferenceTrain import ElmoDifferenceTrain
 from language.transformer.ElmoDifferencePredict import ElmoDifferencePredict
@@ -20,7 +22,9 @@ class ElmoDifference(PathSpec):
         self.n = n
         self.debug = debug
 
-    @configurable_cache(filename=config.cache + os.path.basename(__file__))
+    cache_folder = config.cache + os.path.basename(__file__)
+
+    @configurable_cache(filename=cache_folder)
     def __call__(self, labeled_paths, *args, **kwargs):
 
         try:
@@ -46,30 +50,15 @@ class ElmoDifference(PathSpec):
 
 ant = PathAnt()
 
-elmo_difference_pipe = ant(
-    "arxiv.org",
-    f"elmo.html",
-    via="reading_order",
-    num_labels=config.NUM_LABELS,
-    layout_model_path=full_model_path,
-)
-
-elmo_difference_single_pipe = ant(
-    "arxiv.org",
-    f"elmo.html",
-    num_labels=config.NUM_LABELS,
-    layout_model_path=full_model_path,
-    from_function_only=True,
-)
-
-elmo_difference_model_pipe = ant(
-    None, f"elmo_model.difference", layout_model_path=full_model_path
-)
-
 
 def annotate_uploaded_file(file, service_id, url):
-    BEST_MODELS = json_file_update(config.BEST_MODELS_PATH)
-
+    elmo_difference_single_pipe = ant(
+        "arxiv.org",
+        f"elmo.html",
+        num_labels=config.NUM_LABELS,
+        layout_model_path=full_model_path,
+        from_function_only=True,
+    )
     result = next(
         forget_except(
             [
@@ -78,9 +67,7 @@ def annotate_uploaded_file(file, service_id, url):
                         metaize(
                             [file],
                         ),
-                        difference_model_path=BEST_MODELS["difference"][
-                            "best_model_path"
-                        ],
+                        difference_model_path=find_best_tagger_model(),
                         service_id=service_id,
                         url=url,
                     ),
@@ -100,6 +87,14 @@ ElmoDifferenceQueueRest = RestQueue(
 
 
 def on_predict(args, service_id=None):
+    elmo_difference_pipe = ant(
+        "arxiv.org",
+        f"elmo.html",
+        via="reading_order",
+        num_labels=config.NUM_LABELS,
+        layout_model_path=full_model_path,
+    )
+
     gen = forget_except(
         elmo_difference_pipe(
             metaize(["http://export.arxiv.org/"] * 100),
@@ -112,6 +107,9 @@ def on_predict(args, service_id=None):
 
 
 def annotate_difference_elmo():
+    elmo_difference_model_pipe = ant(
+        None, f"elmo_model.difference", layout_model_path=full_model_path
+    )
     model_in_the_loop(
         model_dir=config.ELMO_DIFFERENCE_MODEL_PATH,
         collection_path=config.ELMO_DIFFERENCE_COLLECTION_PATH,

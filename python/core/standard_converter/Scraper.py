@@ -55,6 +55,8 @@ class Scraper(PathSpec):
                 yield id, meta
             elif os.path.exists(id) and regex.match(self.file_regex, id) is not None:
                 yield id, meta
+            elif os.path.exists(url) and regex.match(self.file_regex, url) is not None:
+                yield url, meta
             else:
                 logging.error(f"{id} is not a valid url/path")
 

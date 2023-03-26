@@ -31,7 +31,12 @@ class PathAnt:
 
         for _from, _to, functional_object in ____CONVERTERS____:
             self.add_edge(_from, _to, functional_object)
-            self.add_starred(_from, _to, functional_object, ____CONVERTERS____)
+            if isinstance(_from, list):
+                for f in _from:
+                    self.add_starred(f, _to, functional_object, ____CONVERTERS____)
+
+            else:
+                self.add_starred(_from, _to, functional_object, ____CONVERTERS____)
             functional_object.ant = self
 
         for (_froms1, _tos1, functional_object1), (

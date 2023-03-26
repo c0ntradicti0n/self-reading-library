@@ -318,7 +318,8 @@ def queue_put(service_id, gen):
     global q
 
     for val in gen:
-        q[service_id].put(service_id, val)
+        logging.info(f"putting {val}")
+        # q[service_id].put(service_id, val)
 
 
 def queue_iter(service_id, gen, single=False):

@@ -19,9 +19,6 @@ from layout.upload_annotation.upload_annotation import UploadAnnotator
 from layout.annotation_thread import (
     layout_annotate_train_model,
     UploadAnnotationQueueRest,
-    sample_pipe,
-    model_pipe,
-    upload_pipe,
     full_model_path,
 )
 from language.span.PredictionAlignment2Css import PredictionAlignment2Css
@@ -29,8 +26,6 @@ from layout.Layout2ReadingOrder import Layout2ReadingOrder
 from language.transformer.ElmoDifference import (
     ElmoDifference,
     ElmoDifferenceQueueRest,
-    elmo_difference_pipe,
-    elmo_difference_model_pipe,
     annotate_difference_elmo,
 )
 from language.text2speech.Txt2Mp3 import Txt2Mp3
@@ -43,3 +38,4 @@ from language.knowledge.GraphDB import *
 from language.knowledge.GraphDBSearch import *
 from language.knowledge.NodeEdges import *
 from language.knowledge.Filter import *
+from core.recompute import *

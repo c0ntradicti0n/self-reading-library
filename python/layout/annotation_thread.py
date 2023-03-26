@@ -58,27 +58,17 @@ def unlabeled_not_existent_filter(x_m):
 
 ant = PathAnt()
 
-sample_pipe = ant("feature", "annotation.collection", model_path=full_model_path)
-
-model_pipe = ant(
-    "annotation.corrected",
-    "model",
-    num_labels=config.NUM_LABELS,
-    collection_step=training_rate,
-)
-
-upload_pipe = ant(
-    "arxiv.org",
-    "annotation.collection",
-    via="upload_annotation",
-    num_labels=config.NUM_LABELS,
-    model_path=full_model_path,
-    from_function_only=True,
-)
-
 
 def annotate_uploaded_file(path_to_pdf, service_id=None, url=None):
     logging.info(f"Working on {path_to_pdf} {service_id}")
+    upload_pipe = ant(
+        "arxiv.org",
+        "annotation.collection",
+        via="upload_annotation",
+        num_labels=config.NUM_LABELS,
+        model_path=full_model_path,
+        from_function_only=True,
+    )
     return next(
         forget_except(
             upload_pipe(metaize([path_to_pdf]), service_id=service_id, url=url),
@@ -96,6 +86,8 @@ UploadAnnotationQueueRest = RestQueue(
 
 
 def on_predict(args, service_id=None):
+    sample_pipe = ant("feature", "annotation.collection", model_path=full_model_path)
+
     gen = forget_except(
         sample_pipe(
             metaize(itertools.cycle(["http://export.arxiv.org/"])),
@@ -109,6 +101,13 @@ def on_predict(args, service_id=None):
 
 
 def layout_annotate_train_model():
+    model_pipe = ant(
+        "annotation.corrected",
+        "model",
+        num_labels=config.NUM_LABELS,
+        collection_step=training_rate,
+    )
+
     model_in_the_loop(
         model_dir=config.TEXT_BOX_MODEL_PATH,
         collection_path=config.COLLECTION_PATH,

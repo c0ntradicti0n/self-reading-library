@@ -39,6 +39,10 @@ scrape_test:
 be:
 	USER=$$USER CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose up   --build be
 
+re:
+	USER=$$USER CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose up   --build recompute
+
+
 up:
 	USER=$$USER CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose up -d
 down:
