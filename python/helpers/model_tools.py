@@ -15,8 +15,6 @@ from pprint import pprint
 
 TRAINING_RATE = {}
 
-BEST_MODELS = config.BEST_MODELS
-
 
 def model_in_the_loop(
     model_dir,

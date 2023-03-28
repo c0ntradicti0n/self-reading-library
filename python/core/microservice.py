@@ -105,7 +105,12 @@ class microservice:
             converter.load()
 
     def remote_call(self, *args, **kwargs):
+
         send_data = json.dumps((args, kwargs))
+
+        if os.environ.get("INSIDE", False):
+            return self.p(*args, **kwargs)
+
         resp = requests.post(
             f"http://{self.service_name}:7777/{self.service_name}",
             send_data,

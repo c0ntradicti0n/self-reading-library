@@ -27,9 +27,15 @@ def latex_replace(s):
         "\\N{LATIN SMALL LETTER A WITH DIAERESIS}": "a",
         "\\N{LATIN SMALL LETTER E WITH DIAERESIS}": "e",
         "\\N{LATIN SMALL LETTER I WITH DIAERESIS}": "i",
-        "\\N{LATIN SMALL LETTER O WITH MACRON}": 'o',
-        "\\N{THIN SPACE}": " "
-
+        "\\N{LATIN SMALL LETTER O WITH MACRON}": "o",
+        "\\N{LATIN SMALL LETTER SHARP S}": "s",
+        "\\N{LATIN CAPITAL LETTER A WITH DIAERESIS}": "ä",
+        "\\N{LATIN CAPITAL LETTER I WITH DIAERESIS}": "i",
+        "\\N{LATIN CAPITAL LETTER E WITH DIAERESIS}": "e",
+        "\\N{LATIN CAPITAL LETTER O WITH DIAERESIS}": "ö",
+        "\\N{LATIN CAPITAL LETTER U WITH DIAERESIS}": "ü",
+        "\\N{THIN SPACE}": " ",
+        "\\N{MIDDLE DOT}": "·",
     }.items():
         s = s.replace(k, v)
     for m in regex.findall(r"\\N\{[\w\s\d]+\}", s):

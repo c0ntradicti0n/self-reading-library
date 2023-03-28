@@ -5,11 +5,7 @@ python-dotenv
 pyjwt
 coloredlogs
 
-
 git+https://github.com/c0ntradicti0n/listalign.git@master#listalign
-dash==2.3.0
-dash-extensions
-visdcc
 
 selenium
 chromedriver-binary

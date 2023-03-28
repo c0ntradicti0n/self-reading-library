@@ -93,13 +93,13 @@ RUN mkdir /.local  && chmod -R 777 /.local
 RUN ls
 
 RUN python3 -c 'import nltk; nltk.download("wordnet"); nltk.download("omw-1.4")'
-RUN pip install dash==2.3.0 dash-extensions visdcc werkzeug==2.0.3
 COPY tokenization_layoutvm2_fast.py /usr/local/lib/python3.9/dist-packages/transformers/models/layoutlmv2/tokenization_layoutlmv2_fast.py
 
 RUN pip install gevent
 RUN apt install -y jq
 RUN apt install graphviz  -y
 RUN apt install graphviz-dev  -y
+RUN pip install pygad
 COPY config/default.latex  /usr/share/pandoc/data/templates/default.latex
 WORKDIR /home/finn/Programming/self-reading-library/python
 

@@ -8,6 +8,8 @@ from core.microservice import microservice
 
 from helpers.cache_tools import configurable_cache
 from helpers.hash_tools import hashval
+from helpers.latex_tools import latex_replace
+from helpers.nested_dict_tools import flatten
 from helpers.str_tools import str_ascii
 from layout.imports import *
 from config import config
@@ -46,6 +48,7 @@ class Layout2ReadingOrder(PathSpec):
     )
     def __call__(self, x_meta, *args, **kwargs):
         from datasets import Dataset
+        from transformers import pipeline
 
         for pdf_path, meta in x_meta:
 
@@ -143,7 +146,6 @@ class Layout2ReadingOrder(PathSpec):
             except:
                 logging.error("Failure setting title", exc_info=True)
                 used_titles = meta["html_path"]
-            meta["title"] = used_titles
 
             used_label_is = [
                 self.sort_by_label(
@@ -182,6 +184,21 @@ class Layout2ReadingOrder(PathSpec):
             del meta["final_feature_df"]
 
             meta["enumerated_texts"] = enumerated_texts
+
+            summarizer = pipeline(
+                "summarization", model="t5-base", tokenizer="t5-base", framework="tf"
+            )
+
+            print(sorted_texts)
+            title = summarizer(
+                latex_replace("\n\n".join(prediction["text"])),
+                min_length=1,
+                max_length=23,
+            )[0]["summary_text"]
+
+            # Print summarized text
+            print(f"{title=}")
+            meta["title"] = title
 
             gc.collect()
 

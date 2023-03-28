@@ -10,7 +10,6 @@ from core.pathant.Converter import converter
 from helpers.hash_tools import bas64encode, hashval
 from helpers.json_tools import json_file_update
 from helpers.list_tools import metaize
-from helpers.model_tools import BEST_MODELS
 from language.transformer.FilterAlignText import FilterAlignText
 
 

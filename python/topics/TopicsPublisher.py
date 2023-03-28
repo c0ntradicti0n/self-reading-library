@@ -51,16 +51,19 @@ class TopicsPublisher(RestPublisher, react):
 
         html_paths_json_paths_txt_paths, metas = list(zip(*documents))
 
-        texts = [
-            " ".join(
-                "\n".join(
-                    [tb[0] for utb in meta["used_text_boxes"] for tb in utb]
-                ).split()[:10]
+        texts_metas = [
+            (
+                " ".join(
+                    "\n".join(
+                        [tb[0] for utb in meta["used_text_boxes"] for tb in utb]
+                    ).split()[:10]
+                ),
+                meta,
             )
             for meta in metas
         ]
 
-        self.topics, text_ids = TopicMaker(texts, meta=metas)
+        self.topics, text_ids = TopicMaker(TopicMaker, texts_metas)
 
         with open(config.topics_dump, "wb") as f:
             pickle.dump([self.topics, metas], f)

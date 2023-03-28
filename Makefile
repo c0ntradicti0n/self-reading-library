@@ -31,6 +31,8 @@ overupd:
 	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose -f docker-compose.override.yaml  up --build -d
 overdown:
 	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose -f docker-compose.override.yaml down || exit 0
+topics:
+	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose -f docker-compose.override.yaml  up --build micro_topicmaker || exit 0
 
 CWD=$(shell pdw)
 scrape_test:

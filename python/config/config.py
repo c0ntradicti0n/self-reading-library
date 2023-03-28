@@ -175,7 +175,6 @@ audio_format = ".ogg"
 audio_path = hidden_folder + "audio/"
 create_frontend = os.environ.get("CREATE_FRONTEND", default=False)
 BEST_MODELS_PATH = hidden_folder + "/best_models.json"
-BEST_MODELS = json_file_update(BEST_MODELS_PATH)
 layout_model_path = find_best_model(TEXT_BOX_MODEL_PATH)[0]
 
 load_dotenv("../.env")

@@ -1,4 +1,5 @@
 import logging
+import os
 from collections import defaultdict
 from sklearn import mixture
 from sklearn.manifold import TSNE
@@ -11,6 +12,7 @@ from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from core.standard_converter.Dict2Graph import Dict2Graph
 from core.microservice import microservice
+from topics.clustering import cluster
 
 
 @microservice
@@ -38,58 +40,20 @@ class TopicMaker(PathSpec):
             *[str(i) for i in range(1000)],
         ]
 
-    def test(self):
-        self.nlp = spacy.load("en_core_web_trf")
-
-        logging.warning("Reading texts")
-
-        # with open("/home/stefan/PycharmProjects/LayoutEagle/test/corpus/faust.txt") as f:
-        #    text = " ".join([l for l in f.readlines() ])
-        with open(
-            "/home/stefan/PycharmProjects/LayoutEagle/python/test/corpus/faust.txt"
-        ) as f:
-            text = " ".join([l for l in f.readlines()])[5000:15000]
-
-        doc = self.nlp(text)
-
-        logging.warning("Tokenizing texts")
-
-        def paragraphs(document):
-            length = 50
-            start = 0
-            try:
-                for token in document:
-                    if token.is_space and token.text.count("\n") > 1:
-                        yield document[start : token.i][:length]
-                        start = token.i
-                yield document[start:][:length]
-            except IndexError:
-                logging.error("accessing doc after end")
-
-        def nps(d):
-            for t in d:
-                try:
-                    yield t.text
-                except IndexError as e:
-                    logging.error("token not found")
-                continue
-
-        texts = list(map(lambda d: list(nps(d)), paragraphs(doc)))
-
-        return texts, [{"text": text} for text in texts]
-
-    def __call__(self, texts, meta, *args, **kwargs):
-        return self.predict(meta, texts)
+    def __call__(micro, self, texts_metas, *args, **kwargs):
+        return micro.predict(list(texts_metas))
 
     def load(self):
         logging.info("Loading spacy model")
         self.nlp = spacy.load("en_core_web_md")
         logging.info("Loaded")
 
-    def predict(self, meta, texts):
+    def predict(self, texts_metas):
+        texts_metas = list(texts_metas)
+        texts, metas = list(zip(*texts_metas))
         embeddingl = []
-        logging.info(f"Making embeedings")
-        for i, text in enumerate(texts):
+        logging.info(f"Making embeddings")
+        for i, (text, meta) in enumerate(texts_metas):
             logging.info(f"Text no. {i}")
 
             try:
@@ -101,15 +65,15 @@ class TopicMaker(PathSpec):
                 embedding = np.random.random(shape)
             embeddingl.append(embedding)
         embeddings = np.vstack(embeddingl)
-        n_components = 3
+        n_components = 73
         logging.info(f"Reducing from {embeddings.shape} to {n_components} dimensions")
         tsne = TSNE(n_components, method="exact")
         tsne_result = tsne.fit_transform(embeddings)
         logging.info(f"Reduced embeddings to {tsne_result.shape=}")
         del embeddingl
         del embeddings
-        topics = self.topicize_recursively(tsne_result, meta, texts)
-        return topics, meta
+        topics = self.topicize_recursively(tsne_result, metas, texts)
+        return topics, metas
 
     def topicize_recursively(
         self, embeddings, meta, texts, split_size=15, max_level=6, level=0
@@ -151,21 +115,10 @@ class TopicMaker(PathSpec):
         return topics
 
     def cluster(self, embeddings):
-        X = embeddings
 
-        g = mixture.GaussianMixture(
-            n_components=min(int(X.shape[0] / 3 + 0.5), 10),
-            covariance_type="tied",
-            reg_covar=1e-4,
-            n_init=20,
-            max_iter=50,
-        )
+        clusters = cluster(embeddings, _num_clusters=4)
 
-        g.fit(X)
-
-        labels = g.predict(X)
-
-        return labels
+        return clusters
 
     def labels2docs(self, texts, labels):
         topic_2_doc_ids = defaultdict(list)
@@ -218,9 +171,57 @@ class TopicMaker(PathSpec):
     def make_titles(self, keywords_to_texts):
         return {k: " ".join(k[0] for k in v[:2]) for k, v in keywords_to_texts.items()}
 
+    @staticmethod
+    def test():
+        TopicMaker.nlp = spacy.load("en_core_web_trf")
+
+        logging.warning("Reading texts")
+
+        # with open("/home/stefan/PycharmProjects/LayoutEagle/test/corpus/faust.txt") as f:
+        #    text = " ".join([l for l in f.readlines() ])
+        try:
+            with open("./topics/faust.txt") as f:
+                text = " ".join([l for l in f.readlines()])[0:35000]
+        except:
+            os.system(
+                "wget https://raw.githubusercontent.com/martinth/mobverdb/master/faust.txt -P ./topics/"
+            )
+            with open("./topics/faust.txt") as f:
+                text = " ".join([l for l in f.readlines()])[0:35000]
+
+        doc = TopicMaker.nlp(text)
+
+        logging.warning("Tokenizing texts")
+
+        def paragraphs(document):
+            length = 50
+            start = 0
+            try:
+                for token in document:
+                    if token.is_space and token.text.count("\n") > 1:
+                        yield document[start : token.i][:length]
+                        start = token.i
+                yield document[start:][:length]
+            except IndexError:
+                logging.error("accessing doc after end")
+
+        def nps(d):
+            for t in d:
+                try:
+                    yield t.text
+                except IndexError as e:
+                    logging.error("token not found")
+                continue
+
+        texts = list(map(lambda d: list(nps(d)), paragraphs(doc)))
+        texts = [" ".join(t) for t in texts]
+        metas = [{"text": text} for text in texts]
+
+        return zip(texts, metas)
+
 
 if __name__ == "__main__":
-    tm = TopicMaker()
-    topics = tm(*tm.test())
+    tm = TopicMaker
+    topics = tm(tm, (tm.converter.test()))
     d2g = Dict2Graph
     print(list(d2g([topics]))[0][0][0])

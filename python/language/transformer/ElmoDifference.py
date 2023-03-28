@@ -1,13 +1,11 @@
 import os
 from core.pathant.PathSpec import PathSpec
 from config import config
-from helpers.best_model_tools import find_best_model
 from helpers.cache_tools import configurable_cache
 from core.pathant.Converter import converter
 from core.pathant.PathAnt import PathAnt
-from core.event_binding import RestQueue, queue_put
-from helpers.json_tools import json_file_update
-from helpers.model_tools import model_in_the_loop, BEST_MODELS
+from core.event_binding import RestQueue
+from helpers.model_tools import model_in_the_loop
 from helpers.list_tools import metaize, forget_except
 from language.transformer.ElmoPredict import find_best_tagger_model
 from layout.annotation_thread import full_model_path
