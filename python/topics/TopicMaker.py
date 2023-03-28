@@ -12,6 +12,7 @@ from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from core.standard_converter.Dict2Graph import Dict2Graph
 from core.microservice import microservice
+from layout.Layout2ReadingOrder import titelize
 from topics.clustering import cluster
 
 
@@ -152,9 +153,9 @@ class TopicMaker(PathSpec):
             tr4w.analyze(constructed_doc, window_size=4, lower=True, stopwords=[])
             keywords = tr4w.get_keywords(5)
 
-            keywords = [k for k in keywords if len(k[0]) > 3]
+            title = titelize(constructed_doc).split()
             try:
-                titled_clustered_documents[topic_id] = keywords
+                titled_clustered_documents[topic_id] = title
             except Exception as e:
                 logging.error("Error making keywords", exc_info=True)
         return titled_clustered_documents

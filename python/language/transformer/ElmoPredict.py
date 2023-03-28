@@ -21,7 +21,7 @@ def find_best_tagger_model():
     return find_best_model(
         config.ELMO_DIFFERENCE_MODEL_PATH,
         lambda path: os.path.exists(path + "/vocabulary")
-                     and os.path.exists(path + "/best.th"),
+        and os.path.exists(path + "/best.th"),
     )[0]
 
 

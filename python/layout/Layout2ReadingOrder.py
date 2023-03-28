@@ -3,6 +3,7 @@ import logging
 import tracemalloc
 
 import numpy
+from transformers import pipeline
 
 from core.microservice import microservice
 
@@ -30,6 +31,20 @@ def cast_array_list(sample):
         return numpy.asarray(sample, dtype=object)
     else:
         return sample
+
+
+def titelize(text):
+    summarizer = pipeline(
+        "summarization", model="t5-base", tokenizer="t5-base", framework="tf"
+    )
+    title = summarizer(
+        text,
+        min_length=1,
+        max_length=23
+    )[0]["summary_text"]
+    # Print summarized text
+    print(f"{title=}")
+    return title
 
 
 @microservice
@@ -185,19 +200,8 @@ class Layout2ReadingOrder(PathSpec):
 
             meta["enumerated_texts"] = enumerated_texts
 
-            summarizer = pipeline(
-                "summarization", model="t5-base", tokenizer="t5-base", framework="tf"
-            )
-
-            print(sorted_texts)
-            title = summarizer(
-                latex_replace("\n\n".join(prediction["text"])),
-                min_length=1,
-                max_length=23,
-            )[0]["summary_text"]
-
-            # Print summarized text
-            print(f"{title=}")
+            text= latex_replace("\n\n".join(prediction["text"]))
+            title= titelize(text)
             meta["title"] = title
 
             gc.collect()
