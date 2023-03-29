@@ -93,6 +93,8 @@ RUN mkdir /.local  && chmod -R 777 /.local
 RUN ls
 
 RUN python3 -c 'import nltk; nltk.download("wordnet"); nltk.download("omw-1.4")'
+RUN python3 -c 'from transformers import pipeline; pipeline("summarization")'
+
 COPY tokenization_layoutvm2_fast.py /usr/local/lib/python3.9/dist-packages/transformers/models/layoutlmv2/tokenization_layoutlmv2_fast.py
 
 RUN pip install gevent

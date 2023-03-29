@@ -91,13 +91,6 @@ def cluster(X, _num_clusters=None):
         best_solution_fitness,
         best_solution_idx,
     ) = ga_instance.best_solution()
-    print("Best solution is {bs}".format(bs=best_solution))
-    print("Fitness of the best solution is {bsf}".format(bsf=best_solution_fitness))
-    print(
-        "Best solution found after {gen} generations".format(
-            gen=ga_instance.best_solution_generation
-        )
-    )
 
     (
         cluster_centers,
@@ -107,16 +100,6 @@ def cluster(X, _num_clusters=None):
         clusters_sum_dist,
     ) = cluster_data(best_solution, best_solution_idx)
 
-    for cluster_idx in range(num_clusters):
-        cluster_x = data[clusters[cluster_idx], 0]
-        cluster_y = data[clusters[cluster_idx], 1]
-        matplotlib.pyplot.scatter(cluster_x, cluster_y)
-        matplotlib.pyplot.scatter(
-            cluster_centers[cluster_idx, 0],
-            cluster_centers[cluster_idx, 1],
-            linewidths=5,
-        )
-    matplotlib.pyplot.title("Clustering using PyGAD")
-    matplotlib.pyplot.show()
+
 
     return cluster_indices

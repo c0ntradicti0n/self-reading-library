@@ -16,45 +16,28 @@ os.environ["LD_LIBRARY_PATH"] = "/usr/local/cuda-11.0/targets/x86_64-linux/lib/"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 
-fmt = Format(
-    before=5,
-    after=3,
-    max_value_str_len=-1,
-    max_exc_str_len=-1,
-    ellipsis_="...",
-    color_scheme=ColorSchemes.synthwave,
-    skip_files_except=["my_project", "site-packages"],
-    brief_files_except="my_project",
-    custom_var_printers=[  # first matching is used
-        ("password", lambda v: "...hidden..."),  # by name, print const str
-        (list, lambda v: f"list{v}"),  # by type, print fancy str
-        (
-            lambda name, type_, filename, is_global: is_global,
-            lambda v: None,
-        ),  # custom filter, skip printing
-        (is_ipython_global, lambda v: None),  # same, handy for Jupyter
-        (
-            ["secret", dict, (lambda name, *_: "asd" in name)],
-            lambda v: "???",
-        ),  # by different things, print const str
-    ],
-)
-
-# import tensorflow as tf
-# tf.config.list_physical_devices("GPU")
-# tf.get_logger().setLevel(3)
-# tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
-
 numpy.set_printoptions(threshold=sys.maxsize)
+
+
+class PackagePathFilter(logging.Filter):
+    def filter(self, record):
+        record.pathname = record.pathname.replace(os.getcwd(), "")
+        return True
 
 logging.getLogger("allennlp").setLevel(logging.ERROR)
 logging.getLogger("rdflib.term").setLevel(logging.ERROR)
 logging.getLogger("pytorch_pretrained_bert").setLevel(logging.ERROR)
+logging.getLogger("falcon_cors").setLevel(logging.ERROR)
 logging.getLogger("pytorch_transformers").setLevel(logging.ERROR)
 logging.getLogger("pdfminer").setLevel(logging.ERROR)
+for handler in logging.root.handlers:
+    handler.addFilter(PackagePathFilter)
 logging.basicConfig(
-    format="""%(asctime)s-%(levelname)s: %(message)s""", datefmt="%H:%M:%S"
+    format="""%(asctime)s-%(levelname)s: %(message)s""", datefmt="%H:%M:%S",
+    handlers=logging.root.handlers
 )
+
+
 
 
 path_prefix = "../core/"

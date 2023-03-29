@@ -14,7 +14,6 @@ import ruamel.yaml
 class microservice:
     def __init__(self, converter, *args, **kwargs):
         name = converter.__class__.__name__
-        logging.warning(f"REGISTERING MICROSERVICE {name}")
         self.service_name = "micro_" + name.lower()
         self.converter = converter
 
@@ -39,7 +38,7 @@ class microservice:
             except Exception:
                 compose = ""
 
-            compose = addict.addict.Dict(ruamel.yaml.load(compose))
+            compose = addict.addict.Dict(ruamel.yaml.safe_load(compose))
             full_path = converter.__class__.__module__
             full_path = full_path.replace("python.", "")
             service_def = {
@@ -75,8 +74,6 @@ class microservice:
                 logging.error("Could not update docker-compose.override!")
 
         else:
-            logging.warning(f"Building app {name}")
-
             self.app = {self.service_name: self}
             import falcon
             from falcon_cors import CORS
@@ -87,7 +84,6 @@ class microservice:
                 allow_all_headers=True,
                 allow_credentials_all_origins=True,
                 allow_all_methods=falcon.HTTP_METHODS,
-                log_level="DEBUG",
             )
 
             from falcon_multipart.middleware import MultipartMiddleware

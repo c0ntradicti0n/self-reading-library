@@ -55,11 +55,8 @@ class TopicMaker(PathSpec):
         embeddingl = []
         logging.info(f"Making embeddings")
         for i, (text, meta) in enumerate(texts_metas):
-            logging.info(f"Text no. {i}")
-
             try:
                 embedding = self.nlp(text[: config.TOPIC_TEXT_LENGTH]).vector
-                # embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH])._.trf_data.tensors[1]                #embedding = self.nlp(text[:config.TOPIC_TEXT_LENGTH])._.trf_data.tensors[1]
                 shape = embedding.shape
             except Exception as e:
                 logging.error(f"could not create embedding", exc_info=True)

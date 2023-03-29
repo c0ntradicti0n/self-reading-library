@@ -36,6 +36,8 @@ def latex_replace(s):
         "\\N{LATIN CAPITAL LETTER U WITH DIAERESIS}": "ü",
         "\\N{THIN SPACE}": " ",
         "\\N{MIDDLE DOT}": "·",
+        "\\N{GREEK SMALL LETTER SIGMA}": "_s_",
+        "\\N{GREEK SMALL LETTER UPSILON}": "_u_"
     }.items():
         s = s.replace(k, v)
     for m in regex.findall(r"\\N\{[\w\s\d]+\}", s):
@@ -43,6 +45,5 @@ def latex_replace(s):
 
     s2 = regex.sub(r"\\N\{[\w\s\d]+\}", s, "")
     if not s2:
-        logging.info("regex replaced whole string")
         return s
     return s2

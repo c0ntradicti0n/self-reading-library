@@ -181,7 +181,7 @@ class BoxFeatureMaker(PathSpec):
             return None
 
     def compute_complex_coordination_data(self, feature_df):
-        feature_df = feature_df.groupby(["page_number"]).apply(self.page_web)
+        feature_df = feature_df.groupby(["page_number"], group_keys=False).apply(self.page_web)
         return feature_df
 
     def distances(self, sub_df, ax, ay, bx, by):

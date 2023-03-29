@@ -57,17 +57,6 @@ class UnPager(PathSpec):
                         self.logger.error("alignment failed")
                         continue
 
-                    print(
-                        str_ascii(
-                            alignment_table(
-                                alignment,
-                                l_a,
-                                l_b,
-                                info_b=lambda i_b: part_annotation[i_b],
-                            )
-                        )
-                    )
-
                     try:
                         for _i1, _i2 in alignment:
                             if _i1 and _i2:

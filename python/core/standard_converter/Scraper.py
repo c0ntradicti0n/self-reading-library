@@ -52,6 +52,7 @@ class Scraper(PathSpec):
 
                 if not os.path.exists(path):
                     self.scrape(url, path, meta)
+                    self.logger.info(f"Downloaded page to {path=} (from {url})")
                 yield id, meta
             elif os.path.exists(id) and regex.match(self.file_regex, id) is not None:
                 yield id, meta
@@ -135,7 +136,7 @@ class Scraper(PathSpec):
             button = driver.find_element("xpath", "//*[text()='Accept']")
             button.click()
         except:
-            self.logger.warning("Found no cookie banner, but cool")
+            pass
 
         source = driver.page_source.encode("utf-8").decode()
         original_html_path = f"./{path}.htm"

@@ -249,8 +249,6 @@ class RestQueue:
         resp.status = falcon.HTTP_OK
 
     def on_patch(self, req, resp, id=None):
-        pprint(req)
-
         file_part = req.get_param("file")
 
         # Read image as binary
@@ -376,7 +374,7 @@ def queue_iter(service_id, gen, single=False):
                 except Exception as e:
                     logging.error(e, exc_info=True)
 
-    print("The End")
+    logging.info(f"Ended {service_id=}")
 
 
 if __name__ == "__main__":

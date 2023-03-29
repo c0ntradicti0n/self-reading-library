@@ -18,7 +18,6 @@ from helpers.time_tools import wait_for_change
 class trigger_on:
     def __init__(self, converter, *args, **kwargs):
         name = converter.__class__.__name__
-        logging.warning(f"REGISTERING TRIGGER {name}")
         self.service_name = "trigger_" + name.lower()
         self.converter = converter
 
@@ -35,7 +34,7 @@ class trigger_on:
             except Exception:
                 compose = ""
 
-            compose = addict.addict.Dict(ruamel.yaml.load(compose))
+            compose = addict.addict.Dict(ruamel.yaml.safe_load(compose))
             full_path = converter.__class__.__module__
             full_path = full_path.replace("python.", "")
             service_def = {

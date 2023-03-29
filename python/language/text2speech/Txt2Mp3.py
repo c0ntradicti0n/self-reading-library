@@ -52,14 +52,8 @@ class Txt2Mp3(Ant):
         self.debug = debug
 
     def load(self):
-        logging.info("loading tts!")
+        logging.info("Loading TTS")
         real_path = os.path.dirname(os.path.realpath(__file__))
-        logging.info(real_path)
-
-        generate_audio(
-            "language/text2speech/test_text",
-            "Hallo du dumme Sau. Sprich mir einen schönen Text.",
-        )
 
     def predict(self, id, text):
         return generate_audio(id, text)

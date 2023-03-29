@@ -84,12 +84,10 @@ class LayoutModelParts(types.ModuleType):
     @property
     def PROCESSOR(self):
         if not hasattr(self, "_PROCESSOR"):
-            logging.info("ACCESSING LAYOUT PROCESSOR")
             import os
             from matplotlib import colors
-            from PIL import Image, ImageFilter
+            from PIL import Image, ImageFilter, ImageFont
             from transformers import LayoutLMv2Processor
-            from PIL import Image, ImageDraw, ImageFont
 
             if os.path.isfile(config.PROCESSOR_PICKLE):
                 with open(config.PROCESSOR_PICKLE, "rb") as f:
@@ -109,29 +107,18 @@ class LayoutModelParts(types.ModuleType):
     @property
     def MODEL(self):
         if not hasattr(self, "_MODEL"):
-            logging.info("ACCESSING LAYOUT MODEL")
             import os
-
-            logging.info("ACCESSING transformers")
             from transformers import LayoutLMv2Processor
-
-            logging.info("ACCESSING classificattion")
-
             from transformers import LayoutLMv2ForTokenClassification
-
-            logging.info("ACCESSING transformers")
-
             from PIL import Image, ImageDraw, ImageFont
 
-            logging.info("imported")
-
             if os.path.isfile(config.MODEL_PICKLE):
-                logging.info("unpickle")
+                logging.info("Model unpickled")
 
                 with open(config.MODEL_PICKLE, "rb") as f:
                     self._MODEL = pickle.load(f)
             else:
-                logging.info("in memory")
+                logging.info("Model read from model file")
 
                 self._MODEL = LayoutLMv2ForTokenClassification.from_pretrained(
                     "microsoft/layoutlmv2-base-uncased",

@@ -76,7 +76,7 @@ def get_all_routes(api):
 
 def create_app():
 
-    logging.info(f"STARTING APP")
+    logging.info(f"Start")
 
     from language.transformer.ElmoDifference import ElmoDifferenceQueueRest
 
@@ -109,7 +109,6 @@ def create_app():
         allow_all_headers=True,
         allow_credentials_all_origins=True,
         allow_all_methods=falcon.HTTP_METHODS,
-        log_level="DEBUG",
     )
 
     from falcon_multipart.middleware import MultipartMiddleware

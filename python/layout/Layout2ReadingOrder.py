@@ -34,15 +34,16 @@ def cast_array_list(sample):
 
 
 def titelize(text):
+    text = latex_replace(text)[:1024]
     summarizer = pipeline(
-        "summarization", model="t5-base", tokenizer="t5-base", framework="tf"
+        "summarization"
     )
     title = summarizer(
         text,
         min_length=1,
         max_length=23
     )[0]["summary_text"]
-    # Print summarized text
+
     print(f"{title=}")
     return title
 
@@ -69,10 +70,6 @@ class Layout2ReadingOrder(PathSpec):
 
             snapshot = tracemalloc.take_snapshot()
             top_stats = snapshot.statistics("lineno")
-
-            print("[ Top 10 ]")
-            for stat in top_stats[:10]:
-                print(stat)
 
             try:
                 feature_df = meta["final_feature_df"]
@@ -102,6 +99,8 @@ class Layout2ReadingOrder(PathSpec):
                 prediction["text"] = prediction["df"]["text"].tolist()[0]
 
                 del prediction["df"]["chars_and_char_boxes"]
+                pandas.options.mode.chained_assignment = None  # default='warn'
+
                 prediction["df"]["LABEL"] = [box_predictions]
 
                 prediction[
@@ -123,8 +122,8 @@ class Layout2ReadingOrder(PathSpec):
                         )
 
                 pagenumber = page_number + 1
-                self.logger.info(
-                    f"Predicted {pagenumber=}/{len(dataset)} with {box_predictions=}"
+                self.logger.info(''
+                    f"Labels {pagenumber}/{len(dataset)}:\n\t\t {'·'.join(box_predictions)}"
                 )
 
                 prediction_meta = model_helpers.repaint_image_from_labels(
@@ -220,12 +219,9 @@ class Layout2ReadingOrder(PathSpec):
         for k, v in encoded_inputs.items():
             encoded_inputs[k] = v.to(self.DEVICE)
 
-        print("now models turn:")
         outputs = self.model(**encoded_inputs)
-        print("outputs")
 
         predictions = outputs.logits.argmax(-1).squeeze().tolist()
-        print(predictions)
 
         token_boxes = encoded_inputs.bbox.squeeze().tolist()
         box_predictions = [

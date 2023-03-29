@@ -84,7 +84,7 @@ class ElmoPredict(PathSpec):
                 try:
                     annotation = None
                     while annotation is None:
-                        annotation = self.predict(words, pdf_path)
+                        annotation = self.predict(words, pdf_path, self.flags)
                         if annotation is None:
                             self.logger.error("retrying to annotate document")
                 except Exception as e:
@@ -135,13 +135,13 @@ class ElmoPredict(PathSpec):
 
             self.init_queues()
 
-    def predict(self, words, path):
+    def predict(self, words, path, flags):
         annotation = self.predictor.predict_json({"sentence": words})
 
         subj_annotation = [(t, w) for t, w in annotation if "SUBJ" in t]
         self.info(subj_annotation)
 
-        if chance(0.5) and DifferenceSpanSet(annotation):
+        if chance(0.5) and DifferenceSpanSet(annotation) and not flags["dont_save"]:
             self.logger.info("Randomly saving annotation to dataset " + str(words))
             new_folder = config.ELMO_DIFFERENCE_COLLECTION_PATH + "/"
             print(f"{path=} {config.tex_data=}")

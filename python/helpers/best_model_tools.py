@@ -24,7 +24,7 @@ def find_best_model(model_dir, condition=None):
         logging.warning(f"No models found in {model_dir}")
         return None, None
 
-    logging.info(f"{scores=} {best_model_path =}")
+    logging.debug(f"{scores=} {best_model_path =}")
     return best_model_path, scores
 
 

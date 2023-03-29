@@ -43,7 +43,7 @@ for doc, meta in ant("css.difference", "recompute")(metaize(docs)):
             os.makedirs(backup_dir, exist_ok=True)
             if (
                 str(Path(config.tex_data)) in backup_path
-                and not meta["url"]
+                and not "url" in meta
                 and backup_path.endswith(".pdf")
             ):
                 continue
@@ -55,6 +55,7 @@ for doc, meta in ant("css.difference", "recompute")(metaize(docs)):
             meta["doc_id"],
             service_id="difference",
             url=meta["url"] if "url" in meta else meta["doc_id"],
+            dont_save=True
         )
         os.system("rm -r .tmp")
     except Exception as e:
