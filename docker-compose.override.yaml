@@ -77,7 +77,7 @@ services:
     build:
       args: {CONTEXT: language/multipurpose_language_models/UniversalModel, OUTSIDE_CONTEXT: /language/multipurpose_language_models}
       context: python
-      dockerfile: $CWD/language/multipurpose_language_models/Dockerfile
+      dockerfile: $CWD/python/language/multipurpose_language_models/Dockerfile
     container_name: micro_universalmodel
     entrypoint: python3 -c 'from language.multipurpose_language_models.UniversalModel
       import UniversalModel; from wsgiref import simple_server; simple_server.make_server("0.0.0.0",
