@@ -47,7 +47,7 @@ def topicize(texts):
         "What is the topic of those texts? Only name it, no sentence please.", text
     )
     print(f"{title=}")
-    return title
+    return title.replace("The topic of those texts is", "")
 
 
 @microservice
