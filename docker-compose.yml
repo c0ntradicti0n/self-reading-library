@@ -141,6 +141,7 @@ services:
       - world
 
   inotify:
+    container_name: inotify
     image: debian
     restart: unless-stopped
     entrypoint:  bash inotify.sh  /home/finn/Programming/self-reading-library/python

@@ -43,6 +43,8 @@ class TopicMaker(PathSpec):
             *self.alphabet,
             *[str(i) for i in range(1000)],
         ]
+        self.nlp = spacy.load("en_core_web_trf")
+
 
     def __call__(micro, self, texts_metas, *args, **kwargs):
         return micro.predict(list(texts_metas))
