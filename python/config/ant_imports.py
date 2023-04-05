@@ -10,6 +10,7 @@ from core.standard_converter.Scraper import Scraper
 from core.standard_converter.HTML2PDF import HTML2PDF
 from helpers.list_tools import metaize, forget_except
 from helpers.model_tools import TRAINING_RATE
+from language.multipurpose_language_models.UniversalModel import *
 from language.text2speech.AudioPublisher import AudioPublisher
 from topics.TopicsPublisher import TopicsPublisher
 from core.captcha import Captcha

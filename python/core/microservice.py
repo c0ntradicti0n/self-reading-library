@@ -21,15 +21,17 @@ class microservice:
             {} if not hasattr(converter, "docker_kwargs") else converter.docker_kwargs
         )
 
-        f = converter.predict
+        g = converter.predict
 
         def p(*args, **kwargs):
-            return f(*args, **kwargs)
+            return g(*args, **kwargs)
 
         self.p = p
         self.converter.predict = self.remote_call
 
-        if not os.environ.get("INSIDE", False):
+        if not os.environ.get("INSIDE", False) and not (
+            os.environ.get("INSIDE", False) == "no_update"
+        ):
             self.converter = converter
             self.imports = inspect.getmembers(sys.modules[__name__], inspect.isclass)
             try:
@@ -48,7 +50,24 @@ class microservice:
                     "options": {"max-file": "5", "max-size": "10m"},
                 },
                 "image": "full_python",
-                "build": "python",
+                **(
+                    {
+                        "build": {
+                            "context": "python",
+                            "dockerfile": converter.Dockerfile + "/Dockerfile",
+                            "args": {
+                                "CONTEXT": full_path.replace(".", "/"),
+                                "OUTSIDE_CONTEXT": converter.Dockerfile.replace(
+                                    os.getcwd(), ""
+                                ),
+                            },
+                        }
+                    }
+                    if hasattr(converter, "Dockerfile")
+                    else {
+                        "build": "python",
+                    }
+                ),
                 "restart": "unless-stopped",
                 "entrypoint": f"python3 -c 'from {full_path} import {name}; from wsgiref import simple_server; simple_server.make_server(\"0.0.0.0\", 7777, {name}.application).serve_forever()'",
                 "environment": {
@@ -61,7 +80,20 @@ class microservice:
                 },
                 "networks": ["db"],
                 "volumes": [
-                    "$CWD/python:/home/finn/Programming/self-reading-library/python"
+                    "$CWD/python:/home/finn/Programming/self-reading-library/python",
+                    *(
+                        [
+                            "$CWD/python"
+                            + converter.Dockerfile.replace(os.getcwd(), "")
+                            + "/"
+                            + v
+                            + ":/volumes/"
+                            + v.replace("../", "")
+                            for v in converter.volumes
+                        ]
+                        if hasattr(converter, "volumes")
+                        else []
+                    ),
                 ],
                 **docker_kwargs,
             }
@@ -92,7 +124,7 @@ class microservice:
                 middleware=[cors.middleware, MultipartMiddleware()]
             )
             application.add_route("/" + self.service_name, self)
-            print("Service at /" + self.service_name)
+            logging.debug("Service at /" + self.service_name)
 
             importlib.import_module(self.converter.__module__).application = application
             converter.application = application
@@ -104,7 +136,7 @@ class microservice:
 
         send_data = json.dumps((args, kwargs))
 
-        if os.environ.get("INSIDE", False):
+        if os.environ.get("INSIDE", False) == False:
             return self.p(*args, **kwargs)
 
         resp = requests.post(

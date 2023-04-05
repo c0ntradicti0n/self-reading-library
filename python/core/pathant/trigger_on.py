@@ -104,7 +104,9 @@ class trigger_on:
         if loops.count(training_rate) > 2:
             logging.info("Training did not change, staying prediction loop")
 
-        logging.info(f"Having {training_rate = }")
+        logging.info(
+            f"Having {training_rate = }; {n_samples=} / {int(scores.groups()[0])=}"
+        )
 
         mutext_path = config.hidden_folder + self.mutext_affix
         if (

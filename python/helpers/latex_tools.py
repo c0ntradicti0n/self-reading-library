@@ -37,7 +37,7 @@ def latex_replace(s):
         "\\N{THIN SPACE}": " ",
         "\\N{MIDDLE DOT}": "·",
         "\\N{GREEK SMALL LETTER SIGMA}": "_s_",
-        "\\N{GREEK SMALL LETTER UPSILON}": "_u_"
+        "\\N{GREEK SMALL LETTER UPSILON}": "_u_",
     }.items():
         s = s.replace(k, v)
     for m in regex.findall(r"\\N\{[\w\s\d]+\}", s):

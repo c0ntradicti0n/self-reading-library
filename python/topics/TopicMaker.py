@@ -1,6 +1,8 @@
 import logging
 import os
 from collections import defaultdict
+from pprint import pprint
+
 from sklearn import mixture
 from sklearn.manifold import TSNE
 
@@ -12,7 +14,8 @@ from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from core.standard_converter.Dict2Graph import Dict2Graph
 from core.microservice import microservice
-from layout.Layout2ReadingOrder import titelize
+from helpers.cache_tools import shelve_it
+from layout.Layout2ReadingOrder import titelize, topicize
 from topics.clustering import cluster
 
 
@@ -63,13 +66,21 @@ class TopicMaker(PathSpec):
                 embedding = np.random.random(shape)
             embeddingl.append(embedding)
         embeddings = np.vstack(embeddingl)
-        n_components = 73
+        n_components = int(min(100, len(texts_metas) / 3))
         logging.info(f"Reducing from {embeddings.shape} to {n_components} dimensions")
         tsne = TSNE(n_components, method="exact")
         tsne_result = tsne.fit_transform(embeddings)
         logging.info(f"Reduced embeddings to {tsne_result.shape=}")
         del embeddingl
         del embeddings
+        clusters, nesting = cluster(tsne_result)
+        print(f"({clusters=} {nesting=}")
+
+        cluster_texts = {i: [texts[c] for c in C] for i, C in clusters.items()}
+        pprint(cluster_texts)
+        cluster_titles = {i: topicize(t) for i, t in cluster_texts.items()}
+        pprint(cluster_titles)
+
         topics = self.topicize_recursively(tsne_result, metas, texts)
         return topics, metas
 
@@ -170,6 +181,7 @@ class TopicMaker(PathSpec):
         return {k: " ".join(k[0] for k in v[:2]) for k, v in keywords_to_texts.items()}
 
     @staticmethod
+    # @shelve_it("topic_maker_test_data")
     def test():
         TopicMaker.nlp = spacy.load("en_core_web_trf")
 
@@ -179,13 +191,13 @@ class TopicMaker(PathSpec):
         #    text = " ".join([l for l in f.readlines() ])
         try:
             with open("./topics/faust.txt") as f:
-                text = " ".join([l for l in f.readlines()])[0:35000]
+                text = " ".join([l for l in f.readlines()])[0:15000]
         except:
             os.system(
                 "wget https://raw.githubusercontent.com/martinth/mobverdb/master/faust.txt -P ./topics/"
             )
             with open("./topics/faust.txt") as f:
-                text = " ".join([l for l in f.readlines()])[0:35000]
+                text = " ".join([l for l in f.readlines()])[0:15000]
 
         doc = TopicMaker.nlp(text)
 
@@ -215,11 +227,13 @@ class TopicMaker(PathSpec):
         texts = [" ".join(t) for t in texts]
         metas = [{"text": text} for text in texts]
 
-        return zip(texts, metas)
+        return list(zip(texts, metas))
 
 
 if __name__ == "__main__":
     tm = TopicMaker
-    topics = tm(tm, (tm.converter.test()))
+    test_data = tm.converter.test()
+    print("calling topic maker")
+    topics = tm(tm, test_data)
     d2g = Dict2Graph
     print(list(d2g([topics]))[0][0][0])

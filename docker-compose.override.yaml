@@ -60,6 +60,37 @@ services:
     networks: [db]
     restart: unless-stopped
     volumes: [$CWD/python:/home/finn/Programming/self-reading-library/python, $CWD/.layouteagle/audio/:/home/finn/Programming/self-reading-library/python/.layouteagle/audio/language/text2speech/]
+  micro_type:
+    container_name: micro_type
+    entrypoint: python3 -c 'from builtins import type; from wsgiref import simple_server;
+      simple_server.make_server("0.0.0.0", 7777, type.application).serve_forever()'
+    environment: {GDB_HOST: gdb, GDB_PASSWORD: '${GDB_PASSWORD}', INSIDE: 'true',
+      LANG: en_US.UTF - 8, LANGUAGE: en_US.UTF-8, LC_ALL: en_US.UTF-8}
+    image: full_python
+    logging:
+      driver: json-file
+      options: {max-file: '5', max-size: 10m}
+    networks: [db]
+    restart: unless-stopped
+    volumes: [$CWD/python:/home/finn/Programming/self-reading-library/python]
+  micro_universalmodel:
+    build:
+      args: {CONTEXT: language/multipurpose_language_models/UniversalModel, OUTSIDE_CONTEXT: /language/multipurpose_language_models}
+      context: python
+      dockerfile: /home/stefan/Programming/Programming/self-reading-library/python/language/multipurpose_language_models/Dockerfile
+    container_name: micro_universalmodel
+    entrypoint: python3 -c 'from language.multipurpose_language_models.UniversalModel
+      import UniversalModel; from wsgiref import simple_server; simple_server.make_server("0.0.0.0",
+      7777, UniversalModel.application).serve_forever()'
+    environment: {GDB_HOST: gdb, GDB_PASSWORD: '${GDB_PASSWORD}', INSIDE: 'true',
+      LANG: en_US.UTF - 8, LANGUAGE: en_US.UTF-8, LC_ALL: en_US.UTF-8}
+    image: full_python
+    logging:
+      driver: json-file
+      options: {max-file: '5', max-size: 10m}
+    networks: [db]
+    restart: unless-stopped
+    volumes: [$CWD/python:/home/finn/Programming/self-reading-library/python, $CWD/python/language/multipurpose_language_models/../../../ggml-alpaca-7b-q4.bin:/volumes/ggml-alpaca-7b-q4.bin]
   trigger_elmodifferencetrain:
     build: python
     container_name: trigger_elmodifferencetrain

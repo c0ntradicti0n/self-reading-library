@@ -24,6 +24,7 @@ class PackagePathFilter(logging.Filter):
         record.pathname = record.pathname.replace(os.getcwd(), "")
         return True
 
+
 logging.getLogger("allennlp").setLevel(logging.ERROR)
 logging.getLogger("rdflib.term").setLevel(logging.ERROR)
 logging.getLogger("pytorch_pretrained_bert").setLevel(logging.ERROR)
@@ -33,11 +34,10 @@ logging.getLogger("pdfminer").setLevel(logging.ERROR)
 for handler in logging.root.handlers:
     handler.addFilter(PackagePathFilter)
 logging.basicConfig(
-    format="""%(asctime)s-%(levelname)s: %(message)s""", datefmt="%H:%M:%S",
-    handlers=logging.root.handlers
+    format="""%(asctime)s-%(levelname)s: %(message)s""",
+    datefmt="%H:%M:%S",
+    handlers=logging.root.handlers,
 )
-
-
 
 
 path_prefix = "../core/"

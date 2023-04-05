@@ -39,6 +39,24 @@ def decompress_pickle(value):
         logging.error(f"corrupted cache file {value=}", exc_info=True)
 
 
+import shelve
+
+
+def shelve_it(file_name):
+    d = shelve.open(file_name)
+
+    def decorator(func):
+        def new_func(*args):
+            key = str(args[1:]) if len(args) > 1 else str(args)
+            if key not in d:
+                d[key] = func(*args)
+            return d[key]
+
+        return new_func
+
+    return decorator
+
+
 def unroll_cache(path, cache):
     for m in cache:
         uncompressed = decompress_pickle(read_cache_file(path, m))

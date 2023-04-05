@@ -12,6 +12,7 @@ from helpers.hash_tools import hashval
 from helpers.latex_tools import latex_replace
 from helpers.nested_dict_tools import flatten
 from helpers.str_tools import str_ascii
+from language.multipurpose_language_models.UniversalModel import UniversalModel
 from layout.imports import *
 from config import config
 from core.pathant.Converter import converter
@@ -35,15 +36,16 @@ def cast_array_list(sample):
 
 def titelize(text):
     text = latex_replace(text)[:1024]
-    summarizer = pipeline(
-        "summarization"
-    )
-    title = summarizer(
-        text,
-        min_length=1,
-        max_length=23
-    )[0]["summary_text"]
+    title = UniversalModel("Find a title for this text", text)
+    print(f"{title=}")
+    return title
 
+
+def topicize(texts):
+    text = latex_replace(str(texts))
+    title = UniversalModel(
+        "What is the topic of those texts? Only name it, no sentence please.", text
+    )
     print(f"{title=}")
     return title
 
@@ -122,7 +124,8 @@ class Layout2ReadingOrder(PathSpec):
                         )
 
                 pagenumber = page_number + 1
-                self.logger.info(''
+                self.logger.info(
+                    ""
                     f"Labels {pagenumber}/{len(dataset)}:\n\t\t {'·'.join(box_predictions)}"
                 )
 
@@ -199,8 +202,8 @@ class Layout2ReadingOrder(PathSpec):
 
             meta["enumerated_texts"] = enumerated_texts
 
-            text= latex_replace("\n\n".join(prediction["text"]))
-            title= titelize(text)
+            text = latex_replace("\n\n".join(prediction["text"]))
+            title = titelize(text)
             meta["title"] = title
 
             gc.collect()

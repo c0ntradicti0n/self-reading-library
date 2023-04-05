@@ -39,7 +39,6 @@ class Training(PathSpec):
         list(model_pipe(metaize(samples_files), collection_step=training_rate))
 
     def __call__(self, x_meta, *args, **kwargs):
-        self.logger.info("!IMPORTING DANGEROUS STUFF")
         import os
         from pprint import pprint, pformat
         import pandas
@@ -73,17 +72,21 @@ class Training(PathSpec):
             d
             for p in feature_dfs
             if (d := load_json_gzip(config.GOLD_ANNOTATION_SET + p))
-            and d["label"] is not None
+            and (d["label"] or ("labels" in d and d["labels"]))
         ]
 
         no_data = [
             d
             for p in feature_dfs
             if (d := load_json_gzip(config.GOLD_ANNOTATION_SET + p))
-            and not d["label"] is not None
+            and not (d["label"] or ("labels" in d and d["labels"]))
         ]
-        self.logger.warning(f"Soma layout samples have no label? {no_data}")
+        self.logger.warning(f"Layout samples have no labels. {len(no_data)=}")
 
+        dicts = [
+            {**d, "label": d["labels"]} if "labels" in d and d["labels"] else d
+            for d in dicts
+        ]
         feature_df = pandas.DataFrame.from_records(dicts)
 
         feature_df = feature_df[
@@ -242,7 +245,7 @@ class Training(PathSpec):
                 )
 
                 f1 = final_score["overall_f1"]
-                n_samples = len(feature_df)
+                n_samples = len(x_meta)
                 print(f"{dataset.shape = }")
                 path = f"{config.TEXT_BOX_MODEL_PATH}_{str(n_samples)}_{str(f1).replace('.', ',')}_{epoch}"
                 f1_to_new_model_paths[f1] = path

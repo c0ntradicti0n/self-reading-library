@@ -84,6 +84,7 @@ services:
   recompute:
     build: python
     container_name: recompute
+    restart: unless-stopped
     logging:
       driver: "json-file"
       options:

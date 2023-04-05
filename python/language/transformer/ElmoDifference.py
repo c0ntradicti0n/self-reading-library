@@ -49,8 +49,7 @@ class ElmoDifference(PathSpec):
 ant = PathAnt()
 
 
-def annotate_uploaded_file(file, service_id, url, dont_save=False
-):
+def annotate_uploaded_file(file, service_id, url, dont_save=False):
     elmo_difference_single_pipe = ant(
         "arxiv.org",
         f"elmo.html",
@@ -69,7 +68,7 @@ def annotate_uploaded_file(file, service_id, url, dont_save=False
                         difference_model_path=find_best_tagger_model(),
                         service_id=service_id,
                         url=url,
-                        dont_save=dont_save
+                        dont_save=dont_save,
                     ),
                     None,
                 )

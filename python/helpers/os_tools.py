@@ -1,5 +1,8 @@
+import logging
 import os
+import shlex
 import shutil
+import subprocess
 from collections import namedtuple
 from glob import iglob
 from pathlib import Path
@@ -106,3 +109,23 @@ def rm_r(path):
 def touch(path):
     with open(path, "a"):
         os.utime(path, None)
+
+
+def o(cmd, user=None, dir="./", err_out=True):
+    try:
+        logging.info(f"calling {user=}: " + cmd)
+
+        output, error = subprocess.Popen(
+            [shlex.quote(c) for c in shlex.split((cmd))],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=dir,
+            user=user,
+        ).communicate()
+        if error and err_out:
+            raise (Exception(error.decode()))
+    except PermissionError:
+        logging.error("can only run in docker")
+    except Exception as e:
+        logging.error(e, exc_info=True)
+    return output.decode() if output else error.decode()

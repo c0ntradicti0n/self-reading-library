@@ -1,105 +1,168 @@
 ## https://blog.paperspace.com/clustering-using-the-genetic-algorithm/
+import logging
+from collections import defaultdict
 
 import numpy
-import matplotlib.pyplot
+from sklearn.metrics.pairwise import cosine_similarity
 import pygad
 
+from helpers.nested_dict_tools import flatten
 
 num_clusters = None
 feature_vector_length = None
 data = None
 
 
-def euclidean_distance(X, Y):
-    return numpy.sqrt(numpy.sum(numpy.power(X - Y, 2), axis=1))
+def walk_linkage(v):
+    clusters = {}
+    cluster_nesting = defaultdict(lambda: list())
 
+    for i, (a, b, s, n) in enumerate(v):
+        a = int(a)
+        b = int(b)
+        try:
+            if b >= len(v) and b - len(v) in clusters:
+                _b = clusters[b - len(v)]
+                cluster_nesting[i].append(b - len(v))
 
-def cluster_data(solution, solution_idx):
-    global num_clusters, feature_vector_length, data
-    cluster_centers = []
-    all_clusters_dists = []
-    clusters = []
-    clusters_sum_dist = []
+            else:
+                if b < len(v):
+                    _b = [b]
+                else:
+                    _b = []
+            if a >= len(v) and a - len(v) in clusters:
+                _a = clusters[a - len(v)]
+                cluster_nesting[i].append(a - len(v))
 
-    for clust_idx in range(num_clusters):
-        cluster_centers.append(
-            solution[
-                feature_vector_length
-                * clust_idx : feature_vector_length
-                * (clust_idx + 1)
-            ]
-        )
-        cluster_center_dists = euclidean_distance(data, cluster_centers[clust_idx])
-        all_clusters_dists.append(numpy.array(cluster_center_dists))
+            else:
+                if a < len(v):
+                    _a = [a]
+                else:
+                    _a = []
+            clusters[i] = list(int(i) for i in flatten([_a, _b]))
+        except:
+            logging.error("Error in clustering walk")
 
-    cluster_centers = numpy.array(cluster_centers)
-    all_clusters_dists = numpy.array(all_clusters_dists)
-
-    cluster_indices = numpy.argmin(all_clusters_dists, axis=0)
-    for clust_idx in range(num_clusters):
-        clusters.append(numpy.where(cluster_indices == clust_idx)[0])
-        if len(clusters[clust_idx]) == 0:
-            clusters_sum_dist.append(0)
-        else:
-            clusters_sum_dist.append(
-                numpy.sum(all_clusters_dists[clust_idx, clusters[clust_idx]])
-            )
-
-    clusters_sum_dist = numpy.array(clusters_sum_dist)
-
-    return (
-        cluster_centers,
-        all_clusters_dists,
-        cluster_indices,
-        clusters,
-        clusters_sum_dist,
-    )
-
-
-def fitness_func(solution, solution_idx):
-    _, _, _, _, clusters_sum_dist = cluster_data(solution, solution_idx)
-
-    fitness = 1.0 / (numpy.sum(clusters_sum_dist) + 0.00000001)
-
-    return fitness
+    return clusters, cluster_nesting
 
 
 def cluster(X, _num_clusters=None):
-    global num_clusters, feature_vector_length, data
-    data = X
+    dist = 1 - cosine_similarity(X)
 
-    num_clusters = _num_clusters
-    feature_vector_length = data.shape[1]
-    num_genes = num_clusters * feature_vector_length
+    from scipy.cluster.hierarchy import ward
 
-    ga_instance = pygad.GA(
-        num_generations=100,
-        sol_per_pop=10,
-        init_range_low=0,
-        init_range_high=20,
-        num_parents_mating=5,
-        keep_parents=2,
-        num_genes=num_genes,
-        fitness_func=fitness_func,
-        suppress_warnings=True,
-    )
+    linkage_matrix = ward(dist)
 
-    ga_instance.run()
-
-    (
-        best_solution,
-        best_solution_fitness,
-        best_solution_idx,
-    ) = ga_instance.best_solution()
-
-    (
-        cluster_centers,
-        all_clusters_dists,
-        cluster_indices,
-        clusters,
-        clusters_sum_dist,
-    ) = cluster_data(best_solution, best_solution_idx)
+    return walk_linkage(linkage_matrix)
 
 
+if __name__ == "__main__":
+    v = [
+        [46.0, 48.0, 1.0516857963105022, 2.0],
+        [1.0, 9.0, 1.0955206600002214, 2.0],
+        [10.0, 53.0, 1.1661865947179142, 2.0],
+        [42.0, 43.0, 1.2778282241480852, 2.0],
+        [13.0, 88.0, 1.2936873668349174, 2.0],
+        [94.0, 97.0, 1.3230575728339062, 2.0],
+        [33.0, 54.0, 1.3252875563583189, 2.0],
+        [4.0, 107.0, 1.3659536348731844, 3.0],
+        [77.0, 80.0, 1.3671623434870896, 2.0],
+        [68.0, 81.0, 1.3682674675830964, 2.0],
+        [18.0, 86.0, 1.3773855079122472, 2.0],
+        [29.0, 57.0, 1.3839576649151795, 2.0],
+        [28.0, 95.0, 1.3897968631549047, 2.0],
+        [50.0, 61.0, 1.4204159419369387, 2.0],
+        [0.0, 7.0, 1.4275842999607282, 2.0],
+        [92.0, 106.0, 1.469516789105135, 3.0],
+        [35.0, 103.0, 1.4808235977685336, 2.0],
+        [65.0, 121.0, 1.5171095924080644, 4.0],
+        [56.0, 101.0, 1.527517623324444, 2.0],
+        [3.0, 11.0, 1.5284591305879225, 2.0],
+        [6.0, 109.0, 1.53576553935811, 3.0],
+        [55.0, 102.0, 1.5386962534619057, 2.0],
+        [58.0, 60.0, 1.5512464551588576, 2.0],
+        [79.0, 96.0, 1.5610528811932896, 2.0],
+        [22.0, 85.0, 1.582203926489177, 2.0],
+        [24.0, 25.0, 1.6038093030758764, 2.0],
+        [39.0, 75.0, 1.6049097042929394, 2.0],
+        [41.0, 116.0, 1.6290877806801238, 3.0],
+        [14.0, 100.0, 1.633895461836695, 2.0],
+        [40.0, 78.0, 1.65018036085846, 2.0],
+        [12.0, 126.0, 1.6511155209329922, 4.0],
+        [89.0, 117.0, 1.6526159726369882, 3.0],
+        [45.0, 104.0, 1.6530219151771175, 2.0],
+        [32.0, 111.0, 1.6595807592406517, 3.0],
+        [47.0, 70.0, 1.6805474384045112, 2.0],
+        [44.0, 59.0, 1.6817835754522619, 2.0],
+        [122.0, 127.0, 1.6933728363437899, 4.0],
+        [52.0, 118.0, 1.6936617937125382, 3.0],
+        [8.0, 113.0, 1.7457734180931115, 4.0],
+        [36.0, 131.0, 1.7496055921556277, 3.0],
+        [76.0, 83.0, 1.755122894488211, 2.0],
+        [26.0, 71.0, 1.770047760302941, 2.0],
+        [66.0, 73.0, 1.7702492328433015, 2.0],
+        [64.0, 137.0, 1.7828647530713564, 4.0],
+        [16.0, 124.0, 1.7965563504265694, 3.0],
+        [105.0, 139.0, 1.8096336450009534, 4.0],
+        [5.0, 67.0, 1.8104455361874232, 2.0],
+        [98.0, 114.0, 1.8231123725400027, 3.0],
+        [110.0, 119.0, 1.8362031321540782, 4.0],
+        [23.0, 37.0, 1.8377596777619032, 2.0],
+        [62.0, 129.0, 1.8504648305867328, 3.0],
+        [31.0, 99.0, 1.8539778482702438, 2.0],
+        [63.0, 128.0, 1.8889030015422017, 3.0],
+        [133.0, 136.0, 1.8915662393595982, 7.0],
+        [20.0, 82.0, 1.897778761526111, 2.0],
+        [21.0, 141.0, 1.9218474935693743, 3.0],
+        [69.0, 91.0, 1.9471995472797163, 2.0],
+        [34.0, 149.0, 1.9558585170932812, 5.0],
+        [27.0, 140.0, 1.960210091705277, 3.0],
+        [49.0, 87.0, 1.9603003155804763, 2.0],
+        [15.0, 135.0, 2.0350955554304195, 3.0],
+        [93.0, 147.0, 2.0369916804669868, 3.0],
+        [130.0, 138.0, 2.073623022197508, 4.0],
+        [84.0, 146.0, 2.094112028827039, 3.0],
+        [90.0, 123.0, 2.0996683564743988, 5.0],
+        [51.0, 155.0, 2.1149273380801494, 3.0],
+        [38.0, 72.0, 2.1232994709523174, 2.0],
+        [30.0, 157.0, 2.1313073314487876, 3.0],
+        [120.0, 144.0, 2.1740981305627174, 6.0],
+        [74.0, 145.0, 2.174450690837704, 4.0],
+        [134.0, 168.0, 2.1915114338547603, 6.0],
+        [112.0, 165.0, 2.215263327717354, 4.0],
+        [160.0, 171.0, 2.2367338476117493, 5.0],
+        [19.0, 161.0, 2.2653345067482755, 4.0],
+        [115.0, 158.0, 2.275346402440885, 5.0],
+        [152.0, 174.0, 2.2957754965533663, 8.0],
+        [2.0, 148.0, 2.315119144290783, 3.0],
+        [17.0, 169.0, 2.3241048924531555, 4.0],
+        [143.0, 151.0, 2.3292946943555224, 7.0],
+        [156.0, 166.0, 2.4433727016228812, 6.0],
+        [164.0, 180.0, 2.518985682448416, 8.0],
+        [167.0, 173.0, 2.6456612445120262, 6.0],
+        [150.0, 159.0, 2.6653720379952555, 10.0],
+        [153.0, 170.0, 2.6670324282862095, 8.0],
+        [132.0, 154.0, 2.692279058771115, 6.0],
+        [108.0, 172.0, 2.7954696841906754, 4.0],
+        [175.0, 183.0, 2.824971929515267, 8.0],
+        [163.0, 182.0, 2.9019095263823806, 8.0],
+        [162.0, 187.0, 2.937574385541044, 8.0],
+        [125.0, 191.0, 3.0885482817119785, 6.0],
+        [189.0, 190.0, 3.092680774584253, 14.0],
+        [142.0, 181.0, 3.3840141411269316, 12.0],
+        [178.0, 192.0, 3.4355760794078356, 13.0],
+        [176.0, 185.0, 3.502849823319177, 12.0],
+        [184.0, 196.0, 3.519578846850727, 21.0],
+        [188.0, 197.0, 3.5571926836184713, 22.0],
+        [195.0, 198.0, 3.9763508842148414, 19.0],
+        [179.0, 193.0, 4.0261678933822544, 12.0],
+        [177.0, 203.0, 4.39165184063361, 16.0],
+        [194.0, 202.0, 4.853911021646319, 27.0],
+        [186.0, 199.0, 5.1097211066015, 20.0],
+        [200.0, 206.0, 5.455986250440674, 41.0],
+        [201.0, 204.0, 6.162465714935232, 38.0],
+        [205.0, 207.0, 11.371948143409952, 68.0],
+        [208.0, 209.0, 24.391801869523437, 106.0],
+    ]
 
-    return cluster_indices
+    print(walk_linkage(v))

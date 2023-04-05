@@ -55,7 +55,7 @@ for doc, meta in ant("css.difference", "recompute")(metaize(docs)):
             meta["doc_id"],
             service_id="difference",
             url=meta["url"] if "url" in meta else meta["doc_id"],
-            dont_save=True
+            dont_save=True,
         )
         os.system("rm -r .tmp")
     except Exception as e:

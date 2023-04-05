@@ -1,0 +1,14 @@
+falcon_compression
+falcon
+falcon-cors
+falcon-multipart
+addict
+requests
+ruamel.yaml
+coloredlogs
+python-dotenv
+traceback_with_variables
+numpy
+regex
+datasets
+jsonpath_ng
