@@ -44,7 +44,7 @@ def titelize(text):
 def topicize(texts):
     text = latex_replace(str(texts))
     title = UniversalModel(
-        "What is the topic of those texts? Only name it, no sentence please.", text
+        "What is the topic of those texts? Only name it, no sentence please. Be careful, a topic is no title and not the name of the text", text
     )
     print(f"{title=}")
     return title.replace("The topic of those texts is", "")

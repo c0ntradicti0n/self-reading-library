@@ -14,7 +14,6 @@ from core.pathant.Converter import converter
 from core.pathant.PathSpec import PathSpec
 from core.standard_converter.Dict2Graph import Dict2Graph
 from core.microservice import microservice
-from helpers.cache_tools import shelve_it
 from layout.Layout2ReadingOrder import titelize, topicize
 from topics.clustering import cluster
 
