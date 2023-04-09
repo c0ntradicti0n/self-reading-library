@@ -68,6 +68,8 @@ services:
       options:
         max-file: "5"
         max-size: "10m"
+    ports:
+      - "3456:3456"
     tty: true
     networks:
       - db
@@ -91,6 +93,8 @@ services:
         max-file: "5"
         max-size: "10m"
     tty: true
+    ports:
+      - "2223:22"
     networks:
       - db
     environment:
@@ -143,6 +147,8 @@ services:
   inotify:
     container_name: inotify
     image: debian
+    ports:
+     - "2225:22"
     restart: unless-stopped
     entrypoint:  bash inotify.sh  /home/finn/Programming/self-reading-library/python
     volumes:
