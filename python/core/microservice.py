@@ -59,7 +59,7 @@ class microservice:
                                 ) + "/Dockerfile",
                             "args": {
                                 "CONTEXT": full_path.replace(".", "/"),
-                                "OUTSIDE_CONTEXT": "$CWD/python" + converter.Dockerfile.replace(
+                                "OUTSIDE_CONTEXT": converter.Dockerfile.replace(
                                     os.getcwd(), ""
                                 ),
                             },

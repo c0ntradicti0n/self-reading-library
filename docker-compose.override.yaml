@@ -62,7 +62,7 @@ services:
     volumes: [$CWD/python:/home/finn/Programming/self-reading-library/python, $CWD/.layouteagle/audio/:/home/finn/Programming/self-reading-library/python/.layouteagle/audio/language/text2speech/]
   micro_universalmodel:
     build:
-      args: {CONTEXT: language/multipurpose_language_models/UniversalModel, OUTSIDE_CONTEXT: $CWD/python/language/multipurpose_language_models}
+      args: {CONTEXT: language/multipurpose_language_models/UniversalModel, OUTSIDE_CONTEXT: /language/multipurpose_language_models}
       context: python
       dockerfile: $CWD/python/language/multipurpose_language_models/Dockerfile
     container_name: micro_universalmodel
