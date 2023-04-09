@@ -54,12 +54,12 @@ class microservice:
                     {
                         "build": {
                             "context": "python",
-                            "dockerfile": "$CWD" + converter.Dockerfile.replace(
+                            "dockerfile": "$CWD/python" + converter.Dockerfile.replace(
                                     os.getcwd(), ""
                                 ) + "/Dockerfile",
                             "args": {
                                 "CONTEXT": full_path.replace(".", "/"),
-                                "OUTSIDE_CONTEXT": converter.Dockerfile.replace(
+                                "OUTSIDE_CONTEXT": "$CWD/python" + converter.Dockerfile.replace(
                                     os.getcwd(), ""
                                 ),
                             },
