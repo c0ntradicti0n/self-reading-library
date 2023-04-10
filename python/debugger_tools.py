@@ -17,5 +17,7 @@ def connect_debugger(port):
                 stdoutToServer=True,
                 stderrToServer=True,
             )
+            logging.warning("connected to debugger")
+
         except:
             logging.warning("could not connect to debugger")
