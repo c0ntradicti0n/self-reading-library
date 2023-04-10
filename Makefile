@@ -93,4 +93,4 @@ fresh: down dbdown db build up
 prepare: mount hosts logs
 
 remote-debug:
-	ssh -N -R 2345:localhost:2345 -R 3456:localhost:3456 -i ~/.ssh/srl.root root@polarity.science
+	ssh -N -R 2345:localhost:2345 -R 0.0.0.0:3456:localhost:3456 -i ~/.ssh/srl.root root@polarity.science

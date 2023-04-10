@@ -60,6 +60,7 @@ services:
     volumes:
       - "$CWD/python:/home/finn/Programming/self-reading-library/python"
     entrypoint:  bash entrypoint.be.sh
+
   fill:
     build: python
     container_name: fill
@@ -69,8 +70,9 @@ services:
         max-file: "5"
         max-size: "10m"
     ports:
-      - "2225:22"
-
+      - "2229:22"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     expose:
       - "3456"
     tty: true
