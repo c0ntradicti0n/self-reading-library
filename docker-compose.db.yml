@@ -9,8 +9,6 @@ services:
       JAVA_XMX: 1g
     networks:
       - db
-    volumes:
-      - .layouteagle/blazegraph:/var/lib/blazegraph
     ports:
       - "12345:9999"
 

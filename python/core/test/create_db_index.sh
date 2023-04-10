@@ -1,0 +1,32 @@
+curl 'http://localhost:12345/blazegraph/namespace' \
+  -H 'Accept: */*' \
+  -H 'Accept-Language: de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7,es-ES;q=0.6,es;q=0.5,pt;q=0.4' \
+  -H 'Connection: keep-alive' \
+  -H 'Content-Type: text/plain' \
+  -H 'Origin: http://localhost:12345' \
+  -H 'Referer: http://localhost:12345/blazegraph/' \
+  -H 'Sec-Fetch-Dest: empty' \
+  -H 'Sec-Fetch-Mode: cors' \
+  -H 'Sec-Fetch-Site: same-origin' \
+  -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36' \
+  -H 'X-Requested-With: XMLHttpRequest' \
+  -H 'sec-ch-ua: "Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "Linux"' \
+  --data-raw $'com.bigdata.namespace.difference.lex.com.bigdata.btree.BTree.branchingFactor=400\ncom.bigdata.rdf.store.AbstractTripleStore.textIndex=false\ncom.bigdata.rdf.store.AbstractTripleStore.axiomsClass=com.bigdata.rdf.axioms.NoAxioms\ncom.bigdata.rdf.sail.isolatableIndices=true\ncom.bigdata.rdf.sail.truthMaintenance=false\ncom.bigdata.rdf.store.AbstractTripleStore.justify=false\ncom.bigdata.rdf.sail.namespace=difference\ncom.bigdata.rdf.store.AbstractTripleStore.quads=true\ncom.bigdata.journal.Journal.groupCommit=false\ncom.bigdata.namespace.difference.spo.com.bigdata.btree.BTree.branchingFactor=1024\ncom.bigdata.rdf.store.AbstractTripleStore.geoSpatial=false\ncom.bigdata.rdf.store.AbstractTripleStore.statementIdentifiers=false\n' \
+  --compressed
+
+curl 'http://localhost:12345/blazegraph/namespace?describe-each-named-graph=false' \
+  -H 'Accept: */*' \
+  -H 'Accept-Language: de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7,es-ES;q=0.6,es;q=0.5,pt;q=0.4' \
+  -H 'Connection: keep-alive' \
+  -H 'Referer: http://localhost:12345/blazegraph/' \
+  -H 'Sec-Fetch-Dest: empty' \
+  -H 'Sec-Fetch-Mode: cors' \
+  -H 'Sec-Fetch-Site: same-origin' \
+  -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36' \
+  -H 'X-Requested-With: XMLHttpRequest' \
+  -H 'sec-ch-ua: "Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "Linux"' \
+  --compressed

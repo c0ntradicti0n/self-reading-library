@@ -69,6 +69,13 @@ ino:
 dbdown:
 	CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose  -f docker-compose.db.yml down -v
 
+db-index:
+	sleep 3
+	bash python/core/test/create_db_index.sh
+	
+
+db-reset: dbdown db db-index
+
 fe:
 	cd react/layout_viewer_made/ && yarn run dev
 
