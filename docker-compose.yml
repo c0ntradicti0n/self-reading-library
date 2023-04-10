@@ -68,8 +68,8 @@ services:
       options:
         max-file: "5"
         max-size: "10m"
-    ports:
-      - "3456:3456"
+    expose:
+      - "3456"
     tty: true
     networks:
       - db
