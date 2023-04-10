@@ -69,7 +69,7 @@ services:
         max-file: "5"
         max-size: "10m"
     ports:
-      - "2223:22"
+      - "2225:22"
 
     expose:
       - "3456"
