@@ -6,9 +6,11 @@ RUN apt-get install -y software-properties-common tzdata
 RUN add-apt-repository ppa:deadsnakes/ppa && apt-get update
 RUN apt-get install -y python3.9 python3.9-distutils python3.9-dev
 RUN ln -sf /usr/bin/python3.9 /usr/bin/python3
-RUN apt-get install -y python3-pip
-RUN pip3 install --upgrade pip
-RUN apt-get install -y git libpq-dev wget
+# Install pip specifically for python3.9 and wire up pip/pip3 symlinks
+RUN apt-get install -y curl git libpq-dev wget
+RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.9
+RUN ln -sf /usr/local/bin/pip3.9 /usr/local/bin/pip \
+ && ln -sf /usr/local/bin/pip3.9 /usr/local/bin/pip3
 RUN wget https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_weights.hdf5
 RUN wget https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_options.json
 RUN apt-get install -y oggvideotools libpq-dev libgraphviz-dev libfreetype6-dev pkg-config poppler-utils
@@ -41,7 +43,7 @@ ENV DISPLAY=:99
 RUN   >&2 echo "$(python3 --version)"
 WORKDIR /home/finn/Programming/self-reading-library
 
-RUN pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
+RUN pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
 RUN pip install transformers==4.25.1
 RUN --mount=type=cache,target=/root/.cache/pip pip install setuptools==57.5.0
 RUN --mount=type=cache,target=/root/.cache/pip pip install "spacy==3.7.5" "spacy-transformers==1.3.5"
@@ -50,12 +52,8 @@ RUN --mount=type=cache,target=/root/.cache/pip python3 -m spacy download en_core
 RUN --mount=type=cache,target=/root/.cache/pip python3 -m spacy download en_core_web_sm
 RUN --mount=type=cache,target=/root/.cache/pip pip install git+https://github.com/facebookresearch/detectron2.git
 RUN --mount=type=cache,target=/root/.cache/pip pip install uvicorn[standard]
-RUN pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
-RUN pip install transformers==4.25.1
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt --use-deprecated=legacy-resolver
-RUN pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
-RUN pip install transformers==4.25.1
 RUN pip install weasyprint
 RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.focal_amd64.deb
 RUN apt -y install ./wkhtmltox_0.12.6-1.focal_amd64.deb || (apt-get install -f -y && apt -y install ./wkhtmltox_0.12.6-1.focal_amd64.deb)
