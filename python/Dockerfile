@@ -53,7 +53,7 @@ RUN --mount=type=cache,target=/root/.cache/pip python3 -m spacy download en_core
 RUN --mount=type=cache,target=/root/.cache/pip pip install --no-build-isolation git+https://github.com/facebookresearch/detectron2.git
 RUN --mount=type=cache,target=/root/.cache/pip pip install uvicorn[standard]
 COPY requirements.txt .
-RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt --use-deprecated=legacy-resolver
+RUN --mount=type=cache,target=/root/.cache/pip pip install --no-build-isolation -r requirements.txt --use-deprecated=legacy-resolver
 RUN pip install weasyprint
 RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.focal_amd64.deb
 RUN apt -y install ./wkhtmltox_0.12.6-1.focal_amd64.deb || (apt-get install -f -y && apt -y install ./wkhtmltox_0.12.6-1.focal_amd64.deb)
