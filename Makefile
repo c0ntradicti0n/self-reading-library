@@ -13,44 +13,48 @@ mount:
 mount-osx:
 	sudo bindfs  ./python/.layouteagle/pdfs/ ./react/layout_viewer_made/public/pdfs
 
-prod:
-	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose build
-dev:
-	ENV=dev USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose build
-build:
-	USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose build
+base:
+	docker image inspect c0ntradiction/pdf2htmlex > /dev/null 2>&1 || \
+		DOCKER_BUILDKIT=1 docker build -f pdf2htmlex.Dockerfile -t c0ntradiction/pdf2htmlex .
+
+prod: base
+	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker compose build
+dev: base
+	ENV=dev USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker compose build
+build: base
+	USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker compose build
 build_fe:
-	USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose build fe
+	USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker compose build fe
 
 
 over:
-	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose -f docker-compose.override.yaml  build
+	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker compose -f docker-compose.override.yaml build
 overup:
-	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose -f docker-compose.override.yaml  up --build
+	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker compose -f docker-compose.override.yaml up --build
 overupd:
-	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose -f docker-compose.override.yaml  up --build -d
+	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker compose -f docker-compose.override.yaml up --build -d
 overdown:
-	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose -f docker-compose.override.yaml down || exit 0
+	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker compose -f docker-compose.override.yaml down || exit 0
 topics:
-	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose -f docker-compose.override.yaml  up --build micro_topicmaker || exit 0
+	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker compose -f docker-compose.override.yaml up --build micro_topicmaker || exit 0
 universal:
-	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose -f docker-compose.override.yaml  up --build micro_universalmodel || exit 0
+	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker compose -f docker-compose.override.yaml up --build micro_universalmodel || exit 0
 
-CWD=$(shell pdw)
+CWD=$(shell pwd)
 scrape_test:
 	ENV=prod USER=$$USER CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker run -v "$(shell pwd)/python:/home/finn/Programming/self-reading-library/python" full_python python3 core/standard_converter/Scraper.py
 
-be:
-	USER=$$USER CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose up   --build be
+be: base
+	USER=$$USER CWD=$(shell pwd) USER_UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker compose up --build be
 
-re:
-	USER=$$USER CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose up   --build recompute
+re: base
+	USER=$$USER CWD=$(shell pwd) USER_UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker compose up --build recompute
 
 
-up:
-	USER=$$USER CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose up -d
+up: base
+	USER=$$USER CWD=$(shell pwd) USER_UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker compose up -d --build
 down:
-	CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker-compose down
+	CWD=$(shell pwd) DOCKER_BUILDKIT=1 docker compose down
 
 dockerlogs:
 	docker logs -f rest
@@ -59,15 +63,15 @@ dockerdebug:
 dbash:
 	docker exec -it rest bash
 
-d: down dockerbuild up
+d: down build up
 
 db:
-	CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose  -f docker-compose.db.yml up -d  db
+	CWD=$(shell pwd) USER_UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker compose -f docker-compose.db.yml up -d db
 ino:
-	CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose  -f docker-compose.db.yml up -d  --build  inotify
+	CWD=$(shell pwd) USER_UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker compose -f docker-compose.db.yml up -d --build inotify
 
 dbdown:
-	CWD=$(shell pwd) UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker-compose  -f docker-compose.db.yml down -v
+	CWD=$(shell pwd) USER_UID="$(shell id -u)" GID="$(shell id -g)" DOCKER_BUILDKIT=1 docker compose -f docker-compose.db.yml down -v
 
 db-index:
 	sleep 5
@@ -81,10 +85,10 @@ fe:
 
 
 docker-fill:
-	docker-compose build fill && docker-compose up fill -d && docker logs -f fill
+	docker compose build fill && docker compose up fill -d && docker logs -f fill
 
 logs:
-	docker-compose logs -f -t --tail 10
+	docker compose logs -f -t --tail 10
 
 hosts:
 	sudo bash update_hosts.sh &

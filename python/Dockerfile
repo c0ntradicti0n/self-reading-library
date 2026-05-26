@@ -1,27 +1,17 @@
 FROM docker.io/c0ntradiction/pdf2htmlex
 RUN echo cool
-RUN apt update
-RUN apt upgrade -y
-RUN apt install software-properties-common -y
-RUN add-apt-repository ppa:deadsnakes/ppa
-RUN apt update
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get -y install tzdata
-RUN apt install python3.9 -y
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y software-properties-common tzdata
+RUN add-apt-repository ppa:deadsnakes/ppa && apt-get update
+RUN apt-get install -y python3.9 python3.9-distutils python3.9-dev
 RUN ln -sf /usr/bin/python3.9 /usr/bin/python3
-RUN apt install python3-pip -y
-RUN apt install git -y
-RUN apt install libpq-dev -y
-RUN apt install wget -y
+RUN apt-get install -y python3-pip
+RUN pip3 install --upgrade pip
+RUN apt-get install -y git libpq-dev wget
 RUN wget https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_weights.hdf5
 RUN wget https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_options.json
-RUN apt install oggvideotools -y
-RUN apt install --reinstall libpq-dev -y
-RUN apt install libgraphviz-dev -y
-RUN apt install python3.9-distutils -y
-RUN apt install python3.9-dev -y
-RUN apt install libfreetype6-dev pkg-config pkg-config -y
-RUN apt install poppler-utils -y
+RUN apt-get install -y oggvideotools libpq-dev libgraphviz-dev libfreetype6-dev pkg-config poppler-utils
 RUN apt install -y pandoc texlive-latex-base texlive-fonts-recommended texlive-fonts-extra texlive-latex-extra texlive-xetex
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
@@ -67,12 +57,8 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt -
 RUN pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
 RUN pip install transformers==4.25.1
 RUN pip install weasyprint
-RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.bionic_amd64.deb
-RUN wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb
-RUN dpkg -i ./libssl1.1_1.1.0g-2ubuntu4_amd64.deb
-RUN rm -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb
-
-RUN apt -y install ./wkhtmltox_0.12.6-1.bionic_amd64.deb
+RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.focal_amd64.deb
+RUN apt -y install ./wkhtmltox_0.12.6-1.focal_amd64.deb || (apt-get install -f -y && apt -y install ./wkhtmltox_0.12.6-1.focal_amd64.deb)
 
 
 

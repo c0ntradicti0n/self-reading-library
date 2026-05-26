@@ -6,13 +6,13 @@ Did you ever went to the library and asked yourself, why they don't read all tho
 
 This contains some NLP-Pipeline-Framework for Layout recognition, semantic  text analysis and text to speech tool for audio-books putting together various tools. 
 
-* It brings a framework to connect a multitude of different tools with less spaghetti-code or sorted spaghettis.
+* It brings a framework to connect a multitude of different tools with less spaghetti-code or sorted spaghetti.
 
-* It has a deep learning approach to learn layout structures (arbitrarily configurable by learning from tags, that are automaticallyh inserted into LateX files, that are compiled and used for learning layout analysis)
+* It has a deep learning approach to learn layout structures (arbitrarily configurable by learning from tags, that are automatically inserted into LateX files, that are compiled and used for learning layout analysis)
 
 * It employs Elmo to predict semantic tags within the texts  (A transformer model like Bert or GPT3 from AllenNLP)
 
-* It creates an interactive 3D-universe of Documentens representing the content of the "library". The documents are automatically clustered and the clusters are titled. 
+* It creates an interactive 3D-universe of documents representing the content of the "library". The documents are automatically clustered and the clusters are titled. 
 ![Library 3D view (created dynamically)](https://github.com/c0ntradicti0n/LayoutEagle/blob/master/universe.png?raw=true)
 
 * It brings a dynamic frontend, that hosts pages for backend components. The frontend services and page-components are dynamically built by the backend!
@@ -53,7 +53,7 @@ coming soon
 ... will come...
 
 ## Topic modelling
-Embeddings, vector representations of the "meaning" of the word, are clusters with Gaussian Clustering to thematically more or less consitent topics. And those clusters are given titles by some TF-IDF-method. 
+Embeddings, vector representations of the "meaning" of the word, are clusters with Gaussian Clustering to thematically more or less consistent topics. And those clusters are given titles by some TF-IDF-method. 
 
 ![Library 3D view (created dynamically)](https://github.com/c0ntradicti0n/LayoutEagle/blob/master/universe.png?raw=true)
 
@@ -98,4 +98,3 @@ yarn run dev
 * [differencebetween.net](http://www.differencebetween.net/)
 * To authors of over 60000 npm packages!
 * To authors of 2000 Python packages!
-* To nature, god and friends!
