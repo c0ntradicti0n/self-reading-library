@@ -8,7 +8,7 @@ RUN apt-get install -y python3.9 python3.9-distutils python3.9-dev
 RUN ln -sf /usr/bin/python3.9 /usr/bin/python3
 # Install pip specifically for python3.9 and wire up pip/pip3 symlinks
 RUN apt-get install -y curl git libpq-dev wget
-RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.9
+RUN curl -sS https://bootstrap.pypa.io/pip/3.9/get-pip.py | python3.9
 RUN ln -sf /usr/local/bin/pip3.9 /usr/local/bin/pip \
  && ln -sf /usr/local/bin/pip3.9 /usr/local/bin/pip3
 RUN wget https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_weights.hdf5
