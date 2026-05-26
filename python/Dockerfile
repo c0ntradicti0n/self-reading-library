@@ -44,7 +44,7 @@ WORKDIR /home/finn/Programming/self-reading-library
 RUN pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
 RUN pip install transformers==4.25.1
 RUN --mount=type=cache,target=/root/.cache/pip pip install setuptools==57.5.0
-RUN --mount=type=cache,target=/root/.cache/pip pip install spacy spacy-transformers
+RUN --mount=type=cache,target=/root/.cache/pip pip install "spacy==3.7.5" "spacy-transformers==1.3.5"
 RUN --mount=type=cache,target=/root/.cache/pip python3 -m spacy download en_core_web_trf
 RUN --mount=type=cache,target=/root/.cache/pip python3 -m spacy download en_core_web_md
 RUN --mount=type=cache,target=/root/.cache/pip python3 -m spacy download en_core_web_sm
