@@ -50,7 +50,7 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install "spacy==3.7.5" "spacy
 RUN --mount=type=cache,target=/root/.cache/pip python3 -m spacy download en_core_web_trf
 RUN --mount=type=cache,target=/root/.cache/pip python3 -m spacy download en_core_web_md
 RUN --mount=type=cache,target=/root/.cache/pip python3 -m spacy download en_core_web_sm
-RUN --mount=type=cache,target=/root/.cache/pip pip install git+https://github.com/facebookresearch/detectron2.git
+RUN --mount=type=cache,target=/root/.cache/pip pip install --no-build-isolation git+https://github.com/facebookresearch/detectron2.git
 RUN --mount=type=cache,target=/root/.cache/pip pip install uvicorn[standard]
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt --use-deprecated=legacy-resolver
