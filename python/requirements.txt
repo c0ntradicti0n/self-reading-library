@@ -98,7 +98,7 @@ cytoolz
 gputil
 flask
 scikit-learn
-transformers==4.25.1
+transformers==4.30.0
 diff_match_patch
 python-Levenshtein
 hanging_threads
